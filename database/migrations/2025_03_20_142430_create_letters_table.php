@@ -14,10 +14,9 @@ return new class extends Migration
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
             $table->varchar(255, 'category_type');
-            $table->unsignedBigInteger('category_id');
+            $table->unsignedInteger('category_id');
             $table->varchar(255, 'responsible_person');
             $table->varchar(255,'reference_number');
-            $table->enum('type', ['upload', 'direct']);
             $table->timestamps();
         });
 
