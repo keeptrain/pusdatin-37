@@ -13,11 +13,17 @@ return new class extends Migration
     {
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
+            $table->varchar(255, 'user_id');
             $table->varchar(255, 'category_type');
             $table->unsignedInteger('category_id');
             $table->varchar(255, 'responsible_person');
             $table->varchar(255,'reference_number');
             $table->timestamps();
+
+            /**
+             * Add Foreign Key to Users Table
+             */
+            $table->foreign('user_id')->references('id')->on('users');
         });
 
         Schema::create('letter_uploads', function (Blueprint $table) {
