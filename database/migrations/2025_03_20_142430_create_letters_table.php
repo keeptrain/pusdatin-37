@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
-            $table->varchar(255, 'user_id');
-            $table->varchar(255, 'category_type');
+            $table->unsignedBigInteger('user_id');
+            $table->string('category_type', 255);
             $table->unsignedInteger('category_id');
-            $table->varchar(255, 'responsible_person');
-            $table->varchar(255,'reference_number');
+            $table->string('responsible_person', 255);
+            $table->string('reference_number', 255);
             $table->timestamps();
 
             /**
@@ -28,8 +28,8 @@ return new class extends Migration
 
         Schema::create('letter_uploads', function (Blueprint $table) {
             $table->id();
-            $table->varchar(255, 'file_name');
-            $table->varchar(255, 'file_path');
+            $table->string('file_name');
+            $table->string('file_path');
         });
 
         Schema::create('letter_directs', function (Blueprint $table) {
@@ -44,7 +44,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('letters');
-        Schema::dropIfExists('letter_upload');
-        Schema::dropIfExists('letter_direct');
+        Schema::dropIfExists('letter_uploads');
+        Schema::dropIfExists('letter_directs');
     }
 };
