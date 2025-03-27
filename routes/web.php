@@ -1,5 +1,8 @@
 <?php
 
+use App\Livewire\Letters\CreateLetter;
+use App\Livewire\Letters\DirectForm;
+use App\Livewire\Letters\UploadForm;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -12,6 +15,12 @@ Route::get('/', function () {
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('letter',CreateLetter::class)->name('letter');
+    Route::get('letter/upload',UploadForm::class)->name('letter.upload');
+    Route::get('letter/form',DirectForm::class)->name('letter.form');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

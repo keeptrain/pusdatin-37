@@ -12,25 +12,42 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
+                <flux:navlist.group :heading="__('Main')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                    <flux:navlist.item icon="folder" :href="route('letter')" :current="request()->routeIs('letter')" wire:navigate>{{ __('Letter') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
-            <flux:spacer />
+            <flux:navlist variant="outline">
+                <flux:navlist.group :heading="__('Data')" class="grid">
+                    <flux:navlist.group expandable heading="Tabel" class=" lg:grid">
+                        <flux:navlist.item href="#">Application</flux:navlist.item>
+                        <flux:navlist.item href="#">Dhis</flux:navlist.item>
+                        <flux:navlist.item href="#">Support</flux:navlist.item>
+                        <flux:navlist.item href="#">User</flux:navlist.item>
+                    </flux:navlist.group>
+                </flux:navlist.group>
+            </flux:navlist>
 
             <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
+                <flux:navlist.group :heading="__('Monitoring')" class="grid">
+                    <flux:navlist.item icon="newspaper" :href="route('letter')" :current="request()->routeIs('letter')" wire:navigate>{{ __('Reporting') }}</flux:navlist.item>
+                    <flux:navlist.item icon="cake" :href="route('letter')" :current="request()->routeIs('letter')" wire:navigate>{{ __('Events & Logs') }}</flux:navlist.item>
+                </flux:navlist.group>
+            </flux:navlist>
 
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
+            <flux:spacer/>
+
+            <flux:navlist variant="outline">
+                <flux:navlist.group :heading="__('Admin')" class="grid">
+                    <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits" target="_blank">
+                    {{ __('Documentation') }}
+                    </flux:navlist.item>
+                </flux:navlist.group>
             </flux:navlist>
 
             <!-- Desktop User Menu -->
-            <flux:dropdown position="bottom" align="start">
+            <flux:dropdown position="bottom" align="start" class="hidden lg:block">
                 <flux:profile
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
