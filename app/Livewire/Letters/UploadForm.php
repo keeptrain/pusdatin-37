@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Letters;
 
-use App\Models\Letter\Letter;
-use App\Models\Letter\LetterUpload;
+use App\Models\Letters\Letter;
+use App\Models\Letters\LetterUpload;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Letter;
+namespace App\Models\Letters;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
