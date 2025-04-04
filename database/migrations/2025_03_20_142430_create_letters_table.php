@@ -18,7 +18,9 @@ return new class extends Migration
             $table->unsignedInteger('category_id');
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
+            $table->enum('status', ['New', 'Read', 'Replied', 'Closed']);
             $table->timestamps();
+            $table->softDeletes();
 
             /**
              * Add Foreign Key to Users Table
