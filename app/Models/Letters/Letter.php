@@ -4,6 +4,7 @@ namespace App\Models\Letters;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Letter extends Model
 {
@@ -38,5 +39,16 @@ class Letter extends Model
         }
 
         return $className;
+    }
+
+    public function getFormattedDateAttribute()
+    {
+        return Carbon::parse($this->created_at)->format('F j, Y');
+    }
+
+    public static function getLetterForTable()
+    {
+        return Letter::select(['id', 'user_id', 'category_type', 'created_at'])
+            ->with('user:id,name');
     }
 }
