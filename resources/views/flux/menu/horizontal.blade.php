@@ -5,7 +5,7 @@
     'description',  
 ])
 
-<a href="{{ $href }}" class="block p-6 border-1 rounded-lg hover:shadow-sm transition duration-300 ease-in-out">
+<a href="{{ $href }}" class="block p-6 border-1 rounded-lg hover:shadow-sm dark:bg-zinc-900 dark:border-zinc-700 dark:hover:bg-zinc-700 ">
     <div class="flex flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-4">
             @if ($icon)
@@ -18,10 +18,10 @@
                 </div>
             @endif
             <div>
-                <h2 class="text-md">{{ $heading }}</h2>
-                <p class="text-gray-500 text-sm">{{ $description }}</p>
+                <flux:heading>{{ $heading }}</flux:heading>
+                <flux:text class="mt-2">{{ $description }}</flux:text>
             </div>
         </div>
-        <flux:button icon-trailing="arrow-right" variant="ghost"/>
+        <flux:button class="cursor-pointer" icon-trailing="arrow-right" variant="ghost" inset/>
     </div>
 </a>
