@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -17,12 +16,12 @@ class UserSeeder extends Seeder
         [
             [
                 'name' => 'Super Admin',
-                'email' => 'superadmin',
+                'email' => 'superadmin@gmail.com',
                 'password' => bcrypt('login'),
             ],
             [
                 'name' => 'Mail Manager',
-                'email' => 'mailmanager',
+                'email' => 'mailmanager.gmail.com',
                 'password' => bcrypt('login'),
             ],
         ]);
@@ -31,7 +30,7 @@ class UserSeeder extends Seeder
         for ($i = 1; $i <= 5; $i++) {
             DB::table('users')->insert([
                 'name' => 'User' . $i,
-                'email' => 'user' . $i,
+                'email' => 'user' . $i . '@gmail.com',
                 'password' => bcrypt('login'),
             ]);
         }
