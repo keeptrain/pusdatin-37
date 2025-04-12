@@ -20,4 +20,9 @@ class LetterUpload extends Model
         return $this->morphOne(Letter::class, 'category_type');
     }
 
+    public static function getLetterUpload() {
+        return Letter::with('id','name', 'category_type')
+            ->get();
+    }
+
 }

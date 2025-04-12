@@ -2,6 +2,7 @@
 
 use App\Livewire\Letters\CreateLetter;
 use App\Livewire\Letters\DirectForm;
+use App\Livewire\Letters\Table;
 use App\Livewire\Letters\UploadForm;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
@@ -20,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('letter',CreateLetter::class)->name('letter');
     Route::get('letter/upload',UploadForm::class)->name('letter.upload');
     Route::get('letter/form',DirectForm::class)->name('letter.form');
+    Route::get('letter/table',Table::class)->name('letter.table');
 });
 
 Route::middleware(['auth'])->group(function () {

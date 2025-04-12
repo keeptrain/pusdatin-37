@@ -5,15 +5,20 @@ namespace App\Models\Letters;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Letter extends Model
 {
+
+    use SoftDeletes;
+
     public $table = "letters";
 
     public $fillable = [
         'user_id',
         'category_type',
         'category_id',
+        'status',
         'responsible_person',
         'reference_number'
     ];
@@ -23,6 +28,11 @@ class Letter extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function categoryType()
+    {
+        return $this->morphTo();
     }
 
     public function getCategoryTypeNameAttribute()
@@ -46,9 +56,15 @@ class Letter extends Model
         return Carbon::parse($this->created_at)->format('F j, Y');
     }
 
-    public static function getLetterForTable()
+    public static function queryForTable()
     {
-        return Letter::select(['id', 'user_id', 'category_type', 'created_at'])
-            ->with('user:id,name');
+        return Letter::select(['id', 'user_id', 'category_type', 'status',  'created_at'])
+            ->with('user:id,name')
+            ->with(['categoryType' => function ($morphTo) {
+                $morphTo->morphWith([
+                    LetterUpload::class => ['letter_uploads:id'],
+                    LetterDirect::class => ['letter_directs:id'],
+                ]);
+            }]);
     }
 }

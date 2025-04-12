@@ -21,9 +21,9 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Data')" class="grid">
                     <flux:navlist.group expandable heading="Tabel" class=" lg:grid">
-                        <flux:navlist.item href="#">Application</flux:navlist.item>
-                        <flux:navlist.item href="#">Dhis</flux:navlist.item>
-                        <flux:navlist.item href="#">Support</flux:navlist.item>
+                        <flux:navlist.item :href="route('letter.table')" wire:navigate>Application</flux:navlist.item>
+                        <flux:navlist.item href="#">Data</flux:navlist.item>
+                        <flux:navlist.item href="#">Humas</flux:navlist.item>
                         <flux:navlist.item href="#">User</flux:navlist.item>
                     </flux:navlist.group>
                 </flux:navlist.group>
