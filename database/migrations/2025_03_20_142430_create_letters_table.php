@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('category_type', 255);
-            $table->unsignedInteger('category_id');
+            $table->morphs('letterable');
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
             $table->enum('status', ['New', 'Read', 'Replied', 'Closed']);
