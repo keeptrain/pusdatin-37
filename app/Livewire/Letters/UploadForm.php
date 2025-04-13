@@ -33,7 +33,8 @@ class UploadForm extends Component
         ]);
     }
 
-    public function nameFile(): string {
+    public function nameFile(): string
+    {
         $user = Auth::user();
         $date = Carbon::now()->format('d');
         $fileName = Str::slug($user->name) . '-' . $date . '.pdf';
@@ -54,11 +55,12 @@ class UploadForm extends Component
             'user_id' => User::currentUser()->id,
             'category_type' => LetterUpload::class,
             'category_id' => $upload->id,
+            'status' => 'Read',
             'responsible_person' => $this->responsible_person,
             'reference_number' => $this->reference_number
         ]);
 
-        
+
         return redirect()->to('/letter')
             ->with('status', [
                 'variant' => 'success',
