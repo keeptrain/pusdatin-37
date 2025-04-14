@@ -41,9 +41,9 @@ class DirectForm extends Component
     {
         return Letter::create([
             'user_id' => User::currentUser()->id,
-            'category_type' => LetterDirect::class,
-            'category_id' => $this->createDirectLetter()->id,
-            'status' => 'Read',
+            'letterable_type' => LetterDirect::class,
+            'letterable_id' => $this->createDirectLetter()->id,
+            'status' => 'New',
             'responsible_person' => $this->responsible_person,
             'reference_number' => $this->reference_number
         ]);

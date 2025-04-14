@@ -36,30 +36,39 @@ class UploadForm extends Component
     public function nameFile(): string
     {
         $user = Auth::user();
-        $date = Carbon::now()->format('d');
-        $fileName = Str::slug($user->name) . '-' . $date . '.pdf';
+        $dateTime = Carbon::now()->format('YmdHis');
+        $fileName = Str::slug($user->name) . '-' . $dateTime . '.pdf';
 
         return $fileName;
+    }
+
+    public function createUploadLetter(): LetterUpload
+    {
+        return LetterUpload::create([
+            'file_name' => $this->nameFile(),
+            'file_path' => $this->file->storeAs('letters', $this->nameFile(), 'public')
+        ]);
+    }
+
+    public function createLetter(): Letter
+    {
+        return Letter::create([
+            'user_id' => User::currentUser()->id,
+            'letterable_type' => LetterUpload::class,
+            'letterable_id' => $this->createUploadLetter()->id,
+            'status' => 'New',
+            'responsible_person' => $this->responsible_person,
+            'reference_number' => $this->reference_number
+        ]);
     }
 
     public function save()
     {
         $this->validateInput();
 
-        $upload = LetterUpload::create([
-            'file_name' => $this->nameFile(),
-            'file_path' => 'letters/' . $this->file->getClientOriginalName()
-        ]);
+        $this->createUploadLetter();
 
-        Letter::create([
-            'user_id' => User::currentUser()->id,
-            'category_type' => LetterUpload::class,
-            'category_id' => $upload->id,
-            'status' => 'Read',
-            'responsible_person' => $this->responsible_person,
-            'reference_number' => $this->reference_number
-        ]);
-
+        $this->createLetter();
 
         return redirect()->to('/letter')
             ->with('status', [
