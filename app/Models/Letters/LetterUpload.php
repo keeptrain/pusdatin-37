@@ -17,12 +17,17 @@ class LetterUpload extends Model
     ];
 
     public function letter(): MorphOne {
-        return $this->morphOne(Letter::class, 'category_type');
+        return $this->morphOne(Letter::class, 'letterable');
     }
 
     public static function getLetterUpload() {
         return Letter::with('id','name', 'category_type')
             ->get();
+    }
+
+    public static function getFilePathAttribute($value)
+    {
+        return asset('storage/' . $value);
     }
 
 }

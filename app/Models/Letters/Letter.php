@@ -5,6 +5,7 @@ namespace App\Models\Letters;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Letter extends Model
@@ -16,8 +17,8 @@ class Letter extends Model
 
     public $fillable = [
         'user_id',
-        'category_type',
-        'category_id',
+        'letterable_type',
+        'letterable_id',
         'status',
         'responsible_person',
         'reference_number'
@@ -30,14 +31,14 @@ class Letter extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function categoryType()
+    public function letterable() : MorphTo
     {
         return $this->morphTo();
     }
 
     public function getCategoryTypeNameAttribute()
     {
-        $morphClass = $this->category_type;
+        $morphClass = $this->letterable_type;
 
         // Pisahkan string berdasarkan backslash
         $parts = explode('\\', $morphClass);
@@ -58,13 +59,8 @@ class Letter extends Model
 
     public static function queryForTable()
     {
-        return Letter::select(['id', 'user_id', 'category_type', 'status',  'created_at'])
+        return Letter::select(['id', 'user_id', 'letterable_type', 'status',  'created_at'])
             ->with('user:id,name')
-            ->with(['categoryType' => function ($morphTo) {
-                $morphTo->morphWith([
-                    LetterUpload::class => ['letter_uploads:id'],
-                    LetterDirect::class => ['letter_directs:id'],
-                ]);
-            }]);
+            ;
     }
 }
