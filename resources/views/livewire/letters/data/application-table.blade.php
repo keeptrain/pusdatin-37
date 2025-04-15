@@ -53,16 +53,23 @@
 
                     <div>
                         <flux:table.row
-                        class="{{ in_array($item->id, $selectedLetters)
-                            ? '  border-s-2 border-black dark:border-white'
-                            : 'border-l-2 border-white dark:border-l-zinc-800' }} ">
-                        <flux:checkbox wire:model.live="selectedLetters" value="{{ $item->id }}" />
-                    </flux:table.row>
+                            class="{{ in_array($item->id, $selectedLetters)
+                                ? '  border-s-2 border-black dark:border-white'
+                                : 'border-l-2 border-white dark:border-l-zinc-800' }} ">
+                            <flux:checkbox wire:model.live="selectedLetters" value="{{ $item->id }}" />
+                        </flux:table.row>
                     </div>
-                   
-                    <flux:table.row>{{ $item->user->name }}</flux:table.row>
+
+                    <flux:table.row>
+                        <a href="{{ route('letter.detail', $item->id) }}" wire:navigate>
+                            {{ $item->user->name }}
+                        </a>
+                    </flux:table.row>
                     <flux:table.row>{{ $item->category_type_name }}</flux:table.row>
-                    <flux:table.row>{{ $item->status }}</flux:table.row>
+                    <flux:table.row>
+                        <flux:notification.status-badge status="{{ $item->status }}">
+                            {{ $item->status }}</flux:notification.status-badge>    
+                    </flux:table.row>
                     <flux:table.row>{{ $item->formatted_date }}</flux:table.row>
                     <flux:table.row>
                         <flux:button wire:click="edit({{ $item->id }})" variant="ghost">Edit</flux:button>

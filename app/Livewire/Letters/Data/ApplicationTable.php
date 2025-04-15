@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire\Letters;
+namespace App\Livewire\Letters\Data;
 
 
 use App\Models\Letters\Letter;
 use Livewire\WithPagination;
 use Livewire\Component;
 
-class Table extends Component
+class ApplicationTable extends Component
 {
     use WithPagination;
 
@@ -23,28 +23,25 @@ class Table extends Component
 
     public function render()
     {
-        return view('livewire.letters.table', [
+        return view('livewire.letters.data.application-table', [
             'letters' => $this->loadLetters(),
         ]);
     }
 
-    public function updatingPage()
+    public function detailPage(int $id)
     {
-        $this->selectedLetters = []; // Reset properti saat halaman berubah
+        return redirect()->route('letter.detail', [$id]);
     }
 
     public function loadLetters()
     {
-        // Cache query result untuk menghindari query ulang dalam satu request
-        return cache()->remember('letters_' . $this->filterStatus . '_' . $this->perPage . '_' , now()->addMinutes(5), function () {
-            $query = Letter::queryForTable()->withoutTrashed();
+        $query = Letter::queryForTable()->withoutTrashed();
 
-            if ($this->filterStatus !== 'All') {
-                $query->where('status', $this->filterStatus);
-            }
+        if ($this->filterStatus !== 'All') {
+            $query->where('status', $this->filterStatus);
+        }
 
-            return $query->paginate($this->perPage);
-        });
+        return $query->paginate($this->perPage);
     }
 
     public function toggleSelectAll()

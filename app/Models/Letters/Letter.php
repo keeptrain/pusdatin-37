@@ -13,7 +13,7 @@ class Letter extends Model
 
     use SoftDeletes;
 
-    public $table = "letters";
+    protected $table = "letters";
 
     public $fillable = [
         'user_id',
