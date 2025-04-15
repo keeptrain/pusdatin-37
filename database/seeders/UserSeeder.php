@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Mail Manager',
-                'email' => 'mailmanager.gmail.com',
+                'email' => 'mailmanager@gmail.com',
                 'password' => bcrypt('login'),
             ],
         ]);
@@ -36,8 +36,8 @@ class UserSeeder extends Seeder
         }
 
         DB::table('roles')->insert([
-            ['name' => 'Super admin'],
-            ['name' => 'Mail manager'],
+            ['name' => 'Administrator'],
+            ['name' => 'Verifikator'],
             ['name' => 'User'],
         ]);
 
