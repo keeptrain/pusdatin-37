@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class PermissionRoleSeeder extends Seeder
 {
@@ -11,6 +13,8 @@ class PermissionRoleSeeder extends Seeder
      */
     public function run(): void
     {
+        // Reset cached roles and permissions
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions
         $permissions = [
@@ -21,7 +25,7 @@ class PermissionRoleSeeder extends Seeder
         ];
         
         foreach ($permissions as $permission) {
-            \Spatie\Permission\Models\Permission::create([
+            Permission::create([
                 'name' => $permission,
                 'guard_name' => 'web'
             ]);

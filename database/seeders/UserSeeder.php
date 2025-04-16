@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -12,27 +13,31 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('users')->insert(
-        [
-            [
-                'name' => 'Administrator',
+        $adminRole = Role::findByName('administrator');
+        $admin = User::create([
+            'name' => 'Administrator',
                 'email' => 'administrator@gmail.com',
                 'password' => bcrypt('login'),
-            ],
-            [
+
+        ]);
+        $admin->assignRole($adminRole);
+
+        $verifikatorRole = Role::findByName('verifikator');
+        $verifikator = User::create([
                 'name' => 'Verifikator',
                 'email' => 'verifikator@gmail.com',
                 'password' => bcrypt('login'),
-            ],
         ]);
+        $verifikator->assignRole($verifikatorRole);
 
-        // Create 5 users with the same password
+        $userRole = Role::findByName('user');        
         for ($i = 1; $i <= 5; $i++) {
-            DB::table('users')->insert([
+            $regularUsers = User::create([
                 'name' => 'User' . $i,
                 'email' => 'user' . $i . '@gmail.com',
                 'password' => bcrypt('login'),
             ]);
+            $regularUsers->assignRole($userRole);
         }
     }
 }
