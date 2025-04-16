@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->morphs('letterable');
+            $table->string('title', 255);
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
             $table->enum('status', ['New', 'Read', 'Replied', 'Closed']);
