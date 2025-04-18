@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('title', 255);
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
-            $table->enum('status', ['New', 'Read', 'Replied', 'Closed']);
+            $table->string('status', 86)->default('pending');
             $table->timestamps();
             $table->softDeletes();
 
@@ -28,6 +28,24 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users');
         });
 
+        /**
+         * Create the request_status_tracks table
+         */
+        Schema::create('request_status_tracks', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('letter_id');
+            $table->string('action', 255);
+            $table->timestamps();
+
+            /**
+             * Add Foreign Key to Letters Table
+             */
+            $table->foreign('letter_id')->references('id')->on('letters');
+        });
+
+        /**
+         * Create the letter_uploads and letter_directs tables
+         */
         Schema::create('letter_uploads', function (Blueprint $table) {
             $table->id();
             $table->string('file_name');
@@ -46,6 +64,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('letters');
+        Schema::dropIfExists('request_status_tracks');
         Schema::dropIfExists('letter_uploads');
         Schema::dropIfExists('letter_directs');
     }

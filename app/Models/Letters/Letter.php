@@ -2,21 +2,28 @@
 
 namespace App\Models\Letters;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use App\Models\User;
+use App\States\LetterStatus;
+use Spatie\ModelStates\HasStates;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Letter extends Model
 {
 
-    use SoftDeletes;
+    use HasStates,SoftDeletes;
 
     protected $table = "letters";
 
+    protected $casts = [
+        'status' => LetterStatus::class,
+    ];
+    
     public $fillable = [
         'user_id',
+        'title',
         'letterable_type',
         'letterable_id',
         'status',
@@ -34,6 +41,11 @@ class Letter extends Model
     public function letterable() : MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function requestStatusTrack()
+    {
+        return $this->hasMany(RequestStatusTrack::class);
     }
 
     public function getCategoryTypeNameAttribute()
@@ -63,4 +75,5 @@ class Letter extends Model
             ->with('user:id,name')
             ;
     }
+    
 }
