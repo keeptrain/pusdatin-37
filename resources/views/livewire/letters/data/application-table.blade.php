@@ -26,7 +26,6 @@
                 <flux:menu.radio.group wire:model="sortBy">
                     <flux:menu.radio checked>Latest activity</flux:menu.radio>
                     <flux:menu.radio>Date created</flux:menu.radio>
-                    <flux:menu.radio>Most popular</flux:menu.radio>
                 </flux:menu.radio.group>
             </flux:menu>
         </flux:dropdown>
@@ -67,12 +66,12 @@
                     </flux:table.row>
                     <flux:table.row>{{ $item->category_type_name }}</flux:table.row>
                     <flux:table.row>
-                        <flux:notification.status-badge status="{{ $item->status }}">
-                            {{ $item->status }}</flux:notification.status-badge>    
+                        <flux:notification.status-badge status="{{ $item->status->label() }}">
+                            {{ $item->status->label() }}</flux:notification.status-badge>
                     </flux:table.row>
                     <flux:table.row>{{ $item->formatted_date }}</flux:table.row>
                     <flux:table.row>
-                        <flux:button wire:click="edit({{ $item->id }})" variant="ghost">Edit</flux:button>
+                        <flux:button wire:click="editPage({{ $item->id }})" variant="ghost">Edit</flux:button>
                     </flux:table.row>
                 </tr>
             @endforeach
