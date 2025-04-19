@@ -4,11 +4,12 @@
 
 <flux:badge class="flex items-center "
     :color="match($status) {
-        'New' => 'lime',
-        'Read' => 'sky',
+        'Pending' => 'lime',
+        'Process' => 'sky',
         'Replied' => 'yellow',
-        'Closed' => 'red',
-        default => 'warning'
+        'Approved' => 'green',
+        'Rejected' => 'red',
+        default => 'zinc'
     }">
     {{ $slot }}
 </flux:badge>

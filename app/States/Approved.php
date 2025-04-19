@@ -4,11 +4,11 @@ namespace App\States;
 
 use App\States\LetterStatus;
 
-class Completed extends LetterStatus
+class Approved extends LetterStatus
 {
     public function label(): string
     {
-        return 'Completed';
+        return 'Approved';
     }
     
     public function color(): string

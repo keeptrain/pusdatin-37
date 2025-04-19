@@ -19,7 +19,7 @@ abstract class LetterStatus extends State
         return parent::config()
             ->default(Pending::class)
             ->allowTransition(Pending::class, Process::class)
-            ->allowTransition(Process::class, Completed::class)
+            ->allowTransition(Process::class, Approved::class)
             ->allowTransition(Process::class, Replied::class)
             ->allowTransition(Process::class, Rejected::class)
             ->allowTransition(Replied::class, Replied::class)
