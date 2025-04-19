@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\States;
 
@@ -24,6 +24,12 @@ abstract class LetterStatus extends State
             ->allowTransition(Process::class, Rejected::class)
             ->allowTransition(Replied::class, Replied::class)
             ->allowTransition(Replied::class, Rejected::class)
+
+            // Only for testing
+            ->allowTransition(Replied::class, Process::class)
+            ->allowTransition(Approved::class, Process::class)
+            ->allowTransition(Rejected::class, Process::class)
         ;
     }
+
 }
