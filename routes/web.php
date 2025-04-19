@@ -33,10 +33,10 @@ Route::middleware(['auth'])->group(function () {
     //     Route::get('chat', [Edit::class])->name('letter.chat');
     //     // etc
     // });
-    // Route::get('letter/{id}',Detail::class)->name('letter.detail');
-    // Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
-    // Route::get('letter/{id}/activity', Activity::class)->name('letter.activity');
-    // Route::get('letter/{id}/chat', Edit::class)->name('letter.chat');
+    Route::get('letter/{id}',Detail::class)->name('letter.detail');
+    Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
+    Route::get('letter/{id}/activity', Activity::class)->name('letter.activity');
+    Route::get('letter/{id}/chat', Edit::class)->name('letter.chat');
 });
 
 Route::prefix('admin')->middleware(['auth', 'role:administrator'])->group(function() {

@@ -3,16 +3,21 @@
 namespace App\Livewire\Letters\Data;
 
 use LogicException;
+use App\States\Process;
 use Livewire\Component;
 use App\Models\Letters\Letter;
+use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterDirect;
 use App\Models\Letters\LetterUpload;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Detail extends Component
 {
-    public $letter;
+    public ?Letter $letter;
+
+    public int $letterId;
 
     public $letterUpload = null;
 
@@ -20,27 +25,63 @@ class Detail extends Component
 
     public function mount(int $id)
     {
-        $this->loadLetterData($id);
+        $this->letterId = $id;
 
-        $letterable = $this->letter->letterable;
+        $this->getLetter();
+    }
 
-        if ($letterable instanceof LetterUpload) {
-            $this->processLetterUpload($letterable);
-        } elseif ($letterable instanceof LetterDirect) {
-            $this->processLetterDirect($letterable);
+    public function getLetter()
+    {
+        return once(
+            fn() =>
+            $this->letter = Letter::with('letterable')->findOrFail($this->letterId)
+        );
+    }
+
+    public function processLetter(int $id)
+    {
+        if (Auth::user()->withoutRole('user')) {
+            DB::transaction(function () {
+                $this->letter->status->transitionTo(Process::class);
+                $this->letter->requestStatusTrack()->create([
+                    'letter_id' => $this->letterId,
+                    'action' => "Permohonan layanan sedang di proses , harap cek berkala."
+                ]);
+            });
+
+            return redirect()->route('letter.table')->with([
+                'status' => [
+                    'variant' => 'success',
+                    'message' => 'Letter has update to read status!'
+                ]
+            ]);
         } else {
-            $this->handleInvalidLetterable($letterable, $id);
+            return redirect()->route('letter.detail', [$id])->with([
+                'status' => [
+                    'variant' => 'error',
+                    'message' => 'Letter has update to read status!'
+                ]
+            ]);
         }
+    }
 
+    public function repliedLetter($letterId)
+    {
+        $this->dispatch('modal-confirmation', $letterId);
+    }
+
+    public function backStatus()
+    {
+        $this->letter->status->transitionTo(Process::class);
     }
 
     private function loadLetterData(int $id)
     {
-        try { 
+        try {
             $this->letter = Letter::with('letterable')->findOrFail($id);
         } catch (ModelNotFoundException $e) {
             throw new NotFoundHttpException('Letter record not found.');
-        } 
+        }
     }
 
     private function processLetterUpload(LetterUpload $letterable): void
@@ -62,5 +103,4 @@ class Detail extends Component
             throw new LogicException("Unsupported letterable type '{$type}' for Letter ID: " . $letterId);
         }
     }
-
 }
