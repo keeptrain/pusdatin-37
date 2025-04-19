@@ -2,10 +2,15 @@
 
 namespace App\Livewire\Letters;
 
-use App\Models\Letters\Letter;
-use App\Models\Letters\LetterUpload;
+use Carbon\Carbon;
+use App\Models\User;
+use App\States\Pending;
 use Livewire\Component;
+use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
+use App\Models\Letters\Letter;
+use Illuminate\Support\Facades\DB;
+use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -17,37 +22,74 @@ class UploadForm extends Component
 
     public $file;
 
+    public $title = '';
+
     public $responsible_person = '';
 
     public $reference_number = '';
 
-    public function validateInput()
+    public function rules()
     {
-        $this->validate([
+        return [
             'file' => 'required|mimes:pdf|max:1024',
+            'title' => 'required|string|max:255',
             'responsible_person' => 'required|string',
-            'reference_number' => 'required|string'
+            'reference_number' => 'required|string',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'file.required' => 'Body is required',
+            'title.required' => 'Title is required',
+            'responsible_person.required' => 'Responsible person is required',
+            'reference_number.required' => 'Reference number is required'
+        ];
+    }
+
+    public function nameFile(): string
+    {
+        $user = Auth::user();
+        $dateTime = Carbon::now()->format('YmdHis');
+
+        $nameWithoutExtension = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
+
+        $fileName = $nameWithoutExtension . '-' . Str::slug($user->name) . '-' . $dateTime . '.pdf';
+
+        return $fileName;
+    }
+
+    public function createUploadLetter(): LetterUpload
+    {
+        return LetterUpload::create([
+            'file_name' => $this->nameFile(),
+            'file_path' => $this->file->storeAs('letters', Carbon::now()->format('His') . '.pdf', 'public')
+        ]);
+    }
+
+    public function createLetter(): Letter
+    {
+        return Letter::create([
+            'user_id' => User::currentUser()->id,
+            'title' => $this->title,
+            'letterable_type' => LetterUpload::class,
+            'letterable_id' => $this->createUploadLetter()->id,
+            'status' => Pending::class,
+            'responsible_person' => $this->responsible_person,
+            'reference_number' => $this->reference_number
         ]);
     }
 
     public function save()
     {
-        $this->validateInput();
+        $this->validate();
 
-        $upload = LetterUpload::create([
-            'file_name' => $this->file->getClientOriginalName(),
-            'file_path' => 'letters/' . $this->file->getClientOriginalName()
-        ]);
+        DB::transaction(function () {
+            $this->createUploadLetter();
+            $this->createLetter();
+        });
 
-        Letter::create([
-            'user_id' => Auth::user()->id,
-            'category_type' => LetterUpload::class,
-            'category_id' => $upload->id,
-            'responsible_person' => $this->responsible_person,
-            'reference_number' => $this->reference_number
-        ]);
-
-        
         return redirect()->to('/letter')
             ->with('status', [
                 'variant' => 'success',

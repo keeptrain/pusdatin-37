@@ -18,8 +18,12 @@
             </div>
         </div>
 
-        <flux:input wire:model="reference_number" class="max-w-sm" label="Nomor Surat" placeholder="No/xx/2025"
-            clearable />
+        <div class="grid grid-cols-2 gap-x-4">
+            <flux:input wire:model="title" label="Judul" placeholder="Judul permohonan layanan" clearable />
+
+            <flux:input wire:model="reference_number" class="max-w-sm" label="Nomor Surat" placeholder="No/xx/2025"
+                clearable />
+        </div>
 
         <flux:input wire:model="file" type="file" label="Upload" badge="Required" class="max-w-sm" />
 
