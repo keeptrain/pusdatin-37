@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\States\LetterStatus;
 use Spatie\ModelStates\HasStates;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -46,6 +47,28 @@ class Letter extends Model
     public function requestStatusTrack()
     {
         return $this->hasMany(RequestStatusTrack::class);
+    }
+
+    public static function getFilterableStates(): array
+    {
+        return [
+            'pending'  => \App\States\Pending::class,
+            'process'  => \App\States\Process::class,
+            'approved' => \App\States\Approved::class,
+            'replied' => \App\States\Replied::class,
+            'rejected' => \App\States\Rejected::class,
+        ];
+    }
+
+    public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder
+    {
+        $map = static::getFilterableStates();
+
+        if ($filterStatus && isset($map[$filterStatus])) {
+            return $query->where('status', $map[$filterStatus]);
+        }
+
+        return $query;
     }
 
     public function getCategoryTypeNameAttribute()

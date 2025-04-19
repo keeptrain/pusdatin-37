@@ -4,6 +4,7 @@ namespace App\Livewire\Letters\Data;
 
 
 use App\Models\Letters\Letter;
+use App\States\Pending;
 use Livewire\WithPagination;
 use Livewire\Component;
 
@@ -13,11 +14,18 @@ class ApplicationTable extends Component
 
     public $perPage = 10; // Default per page
 
-    public $filterStatus = 'All';
+    public $filterStatus = 'all';
+
+    public array $statuses = [
+        'all' => 'All',
+        'pending' => 'Pending',
+        'process' => 'Process',
+        'replied' => 'Replied',
+        'approved' => 'Approved',
+        'rejected' => 'Rejected',
+    ];
 
     public $selectedLetters = [];
-
-    public $statuses = ['All', 'New', 'Read', 'Replied', 'New', 'Read', 'Replied'];
 
     public function mount() {}
 
@@ -33,20 +41,22 @@ class ApplicationTable extends Component
         return redirect()->route('letter.detail', [$id]);
     }
 
+    public function editPage(int $id)
+    {
+        return redirect()->route('letter.edit', [$id]);
+    }
+
     public function loadLetters()
     {
-        $query = Letter::queryForTable()->withoutTrashed();
-
-        if ($this->filterStatus !== 'All') {
-            $query->where('status', $this->filterStatus);
-        }
-
-        return $query->paginate($this->perPage);
+        return Letter::queryForTable()
+            ->withoutTrashed()
+            ->filterByStatus($this->filterStatus !== 'all' ? $this->filterStatus : null)
+            ->paginate($this->perPage);
     }
 
     public function toggleSelectAll()
     {
-        if (count($this->selectedLetters) === $this->letters->count()) {
+        if ($this->filterStatus != 'all' && count($this->selectedLetters) === $this->letters->count()) {
             $this->selectedLetters = [];
         } else {
             $this->selectedLetters = $this->letters->pluck('id')->toArray();
