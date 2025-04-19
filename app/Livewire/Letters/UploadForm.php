@@ -2,14 +2,16 @@
 
 namespace App\Livewire\Letters;
 
-use App\Models\Letters\Letter;
-use App\Models\Letters\LetterUpload;
-use App\Models\User;
-use Livewire\Component;
-use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\User;
+use App\States\Pending;
+use Livewire\Component;
+use Illuminate\Support\Str;
+use Livewire\WithFileUploads;
+use App\Models\Letters\Letter;
+use Illuminate\Support\Facades\DB;
+use App\Models\Letters\LetterUpload;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * [Description Upload]
@@ -20,24 +22,40 @@ class UploadForm extends Component
 
     public $file;
 
-    public $responsible_person;
+    public $title = '';
 
-    public $reference_number;
+    public $responsible_person = '';
 
-    public function validateInput()
+    public $reference_number = '';
+
+    public function rules()
     {
-        $this->validate([
+        return [
             'file' => 'required|mimes:pdf|max:1024',
+            'title' => 'required|string|max:255',
             'responsible_person' => 'required|string',
-            'reference_number' => 'required|string'
-        ]);
+            'reference_number' => 'required|string',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'file.required' => 'Body is required',
+            'title.required' => 'Title is required',
+            'responsible_person.required' => 'Responsible person is required',
+            'reference_number.required' => 'Reference number is required'
+        ];
     }
 
     public function nameFile(): string
     {
         $user = Auth::user();
         $dateTime = Carbon::now()->format('YmdHis');
-        $fileName = Str::slug($user->name) . '-' . $dateTime . '.pdf';
+
+        $nameWithoutExtension = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
+
+        $fileName = $nameWithoutExtension . '-' . Str::slug($user->name) . '-' . $dateTime . '.pdf';
 
         return $fileName;
     }
@@ -46,7 +64,7 @@ class UploadForm extends Component
     {
         return LetterUpload::create([
             'file_name' => $this->nameFile(),
-            'file_path' => $this->file->storeAs('letters', $this->nameFile(), 'public')
+            'file_path' => $this->file->storeAs('letters', Carbon::now()->format('His') . '.pdf', 'public')
         ]);
     }
 
@@ -54,9 +72,10 @@ class UploadForm extends Component
     {
         return Letter::create([
             'user_id' => User::currentUser()->id,
+            'title' => $this->title,
             'letterable_type' => LetterUpload::class,
             'letterable_id' => $this->createUploadLetter()->id,
-            'status' => 'New',
+            'status' => Pending::class,
             'responsible_person' => $this->responsible_person,
             'reference_number' => $this->reference_number
         ]);
@@ -64,11 +83,12 @@ class UploadForm extends Component
 
     public function save()
     {
-        $this->validateInput();
+        $this->validate();
 
-        $this->createUploadLetter();
-
-        $this->createLetter();
+        DB::transaction(function () {
+            $this->createUploadLetter();
+            $this->createLetter();
+        });
 
         return redirect()->to('/letter')
             ->with('status', [
