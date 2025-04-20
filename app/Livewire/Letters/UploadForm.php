@@ -22,6 +22,8 @@ class UploadForm extends Component
 
     public $file;
 
+    public bool $fileReady = false;
+
     public $title = '';
 
     public $responsible_person = '';
@@ -41,16 +43,23 @@ class UploadForm extends Component
     public function messages()
     {
         return [
-            'file.required' => 'Body is required',
+            'file.required' => 'File is required',
+            'file.mimes' =>  'File wrong extension.',
             'title.required' => 'Title is required',
             'responsible_person.required' => 'Responsible person is required',
             'reference_number.required' => 'Reference number is required'
         ];
     }
 
+    public function updatedFile($value)
+    {
+        $this->fileReady = !is_null($value);
+    }
+
     public function nameFile(): string
     {
         $user = Auth::user();
+
         $dateTime = Carbon::now()->format('YmdHis');
 
         $nameWithoutExtension = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -60,11 +69,17 @@ class UploadForm extends Component
         return $fileName;
     }
 
+    public function pathFile()
+    {
+        $extension = $this->file->guessExtension();
+        return now()->timestamp . '.' . $extension;
+    }
+
     public function createUploadLetter(): LetterUpload
     {
         return LetterUpload::create([
             'file_name' => $this->nameFile(),
-            'file_path' => $this->file->storeAs('letters', Carbon::now()->format('His') . '.pdf', 'public')
+            'file_path' => $this->file->storeAs('letters', $this->pathFile(), 'public')
         ]);
     }
 
