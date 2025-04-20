@@ -13,6 +13,11 @@ class Rejected extends LetterStatus
     
     public function color(): string
     {
-        return 'bg-green-500';
+        return 'red';
+    }
+
+    public function message(): string
+    {
+        return 'Surat di tolak';
     }
 }

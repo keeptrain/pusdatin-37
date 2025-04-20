@@ -53,7 +53,6 @@ class ModalConfirmation extends Component
         $this->showModal = true;
         $this->letterId = $id;
         $this->letter = Letter::findOrFail($this->letterId);
-        // $this->states = $this->letter->getStates();
     }
 
     public function closeModal()
@@ -81,31 +80,21 @@ class ModalConfirmation extends Component
         );
     }
 
-    private function processStatusTransition()
+    private function getStatusFromInput()
     {
         $map = $this->getStatusMap();
 
         $stateClass = $map[$this->status];
 
-        $this->letter->status->transitionTo($stateClass);
-    }
-
-    private function createStatusTrack()
-    {
-        RequestStatusTrack::create([
-            'letter_id' => $this->letterId,
-            'action' => 'jhghjggjh',
-        ]);
+        return $stateClass;
     }
 
     public function save()
     {
         try {
             $this->validate();
-
             DB::transaction(function () {
-                $this->processStatusTransition();
-                $this->createStatusTrack();
+                $this->letter->transitionToStatus($this->getStatusFromInput());
             });
         } catch (ModelNotFoundException $e) {
             $this->dispatch('alert', [

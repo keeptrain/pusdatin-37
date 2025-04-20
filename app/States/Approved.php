@@ -15,4 +15,9 @@ class Approved extends LetterStatus
     {
         return 'bg-green-500';
     }
+
+    public function message(): string
+    {
+        return 'Surat disetujui';
+    }
 }

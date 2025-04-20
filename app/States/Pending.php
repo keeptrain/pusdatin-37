@@ -13,6 +13,11 @@ class Pending extends LetterStatus
     
     public function color(): string
     {
-        return 'bg-green-500';
+        return 'lime';
+    }
+
+    public function message(): string
+    {
+        return 'Surat telah di kirim, mohon di cek berkala';
     }
 }

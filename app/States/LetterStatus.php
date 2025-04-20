@@ -14,6 +14,8 @@ abstract class LetterStatus extends State
 {
     abstract public function color(): string;
 
+    abstract public function message(): string;
+
     public static function config(): StateConfig
     {
         return parent::config()

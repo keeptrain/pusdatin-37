@@ -13,15 +13,14 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Letter extends Model
 {
-
-    use HasStates,SoftDeletes;
+    use HasStates, SoftDeletes;
 
     protected $table = "letters";
 
     protected $casts = [
         'status' => LetterStatus::class,
     ];
-    
+
     public $fillable = [
         'user_id',
         'title',
@@ -39,7 +38,7 @@ class Letter extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function letterable() : MorphTo
+    public function letterable(): MorphTo
     {
         return $this->morphTo();
     }
@@ -60,6 +59,22 @@ class Letter extends Model
         ];
     }
 
+    public function transitionToStatus($newStatus): void
+    {
+        $this->status->transitionTo($newStatus);
+
+        $updatedState = $this->status;
+
+        if (method_exists($updatedState, 'message')) {
+            $message = $updatedState->message();
+
+            $this->requestStatusTrack()->create([
+                'letter_id' => $this->id,
+                'action' => $message
+            ]);
+        }
+    }
+
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder
     {
         $map = static::getFilterableStates();
@@ -71,22 +86,6 @@ class Letter extends Model
         return $query;
     }
 
-    public function getCategoryTypeNameAttribute()
-    {
-        $morphClass = $this->letterable_type;
-
-        // Pisahkan string berdasarkan backslash
-        $parts = explode('\\', $morphClass);
-        $className = end($parts);
-
-        // Hapus awalan "Letter" jika ada
-        if (str_starts_with($className, 'Letter')) {
-            return substr($className, 6); // Menghapus "Letter"
-        }
-
-        return $className;
-    }
-
     public function getFormattedDateAttribute()
     {
         return Carbon::parse($this->created_at)->format('F j, Y');
@@ -96,7 +95,6 @@ class Letter extends Model
     {
         return Letter::select(['id', 'user_id', 'letterable_type', 'status',  'created_at'])
             ->with('user:id,name')
-            ;
+        ;
     }
-    
 }

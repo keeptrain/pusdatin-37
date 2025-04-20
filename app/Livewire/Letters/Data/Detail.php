@@ -2,16 +2,11 @@
 
 namespace App\Livewire\Letters\Data;
 
-use LogicException;
 use App\States\Process;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
-use App\Models\Letters\LetterDirect;
-use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Detail extends Component
 {
@@ -42,11 +37,7 @@ class Detail extends Component
     {
         if (Auth::user()->withoutRole('user')) {
             DB::transaction(function () {
-                $this->letter->status->transitionTo(Process::class);
-                $this->letter->requestStatusTrack()->create([
-                    'letter_id' => $this->letterId,
-                    'action' => "Permohonan layanan sedang di proses , harap cek berkala."
-                ]);
+                $this->letter->transitionToStatus(Process::class);
             });
 
             return redirect()->route('letter.table')->with([
@@ -59,7 +50,7 @@ class Detail extends Component
             return redirect()->route('letter.detail', [$id])->with([
                 'status' => [
                     'variant' => 'error',
-                    'message' => 'Letter has update to read status!'
+                    'message' => 'Letter cannot update!'
                 ]
             ]);
         }
@@ -75,32 +66,4 @@ class Detail extends Component
         $this->letter->status->transitionTo(Process::class);
     }
 
-    private function loadLetterData(int $id)
-    {
-        try {
-            $this->letter = Letter::with('letterable')->findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            throw new NotFoundHttpException('Letter record not found.');
-        }
-    }
-
-    private function processLetterUpload(LetterUpload $letterable): void
-    {
-        $this->letterUpload = $letterable->file_path;
-    }
-
-    private function processLetterDirect(LetterDirect $letterable): void
-    {
-        $this->letterDirect = $letterable->body;
-    }
-
-    private function handleInvalidLetterable(?object $letterable, int $letterId): void
-    {
-        if (is_null($letterable)) {
-            throw new LogicException('Associated letterable record is missing or invalid for Letter ID: ' . $letterId);
-        } else {
-            $type = get_class($letterable);
-            throw new LogicException("Unsupported letterable type '{$type}' for Letter ID: " . $letterId);
-        }
-    }
 }

@@ -13,6 +13,11 @@ class Replied extends LetterStatus
     
     public function color(): string
     {
-        return 'bg-green-500';
+        return 'yellow';
+    }
+
+    public function message(): string
+    {
+        return 'Surat anda mendapatkan balasan, harap di periksa.';
     }
 }

@@ -17,7 +17,7 @@
     <x-letters.detail-layout :letterId="$letterId">
 
         @if ($letter->letterable->file_name != null)
-            {{ $letter->letterable->file_name  }}
+            {{ $letter->letterable->file_name }}
             <iframe src="{{ asset($letter->letterable->file_path) }}" width="100%" height="600" class="mt-6" lazy>
                 This browser does not support PDFs. Please download the PDF to view it: Download PDF
             </iframe>
@@ -42,12 +42,10 @@
                 @break
 
                 @case(Replied::class)
-                    <flux:modal.trigger name="confirm-letter-process" wire:click="backStatus">
-                        <flux:button variant="primary">
-                            {{ __('Konfirmasi') }}
-                        </flux:button>
-                    </flux:modal.trigger>
-                    <flux:modal.trigger name="confirm-letter-process">
+                    <flux:button variant="primary" wire:click="backStatus">
+                        {{ __('Konfirmasi') }}
+                    </flux:button>
+                    <flux:modal.trigger name="confirm-letter-verification" wire:click="repliedLetter({{ $letterId }})">
                         <flux:button variant="primary">
                             {{ __('Konfirmasi') }}
                         </flux:button>
@@ -63,11 +61,9 @@
                 @break
 
                 @case(Rejected::class)
-                    <flux:modal.trigger name="confirm-letter-process" wire:click="backStatus">
-                        <flux:button variant="primary">
-                            {{ __('Back') }}
-                        </flux:button>
-                    </flux:modal.trigger>
+                    <flux:button variant="primary">
+                        {{ __('Back') }}
+                    </flux:button>
                 @break
 
                 @default
@@ -75,7 +71,6 @@
         </div>
 
         <livewire:letters.modal-confirmation />
-
 
         <x-slot name="rightPanel">
 
