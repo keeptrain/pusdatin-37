@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
             $table->string('status', 86)->default('pending');
+            $table->integer('current_revision')->default(0);
+            $table->boolean('active_revision')->default(false);
             $table->timestamps();
             $table->softDeletes();
 
@@ -35,6 +37,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('letter_id');
             $table->string('action', 255);
+            $table->text('notes', 255)->nullable();
+            $table->string('created_by', 100);
             $table->timestamps();
 
             /**
@@ -56,6 +60,24 @@ return new class extends Migration
             $table->id();
             $table->text('body');
         });
+
+        // // Create letter_revisions table to store revision history
+        // Schema::create('letter_revisions', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->unsignedBigInteger('letter_id');
+        //     $table->unsignedBigInteger('revised_by'); // User who made the revision
+        //     $table->integer('revision_number');
+        //     $table->string('title', 255)->nullable();
+        //     $table->string('responsible_person', 255)->nullable();
+        //     $table->string('reference_number', 255)->nullable();
+        //     $table->text('revision_notes')->nullable(); // Notes explaining the revision
+        //     $table->text('changes_json')->nullable(); // Store changes in JSON format
+        //     $table->timestamps();
+
+        //     // Add Foreign Keys
+        //     $table->foreign('letter_id')->references('id')->on('letters');
+        //     $table->foreign('revised_by')->references('id')->on('users');
+        // });
     }
 
     /**
