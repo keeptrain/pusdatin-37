@@ -20,9 +20,27 @@
                 </flux:navlist.group>
             </flux:navlist>
 
+            <flux:modal.trigger name="edit-profile">
+                <flux:navlist variant="outline">
+                    <flux:navlist.group class="grid">
+                        <flux:navlist.item icon="bell-alert" badge="100" badge-color="lime">{{ __('Notifications') }}</flux:navlist.item>
+                    </flux:navlist.group>
+                </flux:navlist>
+             
+            </flux:modal.trigger>
+
+            <flux:modal name="edit-profile" variant="flyout" position="right">
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg">Notification</flux:heading>
+                        <flux:text class="mt-2">Test notifications</flux:text>
+                    </div>
+                </div>
+            </flux:modal>
+
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Manage')" class="grid">
-                    <flux:navlist.group  expandable heading="Tabel" class=" lg:grid">
+                    <flux:navlist.group expandable heading="Tabel" class=" lg:grid">
                         <flux:navlist.item :href="route('letter.table')" wire:navigate>Application</flux:navlist.item>
                         <flux:navlist.item href="#">Data</flux:navlist.item>
                         <flux:navlist.item href="#">Humas</flux:navlist.item>
@@ -30,10 +48,9 @@
                     @hasrole('administrator')
                     <flux:navlist.group expandable heading="System" class=" lg:grid">
                         <flux:navlist.item :href="route('admin.users')" wire:navigate>User</flux:navlist.item>
-        
+                        <flux:navlist.item wire:navigate>Template</flux:navlist.item>
                     </flux:navlist.group>
                     @endhasrole
-                
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -46,16 +63,8 @@
 
             <flux:spacer/>
 
-            <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Admin')" class="grid">
-                    <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits" target="_blank">
-                    {{ __('Documentation') }}
-                    </flux:navlist.item>
-                </flux:navlist.group>
-            </flux:navlist>
-
             <!-- Desktop User Menu -->
-            <flux:dropdown position="bottom" align="start" class="hidden lg:block">
+            <flux:dropdown position="top" align="start" class="hidden lg:block">
                 <flux:profile
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
@@ -148,6 +157,8 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
+
+            
         </flux:header>
 
         {{ $slot }}
