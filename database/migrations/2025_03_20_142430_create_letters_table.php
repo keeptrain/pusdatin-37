@@ -52,8 +52,15 @@ return new class extends Migration
          */
         Schema::create('letter_uploads', function (Blueprint $table) {
             $table->id();
-            $table->string('file_name');
+            $table->foreignId('letter_id')->constrained('letters')->onDelete('cascade');
+            $table->string('part_name');
+            // $table->string('file_name');
             $table->string('file_path');
+             // $table->string('file_type')->nullable();
+            $table->integer('version')->default(1);
+            $table->boolean('needs_revision')->default(false);
+            $table->text('revision_note')->nullable();
+            $table->timestamps();
         });
 
         Schema::create('letter_directs', function (Blueprint $table) {
