@@ -7,20 +7,17 @@ use Livewire\Component;
 use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterDirect;
-use App\Models\Letters\RequestStatusTrack;
-use App\States\Pending;
+use Illuminate\Support\Facades\Auth;
 
 class DirectForm extends Component
 {
-    public $currentStep = 1;
+    public $title = '';
 
-    public $title;
+    public $responsible_person = '';
 
-    public $body;
+    public $reference_number = '';
 
-    public $responsible_person;
-
-    public $reference_number;
+    public $body = '';
 
     public function rules()
     {
@@ -41,7 +38,6 @@ class DirectForm extends Component
         ];
     }
 
-
     public function createDirectLetter(): int
     {
         $data = LetterDirect::create([
@@ -51,26 +47,23 @@ class DirectForm extends Component
         return $data->id;
     }
 
-    public function createLetter(int $letterableId): int
+    public function createLetter(int $letterableId)
     {
+        $defaultStatusClass = Letter::getDefaultStateFor('status');
+
         $letter = Letter::create([
             'user_id' => User::currentUser()->id,
-            'title' => $this->title,
             'letterable_type' => LetterDirect::class,
             'letterable_id' => $letterableId,
-            'status' => Letter::getDefaultStateFor('status'),
+            'title' => $this->title,
             'responsible_person' => $this->responsible_person,
-            'reference_number' => $this->reference_number
+            'reference_number' => $this->reference_number,
+            'status' => $defaultStatusClass,
         ]);
 
-        return $letter->id;
-    }
-
-    public function createRequestStatusTrack(int $letterId)
-    {
-        return RequestStatusTrack::create([
-            'letter_id' => $letterId,
-            'action' => 'Request berhasil diterima.'
+        $letter->requestStatusTrack()->create([
+            'action' => (new $defaultStatusClass($letter))->message(),
+            'created_by' => Auth::user()->name,
         ]);
     }
 
@@ -80,8 +73,8 @@ class DirectForm extends Component
 
         DB::transaction(function () {
             $letterableId = $this->createDirectLetter();
-            $letterId = $this->createLetter($letterableId);
-            $this->createRequestStatusTrack($letterId);
+            $this->authorize('create', $letterableId); 
+            $this->createLetter($letterableId);
         });
 
         return redirect()->to('/letter')

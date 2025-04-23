@@ -5,6 +5,7 @@ namespace App\Livewire\Letters\Data;
 use App\States\Process;
 use Livewire\Component;
 use App\Models\Letters\Letter;
+use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,17 +13,20 @@ class Detail extends Component
 {
     public ?Letter $letter;
 
+    #[Locked] 
     public int $letterId;
 
     public $letterUpload = null;
 
     public $letterDirect = null;
 
+    public $uploads;
+
     public function mount(int $id)
     {
         $this->letterId = $id;
-
-        $this->getLetter();
+        $this->letter = $this->getLetter();
+        $this->uploads = $this->letter->uploads;
     }
 
     public function getLetter()
@@ -37,7 +41,7 @@ class Detail extends Component
     {
         if (Auth::user()->withoutRole('user')) {
             DB::transaction(function () {
-                $this->letter->transitionToStatus(Process::class);
+                $this->letter->transitionToStatus(Process::class,'');
             });
 
             return redirect()->route('letter.table')->with([

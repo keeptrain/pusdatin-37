@@ -26,6 +26,8 @@ abstract class LetterStatus extends State
             ->allowTransition(Process::class, Rejected::class)
             ->allowTransition(Replied::class, Replied::class)
             ->allowTransition(Replied::class, Rejected::class)
+            ->allowTransition(Replied::class, Approved::class)
+            ->allowTransition(Replied::class, Rejected::class)
 
             // Only for testing
             ->allowTransition(Replied::class, Process::class)

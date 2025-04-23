@@ -8,11 +8,21 @@
 
         <flux:notification.status-stepped :status="$letter->status->label()" />
 
-        @foreach ($activity as $item )
+        @if ($letter->active_revision)
+            <flux:button wire:click="detailPage({{ $letterId }})" class="mt-6" wire:navigate> Revisi</flux:button>
+        @endif
+
+        @foreach ($activity as $item)
             <flux:text class="mt-6">{{ $item->created_at }}</flux:text>
             <flux:text>{{ $item->action }}</flux:text>
+            <flux:text>{{ $item->created_by }}</flux:text>
+            <flux:text>
+                @if (!empty($item->notes))
+                    Notes: {{ $item->notes }}
+                @endif
+            </flux:text>
         @endforeach
-        
+
         {{-- <flux:table.base :perPage="$perPage" :paginate="$data">
             <x-slot name="header">
                 <flux:table.column>Action</flux:table.column>

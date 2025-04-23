@@ -25,14 +25,17 @@
                 clearable />
         </div>
 
-        <flux:input wire:model="file" type="file" label="Upload" badge="Required" class="max-w-sm" />
+        <flux:input wire:model="files.0" type="file" label="Upload 1" badge="Required" class="max-w-sm" />
 
+        <flux:input wire:model="files.1" type="file" label="Upload 2" badge="Required" class="max-w-sm" />
+
+        <flux:input wire:model="files.2" type="file" label="Upload 3" badge="Required" class="max-w-sm" />
 
         <flux:description>Maximum size 1MB.</flux:description>
 
         <div class="flex flex-row justify-between">
             <flux:button type="button" :href="route('letter')" wire:navigate>{{ __('Cancel') }}</flux:button>
-            <flux:button type="submit" variant="primary" :disabled="!$fileReady">
+            <flux:button type="submit" variant="primary">
                 {{ __('Create') }}
             </flux:button>
         </div>

@@ -1,3 +1,6 @@
+@php
+    $files = $letter->uploads;
+@endphp
 <div class="overflow-x-auto">
 
     @if (session('status'))
@@ -9,18 +12,39 @@
     @endif
 
     <flux:breadcrumbs>
-        {{-- <flux:breadcrumbs.item :href="route('dashboard')" wire:navigate icon="home" /> --}}
         <flux:breadcrumbs.item :href="route('letter.table')" wire:navigate>Letter</flux:breadcrumbs.item>
         <flux:breadcrumbs.item>{{ $letter->title }}</flux:breadcrumbs.item>
     </flux:breadcrumbs>
 
     <x-letters.detail-layout :letterId="$letterId">
+        @if (!empty($files))
 
-        @if ($letter->letterable->file_name != null)
-            {{ $letter->letterable->file_name }}
-            <iframe src="{{ asset($letter->letterable->file_path) }}" width="100%" height="600" class="mt-6" lazy>
-                This browser does not support PDFs. Please download the PDF to view it: Download PDF
-            </iframe>
+
+            <div x-data="{ activeTab: '{{ $files->first()->part_name }}' }" class="mt-6">
+                <!-- Tabs -->
+                <div class="flex space-x-2 border-b border-gray-200">
+                    @foreach ($files as $file)
+                        <button @click="activeTab = '{{ $file->part_name }}'"
+                            :class="{ 'border-b-2 border-blue-500 text-blue-600': activeTab === '{{ $file->part_name }}' }"
+                            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600">
+                            {{ ucfirst($file->part_name) }}
+                        </button>
+                    @endforeach
+                </div>
+
+                <!-- Tab Content -->
+                <div class="mt-4">
+                    @foreach ($files as $file)
+                        <div x-show="activeTab === '{{ $file->part_name }}'" x-cloak>
+                            <iframe src="{{ asset($file->file_path) }}" width="100%" height="600"
+                                class="rounded shadow border">
+                                This browser does not support PDFs. Please download the PDF to view it:
+                                <a href="{{ asset($file->file_path) }}">Download PDF</a>
+                            </iframe>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         @endif
 
         {{ $letter->letterable->body }}

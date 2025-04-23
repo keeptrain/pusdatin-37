@@ -8,8 +8,8 @@ use App\States\LetterStatus;
 use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Cache;
-use App\Models\Letters\RequestStatusTrack;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ModalConfirmation extends Component
@@ -22,21 +22,58 @@ class ModalConfirmation extends Component
 
     public LetterStatus $letterStatus;
 
-    public RequestStatusTrack $requestStatusTrack;
-
     public $status = '';
+
+    public $notes = '';
+
+    public bool $active_revision;
+
+    public $tracks;
+
+    public $revisionParts = [];
+    public $revisionNotes = [];
+
+    public $revisionNotesPerPart = [];
+
+    public $showPart = false;
+    public $showNotes = false;
 
     public function rules()
     {
-        return [
-            'status' => ['required', 'string', Rule::in($this->getStatusMap()->keys())],
+        $rules = [
+            'status' => [
+                'required',
+                'string',
+                Rule::in($this->getStatusMap()->keys()),
+            ],
         ];
+
+        if ($this->status === 'replied') {
+            if ($this->active_revision) {
+                $rules['status'][] = function ($attribute, $value, $fail) {
+                    $fail('Masih ada revisi aktif yang belum diselesaikan. Tidak dapat membuat revisi baru.');
+                };
+            }
+
+            $rules['revisionParts'] = [
+                'required',
+                'array',
+                'min:1'
+            ];
+            foreach ($this->revisionParts as $index => $partName) {
+                $rules["revisionNotes.$partName"] = ['required', 'string'];
+            }
+        }
+
+        return $rules;
     }
 
     public function messages()
     {
         return [
             'status.required' => 'Status surat tidak boleh kosong',
+            'revisionParts.required' => 'Butuh bagian yang harus di revisi'
+        
         ];
     }
 
@@ -52,7 +89,8 @@ class ModalConfirmation extends Component
     {
         $this->showModal = true;
         $this->letterId = $id;
-        $this->letter = Letter::findOrFail($this->letterId);
+        $this->letter = Letter::with('uploads')->findOrFail($this->letterId);
+        $this->active_revision = $this->letter->active_revision;
     }
 
     public function closeModal()
@@ -60,6 +98,17 @@ class ModalConfirmation extends Component
         $this->showModal = false;
     }
 
+    public function openNotesClosePart()
+    {
+        $this->showNotes = true;
+        $this->showPart = false;
+    }
+
+    public function openPartCloseNotes()
+    {
+        $this->showNotes = false;
+        $this->showPart = true;
+    }
     private function getCachedLetter()
     {
         return Cache::remember('letter_' . $this->letterId, 300, function () {
@@ -93,8 +142,27 @@ class ModalConfirmation extends Component
     {
         try {
             $this->validate();
+
             DB::transaction(function () {
-                $this->letter->transitionToStatus($this->getStatusFromInput());
+                if (in_array($this->status, ['replied', 'rejected'])) {
+                    foreach ($this->revisionParts as $partName) {
+                        $note = $this->revisionNotes[$partName] ?? null;
+
+                        LetterUpload::where('letter_id', $this->letterId)
+                            ->where('part_name', $partName)
+                            ->latest('version')
+                            ->first()?->update([
+                                'needs_revision' => true,
+                                'revision_note' => $note,
+                                'version' => DB::raw('version + 1'),
+                            ]);
+                    }
+                }
+
+                $this->letter->transitionToStatus($this->getStatusFromInput(), $this->notes);
+                // $this->letter->uploads;
+                $this->reset(['status', 'notes']);
+                $this->closeModal();
             });
         } catch (ModelNotFoundException $e) {
             $this->dispatch('alert', [
