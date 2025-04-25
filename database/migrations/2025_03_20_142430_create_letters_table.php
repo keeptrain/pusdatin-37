@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        /**
+         * Create the letters table
+         */
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->morphs('letterable');
+            // $table->morphs('letterable');
             $table->string('title', 255);
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
@@ -48,24 +51,40 @@ return new class extends Migration
         });
 
         /**
-         * Create the letter_uploads and letter_directs tables
+         * Create the letter_uploads table
          */
         Schema::create('letter_uploads', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('letter_id')->constrained('letters')->onDelete('cascade');
+            // $table->foreignId('letter_id')->constrained('letters')->onDelete('cascade');
             $table->string('part_name');
             // $table->string('file_name');
             $table->string('file_path');
-             // $table->string('file_type')->nullable();
+            // $table->string('file_type')->nullable();
             $table->integer('version')->default(1);
             $table->boolean('needs_revision')->default(false);
             $table->text('revision_note')->nullable();
             $table->timestamps();
         });
 
+        /**
+         * Create the letter_directs table
+         */
         Schema::create('letter_directs', function (Blueprint $table) {
             $table->id();
             $table->text('body');
+        });
+
+        /**
+         * Create the letters_mappings table
+         */
+        Schema::create('letters_mappings', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('letter_id');
+            $table->morphs('letterable');
+            $table->timestamps();
+
+            // Add Foreign Key to Letters Table
+            $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
         });
 
         // // Create letter_revisions table to store revision history
