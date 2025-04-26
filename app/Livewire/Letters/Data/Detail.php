@@ -86,6 +86,12 @@ class Detail extends Component
         }
     }
 
+    public function repliedLetter()
+    {
+        $this->activeRevision = $this->letter->active_revision;
+        $this->showModal = true;
+    }
+
     public function backStatus()
     {
         $this->letter->status->transitionTo(Process::class);
