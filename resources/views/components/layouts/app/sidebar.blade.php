@@ -29,13 +29,8 @@
              
             </flux:modal.trigger>
 
-            <flux:modal name="edit-profile" variant="flyout" position="right">
-                <div class="space-y-6">
-                    <div>
-                        <flux:heading size="lg">Notification</flux:heading>
-                        <flux:text class="mt-2">Test notifications</flux:text>
-                    </div>
-                </div>
+            <flux:modal name="edit-profile" variant="flyout" position="right" :closable="false">
+                <x-layouts.notifications/>      
             </flux:modal>
 
             <flux:navlist variant="outline">
