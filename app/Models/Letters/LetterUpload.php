@@ -2,9 +2,8 @@
 
 namespace App\Models\Letters;
 
+use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
-use Database\Factories\LetterUploadFactory;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class LetterUpload extends Model
@@ -12,8 +11,6 @@ class LetterUpload extends Model
     use HasFactory;
 
     protected $table = 'letter_uploads';
-
-    public $timestamps = false;
 
     public $fillable = [
         'part_name',
@@ -25,9 +22,9 @@ class LetterUpload extends Model
 
     const PART_ATTACHMENT = ['part1', 'part2', 'part3'];
 
-    public function letter(): MorphOne
+    public function mapping()
     {
-        return $this->morphOne(Letter::class, 'letterable');
+        return $this->morphOne(LettersMapping::class, 'letterable');
     }
 
     public static function getLetterUpload()
@@ -40,5 +37,4 @@ class LetterUpload extends Model
     {
         return asset('storage/' . $value);
     }
-
 }

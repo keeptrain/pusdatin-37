@@ -1,17 +1,18 @@
 <?php
 
+use Livewire\Livewire;
+use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
+use App\Livewire\Letters\Data\Edit;
+use App\Livewire\Settings\Password;
+use App\Livewire\Letters\DirectForm;
+use App\Livewire\Letters\UploadForm;
+use App\Livewire\Letters\Data\Detail;
+use App\Livewire\Settings\Appearance;
+use Illuminate\Support\Facades\Route;
 use App\Livewire\Letters\CreateLetter;
 use App\Livewire\Letters\Data\Activity;
 use App\Livewire\Letters\Data\ApplicationTable;
-use App\Livewire\Letters\Data\Detail;
-use App\Livewire\Letters\Data\Edit;
-use App\Livewire\Letters\DirectForm;
-use App\Livewire\Letters\UploadForm;
-use App\Livewire\Settings\Appearance;
-use App\Livewire\Settings\Password;
-use App\Livewire\Settings\Profile;
-use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');

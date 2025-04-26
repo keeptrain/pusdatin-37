@@ -1,58 +1,51 @@
 <div>
-    <flux:breadcrumbs>
-        <flux:breadcrumbs.item :href="route('letter')" wire:navigate>Letter</flux:breadcrumbs.item>
-        <flux:breadcrumbs.item>{{ $letter->title }}</flux:breadcrumbs.item>
-    </flux:breadcrumbs>
+    <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
     <x-letters.detail-layout :letterId="$letterId">
+        <div class="p-12">
+            <flux:notification.status-stepped :status="$letter->status->label()" />
 
-        <flux:notification.status-stepped :status="$letter->status->label()" />
+            @if ($letter->active_revision)
+                <flux:button wire:click="detailPage({{ $letterId }})" class="mt-6" wire:navigate> Revisi
+                </flux:button>
+            @endif
 
-        @if ($letter->active_revision)
-            <flux:button wire:click="detailPage({{ $letterId }})" class="mt-6" wire:navigate> Revisi</flux:button>
-        @endif
+            @foreach ($activity as $date => $hours)
+                <!-- Activity letter -->
+                <div class="border border-gray-200 rounded-lg mt-4 md:mt-8">
+                    <div class="p-4 flex items-center">
+                        <flux:icon.calendar />
+                        <flux:heading class="ml-3">{{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
+                        </flux:heading>
+                    </div>
 
-        @foreach ($activity as $item)
-            <flux:text class="mt-6">{{ $item->created_at }}</flux:text>
-            <flux:text>{{ $item->action }}</flux:text>
-            <flux:text>{{ $item->created_by }}</flux:text>
-            <flux:text>
-                @if (!empty($item->notes))
-                    Notes: {{ $item->notes }}
-                @endif
-            </flux:text>
-        @endforeach
+                    @foreach ($hours as $hour => $actions)
+                        <div class="border-t border-gray-200">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center p-4">
 
-        {{-- <flux:table.base :perPage="$perPage" :paginate="$data">
-            <x-slot name="header">
-                <flux:table.column>Action</flux:table.column>
-                <flux:table.column>Date</flux:table.column>
-            </x-slot>
+                                <div class="mb-3 md:mb-0">
+                                    @foreach ($actions as $action)
+                                        <flux:subheading>
+                                            {{ $action->action }}
+                                        </flux:subheading>
+                                        @if (!empty($action->notes))
+                                            Notes: {{ $action->notes }}
+                                        @endif
+                                    @endforeach
+                                </div>
+                                <div class="flex flex-col md:flex-row md:items-center md:space-x-4">
+                                    <div class="mb-2 md:mb-0">
 
-            <x-slot name="body">
-                @foreach ($data as $item)
-                    <tr>
-                        <flux:table.row>
-                            {{ $item->action }}
-                        </flux:table.row>
-                        <flux:table.row>{{ $item->created_at->format('d M Y H:i') }}</flux:table.row>
+                                        {{ $hour }}
+                                    </div>
+                                </div>
 
-
-                    </tr>
-                @endforeach
-
-            </x-slot>
-
-            <x-slot name="emptyRow">
-                <td class="py-3">&nbsp;</td>
-                <td class="py-3">&nbsp;</td>
-                <td class="py-3">&nbsp;</td>
-                <td class="py-3">&nbsp;</td>
-                <td class="py-3">&nbsp;</td>
-                <td class="py-3">&nbsp;</td>
-            </x-slot>
-
-        </flux:table.base> --}}
-
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endforeach
+        </div>
     </x-letters.detail-layout>
+
 </div>

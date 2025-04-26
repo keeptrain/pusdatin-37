@@ -3,39 +3,36 @@
 namespace App\Livewire\Letters;
 
 use Livewire\Component;
-use Livewire\Attributes\On;
 use App\States\LetterStatus;
 use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterUpload;
-use Illuminate\Support\Facades\Cache;
+use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Livewire\Attributes\Locked;
 
 class ModalConfirmation extends Component
 {
     public $showModal = false;
 
+    #[Locked]
     public int $letterId;
 
     public Letter $letter;
-
-    public LetterStatus $letterStatus;
 
     public $status = '';
 
     public $notes = '';
 
-    public bool $active_revision;
-
-    public $tracks;
+    public bool $activeRevision;
 
     public $revisionParts = [];
+
     public $revisionNotes = [];
 
-    public $revisionNotesPerPart = [];
-
     public $showPart = false;
+
     public $showNotes = false;
 
     public function rules()
@@ -49,7 +46,7 @@ class ModalConfirmation extends Component
         ];
 
         if ($this->status === 'replied') {
-            if ($this->active_revision) {
+            if ($this->activeRevision) {
                 $rules['status'][] = function ($attribute, $value, $fail) {
                     $fail('Masih ada revisi aktif yang belum diselesaikan. Tidak dapat membuat revisi baru.');
                 };
@@ -73,24 +70,18 @@ class ModalConfirmation extends Component
         return [
             'status.required' => 'Status surat tidak boleh kosong',
             'revisionParts.required' => 'Butuh bagian yang harus di revisi'
-        
         ];
     }
 
-    public function render()
-    {
-        return view('livewire.letters.modal-confirmation');
-    }
-
-    public function mount() {}
-
-    #[On('modal-confirmation')]
-    public function openModal(int $id)
+    public function mount()
     {
         $this->showModal = true;
+    }
+
+    public function openModal(int $id, $activeRevision)
+    {
         $this->letterId = $id;
-        $this->letter = Letter::with('uploads')->findOrFail($this->letterId);
-        $this->active_revision = $this->letter->active_revision;
+        $this->activeRevision = $activeRevision;
     }
 
     public function closeModal()
@@ -108,12 +99,6 @@ class ModalConfirmation extends Component
     {
         $this->showNotes = false;
         $this->showPart = true;
-    }
-    private function getCachedLetter()
-    {
-        return Cache::remember('letter_' . $this->letterId, 300, function () {
-            return Letter::with('status')->findOrFail($this->letterId);
-        });
     }
 
     public function getStatusMap()
@@ -138,6 +123,34 @@ class ModalConfirmation extends Component
         return $stateClass;
     }
 
+    public function updateRevisionFromMapping(int $letterId, string $partName, string $note)
+    {
+        $mapping = LettersMapping::where('letter_id', $letterId)
+            ->where('letterable_type', LetterUpload::class)
+            ->whereHasMorph('letterable', [LetterUpload::class], function ($query) use ($partName) {
+                $query->where('part_name', $partName);
+            })
+            ->first();
+
+        if (!$mapping) {
+            throw new \Exception("Mapping tidak ditemukan untuk letter ID $letterId dan part $partName.");
+        }
+
+        $letterUpload = LetterUpload::where('id', $mapping->letterable_id)
+            ->latest('version')
+            ->first();
+
+        if (!$letterUpload) {
+            throw new \Exception("LetterUpload tidak ditemukan.");
+        }
+
+        $letterUpload->update([
+            'needs_revision' => true,
+            'revision_note' => $note,
+            'version' => DB::raw('version + 1'),
+        ]);
+    }
+
     public function save()
     {
         try {
@@ -148,21 +161,22 @@ class ModalConfirmation extends Component
                     foreach ($this->revisionParts as $partName) {
                         $note = $this->revisionNotes[$partName] ?? null;
 
-                        LetterUpload::where('letter_id', $this->letterId)
-                            ->where('part_name', $partName)
-                            ->latest('version')
-                            ->first()?->update([
-                                'needs_revision' => true,
-                                'revision_note' => $note,
-                                'version' => DB::raw('version + 1'),
-                            ]);
+                        $this->updateRevisionFromMapping($this->letterId, $partName, $note);
                     }
                 }
 
-                $this->letter->transitionToStatus($this->getStatusFromInput(), $this->notes);
-                // $this->letter->uploads;
+                $letter = Letter::findOrFail($this->letterId);
+
+                $letter->transitionToStatus($this->getStatusFromInput(), $this->notes);
+
                 $this->reset(['status', 'notes']);
                 $this->closeModal();
+
+                return redirect()->to("/letter/$this->letterId")
+                    ->with('status', [
+                        'variant' => 'success',
+                        'message' => 'Create direct Letter successfully!'
+                    ]);
             });
         } catch (ModelNotFoundException $e) {
             $this->dispatch('alert', [

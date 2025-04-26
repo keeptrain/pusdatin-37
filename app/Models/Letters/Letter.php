@@ -2,6 +2,7 @@
 
 namespace App\Models\Letters;
 
+use App\Models\letters\LettersMapping;
 use Carbon\Carbon;
 use App\Models\User;
 use App\States\LetterStatus;
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Auth;
 
 class Letter extends Model
@@ -28,8 +28,6 @@ class Letter extends Model
         'title',
         'responsible_person',
         'reference_number',
-        'letterable_type',
-        'letterable_id',
         'status',
         'current_revision',
         'active_revision'
@@ -42,14 +40,9 @@ class Letter extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function letterable(): MorphTo
+    public function mapping()
     {
-        return $this->morphTo();
-    }
-
-    public function uploads()
-    {
-        return $this->hasMany(LetterUpload::class);
+        return $this->hasMany(LettersMapping::class);
     }
 
     public function requestStatusTrack()
@@ -86,6 +79,8 @@ class Letter extends Model
 
         if ($isReplied) {
             $this->update(['active_revision' => true]);
+        } else {
+            $this->update(['active_revision' => false]);
         }
 
         $this->requestStatusTrack()->create([
@@ -103,7 +98,7 @@ class Letter extends Model
 
     private function shouldIncludeNotes($state): bool
     {
-        return $this->isRepliedState($state);
+        return $state instanceof \App\States\Approved;
     }
 
     public function getCategoryTypeNameAttribute()

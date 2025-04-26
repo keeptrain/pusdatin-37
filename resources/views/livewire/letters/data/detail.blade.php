@@ -1,8 +1,4 @@
-@php
-    $files = $letter->uploads;
-@endphp
 <div class="overflow-x-auto">
-
     @if (session('status'))
         @php
             $variant = session('status')['variant'];
@@ -11,94 +7,132 @@
         <flux:notification.toast :variant="$variant" :message="$message" :duration="3000" />
     @endif
 
-    <flux:breadcrumbs>
-        <flux:breadcrumbs.item :href="route('letter.table')" wire:navigate>Letter</flux:breadcrumbs.item>
-        <flux:breadcrumbs.item>{{ $letter->title }}</flux:breadcrumbs.item>
-    </flux:breadcrumbs>
+    <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
-    <x-letters.detail-layout :letterId="$letterId">
-        @if (!empty($files))
+    <div x-data="{ partTab: '{{ $uploads->first()->part_name ?? '' }}' }">
+        <x-letters.detail-layout :letterId="$letterId">
 
-
-            <div x-data="{ activeTab: '{{ $files->first()->part_name }}' }" class="mt-6">
-                <!-- Tabs -->
-                <div class="flex space-x-2 border-b border-gray-200">
-                    @foreach ($files as $file)
-                        <button @click="activeTab = '{{ $file->part_name }}'"
-                            :class="{ 'border-b-2 border-blue-500 text-blue-600': activeTab === '{{ $file->part_name }}' }"
-                            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600">
-                            {{ ucfirst($file->part_name) }}
-                        </button>
-                    @endforeach
-                </div>
-
+            @if (!empty($uploads))
                 <!-- Tab Content -->
-                <div class="mt-4">
-                    @foreach ($files as $file)
-                        <div x-show="activeTab === '{{ $file->part_name }}'" x-cloak>
-                            <iframe src="{{ asset($file->file_path) }}" width="100%" height="600"
-                                class="rounded shadow border">
+                <div class="mt-3 mr-3">
+                    @foreach ($uploads as $file)
+                        <div x-show="partTab === '{{ $file->part_name }}'" x-cloak>
+                            <iframe loading="lazy" src="{{ asset($file->file_path) }}" width="100%" height="800"
+                                class="rounded shadow border-none">
                                 This browser does not support PDFs. Please download the PDF to view it:
                                 <a href="{{ asset($file->file_path) }}">Download PDF</a>
                             </iframe>
                         </div>
                     @endforeach
+
+                    @if ($showModal)
+                        <livewire:letters.modal-confirmation :letterId="$letterId" :activeRevision="$activeRevision" />
+                    @endif
                 </div>
-            </div>
-        @endif
+            @endif
 
-        {{ $letter->letterable->body }}
+            @foreach ($directs as $item)
+                {{ $item->body }}
+            @endforeach
 
-        <div class="flex justify-end mt-6">
-            @switch($letter->status->label())
-                @case(Pending::class)
-                    <flux:button variant="primary" wire:click="processLetter({{ $letter->id }})">
-                        {{ __('Process') }}
-                    </flux:button>
-                @break
+            <x-slot name="rightSidebar">
+                <h3 class="text-lg font-bold mb-4">General</h3>
 
-                @case(Process::class)
-                    <flux:modal.trigger name="confirm-letter-verification" wire:click="repliedLetter({{ $letterId }})">
-                        <flux:button variant="primary" type="click">
-                            {{ __('Verifikasi') }}
-                        </flux:button>
-                    </flux:modal.trigger>
-                @break
+                <div class="mb-6">
+                    <h4 class="text-gray-500 mb-1">Title</h4>
+                    <p class="text-gray-800">
+                        {{ $letter->title }}
+                    </p>
+                </div>
 
-                @case(Replied::class)
-                    <flux:button variant="primary" wire:click="backStatus">
-                        {{ __('Konfirmasi') }}
-                    </flux:button>
-                    <flux:modal.trigger name="confirm-letter-verification" wire:click="repliedLetter({{ $letterId }})">
-                        <flux:button variant="primary">
-                            {{ __('Konfirmasi') }}
-                        </flux:button>
-                    </flux:modal.trigger>
-                @break
+                <div class="mb-6">
+                    <h4 class="text-gray-500 mb-1">Responsible person</h4>
+                    <p class="text-gray-800">
+                        {{ $letter->responsible_person }}
+                    </p>
+                </div>
 
-                @case(Approved::class)
-                    <flux:modal.trigger name="confirm-letter-process" wire:click="backStatus">
-                        <flux:button variant="primary">
-                            {{ __('Back') }}
-                        </flux:button>
-                    </flux:modal.trigger>
-                @break
+                <div class="mb-6">
+                    <h4 class="text-gray-500 mb-1">Reference number</h4>
+                    <p class="text-gray-800">
+                        {{ $letter->reference_number }}
+                    </p>
+                </div>
 
-                @case(Rejected::class)
-                    <flux:button variant="primary">
-                        {{ __('Back') }}
-                    </flux:button>
-                @break
+                <div class="mb-6">
+                    <h4 class="text-gray-500 mb-1">Created at</h4>
+                    <p class="text-gray-800">{{ $letter->created_at }}</p>
+                </div>
 
-                @default
-            @endswitch
-        </div>
+                <div class="mb-6">
+                    <h4 class="text-gray-500 mb-1">Updated at</h4>
+                    <p class="text-gray-800">{{ $letter->updated_at }}</p>
+                </div>
 
-        <livewire:letters.modal-confirmation />
+                <div class="mb-6">
+                    <h4 class="text-gray-500 mb-1">Status</h4>
+                    <flux:notification.status-badge status="{{ $letter->status->label() }}">
+                        {{ $letter->status->label() }}</flux:notification.status-badge>
+                </div>
 
-        <x-slot name="rightPanel">
+                <div class="border-1 p-3">
+                    <h4 class="text-gray-500 mb-3">Documents</h4>
+                    <div class="space-y-3">
+                        @foreach ($uploads as $file)
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center mr-2">
+                                  <flux:icon.document-magnifying-glass class="size-4"/>
+                                </div>
+                                <button @click="partTab = '{{ $file->part_name }}'" class="text-gray-800 cursor-pointer"
+                                    :class="{'border-dotted border-b-2 border-blue-500 text-blue-600': partTab === '{{ $file->part_name }}' }">{{ ucfirst($file->part_name) }}</button>
+                            </div>
+                        @endforeach
+                    </div>
 
-        </x-slot>
-    </x-letters.detail-layout>
+                </div>
+                <div class=" justify-end mt-6">
+                    @switch($letter->status->label())
+                        @case(Pending::class)
+                            <flux:button variant="primary" wire:click="processLetter({{ $letter->id }})" class="w-full">
+                                {{ __('Process') }}
+                            </flux:button>
+                        @break
 
+                        @case(Process::class)
+                            <flux:modal.trigger name="confirm-letter-verification"
+                                wire:click="repliedLetter({{ $letterId }})">
+                                <flux:button variant="primary" type="click" class="w-full">
+                                    {{ __('Verifikasi') }}
+                                </flux:button>
+                            </flux:modal.trigger>
+                        @break
+
+                        @case(Replied::class)
+                            <flux:modal.trigger name="confirm-letter-verification"
+                                wire:click="repliedLetter({{ $letterId }})">
+                                <flux:button variant="primary" class="w-full">
+                                    {{ __('Konfirmasi') }}
+                                </flux:button>
+                            </flux:modal.trigger>
+                        @break
+
+                        @case(Approved::class)
+                            <flux:button variant="primary" wire:click="backStatus">
+                                {{ __('Back') }}
+                            </flux:button>
+                        @break
+
+                        @case(Rejected::class)
+                            <flux:button variant="primary" wire:click="backStatus">
+                                {{ __('Back') }}
+                            </flux:button>
+                        @break
+
+                        @default
+                    @endswitch
+                </div>
+            </x-slot>
+        </x-letters.detail-layout>
+
+    </div>
 </div>

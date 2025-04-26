@@ -1,54 +1,118 @@
 <div>
-    <flux:breadcrumbs>
-        <flux:breadcrumbs.item :href="route('letter.table')" wire:navigate>Letter</flux:breadcrumbs.item>
-        <flux:breadcrumbs.item>{{ $letter->title }}</flux:breadcrumbs.item>
-    </flux:breadcrumbs>
+    <h2 class="text-xl font-semibold text-gray-800 mb-6">Update</h2>
 
-    <x-letters.detail-layout :letterId="$letterId">
-        <form wire:submit="save" class="space-y-6 mb-6">
-            <div class="grid grid-cols-2 gap-x-4">
-                <div>
-                    <flux:input wire:model="responsible_person" label="Penanggung jawab" placeholder="Nama lengkap"
-                        value="{{ $letter->responsible_person }}" clearable />
-                </div>
+    <form wire:submit="save" class="space-y-6">
 
-                <div>
-                    <flux:select wire:model="section" label="Section" placeholder="Choose section...">
-                        <flux:select.option>Seksi A</flux:select.option>
-                        <flux:select.option>Seksi B</flux:select.option>
-                        <flux:select.option>Seksi C</flux:select.option>
-                        <flux:select.option>Seksi D</flux:select.option>
-                    </flux:select>
-                </div>
-            </div>
+        <!-- Section 1: Basic Information -->
+        <div class="border border-gray-200 rounded-lg p-4">
+            <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
+                <span
+                    class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>
+                Informasi Dasar
+            </h3>
 
-            <flux:input wire:model="title" label="Title"> {{ $letter->title }} </flux:input>
+            <div class="space-y-6">
+                <flux:input wire:model="title" label="Title" placeholder="Nama lengkap" clearable />
 
-            <flux:input wire:model="reference_number" class="max-w-sm" label="Nomor Surat" placeholder="No/xx/2025"
-                value="{{ $letter->reference_number }}" clearable />
+                <flux:input wire:model="responsible_person" label="Responsible person" placeholder="Nama lengkap"
+                    clearable />
 
-            @if (empty($revisedUploads))
-                <flux:textarea wire:model="body" label="Latar belakang masalah" rows="3" />
-            @else
-                @foreach ($revisedUploads as $upload)
-                    <div class="mb-4">
-                        <label class="block font-semibold">{{ ucfirst($upload->part_name) }} <a
-                                href="{{ asset($upload->file_path) }}" class="text-blue-600 font-undel"
-                                target="_blank">file sebelumnya</a></label>
+                <div class="grid grid-cols-2 gap-x-6">
 
-                        <flux:input wire:model="revisedFiles.{{ $upload->part_name }}" type="file"
-                            label="Mengubah {{ $upload->part_name }}" badge="Required" class="max-w-sm" />
-                        <p class="text-sm text-red-500">{{ $upload->revision_note }}</p>
+                    <div>
+                        <flux:input wire:model="reference_number" label="Reference number" placeholder="Nama lengkap"
+                            clearable />
                     </div>
-                @endforeach
-            @endif
 
-            <div class="flex flex-row justify-start">
+                    <div>
+                        <flux:select wire:model="section" label="Section" placeholder="Choose section...">
+                            <flux:select.option>Seksi A</flux:select.option>
+                            <flux:select.option>Seksi B</flux:select.option>
+                            <flux:select.option>Seksi C</flux:select.option>
+                            <flux:select.option>Seksi D</flux:select.option>
+                        </flux:select>
+                    </div>
+                </div>
 
-                <flux:button type="submit" variant="primary" :disabled="!$letter->active_revision">{{ __('Update') }}
-                </flux:button>
             </div>
-        </form>
+        </div>
 
-    </x-letters.detail-layout>
+        <!-- Section 2: Document Upload -->
+        <div class="border border-gray-200 rounded-lg p-4">
+            <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
+                <span
+                    class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
+                Unggah Dokumen
+            </h3>
+
+            <div class="space-y-6">
+                @foreach ($letter->mapping as $item)
+                    @php
+                        $upload = $item->letterable;
+                    @endphp
+
+                    @if ($upload instanceof \App\Models\Letters\LetterUpload && $upload->needs_revision)
+                        <!-- File Upload -->
+                        <div
+                            class="border-2 rounded-lg p-6 {{ $errors->has('revisedFiles.' . $upload->part_name) ? 'border-dashed border-red-500' : 'border-dashed border-gray-300' }}">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-1">{{ $upload->part_name }}</h4>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Note:
+                                            {{ $upload->revision_note }}</label>
+                                        <flux:input wire:model="revisedFiles.{{ $upload->part_name }}" type="file"
+                                            class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+
+                                        @error("revisedFiles.{$upload->part_name}")
+                                            <p class="text-xs text-red-500 mt-3">{{ $message }}</p>
+                                        @enderror
+
+                                        <p class="text-xs text-gray-500 mt-6">Format: PDF (Max. 1MB)</p>
+                                    </div>
+                                </div>
+
+                                <div class="ml-4">
+                                    <div class="flex items-center text-sm text-gray-500 mb-1">
+                                        <span class="font-medium">Version:</span>
+                                        <span class="ml-1">{{ $upload->version }}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        Diperbarui: {{ $upload->updated_at }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Section 3: Additional Info -->
+        <div class="border border-gray-200 rounded-lg p-4">
+            <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
+                <span
+                    class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">3</span>
+                Informasi Tambahan
+            </h3>
+
+            <div class="space-y-4">
+                <div>
+                    <flux:textarea wire:model="revisionNote" placeholder="Input information of changes...">
+                    </flux:textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+            <flux:button href="{{ route('letter.table') }}">
+                Batal
+            </flux:button>
+            <flux:button type="submit" variant="primary">
+                Update
+            </flux:button>
+        </div>
+    </form>
 </div>

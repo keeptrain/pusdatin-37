@@ -11,37 +11,63 @@ use Illuminate\Support\Facades\Auth;
 
 class Detail extends Component
 {
-    public ?Letter $letter;
-
-    #[Locked] 
+    #[Locked]
     public int $letterId;
 
-    public $letterUpload = null;
-
-    public $letterDirect = null;
+    public ?Letter $letter;
 
     public $uploads;
+
+    public $directs;
+
+    public $showModal = false;
+
+    public $activeRevision;
 
     public function mount(int $id)
     {
         $this->letterId = $id;
-        $this->letter = $this->getLetter();
-        $this->uploads = $this->letter->uploads;
+        $this->letter = Letter::with([
+            'mapping.letterable' => function ($morphTo) {
+                $morphTo->morphWith([
+                    \App\Models\Letters\LetterUpload::class => [],
+                    \App\Models\Letters\LetterDirect::class => [],
+                ]);
+            }
+        ])->findOrFail($id);
+
+        $this->processMappings();
     }
 
-    public function getLetter()
+    public function detailPage()
     {
-        return once(
-            fn() =>
-            $this->letter = Letter::with('letterable')->findOrFail($this->letterId)
-        );
+        return redirect()->route('letter.edit', [$this->letterId]);
+    }
+
+    protected function processMappings()
+    {
+        $this->uploads = collect();
+        $this->directs = collect();
+
+        $this->letter->mapping->each(function ($mapping) {
+            if ($mapping->letterable instanceof \App\Models\Letters\LetterUpload) {
+                $this->uploads->push($mapping->letterable);
+            } elseif ($mapping->letterable instanceof \App\Models\Letters\LetterDirect) {
+                $this->directs->push($mapping->letterable);
+            }
+        });
+
+        // Sorted part_name to Part1,part2,part3
+        $this->uploads = $this->uploads->sortBy(function ($upload) {
+            return (int) filter_var($upload->part_name, FILTER_SANITIZE_NUMBER_INT);
+        })->values();
     }
 
     public function processLetter(int $id)
     {
         if (Auth::user()->withoutRole('user')) {
             DB::transaction(function () {
-                $this->letter->transitionToStatus(Process::class,'');
+                $this->letter->transitionToStatus(Process::class, '');
             });
 
             return redirect()->route('letter.table')->with([
@@ -60,14 +86,8 @@ class Detail extends Component
         }
     }
 
-    public function repliedLetter($letterId)
-    {
-        $this->dispatch('modal-confirmation', $letterId);
-    }
-
     public function backStatus()
     {
         $this->letter->status->transitionTo(Process::class);
     }
-
 }

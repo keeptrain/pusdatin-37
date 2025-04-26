@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Auth;
+use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UploadForm extends Component
@@ -40,7 +41,6 @@ class UploadForm extends Component
     }
 
     public function messages()
-
     {
         return [
             'title.required' => 'Title is required',
@@ -51,10 +51,27 @@ class UploadForm extends Component
 
     public function mount() {}
 
-    public function render()
-
+    public function save()
     {
-        return view('livewire.letters.upload-form');
+        try {
+            $this->validate();
+
+            DB::transaction(function () {
+                $letter = $this->createLetter();
+                $uploads = $this->storeFiles();
+                $uploadIds = $this->insertLetterUploads($uploads);
+                $this->createLetterMappings($letter->id, $uploadIds);
+                $this->createStatusTrack($letter);
+            });
+
+            return redirect()->to('/letter')
+                ->with('status', [
+                    'variant' => 'success',
+                    'message' => 'Create direct Letter successfully!'
+                ]);
+        } catch (ModelNotFoundException $e) {
+            // Handle error
+        }
     }
 
     public function nameFile(): string
@@ -76,72 +93,52 @@ class UploadForm extends Component
         return now()->timestamp . '.' . $extension;
     }
 
-    public function save()
-    {
-        try {
-            $this->validate();
-
-            DB::transaction(function () {
-                $letter = $this->createLetter();
-                $uploadIds = $this->processFileUploads($letter);
-                $this->updateLetterWithFirstUpload($letter, $uploadIds->first());
-                $this->createStatusTrack($letter);
-            });
-
-            return redirect()->to('/letter');
-        } catch (ModelNotFoundException $e) {
-        }
-    }
-
     protected function createLetter(): Letter
     {
         return Letter::create([
             'user_id' => Auth::id(),
-            'letterable_type' => LetterUpload::class,
-            'letterable_id' => 0, // Temporary value
             'title' => $this->title,
             'responsible_person' => $this->responsible_person,
             'reference_number' => $this->reference_number,
-            'status' => Letter::getDefaultStateFor('status')
+            'status' => Letter::getDefaultStateFor('status'),
         ]);
     }
 
-    protected function processFileUploads(Letter $letter): Collection
+    protected function storeFiles(): array
     {
-        $uploads = $this->storeFiles($letter);
+        return collect($this->files)
+            ->sortKeys()
+            ->values()
+            ->map(function ($file, $index) {
+                return [
+                    'part_name' => 'part' . ($index + 1),
+                    'file_path' => $file->store('letters', 'public'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
+    }
+
+    protected function insertLetterUploads(array $uploads): Collection
+    {
         LetterUpload::insert($uploads);
 
-        return $this->getUploadIds($letter, count($uploads));
-    }
-
-    private function storeFiles(Letter $letter): array
-    {
-        $ordered = collect($this->files)
-            ->sortKeys()
-            ->values();
-
-        return $ordered->map(function ($file, $index) use ($letter) {
-            return [
-                'letter_id'  => $letter->id,
-                'part_name'  => 'part' . ($index + 1),
-                'file_path'  => $file->store('letters', 'public'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        })->toArray();
-    }
-
-    private function getUploadIds(Letter $letter, int $count): Collection
-    {
-        return LetterUpload::where('letter_id', $letter->id)
-            ->orderBy('id')
-            ->take($count)
+        return LetterUpload::latest('id')
+            ->take(count($uploads))
             ->pluck('id');
     }
 
-    protected function updateLetterWithFirstUpload(Letter $letter, int $firstUploadId): void
+    protected function createLetterMappings(int $letterId, Collection $uploadIds): void
     {
-        $letter->update(['letterable_id' => $firstUploadId]);
+        $mappings = $uploadIds->map(function ($uploadId) use ($letterId) {
+            return [
+                'letter_id' => $letterId,
+                'letterable_type' => LetterUpload::class,
+                'letterable_id' => $uploadId,
+            ];
+        })->toArray();
+
+        LettersMapping::insert($mappings);
     }
 
     protected function createStatusTrack(Letter $letter): void

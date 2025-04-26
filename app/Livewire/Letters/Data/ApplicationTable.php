@@ -2,11 +2,10 @@
 
 namespace App\Livewire\Letters\Data;
 
-
-use App\Models\Letters\Letter;
-use App\States\Pending;
-use Livewire\WithPagination;
 use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\Letters\Letter;
+
 
 class ApplicationTable extends Component
 {
@@ -25,6 +24,8 @@ class ApplicationTable extends Component
         'rejected' => 'Rejected',
     ];
 
+    public $sortBy = 'date_created';
+
     public $selectedLetters = [];
 
     public function mount() {}
@@ -32,7 +33,7 @@ class ApplicationTable extends Component
     public function render()
     {
         return view('livewire.letters.data.application-table', [
-            'letters' => $this->loadLetters(),
+            'letters' => $this->loadLetters()->paginate($this->perPage),
         ]);
     }
 
@@ -48,10 +49,26 @@ class ApplicationTable extends Component
 
     public function loadLetters()
     {
-        return Letter::queryForTable()
-            ->withoutTrashed()
-            ->filterByStatus($this->filterStatus !== 'all' ? $this->filterStatus : null)
-            ->paginate($this->perPage);
+        $query = Letter::with([
+            'user:id,name',
+        ])->when($this->filterStatus !== 'all', function ($query) {
+            $query->filterByStatus($this->filterStatus);
+        });
+
+        [$column, $direction] = $this->getSortCriteria();
+
+        $query->orderBy($column, $direction);
+
+        return $query;
+    }
+
+    private function getSortCriteria(): array
+    {
+        return match ($this->sortBy) {
+            'date_created' => ['created_at', 'desc'],
+            'latest_activity' => ['updated_at', 'desc'],
+            default => ['updated_at', 'desc'],
+        };
     }
 
     public function toggleSelectAll()

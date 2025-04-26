@@ -38,27 +38,30 @@ class DirectForm extends Component
         ];
     }
 
-    public function createDirectLetter(): int
+    public function createLetterDirect()
     {
         $data = LetterDirect::create([
             'body' => $this->body
         ]);
 
-        return $data->id;
+        return $data;
     }
 
-    public function createLetter(int $letterableId)
+    public function createLetter()
     {
         $defaultStatusClass = Letter::getDefaultStateFor('status');
 
         $letter = Letter::create([
             'user_id' => User::currentUser()->id,
-            'letterable_type' => LetterDirect::class,
-            'letterable_id' => $letterableId,
             'title' => $this->title,
             'responsible_person' => $this->responsible_person,
             'reference_number' => $this->reference_number,
             'status' => $defaultStatusClass,
+        ]);
+
+        $letter->mapping()->create([
+            'letterable_type' => LetterDirect::class,
+            'letterable_id' => $this->createLetterDirect()->id
         ]);
 
         $letter->requestStatusTrack()->create([
@@ -72,9 +75,7 @@ class DirectForm extends Component
         $this->validate();
 
         DB::transaction(function () {
-            $letterableId = $this->createDirectLetter();
-            $this->authorize('create', $letterableId); 
-            $this->createLetter($letterableId);
+            $this->createLetter();
         });
 
         return redirect()->to('/letter')

@@ -2,34 +2,47 @@
     <flux:heading size="xl" level="1" class="mb-6">{{ __('Letter') }}</flux:heading>
     <flux:menu.tabs :statuses="$statuses" :filterStatus="$filterStatus" />
 
-    <div class="flex justify-start mb-4 h-10">
-        @if (count($selectedLetters) > 0)
-            <flux:dropdown class="mr-2">
-                <flux:button class="bg-zinc-100 dark:bg-zinc-900" icon="ellipsis-vertical">
-                    <span class="hidden lg:inline">Actions</span>
+    <div class="flex flex-1 justify-between items-center mb-4 h-10">
+        <!-- Left Side: Actions and Sort -->
+        <div class="flex items-center space-x-2">
+            @if (count($selectedLetters) > 0)
+                <!-- Action Dropdown -->
+                <flux:dropdown class="mr-2">
+                    <flux:button class="bg-zinc-100 dark:bg-zinc-900" icon="ellipsis-vertical">
+                        <span class="hidden lg:inline">Actions</span>
+                    </flux:button>
+    
+                    <flux:menu>
+                        <flux:modal.trigger name="confirm-letter-deletion">
+                            <flux:menu.item variant="danger" icon="trash" x-data=""
+                                x-on:click.prevent="$dispatch('open-modal', 'confirm-letter-deletion')">Delete
+                                ({{ count($selectedLetters) }})</flux:menu.item>
+                        </flux:modal.trigger>
+                    </flux:menu>
+                </flux:dropdown>
+            @endif
+    
+            <!-- Sort Dropdown -->
+            <flux:dropdown>
+                <flux:button class="bg-zinc-100 dark:bg-zinc-900" icon:trailing="chevron-down">
+                    Sort by
                 </flux:button>
-
+    
                 <flux:menu>
-                    <flux:modal.trigger name="confirm-letter-deletion">
-                        <flux:menu.item variant="danger" icon="trash" x-data=""
-                            x-on:click.prevent="$dispatch('open-modal', 'confirm-letter-deletion')">Delete
-                            ({{ count($selectedLetters) }})</flux:menu.item>
-                    </flux:modal.trigger>
+                    <flux:menu.radio.group wire:model.live="sortBy">
+                        <flux:menu.radio value="latest_activity">Latest activity</flux:menu.radio>
+                        <flux:menu.radio value="date_created">Date created</flux:menu.radio>
+                    </flux:menu.radio.group>
                 </flux:menu>
-
             </flux:dropdown>
-        @endif
-        <flux:dropdown>
-            <flux:button class="bg-zinc-100 dark:bg-zinc-900" icon:trailing="chevron-down">Sort by</flux:button>
-
-            <flux:menu>
-                <flux:menu.radio.group wire:model="sortBy">
-                    <flux:menu.radio checked>Latest activity</flux:menu.radio>
-                    <flux:menu.radio>Date created</flux:menu.radio>
-                </flux:menu.radio.group>
-            </flux:menu>
-        </flux:dropdown>
+        </div>
+    
+        <!-- Right Side: Search -->
+        <div>
+            <flux:input icon="magnifying-glass" placeholder="Search..." />
+        </div>
     </div>
+
 
     <flux:table.base :perPage="$perPage" :paginate="$letters" emptyMessage="No data letter available.">
         <x-slot name="header">
@@ -37,7 +50,7 @@
                 <flux:checkbox wire:click="toggleSelectAll" />
             </flux:table.column>
             <flux:table.column>Name</flux:table.column>
-            <flux:table.column>Type</flux:table.column>
+            <flux:table.column>Title</flux:table.column>
             <flux:table.column>Status</flux:table.column>
             <flux:table.column>Created date</flux:table.column>
             <flux:table.column></flux:table.column>
@@ -64,7 +77,7 @@
                             {{ $item->user->name }}
                         </a>
                     </flux:table.row>
-                    <flux:table.row>{{ $item->category_type_name }}</flux:table.row>
+                    <flux:table.row>{{ $item->title }}</flux:table.row>
                     <flux:table.row>
                         <flux:notification.status-badge status="{{ $item->status->label() }}">
                             {{ $item->status->label() }}</flux:notification.status-badge>
@@ -86,7 +99,6 @@
             <td class="py-3">&nbsp;</td>
         </x-slot>
     </flux:table.base>
-
 
     <flux:modal name="confirm-letter-deletion" focusable class="max-w-lg">
         <form wire:submit="deleteSelected" class="space-y-6">
