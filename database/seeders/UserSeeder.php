@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -12,64 +13,31 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('users')->insert(
-        [
-            [
-                'name' => 'Super Admin',
-                'email' => 'superadmin@gmail.com',
+        $adminRole = Role::findByName('administrator');
+        $admin = User::create([
+            'name' => 'Administrator',
+                'email' => 'administrator@gmail.com',
                 'password' => bcrypt('login'),
-            ],
-            [
-                'name' => 'Mail Manager',
-                'email' => 'mailmanager.gmail.com',
-                'password' => bcrypt('login'),
-            ],
-        ]);
 
-        // Create 5 users with the same password
+        ]);
+        $admin->assignRole($adminRole);
+
+        $verifikatorRole = Role::findByName('verifikator');
+        $verifikator = User::create([
+                'name' => 'Verifikator',
+                'email' => 'verifikator@gmail.com',
+                'password' => bcrypt('login'),
+        ]);
+        $verifikator->assignRole($verifikatorRole);
+
+        $userRole = Role::findByName('user');        
         for ($i = 1; $i <= 5; $i++) {
-            DB::table('users')->insert([
+            $regularUsers = User::create([
                 'name' => 'User' . $i,
                 'email' => 'user' . $i . '@gmail.com',
                 'password' => bcrypt('login'),
             ]);
+            $regularUsers->assignRole($userRole);
         }
-
-        DB::table('roles')->insert([
-            ['name' => 'Super admin'],
-            ['name' => 'Mail manager'],
-            ['name' => 'User'],
-        ]);
-
-        DB::table('role_user')->insert([
-            [
-                'user_id' => 1,
-                'role_id' => 1,
-            ],
-            [
-                'user_id' => 2,
-                'role_id' => 2,
-            ],
-            [
-                'user_id' => 3,
-                'role_id' => 3,
-            ],
-            [
-                'user_id' => 4,
-                'role_id' => 3,
-            ],
-            [
-                'user_id' => 5,
-                'role_id' => 3,
-            ],
-            [
-                'user_id' => 6,
-                'role_id' => 3,
-            ],
-            [
-                'user_id' => 7,
-                'role_id' => 3,
-            ],
-        ]);
     }
 }

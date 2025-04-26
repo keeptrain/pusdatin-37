@@ -11,14 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
+        /**
+         * Create the letters table
+         */
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('category_type', 255);
-            $table->unsignedInteger('category_id');
+            // $table->morphs('letterable');
+            $table->string('title', 255);
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
-            $table->enum('status', ['New', 'Read', 'Replied', 'Closed']);
+            $table->string('status', 86)->default('pending');
+            $table->integer('current_revision')->default(0);
+            $table->boolean('active_revision')->default(false);
             $table->timestamps();
             $table->softDeletes();
 
@@ -28,16 +33,77 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users');
         });
 
-        Schema::create('letter_uploads', function (Blueprint $table) {
+        /**
+         * Create the request_status_tracks table
+         */
+        Schema::create('request_status_tracks', function (Blueprint $table) {
             $table->id();
-            $table->string('file_name');
-            $table->string('file_path');
+            $table->unsignedBigInteger('letter_id');
+            $table->string('action', 255);
+            $table->text('notes', 255)->nullable();
+            $table->string('created_by', 100);
+            $table->timestamps();
+
+            /**
+             * Add Foreign Key to Letters Table
+             */
+            $table->foreign('letter_id')->references('id')->on('letters');
         });
 
+        /**
+         * Create the letter_uploads table
+         */
+        Schema::create('letter_uploads', function (Blueprint $table) {
+            $table->id();
+            // $table->foreignId('letter_id')->constrained('letters')->onDelete('cascade');
+            $table->string('part_name');
+            // $table->string('file_name');
+            $table->string('file_path');
+            // $table->string('file_type')->nullable();
+            $table->integer('version')->default(1);
+            $table->boolean('needs_revision')->default(false);
+            $table->text('revision_note')->nullable();
+            $table->timestamps();
+        });
+
+        /**
+         * Create the letter_directs table
+         */
         Schema::create('letter_directs', function (Blueprint $table) {
             $table->id();
             $table->text('body');
         });
+
+        /**
+         * Create the letters_mappings table
+         */
+        Schema::create('letters_mappings', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('letter_id');
+            $table->morphs('letterable');
+            $table->timestamps();
+
+            // Add Foreign Key to Letters Table
+            $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
+        });
+
+        // // Create letter_revisions table to store revision history
+        // Schema::create('letter_revisions', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->unsignedBigInteger('letter_id');
+        //     $table->unsignedBigInteger('revised_by'); // User who made the revision
+        //     $table->integer('revision_number');
+        //     $table->string('title', 255)->nullable();
+        //     $table->string('responsible_person', 255)->nullable();
+        //     $table->string('reference_number', 255)->nullable();
+        //     $table->text('revision_notes')->nullable(); // Notes explaining the revision
+        //     $table->text('changes_json')->nullable(); // Store changes in JSON format
+        //     $table->timestamps();
+
+        //     // Add Foreign Keys
+        //     $table->foreign('letter_id')->references('id')->on('letters');
+        //     $table->foreign('revised_by')->references('id')->on('users');
+        // });
     }
 
     /**
@@ -46,6 +112,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('letters');
+        Schema::dropIfExists('request_status_tracks');
         Schema::dropIfExists('letter_uploads');
         Schema::dropIfExists('letter_directs');
     }

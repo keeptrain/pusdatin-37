@@ -1,6 +1,6 @@
 <x-letters.layout legend="Direct Form">
 
-    <form class="space-y-6">
+    <form wire:submit="save" class="space-y-6">
         <div class="grid grid-cols-2 gap-x-4">
             <div>
                 <flux:input wire:model="responsible_person" label="Penanggung jawab" placeholder="Nama" clearable />
@@ -16,10 +16,14 @@
             </div>
         </div>
 
-        <flux:input wire:model="reference_number" class="max-w-sm" label="Nomor Surat" placeholder="No/xx/2025"
-            clearable />
+        <div class="grid grid-cols-2 gap-x-4">
+            <flux:input wire:model="title" label="Judul" placeholder="Judul permohonan layanan" clearable />
 
-        <flux:textarea label="Latar belakang masalah" rows="3" />
+            <flux:input wire:model="reference_number" class="max-w-sm" label="Nomor Surat" placeholder="No/xx/2025"
+                clearable />
+        </div>
+
+        <flux:textarea wire:model="body" label="Latar belakang masalah" rows="3" />
 
         {{-- <flux:textarea label="2. Analisis manfaat" rows="auto" />
 
@@ -48,9 +52,9 @@
                         </flux:menu.radio.group>
                     </flux:menu>
                 </flux:dropdown>
-            <flux:button variant="primary">{{ __('Next') }}</flux:button>
+                <flux:button variant="primary" type="submit">{{ __('Next') }}</flux:button>
             </div>
         </div>
     </form>
-    
+
 </x-letters.layout>

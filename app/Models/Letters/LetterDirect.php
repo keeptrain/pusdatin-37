@@ -8,15 +8,12 @@ class LetterDirect extends Model
 {
     protected $table = 'letter_directs';
 
-    public $timestamps = false;
-
     public $fillable = [
         'body'
     ];
 
-    public function letter()
+    public function mappings()
     {
-        return $this->morphOne(Letter::class, 'category_type');
+        return $this->hasMany(LettersMapping::class, 'letter_id');
     }
-
 }
