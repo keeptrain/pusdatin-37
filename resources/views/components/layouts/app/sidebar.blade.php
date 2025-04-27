@@ -29,8 +29,8 @@
              
             </flux:modal.trigger>
 
-            <flux:modal name="edit-profile" variant="flyout" position="right" :closable="false">
-                <x-layouts.notifications/>      
+            <flux:modal name="edit-profile" variant="flyout" position="right" :closable="false" class="md:w-96">
+                <livewire:admin.notifications />    
             </flux:modal>
 
             <flux:navlist variant="outline">
