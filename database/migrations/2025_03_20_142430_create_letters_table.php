@@ -40,7 +40,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('letter_id');
             $table->string('action', 255);
-            $table->text('notes', 255)->nullable();
+            $table->text('notes')->nullable();
             $table->string('created_by', 100);
             $table->timestamps();
 
@@ -72,6 +72,7 @@ return new class extends Migration
         Schema::create('letter_directs', function (Blueprint $table) {
             $table->id();
             $table->text('body');
+            $table->timestamps();
         });
 
         /**
@@ -115,5 +116,6 @@ return new class extends Migration
         Schema::dropIfExists('request_status_tracks');
         Schema::dropIfExists('letter_uploads');
         Schema::dropIfExists('letter_directs');
+        Schema::dropIfExists('letters_mappings');
     }
 };
