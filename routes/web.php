@@ -3,6 +3,7 @@
 use Livewire\Livewire;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
+use App\Livewire\Letters\Chat;
 use App\Livewire\Letters\Data\Edit;
 use App\Livewire\Settings\Password;
 use App\Livewire\Letters\DirectForm;
@@ -37,7 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('letter/{id}',Detail::class)->name('letter.detail');
     Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
     Route::get('letter/{id}/activity', Activity::class)->name('letter.activity');
-    Route::get('letter/{id}/chat', Edit::class)->name('letter.chat');
+    Route::get('letter/{id}/chat', Chat::class)->name('letter.chat');
 });
 
 Route::prefix('admin')->middleware(['auth', 'role:administrator'])->group(function() {

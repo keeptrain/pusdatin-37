@@ -14,7 +14,7 @@
         const routes = {
             'Overview': '{{ route('letter.detail', $letterId) }}',
             'Activity': '{{ route('letter.activity', $letterId) }}',
-            'Chat': '{{ route('letter.activity', $letterId) }}',
+            'Chat': '{{ route('letter.chat', $letterId) }}',
         };
         window.location.href = routes[tab];
     }
