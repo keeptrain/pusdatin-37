@@ -3,6 +3,7 @@
 namespace App\Livewire\Letters;
 
 use Carbon\Carbon;
+use App\Models\User;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Auth;
 use App\Models\letters\LettersMapping;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewServiceRequestNotification;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UploadForm extends Component
@@ -46,6 +49,9 @@ class UploadForm extends Component
             'title.required' => 'Title is required',
             'responsible_person.required' => 'Responsible person is required',
             'reference_number.required' => 'Reference number is required',
+            'files.0.required' => 'Files 1 required',
+            'files.1.required' => 'Files 2 required',
+            'files.2.required' => 'Files 3 required',
         ];
     }
 
@@ -62,6 +68,8 @@ class UploadForm extends Component
                 $uploadIds = $this->insertLetterUploads($uploads);
                 $this->createLetterMappings($letter->id, $uploadIds);
                 $this->createStatusTrack($letter);
+                $user = User::role(['administrator','verifikator'])->get();
+                Notification::send($user, new NewServiceRequestNotification($letter));
             });
 
             return redirect()->to('/letter')

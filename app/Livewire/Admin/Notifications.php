@@ -4,18 +4,18 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Auth;
 
 class Notifications extends Component
 {
-
     public $notifications = [];
 
     public $groupedNotifications = [];
 
     public function mount()
     {
-        $this->loadNotifications();
+        // $this->loadNotifications();
     }
 
     public function loadNotifications()
@@ -52,7 +52,9 @@ class Notifications extends Component
 
     public function goDetailPage($notificationId)
     {
-        $notification = Auth::user()->unreadNotifications()->find($notificationId);
+        $notification = Auth::user()
+            ->unreadNotifications()
+            ->find($notificationId);
 
         if ($notification) {
             // $notification->markAsRead(); // tandai sudah dibaca
@@ -69,5 +71,6 @@ class Notifications extends Component
     public function markAllAsRead()
     {
         Auth::user()->unreadNotifications()->update(['read_at' => now()]);
+        $this->loadNotifications();
     }
 }

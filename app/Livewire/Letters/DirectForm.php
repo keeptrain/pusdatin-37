@@ -81,23 +81,26 @@ class DirectForm extends Component
 
     public function save()
     {
-        $this->validate();
+        try {
+            $this->validate();
 
-        DB::transaction(function () {
+            DB::transaction(function () {
+                $letter = $this->createLetter();
+                $letterDirect = $this->createLetterDirect();
+                $this->createLetterMappings($letter,$letterDirect);
+                $this->createStatusTrack($letter, $letter->status);
+                $user = User::role(['administrator','verifikator'])->get();
+                Notification::send($user, new NewServiceRequestNotification($letter));
+            });
             
-            $letter = $this->createLetter();
-            $letterDirect = $this->createLetterDirect();
-            $this->createLetterMappings($letter,$letterDirect);
-            $this->createStatusTrack($letter, $letter->status);
-            $user = User::role('verifikator')->get();
-            Notification::sendNow($user, new NewServiceRequestNotification($letter));
-            
-        });
-
-        return redirect()->to('/letter')
+            return redirect()->to('/letter')
             ->with('status', [
                 'variant' => 'success',
                 'message' => 'Create direct Letter successfully!'
             ]);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+        
     }
 }

@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div wire:init="loadNotifications" class="space-y-6">
     <!-- Header -->
     <div class="flex justify-between items-center">
         <div>
@@ -27,7 +27,8 @@
             </flux:menu>
         </flux:dropdown>
         <div class="ml-auto flex items-center">
-            <flux:button wire:click="markAllAsRead" icon="check" variant="ghost" class="flex items-center text-blue-600">
+            <flux:button wire:click="markAllAsRead" icon="check" variant="ghost"
+                class="flex items-center text-blue-600">
                 Mark all as read
             </flux:button>
         </div>
@@ -55,7 +56,8 @@
                                 <flux:heading>{{ $notification->data['message'] ?? '-' }}</flux:heading>
                                 <div class="flex items-center text-sm text-gray-500">
                                     <span>{{ $notification->data['letter_category'] ?? '-' }} -
-                                        {{ $notification->created_at->format('H:i') }}</span>
+                                        {{ $notification->created_at->format('H:i') }} -
+                                        {{ $notification->created_at->diffForHumans() }}</span>
                                 </div>
                             </div>
                         </div>
