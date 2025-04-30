@@ -88,6 +88,19 @@ return new class extends Migration
             $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
         });
 
+        Schema::create('letter_messages', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('letter_id');
+            $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade');
+            $table->text('body');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+
+            // Add Foreign Key to Letters Table
+            $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
+        });
+
         // // Create letter_revisions table to store revision history
         // Schema::create('letter_revisions', function (Blueprint $table) {
         //     $table->id();
@@ -117,5 +130,6 @@ return new class extends Migration
         Schema::dropIfExists('letter_uploads');
         Schema::dropIfExists('letter_directs');
         Schema::dropIfExists('letters_mappings');
+        Schema::dropIfExists('letter_messages');
     }
 };
