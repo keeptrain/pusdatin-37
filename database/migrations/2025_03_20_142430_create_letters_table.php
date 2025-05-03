@@ -101,6 +101,17 @@ return new class extends Migration
             $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
         });
 
+        Schema::create('letter_templates', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('type');
+            $table->string('file_path');
+            $table->enum('format', ['docx', 'pdf']);
+            $table->foreignId('created_by')->constrained('users');
+            $table->boolean('is_active')->default(false);
+            $table->timestamps();
+        });
+
         // // Create letter_revisions table to store revision history
         // Schema::create('letter_revisions', function (Blueprint $table) {
         //     $table->id();
