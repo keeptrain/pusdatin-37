@@ -16,8 +16,13 @@ class Pending extends LetterStatus
         return 'lime';
     }
 
-    public function message(): string
+    public function trackingMessage(): string
     {
         return 'Surat telah di kirim, mohon di cek berkala';
+    }
+
+    public function userNotificationMessage(array $context): string
+    {
+        return "Surat baru telah diajukan oleh " . $context['responsible_person'];
     }
 }
