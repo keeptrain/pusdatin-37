@@ -2,15 +2,18 @@
 
 namespace App\Livewire\Letters;
 
+use App\Models\User;
 use Livewire\Component;
 use App\States\LetterStatus;
 use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterUpload;
 use App\Models\letters\LettersMapping;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewServiceRequestNotification;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Livewire\Attributes\Locked;
 
 class ModalConfirmation extends Component
 {
@@ -57,6 +60,7 @@ class ModalConfirmation extends Component
                 'array',
                 'min:1'
             ];
+
             foreach ($this->revisionParts as $index => $partName) {
                 $rules["revisionNotes.$partName"] = ['required', 'string'];
             }
@@ -147,8 +151,19 @@ class ModalConfirmation extends Component
         $letterUpload->update([
             'needs_revision' => true,
             'revision_note' => $note,
-            'version' => DB::raw('version + 1'),
+            // 'version' => DB::raw('version + 1'),`
         ]);
+    }
+
+    public function checkRevisionInputForRepliedStatus()
+    {
+        if (in_array($this->status, ['replied', 'rejected'])) {
+            foreach ($this->revisionParts as $partName) {
+                $note = $this->revisionNotes[$partName] ?? null;
+
+                $this->updateRevisionFromMapping($this->letterId, $partName, $note);
+            }
+        }
     }
 
     public function save()
@@ -157,17 +172,14 @@ class ModalConfirmation extends Component
             $this->validate();
 
             DB::transaction(function () {
-                if (in_array($this->status, ['replied', 'rejected'])) {
-                    foreach ($this->revisionParts as $partName) {
-                        $note = $this->revisionNotes[$partName] ?? null;
-
-                        $this->updateRevisionFromMapping($this->letterId, $partName, $note);
-                    }
-                }
+                $this->checkRevisionInputForRepliedStatus();
 
                 $letter = Letter::findOrFail($this->letterId);
 
-                $letter->transitionToStatus($this->getStatusFromInput(), $this->notes);
+                $letter->transitionToStatus($this->getStatusFromInput(), ($this->notes) ? $this->notes : null);
+
+                $user = User::findOrFail($letter->user_id);
+                Notification::send($user, new NewServiceRequestNotification($letter, auth()->user()));
 
                 $this->reset(['status', 'notes']);
                 $this->closeModal();

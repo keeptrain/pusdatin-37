@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Letters\Data;
 
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
@@ -9,6 +10,8 @@ use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewServiceRequestNotification;
 
 class Edit extends Component
 {
@@ -122,6 +125,9 @@ class Edit extends Component
                     $statusTrack->notes = $this->revisionNote;
                     $statusTrack->save();
                 }
+
+                $user = User::role(['administrator','verifikator'])->get();
+                Notification::send($user, new NewServiceRequestNotification($letter, auth()->user()));
             }
 
             return redirect()->to("/letter/$this->letterId/activity")

@@ -10,11 +10,11 @@
                 </flux:subheading>
             </div>
 
-            <flux:radio.group wire:model="status" label="Status" badge="Required">
-                <flux:radio value="approved" label="Approved" x-on:click="$wire.openNotesClosePart()" />
-                <flux:radio value="replied" label="Replied" x-on:click="$wire.openPartCloseNotes()" />
-                <flux:radio value="rejected" label="Rejected" x-on:click="$wire.openPartCloseNotes()" />
-                <flux:radio value="wrong" label="Test failed" x-on:click="$wire.showPart = false" />
+            <flux:radio.group wire:model="status" name="status" label="Status" badge="Required" data-checked >
+                <flux:radio value="approved" name="status" label="Approved" x-on:click="$wire.openNotesClosePart()"  />
+                <flux:radio value="replied" name="status" label="Replied" x-on:click="$wire.openPartCloseNotes()" />
+                <flux:radio value="rejected" name="status" label="Rejected" x-on:click="$wire.openNotesClosePart()" />
+                <flux:radio value="wrong" name="status" label="Test failed" x-on:click="$wire.showPart = false" />
             </flux:radio.group>
 
             <div x-data="{
@@ -41,6 +41,13 @@
                     <template x-if="revisionPart.includes('part3')">
                         <flux:textarea wire:model.defer="revisionNotes.part3" cols="66" rows="2"
                             placeholder="Catatan untuk Part3" resize="vertical" />
+                    </template>
+
+                    <flux:checkbox value="otherPart" label="Other" x-model="revisionPart" />
+
+                    <template x-if="revisionPart.includes('otherPart')">
+                        <flux:textarea wire:model.defer="revisionNotes.otherPart" cols="66" rows="2"
+                            placeholder="Catatan untuk bagian lain" resize="vertical" />
                     </template>
                 </flux:checkbox.group>
 
