@@ -57,11 +57,50 @@ class Letter extends Model
             'process'  => \App\States\Process::class,
             'approved' => \App\States\Approved::class,
             'replied' => \App\States\Replied::class,
-            'rejected' => \App\States\Rejected::class,
+            'rejected' => \App\States\Rejected::class
         ];
     }
 
-    public function transitionToStatus($newStatus, string $notes): void
+    /**
+     * Get the created_at attribute in readable format.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->diffForHumans();
+    }
+
+    public function createdAtDMY()
+    {
+        return Carbon::parse($this->created_at)->format('d F Y');
+    }
+
+    public function createdAtWithTime()
+    {
+        return Carbon::parse($this->created_at)->format('d F Y, H:i');
+    }
+
+    /**
+     * Get the updated_at attribute in readable format.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d F Y, H:i');
+    }
+
+    public function transitionStatusOnly($newStatus)
+    {
+        $states = self::getFilterableStates();
+
+        $this->status->transitionTo($states[$newStatus]);
+    }
+
+    public function transitionToStatus($newStatus, ?string $notes): void
     {
         $this->status->transitionTo($newStatus);
 
@@ -86,7 +125,7 @@ class Letter extends Model
         $this->requestStatusTrack()->create([
             'letter_id'    => $this->id,
             'action'       => $updatedState->message(),
-            'notes'        => $this->shouldIncludeNotes($updatedState) ? $notes : null,
+            'notes'        => $notes,
             'created_by'   => Auth::user()->name,
         ]);
     }
@@ -94,25 +133,6 @@ class Letter extends Model
     private function isRepliedState($state): bool
     {
         return $state instanceof \App\States\Replied;
-    }
-
-    private function shouldIncludeNotes($state): bool
-    {
-        return $state instanceof \App\States\Approved;
-    }
-
-    public function getCategoryTypeNameAttribute()
-    {
-        $morphClass = $this->letterable_type;
-
-        $parts = explode('\\', $morphClass);
-        $className = end($parts);
-
-        if (str_starts_with($className, 'Letter')) {
-            return substr($className, 6);
-        }
-
-        return $className;
     }
 
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder
@@ -126,15 +146,4 @@ class Letter extends Model
         return $query;
     }
 
-    public function getFormattedDateAttribute()
-    {
-        return Carbon::parse($this->created_at)->format('F j, Y');
-    }
-
-    public static function queryForTable()
-    {
-        return Letter::select(['id', 'user_id', 'letterable_type', 'status',  'created_at'])
-            ->with('user:id,name')
-        ;
-    }
 }

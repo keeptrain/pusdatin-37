@@ -16,8 +16,13 @@ class Approved extends LetterStatus
         return 'bg-green-500';
     }
 
-    public function message(): string
+    public function trackingMessage(): string
     {
         return 'Surat disetujui';
+    }
+
+    public function userNotificationMessage(array $context): string
+    {
+        return "Permohonan layanan anda diterima";
     }
 }

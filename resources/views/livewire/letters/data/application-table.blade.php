@@ -1,4 +1,5 @@
 <div class="lg:p-3">
+
     <flux:heading size="xl" level="1" class="mb-6">{{ __('Letter') }}</flux:heading>
     <flux:menu.tabs :statuses="$statuses" :filterStatus="$filterStatus" />
 
@@ -11,7 +12,7 @@
                     <flux:button class="bg-zinc-100 dark:bg-zinc-900" icon="ellipsis-vertical">
                         <span class="hidden lg:inline">Actions</span>
                     </flux:button>
-    
+
                     <flux:menu>
                         <flux:modal.trigger name="confirm-letter-deletion">
                             <flux:menu.item variant="danger" icon="trash" x-data=""
@@ -21,35 +22,36 @@
                     </flux:menu>
                 </flux:dropdown>
             @endif
-    
+
             <!-- Sort Dropdown -->
             <flux:dropdown>
                 <flux:button class="bg-zinc-100 dark:bg-zinc-900" icon:trailing="chevron-down">
                     Sort by
                 </flux:button>
-    
+
                 <flux:menu>
-                    <flux:menu.radio.group wire:model.live="sortBy">
+                    <flux:menu.radio.group wire:model.live.debounce.1000ms="sortBy">
                         <flux:menu.radio value="latest_activity">Latest activity</flux:menu.radio>
                         <flux:menu.radio value="date_created">Date created</flux:menu.radio>
                     </flux:menu.radio.group>
                 </flux:menu>
             </flux:dropdown>
         </div>
-    
+
         <!-- Right Side: Search -->
-        <div>
-            <flux:input icon="magnifying-glass" placeholder="Search..." />
+        <div class="flex">
+            {{-- for testing --}}
+            <flux:button icon="plus-circle" :href="route('letter')" class="p-2 mr-2"></flux:button>
+            <flux:input wire:model.live.debounce.500ms="searchQuery" icon="magnifying-glass" placeholder="Search..." />
         </div>
     </div>
-
 
     <flux:table.base :perPage="$perPage" :paginate="$letters" emptyMessage="No data letter available.">
         <x-slot name="header">
             <flux:table.column class="w-1 border-l-2 border-white dark:border-l-zinc-800">
                 <flux:checkbox wire:click="toggleSelectAll" />
             </flux:table.column>
-            <flux:table.column>Name</flux:table.column>
+            <flux:table.column>Responsible person</flux:table.column>
             <flux:table.column>Title</flux:table.column>
             <flux:table.column>Status</flux:table.column>
             <flux:table.column>Created date</flux:table.column>
@@ -58,33 +60,37 @@
 
         <x-slot name="body">
             @foreach ($letters as $item)
-                <tr class="
+                <tr @if(!in_array($item->id, $selectedLetters)) 
+                    @click="window.location.href='{{ route('letter.detail', ['id' => $item->id]) }}'" 
+                    @endif class="
                     {{ in_array($item->id, $selectedLetters) ? 'relative bg-zinc-50 dark:bg-zinc-900 ' : 'dark:bg-zinc-800' }}
                     border-b border-b-zinc-100 dark:border-b-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 cursor-pointer"
                     wire:navigate>
 
-                    <div>
-                        <flux:table.row
-                            class="{{ in_array($item->id, $selectedLetters)
-                                ? '  border-s-2 border-black dark:border-white'
-                                : 'border-l-2 border-white dark:border-l-zinc-800' }} ">
-                            <flux:checkbox wire:model.live="selectedLetters" value="{{ $item->id }}" />
-                        </flux:table.row>
-                    </div>
-
-                    <flux:table.row>
-                        <a href="{{ route('letter.detail', $item->id) }}" wire:navigate>
-                            {{ $item->user->name }}
-                        </a>
+                    <flux:table.row @click.stop class="{{ in_array($item->id, $selectedLetters)
+                            ? '  border-s-2 border-black dark:border-white'
+                        : 'border-l-2 border-white dark:border-l-zinc-800' }} ">
+                        <flux:checkbox wire:model.live="selectedLetters" value="{{ $item->id }}" />
                     </flux:table.row>
+
+                    <flux:table.row>{{ $item->user->name }}</flux:table.row>
                     <flux:table.row>{{ $item->title }}</flux:table.row>
                     <flux:table.row>
                         <flux:notification.status-badge status="{{ $item->status->label() }}">
                             {{ $item->status->label() }}</flux:notification.status-badge>
                     </flux:table.row>
-                    <flux:table.row>{{ $item->formatted_date }}</flux:table.row>
+                    <flux:table.row>{{ $item->createdAtDMY() }}</flux:table.row>
                     <flux:table.row>
-                        <flux:button wire:click="editPage({{ $item->id }})" variant="ghost">Edit</flux:button>
+                        <flux:dropdown @click.stop >
+                            <flux:button icon:trailing="ellipsis-vertical" variant="ghost"></flux:button>
+
+                            <flux:menu>
+                                <flux:menu.item :href="route('letter.activity', [$item->id])" icon="list-bullet" wire:navigate>Activity
+                                </flux:menu.item>
+                                <flux:menu.item :href="route('letter.chat', [$item->id])" icon="chat-bubble-left-right" wire:navigate>Chat</flux:menu.item>
+                                <flux:menu.item :href="route('letter.rollback', [$item->id])" icon="backward" wire:navigate>Rollback</flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
                     </flux:table.row>
                 </tr>
             @endforeach
@@ -110,15 +116,12 @@
                 </flux:subheading>
             </div>
             <div class="flex justify-end space-x-2">
-
                 <flux:modal.close>
                     <flux:button variant="filled">{{ __('Cancel') }}</flux:button>
                 </flux:modal.close>
 
                 <flux:button variant="danger" type="submit">{{ __('Confirm') }}</flux:button>
-
             </div>
         </form>
     </flux:modal>
-
 </div>

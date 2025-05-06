@@ -16,8 +16,13 @@ class Process extends LetterStatus
         return 'sky';
     }
 
-    public function message(): string
+    public function trackingMessage(): string
     {
         return 'Surat sedang dalam proses.';
+    }
+
+    public function userNotificationMessage(array $context): string
+    {
+        return "Permohonan layanan anda sedang di proses oleh " . $context['verifikator'];
     }
 }

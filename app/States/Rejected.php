@@ -16,8 +16,13 @@ class Rejected extends LetterStatus
         return 'red';
     }
 
-    public function message(): string
+    public function trackingMessage(): string
     {
         return 'Surat di tolak';
+    }
+
+    public function userNotificationMessage(array $context): string
+    {
+        return "Permohonan layanan anda ditolak";
     }
 }

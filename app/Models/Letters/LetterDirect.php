@@ -12,6 +12,8 @@ class LetterDirect extends Model
         'body'
     ];
 
+    public $timestamps = false;
+
     public function mappings()
     {
         return $this->hasMany(LettersMapping::class, 'letter_id');

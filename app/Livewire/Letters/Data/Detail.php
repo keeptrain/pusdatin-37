@@ -2,12 +2,15 @@
 
 namespace App\Livewire\Letters\Data;
 
+use App\Models\User;
 use App\States\Process;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewServiceRequestNotification;
 
 class Detail extends Component
 {
@@ -66,11 +69,14 @@ class Detail extends Component
     public function processLetter(int $id)
     {
         if (Auth::user()->withoutRole('user')) {
-            DB::transaction(function () {
+            DB::transaction(function () use($id) {
                 $this->letter->transitionToStatus(Process::class, '');
+                $letter = Letter::findOrFail($id); 
+                $user = User::findOrFail($letter->user_id);
+                Notification::send($user, new NewServiceRequestNotification($letter, auth()->user()->name));
             });
 
-            return redirect()->route('letter.table')->with([
+            return redirect()->route('letter.detail', [$id])->with([
                 'status' => [
                     'variant' => 'success',
                     'message' => 'Letter has update to read status!'
@@ -86,8 +92,10 @@ class Detail extends Component
         }
     }
 
-    public function backStatus()
+    public function repliedLetter()
     {
-        $this->letter->status->transitionTo(Process::class);
+        $this->activeRevision = $this->letter->active_revision;
+        $this->showModal = true;
     }
+
 }

@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Letters\Letter;
 
-
 class ApplicationTable extends Component
 {
     use WithPagination;
@@ -28,6 +27,8 @@ class ApplicationTable extends Component
 
     public $selectedLetters = [];
 
+    public $searchQuery = '';
+
     public function mount() {}
 
     public function render()
@@ -42,18 +43,23 @@ class ApplicationTable extends Component
         return redirect()->route('letter.detail', [$id]);
     }
 
-    public function editPage(int $id)
-    {
-        return redirect()->route('letter.edit', [$id]);
-    }
-
     public function loadLetters()
     {
         $query = Letter::with([
             'user:id,name',
-        ])->when($this->filterStatus !== 'all', function ($query) {
-            $query->filterByStatus($this->filterStatus);
-        });
+        ])
+            ->when($this->filterStatus !== 'all', function ($query) {
+                $query->filterByStatus($this->filterStatus);
+            })
+            ->when($this->searchQuery, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('title', 'like', '%' . $this->searchQuery . '%')
+                        ->orWhere('responsible_person', 'like', '%' . $this->searchQuery . '%')
+                        ->orWhereHas('user', function ($q) {
+                            $q->where('name', 'like', '%' . $this->searchQuery . '%');
+                        });
+                });
+            });
 
         [$column, $direction] = $this->getSortCriteria();
 

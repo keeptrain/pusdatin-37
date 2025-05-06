@@ -16,8 +16,17 @@ class Replied extends LetterStatus
         return 'yellow';
     }
 
-    public function message(): string
+    public function trackingMessage(): string
     {
         return 'Surat anda mendapatkan balasan, harap di periksa.';
+    }
+
+    public function userNotificationMessage(array $context): string
+    {
+        if (isset($context['verifikator_role']) && in_array($context['verifikator_role'], ['administrator', 'verifikator'])) {
+            return 'Permohonan layanan anda mendapatkan balasan';
+        }
+    
+        return 'Permohonan layanan ini direvisi oleh pemohon';
     }
 }

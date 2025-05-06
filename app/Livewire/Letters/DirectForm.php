@@ -8,6 +8,8 @@ use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterDirect;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\NewServiceRequestNotification;
 
 class DirectForm extends Component
 {
@@ -38,50 +40,67 @@ class DirectForm extends Component
         ];
     }
 
-    public function createLetterDirect()
-    {
-        $data = LetterDirect::create([
-            'body' => $this->body
-        ]);
-
-        return $data;
-    }
-
     public function createLetter()
     {
         $defaultStatusClass = Letter::getDefaultStateFor('status');
 
-        $letter = Letter::create([
+        return Letter::create([
             'user_id' => User::currentUser()->id,
             'title' => $this->title,
             'responsible_person' => $this->responsible_person,
             'reference_number' => $this->reference_number,
             'status' => $defaultStatusClass,
         ]);
+    }
 
-        $letter->mapping()->create([
-            'letterable_type' => LetterDirect::class,
-            'letterable_id' => $this->createLetterDirect()->id
+    public function createLetterDirect()
+    {
+        return LetterDirect::create([
+            'body' => $this->body,
+            // 'created_at' => now(),
+            // 'updated_at' => now()
         ]);
 
-        $letter->requestStatusTrack()->create([
-            'action' => (new $defaultStatusClass($letter))->message(),
+    }
+
+    public function createLetterMappings($letter, $letterDirect)
+    {
+        $letter->mapping()->create([
+            'letterable_type' => LetterDirect::class,
+            'letterable_id' => $letterDirect->id
+        ]);
+    }
+
+    public function createStatusTrack($letter,$status)
+    {
+        return $letter->requestStatusTrack()->create([
+            'action' => (new $status($letter))->trackingMessage(),
             'created_by' => Auth::user()->name,
         ]);
     }
 
     public function save()
     {
-        $this->validate();
+        try {
+            $this->validate();
 
-        DB::transaction(function () {
-            $this->createLetter();
-        });
-
+            DB::transaction(function () {
+                $letter = $this->createLetter();
+                $letterDirect = $this->createLetterDirect();
+                $this->createLetterMappings($letter,$letterDirect);
+                $this->createStatusTrack($letter, $letter->status);
+                $user = User::role(['administrator','verifikator'])->get();
+                Notification::send($user, new NewServiceRequestNotification($letter));
+            });
+            
         return redirect()->to('/letter')
             ->with('status', [
                 'variant' => 'success',
                 'message' => 'Create direct Letter successfully!'
             ]);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+        
     }
 }
