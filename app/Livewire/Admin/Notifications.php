@@ -4,7 +4,6 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Auth;
 
 class Notifications extends Component
@@ -13,20 +12,32 @@ class Notifications extends Component
 
     public $groupedNotifications = [];
 
+    public $notificationCount = 0;
+
     public function mount()
     {
-        // $this->loadNotifications();
+        $this->notificationCount = $this->emitCount();
     }
 
-    public function loadNotifications()
+    public function loadNotifications(bool $refresh = false)
     {
-        $this->notifications = Auth::user()
-            ->unreadNotifications()
+        $user = Auth::user();
+
+        if ($refresh) {
+            $user->unsetRelation('unreadNotifications');
+        }
+
+        $this->notifications = $user->unreadNotifications()
             ->latest()
             ->take(10)
-            ->get();
+            ->get(['id', 'data', 'created_at']);
 
         $this->groupNotifications();
+    }
+
+    public function reloadNotifications()
+    {
+        $this->loadNotifications(true);
     }
 
     protected function groupNotifications()
@@ -50,16 +61,26 @@ class Notifications extends Component
         }
     }
 
+    public function emitCount(): void
+    {
+        $count = auth()->user()
+            ->unreadNotifications()
+            ->count();
+
+        $this->dispatch('notification-count-updated', [
+            'count' => $count,
+        ]);
+    }
+
     public function goDetailPage($notificationId)
     {
-        $notification = Auth::user()
+        $notification = auth()->user()
             ->unreadNotifications()
             ->find($notificationId);
 
         if ($notification) {
-            // $notification->markAsRead(); // tandai sudah dibaca
+            $notification->markAsRead();
 
-            // ambil letter_id dari data notifikasi
             $letterId = $notification->data['id'] ?? null;
 
             if ($letterId) {
@@ -70,7 +91,7 @@ class Notifications extends Component
 
     public function markAllAsRead()
     {
-        Auth::user()->unreadNotifications()->update(['read_at' => now()]);
+        auth()->user()->unreadNotifications()->update(['read_at' => now()]);
         $this->loadNotifications();
     }
 }

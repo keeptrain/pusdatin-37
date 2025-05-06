@@ -18,7 +18,7 @@
                 <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
 
-                {{-- <flux:modal.trigger name="notifications-admin">
+                <flux:modal.trigger name="notifications-admin">
                     <flux:navlist variant="outline">
                         <flux:navlist.group class="grid">
                             <flux:navlist.item icon="bell-alert">
@@ -35,7 +35,7 @@
                 <flux:modal name="notifications-admin" variant="flyout" position="right" :closable="false"
                     class="md:w-96">
                     <livewire:admin.notifications />
-                </flux:modal> --}}
+                </flux:modal>
 
             </flux:navlist.group>
         </flux:navlist>
