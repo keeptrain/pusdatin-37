@@ -74,7 +74,7 @@ class DirectForm extends Component
     public function createStatusTrack($letter,$status)
     {
         return $letter->requestStatusTrack()->create([
-            'action' => (new $status($letter))->message(),
+            'action' => (new $status($letter))->trackingMessage(),
             'created_by' => Auth::user()->name,
         ]);
     }
@@ -93,7 +93,7 @@ class DirectForm extends Component
                 Notification::send($user, new NewServiceRequestNotification($letter));
             });
             
-            return redirect()->to('/letter')
+        return redirect()->to('/letter')
             ->with('status', [
                 'variant' => 'success',
                 'message' => 'Create direct Letter successfully!'
