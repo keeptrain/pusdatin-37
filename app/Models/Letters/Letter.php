@@ -106,10 +106,6 @@ class Letter extends Model
 
         $updatedState = $this->status;
 
-        if (!method_exists($updatedState, 'message')) {
-            return;
-        }
-
         $isReplied = $this->isRepliedState($updatedState);
 
         if ($isReplied && $this->active_revision === true) {
@@ -124,7 +120,7 @@ class Letter extends Model
 
         $this->requestStatusTrack()->create([
             'letter_id'    => $this->id,
-            'action'       => $updatedState->message(),
+            'action'       => $updatedState->trackingMessage(),
             'notes'        => $notes,
             'created_by'   => Auth::user()->name,
         ]);

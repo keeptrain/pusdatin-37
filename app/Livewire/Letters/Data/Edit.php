@@ -96,7 +96,7 @@ class Edit extends Component
                 $letterUpload = $uploadsByPart[$partName] ?? null;
 
                 if ($letterUpload) {
-                    $path = $file->store('letter', 'public');
+                    $path = $file->store('letters', 'public');
 
                     $letterUpload->update([
                         'file_path' => $path,

@@ -45,15 +45,31 @@
                 Unggah Dokumen
             </h3>
 
-            <div class="space-y-6">
+            <div x-data="{
+                activeUploads: 0,
+                progress: 0,
+                get uploading() {
+                    return this.activeUploads > 0;
+                }
+            }" x-on:livewire-upload-start="activeUploads++" x-on:livewire-upload-finish="activeUploads--"
+                x-on:livewire-upload-error="activeUploads--" x-on:livewire-upload-cancel="activeUploads--"
+                x-on:livewire-upload-progress="progress = $event.detail.progress" class="space-y-6">
                 @foreach ($letter->mapping as $item)
                     @php
                         $upload = $item->letterable;
                     @endphp
 
                     @if ($upload instanceof \App\Models\Letters\LetterUpload && $upload->needs_revision)
+
                         <!-- File Upload -->
-                        <div
+                        <div>
+                            <x-letters.input-file-adapter title="{{ $upload->part_name }}"
+                                model="revisedFiles.{{ $upload->part_name }}" />
+                            <label class="block text-sm font-medium text-zinc-400 mt-2 mb-2">
+                                Note: {{ $upload->revision_note }}</label>
+                        </div>
+
+                        {{-- <div
                             class="border-2 rounded-lg p-6 {{ $errors->has('revisedFiles.' . $upload->part_name) ? 'border-dashed border-red-500' : 'border-dashed border-gray-300' }}">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
@@ -66,7 +82,7 @@
                                             class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
 
                                         @error("revisedFiles.{$upload->part_name}")
-                                            <p class="text-xs text-red-500 mt-3">{{ $message }}</p>
+                                        <p class="text-xs text-red-500 mt-3">{{ $message }}</p>
                                         @enderror
 
                                         <p class="text-xs text-gray-500 mt-6">Format: PDF (Max. 1MB)</p>
@@ -83,7 +99,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                     @endif
                 @endforeach
             </div>
@@ -108,7 +124,7 @@
         <!-- Form Actions -->
         <div class="flex justify-end space-x-3">
             <flux:button href="{{ route('letter.table') }}">
-                Batal
+                Cancel
             </flux:button>
             <flux:button type="submit" variant="primary">
                 Update
