@@ -152,7 +152,7 @@ class UploadForm extends Component
     protected function createStatusTrack(Letter $letter): void
     {
         $letter->requestStatusTrack()->create([
-            'action' => (new ($letter->status)($letter))->message(),
+            'action' => (new ($letter->status)($letter))->trackingMessage(),
             'created_by' => Auth::user()->name
         ]);
     }

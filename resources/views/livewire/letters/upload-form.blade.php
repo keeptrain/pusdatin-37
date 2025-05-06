@@ -5,19 +5,19 @@
             <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                 <span
                     class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>
-                Informasi Dasar
+                Basic information
             </h3>
 
             <div class="space-y-6">
-                <flux:input wire:model="title" label="Title" placeholder="Nama lengkap" clearable />
+                <flux:input wire:model="title" label="Title" placeholder="Your title request service" clearable />
 
-                <flux:input wire:model="responsible_person" label="Responsible person" placeholder="Nama lengkap"
+                <flux:input wire:model="responsible_person" label="Responsbile person" placeholder="NRK / Name"
                     clearable />
 
                 <div class="grid grid-cols-2 gap-x-6">
 
                     <div>
-                        <flux:input wire:model="reference_number" label="Reference number" placeholder="Nama lengkap"
+                        <flux:input wire:model="reference_number" label="Reference number" placeholder="No./xx/xx/2025"
                             clearable />
                     </div>
 
@@ -47,7 +47,7 @@
                 <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                     <span
                         class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
-                    Unggah Dokumen
+                    Upload document
                 </h3>
 
                 <div class="space-y-6">
