@@ -5,11 +5,6 @@
         <div class="p-12">
             <flux:notification.status-stepped :status="$letter->status->label()" />
 
-            @if ($letter->active_revision)
-                <flux:button wire:click="detailPage({{ $letterId }})" class="mt-6" wire:navigate> Revisi
-                </flux:button>
-            @endif
-
             @foreach ($activity as $date => $hours)
                 <!-- Activity letter -->
                 <div class="border border-gray-200 rounded-lg mt-4 md:mt-8">

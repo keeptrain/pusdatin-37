@@ -12,7 +12,7 @@ class LetterDirect extends Model
         'body'
     ];
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function mappings()
     {
