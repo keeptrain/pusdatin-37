@@ -13,6 +13,8 @@ abstract class LetterStatus extends State
 {
     abstract public function color(): string;
 
+    abstract public function toastMessage(): string;
+
     abstract public function trackingMessage(): string;
 
     abstract public function userNotificationMessage(array $context): string;

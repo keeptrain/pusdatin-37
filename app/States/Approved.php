@@ -16,6 +16,11 @@ class Approved extends LetterStatus
         return 'bg-green-500';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Letter successfully update status to approved!';
+    }
+
     public function trackingMessage(): string
     {
         return 'Surat disetujui';

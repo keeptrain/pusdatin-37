@@ -16,6 +16,11 @@ class Process extends LetterStatus
         return 'sky';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Successfully updated status to process';
+    }
+
     public function trackingMessage(): string
     {
         return 'Surat sedang dalam proses.';

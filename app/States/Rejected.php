@@ -16,6 +16,11 @@ class Rejected extends LetterStatus
         return 'red';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Letter successfully update status to rejected!';
+    }
+
     public function trackingMessage(): string
     {
         return 'Surat di tolak';

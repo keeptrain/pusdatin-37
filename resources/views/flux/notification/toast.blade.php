@@ -1,11 +1,10 @@
 @props([
-    'variant' => null, // Default variant
-    'message' => null, // Default message
-    'duration' => null, // Default duration in milliseconds (3 seconds)
+    'variant' => null,
+    'message' => null,
+    'duration' => null,
 ])
 
 @php
-    // Mapping for icons and colors based on variant
     $icons = [
         'success' => 'check-circle',
         'error' => 'exclamation-circle',
@@ -25,7 +24,7 @@
 @endphp
 
 <div id="toast-container"
-    class="fixed p-3 bottom-6 right-6 rounded-xl border-1 border-gray-300 shadow-md bg-white dark:bg-gray-800 text-black dark:text-white w-auto max-w-md flex flex-col">
+    class="flex flex-col fixed p-3 top-6 right-6 rounded-xl border-1 border-gray-300 shadow-md bg-white dark:bg-gray-800 text-black dark:text-white w-auto max-w-md">
 
     <!-- Top Row: Icon, Heading, and Close Button -->
     <div class="flex items-center justify-between  space-x-4">

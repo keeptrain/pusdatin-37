@@ -1,12 +1,4 @@
 <div class="overflow-x-auto">
-    @if (session('status'))
-        @php
-            $variant = session('status')['variant'];
-            $message = session('status')['message'];
-        @endphp
-        <flux:notification.toast :variant="$variant" :message="$message" :duration="3000" />
-    @endif
-
     <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
     <div x-data="{ partTab: '{{ $uploads->first()->part_name ?? '' }}' }">

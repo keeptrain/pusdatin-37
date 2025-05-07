@@ -16,6 +16,11 @@ class Replied extends LetterStatus
         return 'yellow';
     }
 
+    public function toastMessage(): string
+    {
+        return "Letter successfully update status to replied!";
+    }
+
     public function trackingMessage(): string
     {
         return 'Surat anda mendapatkan balasan, harap di periksa.';

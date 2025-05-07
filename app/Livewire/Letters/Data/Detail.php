@@ -79,7 +79,7 @@ class Detail extends Component
             return redirect()->route('letter.detail', [$id])->with([
                 'status' => [
                     'variant' => 'success',
-                    'message' => 'Letter has update to read status!'
+                    'message' => $this->letter->status->toastMessage(),
                 ]
             ]);
         } else {

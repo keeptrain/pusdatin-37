@@ -187,7 +187,7 @@ class ModalConfirmation extends Component
                 return redirect()->to("/letter/$this->letterId")
                     ->with('status', [
                         'variant' => 'success',
-                        'message' => 'Create direct Letter successfully!'
+                        'message' => $letter->status->toastMessage(),
                     ]);
             });
         } catch (ModelNotFoundException $e) {
