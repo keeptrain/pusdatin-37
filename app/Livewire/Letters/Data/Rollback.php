@@ -2,49 +2,57 @@
 
 namespace App\Livewire\Letters\Data;
 
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\RequestStatusTrack;
+use Livewire\Attributes\Locked;
 
 class Rollback extends Component
 {
+    #[Locked]
     public $letterId;
 
-    public $letter;
+    public $changeStatus = '';
 
-    public $status;
-
-    public $changeStatus = "";
-
-    public $statusTrack;
+    public array $filter = [
+        'sortBy' => 'latest',
+        'deletedRecords' => 'withoutDeleted',
+    ];
 
     public array $trackId = [];
 
     public function mount(int $id)
     {
         $this->letterId = $id;
-        $this->letter = $this->getStatusTrack();
     }
 
-    public function getStatusTrack()
+    #[Computed]
+    public function letter(): Letter
     {
-        return Letter::with(['requestStatusTrack' => function ($q) {
-            $q->where('created_by', auth()->user()->name);
-            $q->latest();
-        }])->findOrFail($this->letterId);
+        return Letter::with([
+            'requestStatusTrack' => fn($query) =>
+            $query->filterByUser(auth()->user()->name)
+                ->sortBy($this->filter['sortBy'])
+                ->withDeletedRecords($this->filter['deletedRecords'])
+        ])->findOrFail($this->letterId);
+    }
+
+    public function updatedFilter()
+    {
+        $this->trackId = [];
     }
 
     public function save()
     {
         DB::transaction(function () {
-            $this->letter->transitionStatusOnly($this->changeStatus);
+            $letter = $this->letter;
 
-            $this->letter->update([
-                'active_revision' => false
-            ]);
+            $letter->transitionStatusOnly($this->changeStatus);
+            $letter->update(['active_revision' => false]);
 
-            $this->letter->mapping->each(function ($mapping) {
+            $letter->mapping->each(function ($mapping) {
                 if ($mapping->letterable) {
                     $mapping->letterable->update([
                         'needs_revision' => false,
@@ -52,20 +60,28 @@ class Rollback extends Component
                 }
             });
 
-            $validIds = $this->letter->requestStatusTrack
-                ->where('created_by', auth()->user()->name)
+            $validIds = $letter->requestStatusTrack
                 ->pluck('id')
                 ->intersect($this->trackId);
 
             if ($validIds->isNotEmpty()) {
-                RequestStatusTrack::whereIn('id', $validIds)->delete();
+                $tracks = RequestStatusTrack::withTrashed()->whereIn('id', $validIds)->get();
+
+                foreach ($tracks as $track) {
+                    $track->trashed() ? $track->restore() : $track->delete();
+                }
             }
 
-            return redirect()->to("/letter/$this->letterId/activity")
+            return redirect()->to("/letter/{$this->letterId}/activity")
                 ->with('status', [
                     'variant' => 'success',
-                    'message' => 'Create direct Letter successfully!'
+                    'message' => 'Successfully rollback action!'
                 ]);
         });
+    }
+
+    public function delete()
+    {
+        DB::transaction(function () {});
     }
 }
