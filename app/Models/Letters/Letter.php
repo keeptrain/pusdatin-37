@@ -33,8 +33,6 @@ class Letter extends Model
         'active_revision'
     ];
 
-    public $timestamps = true;
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -50,7 +48,7 @@ class Letter extends Model
         return $this->hasMany(RequestStatusTrack::class);
     }
 
-    public static function getFilterableStates(): array
+    public static function resolveStatusClassFromString(): array
     {
         return [
             'pending'  => \App\States\Pending::class,
@@ -95,9 +93,15 @@ class Letter extends Model
 
     public function transitionStatusOnly($newStatus)
     {
-        $states = self::getFilterableStates();
+        $states = self::resolveStatusClassFromString();
 
-        $this->status->transitionTo($states[$newStatus]);
+        $currentStatusName = $this->status->getValue();
+
+        if ($newStatus !== $currentStatusName) {
+            if (isset($states[$newStatus])) {
+                $this->status->transitionTo($states[$newStatus]);
+            }
+        }
     }
 
     public function transitionToStatus($newStatus, ?string $notes): void
@@ -133,7 +137,7 @@ class Letter extends Model
 
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder
     {
-        $map = static::getFilterableStates();
+        $map = static::resolveStatusClassFromString();
 
         if ($filterStatus && isset($map[$filterStatus])) {
             return $query->where('status', $map[$filterStatus]);
