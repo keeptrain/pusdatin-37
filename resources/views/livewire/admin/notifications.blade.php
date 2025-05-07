@@ -46,11 +46,7 @@
                             <div class="flex px-4 py-3 hover:bg-zinc-100 bg-zinc-50 rounded-lg">
                                 <div class="mr-3">
                                     <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <flux:icon.envelope class="size-5"/>
                                     </div>
                                 </div>
                                 <div class="flex-1">
