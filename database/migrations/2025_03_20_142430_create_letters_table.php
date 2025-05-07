@@ -43,6 +43,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->string('created_by', 100);
             $table->timestamps();
+            $table->softDeletes();
 
             /**
              * Add Foreign Key to Letters Table
