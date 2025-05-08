@@ -17,7 +17,7 @@ use App\Livewire\Letters\Data\ApplicationTable;
 use App\Livewire\Letters\Data\Rollback;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing-page');
 })->name('home');
 
 Route::get('dashboard', function () {
