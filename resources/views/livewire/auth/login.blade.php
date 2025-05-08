@@ -1,34 +1,26 @@
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+    <a class="flex flex-col items-center gap-2 font-medium">
+        <span class="flex h-9 w-9 items-center justify-center rounded-md">
+            <x-lucide-log-in />
+        </span>
+    </a>
+    <x-auth-header :title="__('Log in to your account')" :description="null" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
 
     <form wire:submit="login" class="flex flex-col gap-6">
         <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email address')"
-            type="email"
-            required
-            autofocus
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
+        <flux:input wire:model="email" :label="__('Email address')" type="email" required autofocus autocomplete="email"
+            placeholder="email@example.com" />
 
         <!-- Password -->
         <div class="relative">
-            <flux:input
-                wire:model="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="current-password"
-                :placeholder="__('Password')"
-            />
+            <flux:input wire:model="password" :label="__('Password')" type="password" required
+                autocomplete="current-password" :placeholder="__('Password')" />
 
             @if (Route::has('password.request'))
-                <flux:link class="absolute right-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
+                <flux:link variant="subtle" class="absolute right-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
                     {{ __('Forgot your password?') }}
                 </flux:link>
             @endif
