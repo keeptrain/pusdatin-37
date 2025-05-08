@@ -1,4 +1,4 @@
-<div class="flex flex-col p-6">
+<div class="flex flex-col ">
     @include('partials.create-letter-heading')
 
     <flux:legend>{{ $legend ?? '' }}</flux:legend>

@@ -1,6 +1,6 @@
 <x-letters.layout legend="Upload Form">
 
-    <form wire:submit="save" class="space-y-6 mb-6">
+    <form wire:submit="save" class="space-y-6 mb-6 ">
         <div class="border border-gray-200 rounded-lg p-4">
             <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                 <span

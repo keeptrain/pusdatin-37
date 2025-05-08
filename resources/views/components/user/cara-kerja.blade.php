@@ -1,4 +1,7 @@
-<section id="cara-kerja" class="py-20 bg-gray-50">
+@props([
+'bg' => 'bg-gray-50',
+])
+<section id="cara-kerja" {{ $attributes->merge(['class' => $bg . ' py-20']) }}>
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-16 text-center">
             <h2 class="text-3xl font-bold text-center mb-5 relative 
