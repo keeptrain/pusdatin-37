@@ -11,9 +11,8 @@
             <div class="hidden md:flex items-center space-x-8">
                 <a href="#layanan" class="text-gray-700 hover:text-[#364872] transition-colors">Layanan</a>
                 <a href="#cara-kerja" class="text-gray-700 hover:text-[#364872] transition-colors">Cara Kerja</a>
-                <a href="#testimonial" class="text-gray-700 hover:text-[#364872] transition-colors">Testimonial</a>
-                <a href="#faq" class="text-gray-700 hover:text-[#364872] transition-colors">FAQ</a>
-                <button class="bg-[#364872] hover:bg-purple-800 text-white px-4 py-1 rounded-md">Masuk</button>
+                <a href="{{ route('login') }}" class="bg-[#364872] hover:bg-[#25262a] text-white px-4 py-1 rounded-md">Masuk</a>
+
             </div>
 
             {{-- Mobile menu button --}}
