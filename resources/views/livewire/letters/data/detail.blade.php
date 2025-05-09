@@ -1,9 +1,11 @@
+@php
+    $status = $letter->status->label()
+@endphp
 <div class="overflow-x-auto">
     <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
     <div x-data="{ partTab: '{{ $uploads->first()->part_name ?? '' }}' }">
         <x-letters.detail-layout :letterId="$letterId">
-
             @if (!empty($uploads))
                 <!-- Tab Content -->
                 <div class="mt-3 mr-3">
@@ -63,8 +65,8 @@
 
                 <div class="mb-6">
                     <h4 class="text-gray-500 mb-1">Status</h4>
-                    <flux:notification.status-badge status="{{ $letter->status->label() }}">
-                        {{ $letter->status->label() }}</flux:notification.status-badge>
+                    <flux:notification.status-badge status="{{ $status }}">
+                        {{ $status }}</flux:notification.status-badge>
                 </div>
 
                 <div class="border-1 p-3">
@@ -82,31 +84,44 @@
                     </div>
                 </div>
                 <div class="flex flex-1 gap-2 mt-6">
-                    @switch($letter->status->label())
-                        @case('Pending')
-                            <flux:button variant="primary" wire:click="processLetter({{ $letter->id }})" class="w-full">
-                                {{ __('Process') }}
-                            </flux:button>
-                        @break
-
-                        @default
-                        <flux:modal.trigger name="confirm-letter-verification"
-                            wire:click="repliedLetter({{ $letterId }})">
-                            <flux:button variant="primary" type="click" class="w-full" :disabled="$letter->active_revision == 1">
+                    
+                    @switch($status)
+                        @case('Process')
+                        @case('Replied')
+                        <flux:modal.trigger name="confirm-letter-verification" wire:click="repliedLetter({{ $letterId }})">
+                            <flux:button variant="primary" type="click" icon="check-badge" class="w-full" :disabled="$letter->active_revision == 1">
                                 {{ __('Verifikasi') }}
                             </flux:button>
                         </flux:modal.trigger>
+
+                        <flux:dropdown>
+                            <flux:button icon="ellipsis-horizontal"/>
+                            <flux:menu>
+                                <flux:modal.trigger name="confirm-letter-verification" wire:click="repliedLetter({{ $letterId }})">
+                                    <flux:menu.item :href="route('letter.edit', [$letterId])" icon="pencil-square">Force edit</flux:menu.item>
+                                </flux:modal.trigger>
+                                <flux:menu.item :href="route('letter.rollback', [$letterId])" icon="backward">Rollback</flux:menu.item>
+                                <flux:menu.item icon="trash" variant="danger">Delete</flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
+                    @break
+                    @case('Pending')
+                        <flux:button variant="primary" wire:click="processLetter({{ $letter->id }})" icon:trailing="arrow-right" class="w-full">
+                            {{ __('Process') }}
+                        </flux:button>
+                    @break
+                    @default
+                        <flux:dropdown class="w-full">
+                            <flux:button icon="ellipsis-horizontal" class="w-full"/>
+                            <flux:menu>
+                                <flux:modal.trigger name="confirm-letter-verification" wire:click="repliedLetter({{ $letterId }})">
+                                    <flux:menu.item :href="route('letter.edit', [$letterId])" icon="pencil-square">Force edit</flux:menu.item>
+                                </flux:modal.trigger>
+                                <flux:menu.item :href="route('letter.rollback', [$letterId])" icon="backward">Rollback</flux:menu.item>
+                                <flux:menu.item icon="trash" variant="danger">Delete</flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
                     @endswitch
-                    <flux:dropdown>
-                        <flux:button icon="ellipsis-horizontal"/>
-                        <flux:menu>
-                            <flux:modal.trigger name="confirm-letter-verification" wire:click="repliedLetter({{ $letterId }})">
-                                <flux:menu.item :href="route('letter.edit', [$letterId])" icon="pencil-square" >Force edit</flux:menu.item>
-                            </flux:modal.trigger>
-                            <flux:menu.item  :href="route('letter.rollback', [$letterId])" icon="arrow-path" >Rollback</flux:menu.item>
-                            <flux:menu.item icon="trash" variant="danger" >Delete</flux:menu.item>
-                        </flux:menu>
-                    </flux:dropdown>
                 </div>
             </x-slot>
         </x-letters.detail-layout>

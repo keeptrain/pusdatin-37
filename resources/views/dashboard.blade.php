@@ -1,8 +1,20 @@
 <x-layouts.app :title="__('Dashboard')">
 
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl ">
-        <flux:heading size="xl" level="1" class="text-color-testing-100">Good afternoon, {{ auth()->user()->name }}</flux:heading>
+    <div x-data="{ greeting: '' }" x-init="const hour = new Date().getHours();
+            if (hour >= 5 && hour < 12) {
+                greeting = 'Good morning';
+            } else if (hour >= 12 && hour < 18) {
+                greeting = 'Good afternoon';
+            } else {
+                greeting = 'Good evening';
+            }" class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
+        <div>
+            <flux:heading size="xl" level="1" class="text-color-testing-100">
+                <span x-text="`${greeting}, {{ auth()->user()->name }}`"></span>
+            </flux:heading>
+        </div>
         <flux:text class="text-base">Here's what's new today</flux:text>
+
         <flux:separator variant="subtle" />
 
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
@@ -205,4 +217,5 @@
             </div>
         </div>
     </div>
+
 </x-layouts.app>
