@@ -1,13 +1,13 @@
 <section>
-    <div wire:poll.visible="loadNotifications" class="space-y-6">
+    <div class="space-y-6">
         <!-- Header -->
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-semibold text-gray-800">Notification</h1>
             </div>
             <div class="flex space-x-2">
-                <flux:button wire:click="reloadNotifications" icon="arrow-path"
-                    class="p-2 rounded-md border border-gray-200" />
+                <flux:button wire:click="refreshNotifications" icon="arrow-path"
+                    class="p-2 rounded-md border border-gray-200"/>
                 <flux:modal.close>
                     <flux:button icon="x-mark" />
                 </flux:modal.close>
@@ -36,11 +36,10 @@
         </div>
 
         <!-- Notification list -->
-        <div>
-            @foreach ($groupedNotifications as $dateLabel => $items)
+        <div wire:poll.visible>
+            @foreach ($this->notifications as $dateLabel => $items)
                 @if (count($items) > 0)
                     <h2 class=" text-gray-500 font-medium">{{ $dateLabel }}</h2>
-
                     @foreach ($items as $notification)
                         <div wire:click="goDetailPage('{{ $notification->id }}')" class="mb-3 cursor-pointer ">
                             <div class="flex px-4 py-3 hover:bg-zinc-100 bg-zinc-50 rounded-lg">

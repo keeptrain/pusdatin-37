@@ -4,14 +4,10 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
 
 class Notifications extends Component
 {
-    public $notifications = [];
-
-    public $groupedNotifications = [];
-
     public $notificationCount = 0;
 
     public function mount()
@@ -19,46 +15,34 @@ class Notifications extends Component
         $this->notificationCount = $this->emitCount();
     }
 
-    public function loadNotifications(bool $refresh = false)
+    #[Computed]
+    public function notifications()
     {
-        $user = Auth::user();
-
-        if ($refresh) {
-            $user->unsetRelation('unreadNotifications');
-        }
-
-        $this->notifications = $user->unreadNotifications()
+        $notifications = auth()->user()
+            ->unreadNotifications()
             ->latest()
             ->take(10)
             ->get(['id', 'data', 'created_at']);
 
-        $this->groupNotifications();
+        return $this->groupNotifications($notifications);
     }
 
-    public function reloadNotifications()
+    protected function groupNotifications($notifications)
     {
-        $this->loadNotifications(true);
-    }
-
-    protected function groupNotifications()
-    {
-        $this->groupedNotifications = [
-            'Today' => [],
-            'Yesterday' => [],
-            'Earlier' => [],
-        ];
-
-        foreach ($this->notifications as $notification) {
+        return $notifications->groupBy(function ($notification) {
             $createdAt = Carbon::parse($notification->created_at);
 
-            if ($createdAt->isToday()) {
-                $this->groupedNotifications['Today'][] = $notification;
-            } elseif ($createdAt->isYesterday()) {
-                $this->groupedNotifications['Yesterday'][] = $notification;
-            } else {
-                $this->groupedNotifications['Earlier'][] = $notification;
-            }
-        }
+            return match (true) {
+                $createdAt->isToday() => 'Today',
+                $createdAt->isYesterday() => 'Yesterday',
+                default => 'Earlier'
+            };
+        })->mapWithKeys(fn($items, $key) => [$key => $items->all()]);
+    }
+
+    public function refreshNotifications()
+    {
+        auth()->user()->unsetRelation('unreadNotifications');
     }
 
     public function emitCount(): void
@@ -92,6 +76,6 @@ class Notifications extends Component
     public function markAllAsRead()
     {
         auth()->user()->unreadNotifications()->update(['read_at' => now()]);
-        $this->loadNotifications();
+        unset($this->notifications); 
     }
 }
