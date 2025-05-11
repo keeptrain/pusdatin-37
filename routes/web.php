@@ -15,21 +15,16 @@ use App\Livewire\Letters\CreateLetter;
 use App\Livewire\Admin\ManageTemplates;
 use App\Livewire\Letters\Data\Activity;
 use App\Livewire\Letters\Data\Rollback;
+use App\Http\Controllers\DashboardController;
 use App\Livewire\Letters\Data\ApplicationTable;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('dashboard', function () {
-    $user = auth()->user();
-
-    return match (true) {
-        $user->hasRole(['administrator', 'verifikator']) => view('dashboard', ['totalServices' => Letter::count()]),
-        $user->hasRole('user') => view('dashboard-user'),
-        default => abort(403),
-    };
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('letter', CreateLetter::class)->name('letter');
