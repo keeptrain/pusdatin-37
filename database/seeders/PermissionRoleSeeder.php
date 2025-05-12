@@ -34,7 +34,10 @@ class PermissionRoleSeeder extends Seeder
         // Create roles
         $roles = [
             'administrator',
-            'verifikator',
+            'head_verifier',
+            'si_verifier',
+            'data_verifier',
+            'pr_verifier',
             'user',
         ];
 
@@ -49,7 +52,13 @@ class PermissionRoleSeeder extends Seeder
         $role = \Spatie\Permission\Models\Role::findByName('administrator');
         $role->givePermissionTo($permissions);
 
-        $role = \Spatie\Permission\Models\Role::findByName('verifikator');
+        $role = \Spatie\Permission\Models\Role::findByName('head_verifier');
+        $role->givePermissionTo(['read', 'update']);
+
+        $role = \Spatie\Permission\Models\Role::findByName('si_verifier');
+        $role->givePermissionTo(['read', 'update']);
+
+        $role = \Spatie\Permission\Models\Role::findByName('pr_verifier');
         $role->givePermissionTo(['read', 'update']);
 
         $role = \Spatie\Permission\Models\Role::findByName('user');
