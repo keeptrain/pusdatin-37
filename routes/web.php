@@ -16,6 +16,8 @@ use App\Livewire\Admin\ManageTemplates;
 use App\Livewire\Letters\Data\Activity;
 use App\Livewire\Letters\Data\Rollback;
 use App\Livewire\Letters\Data\ApplicationTable;
+use App\Livewire\Letters\DetailHistory;
+use App\Livewire\Letters\HistoryLetter;
 
 Route::get('/', function () {
     return view('welcome');
@@ -37,11 +39,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('letter/form', DirectForm::class)->name('letter.form');
     Route::get('letter/table', ApplicationTable::class)->name('letter.table');
 
+    Route::get('letter/history', HistoryLetter::class)->name('history');
+    Route::get('letter/history/{track}', DetailHistory::class)->name('history.detail');
+
+
     Route::get('letter/{id}', Detail::class)->name('letter.detail');
     Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
     Route::get('letter/{id}/activity', Activity::class)->name('letter.activity');
     Route::get('letter/{id}/chat', Chat::class)->name('letter.chat');
     Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
+
 
     // Route::prefix('letter/{id}')->group(function() {
     //     Route::get('detail', [Detail::class])->name('letter.detail');

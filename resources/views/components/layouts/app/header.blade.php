@@ -22,6 +22,10 @@
                 wire:navigate>
                 {{ __('Letter') }}
             </flux:navbar.item>
+            <flux:navbar.item icon="arrow-path" :href="route('history')" :current="request()->routeIs('history')"
+                wire:navigate>
+                {{ __('Histori Permohonan') }}
+            </flux:navbar.item>
         </flux:navbar>
 
         <flux:spacer />
@@ -125,8 +129,10 @@
             </flux:navlist.item>
         </flux:navlist>
     </flux:sidebar>
+    <div class="max-w-[1440px] mx-auto"> <!--dubungkus max-w biar ga jadi melebar di layar besar -->
+        {{ $slot }}
+    </div>
 
-    {{ $slot }}
 
     @fluxScripts
 </body>
