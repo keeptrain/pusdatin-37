@@ -4,7 +4,7 @@
         @foreach($tracks as $track)
         <x-user.card-history
             :requestId="$track->id"
-            title="{{ $track->letter->title }}" />
+            :title="$track->letter->title" />
         @endforeach
 
     </div>

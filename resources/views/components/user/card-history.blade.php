@@ -43,7 +43,7 @@
 
         <div class="flex flex-col items-center justify-between md:flex-row">
             <div class="flex gap-1 items-center  w-[60%]">
-                <div class="w-[30%] bg-gray-200 rounded-full h-2">
+                <div class="w-[30%] bg-gray-200 rounded-full h-2 progres-bar    ">
                     <div class="bg-[#364872] h-2 rounded-full" style="width: 50%"></div>
                 </div>
                 <span class="text-gray-600 font-medium">50%</span>
