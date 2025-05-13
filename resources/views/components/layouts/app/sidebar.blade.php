@@ -47,26 +47,44 @@
             </flux:navlist.group>
         </flux:navlist>
 
+        <flux:navlist variant="outline">
+            <flux:navlist.group :heading="__('Manage')" class="grid">
+                @hasanyrole('administrator|head_verifier')
+                <flux:navlist.item href="#" icon="arrow-right-end-on-rectangle">Disposisi</flux:navlist.item>
+                @endrole
+                <flux:navlist.item :href="route('letter.table')" icon="folder-open"
+                    :current="request()->routeIs('letter.table')" wire:navigate>Services Request</flux:navlist.item>
+                {{-- <flux:navlist.group expandable heading="Services request" class=" lg:grid">
+                    <flux:navlist.item :href="route('letter.table')" wire:navigate>Sistem informasi</flux:navlist.item>
+                    <flux:navlist.item :href="route('letter.table')" wire:navigate>Data</flux:navlist.item>
+                    <flux:navlist.item href="#">Humas</flux:navlist.item>
+                </flux:navlist.group> --}}
 
-        <flux:navlist.group :heading="__('Manage')" class="grid">
-            <flux:navlist.group expandable heading="Letter" class=" lg:grid">
-                <flux:navlist.item :href="route('letter.table')" wire:navigate>Application</flux:navlist.item>
-                <flux:navlist.item href="#">Data</flux:navlist.item>
-                <flux:navlist.item href="#">Humas</flux:navlist.item>
+                {{-- <flux:navlist.group expandable heading="System" class=" lg:grid">
+                    <flux:navlist.item :href="route('admin.users')" wire:navigate>User</flux:navlist.item>
+                    <flux:navlist.item wire:navigate>Template</flux:navlist.item>
+                </flux:navlist.group> --}}
+
             </flux:navlist.group>
-
-            {{-- <flux:navlist.group expandable heading="System" class=" lg:grid">
-                <flux:navlist.item :href="route('admin.users')" wire:navigate>User</flux:navlist.item>
-                <flux:navlist.item wire:navigate>Template</flux:navlist.item>
-            </flux:navlist.group> --}}
-
-        </flux:navlist.group>
+        </flux:navlist>
 
         <flux:navlist variant="outline">
-            <flux:navlist.item :href="route('manage.templates')" icon="document-text" wire:navigate>Template
-            </flux:navlist.item>
-            <flux:navlist.item :href="route('manage.users')" icon="globe-alt" wire:navigate>System
-            </flux:navlist.item>
+            <flux:navlist.group :heading="__('Systems')" class="grid">
+                @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier')
+                <flux:navlist.item :href="route('manage.templates')" icon="chart-pie" wire:navigate>Analytics
+                </flux:navlist.item>
+                @endhasanyrole
+
+                @hasanyrole('si_verifier|data_verifier|pr_verifier')
+                <flux:navlist.item :href="route('manage.templates')" icon="document-text" wire:navigate>Templates
+                </flux:navlist.item>
+                @endrole
+
+                @hasanyrole('administrator')
+                <flux:navlist.item :href="route('manage.users')" icon="globe-alt" wire:navigate>User
+                </flux:navlist.item>
+                @endrole
+            </flux:navlist.group>
         </flux:navlist>
 
         {{-- <flux:navlist variant="outline">

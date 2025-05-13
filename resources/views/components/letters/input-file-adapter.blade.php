@@ -18,8 +18,8 @@
         @endif
     </h4>
     @if ($template)
-    <flux:button href="{{ asset($filePath) }}" size="xs" variant="primary" download>
-        <flux:icon.arrow-down-tray class="size-4" />Download Template
+    <flux:button wire:click="{{ $filePath }}" size="xs" variant="primary" icon="arrow-down-tray">
+        Download Template
     </flux:button>
     @endif
 </div>

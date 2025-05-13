@@ -1,7 +1,6 @@
 <?php
 
 use App\Livewire\Letters\Chat;
-use App\Models\Letters\Letter;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Letters\Data\Edit;
@@ -12,13 +11,13 @@ use App\Livewire\Letters\Data\Detail;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Letters\CreateLetter;
-use App\Livewire\Admin\ManageTemplates;
 use App\Livewire\Letters\Data\Activity;
 use App\Livewire\Letters\Data\Rollback;
-use App\Http\Controllers\DashboardController;
-use App\Livewire\Letters\Data\ApplicationTable;
 use App\Livewire\Letters\DetailHistory;
 use App\Livewire\Letters\HistoryLetter;
+use App\Http\Controllers\DashboardController;
+use App\Livewire\Letters\Data\ApplicationTable;
+use App\Http\Controllers\Admin\TemplateController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -53,10 +52,13 @@ Route::middleware(['auth'])->group(function () {
     // });
 });
 
-Route::group(['middleware' => ['auth', 'role:administrator']], function () {
+Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_verifier|pr_verifier']], function () {
     Route::prefix('system')->group(function () {
         Route::get('users', ManageUsers::class)->name('manage.users');
-        Route::get('templates', ManageTemplates::class)->name('manage.templates');
+        Route::get('templates', [TemplateController::class,'index'])->name('manage.templates');
+        Route::get('template/create', [TemplateController::class,'create'])->name('create.template');
+        Route::post('template/store', [TemplateController::class,'store'])->name('store.template');
+        // Route::get('templates/create', ManageTemplates::class)->name('template.create');
     });
 });
 

@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -17,12 +18,12 @@ return new class extends Migration
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            // $table->morphs('letterable');
             $table->string('title', 255);
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
-            $table->string('status', 86)->default('pending');
-            $table->integer('current_revision')->default(0);
+            $table->string('status', 86)->default(Letter::getDefaultStates());
+            $table->int('current_division')->default(2);
+            // $table->int('previous_division')->nullable();
             $table->boolean('active_revision')->default(false);
             $table->timestamps();
             $table->softDeletes();
@@ -56,16 +57,28 @@ return new class extends Migration
          */
         Schema::create('letter_uploads', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('letter_id')->constrained('letters')->onDelete('cascade');
-            $table->string('part_name');
-            // $table->string('file_name');
+            $table->integer('part_number');
             $table->string('file_path');
-            // $table->string('file_type')->nullable();
-            $table->integer('version')->default(1);
+            $table->integer('version')->default(0);
             $table->boolean('needs_revision')->default(false);
-            $table->text('revision_note')->nullable();
+            $table->string('revision_note')->nullable();
             $table->timestamps();
         });
+
+        // /**
+        //  * Create the letter_uploads_revisions table
+        //  */
+        // Schema::create('letter_uploads_revisions', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->unsignedBigInteger('letter_upload_id');
+        //     $table->string('file_path');
+        //     $table->integer('version')->default(1);
+        //     $table->revision_note('revision_note')->nullable();
+        //     $table->timestamps();
+
+
+        //     $table->foreign('letter_upload_id')->references('id')->on('letter_uploads')->onDelete('cascade');
+        // });
 
         /**
          * Create the letter_directs table
@@ -83,7 +96,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('letter_id');
             $table->morphs('letterable');
-            $table->timestamps();
 
             // Add Foreign Key to Letters Table
             $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
@@ -102,13 +114,11 @@ return new class extends Migration
             $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
         });
 
-        Schema::create('letter_templates', function (Blueprint $table) {
+        Schema::create('document_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('type');
+            $table->int('part_number');
             $table->string('file_path');
-            $table->enum('format', ['docx', 'pdf']);
-            $table->foreignId('created_by')->constrained('users');
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
@@ -143,5 +153,6 @@ return new class extends Migration
         Schema::dropIfExists('letter_directs');
         Schema::dropIfExists('letters_mappings');
         Schema::dropIfExists('letter_messages');
+        Schema::dropIfExists('document_templates');
     }
 };
