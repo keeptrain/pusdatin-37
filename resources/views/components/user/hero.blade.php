@@ -18,28 +18,25 @@
                 </div>
             </div>
             <div class="lg:w-1/2 relative">
-                <div class="relative z-10 bg-white rounded-2xl shadow-xl p-6 border border-purple-100 animate-[float_5s_ease-in-out_infinite]">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="relative z-10 bg-white rounded-2xl shadow-xl p-6 border border-purple-100 animate-[float_5s_ease-in-out_infinite] w-[325px] sm:w-full">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-blue-50 border border-purple-100">
                             <x-lucide-code class="w-14 text-[#364872]" />
                             </svg>
-                            <span class="text-center font-medium">Aplikasi</span>
-                        </div>
-                        <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-teal-50 border border-teal-100">
-                            <x-lucide-database class="w-14 text-teal-700" />
-                            <span class="text-center font-medium">Data</span>
+                            <span class="text-center font-medium">Sistem Informasi & Data</span>
                         </div>
                         <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-orange-50 border border-orange-100">
                             <x-lucide-file-video class="w-14 text-orange-700" />
-                            <span class="text-center font-medium">Multimedia</span>
+                            <span class="text-center font-medium">Kehumasan</span>
                         </div>
+
                     </div>
                     <div class="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-100">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-3 h-3 rounded-full bg-red-500"></div>
                             <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                             <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                            <div id="typing-text" class="text-sm text-gray-500 transition-opacity duration-300 ease-in-out h-[20px]"></div>
+                            <div id="typing-text" class="text-sm text-gray-500 transition-opacity duration-300 ease-in-out h-[20px] "></div>
                         </div>
                         <div class="h-2 bg-indigo-200 rounded-full mb-2 w-3/4"></div>
                         <div class="h-2 bg-indigo-200 rounded-full mb-2 w-1/2"></div>
