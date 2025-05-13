@@ -18,11 +18,7 @@
 
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
                         <!-- FileEdit Icon from Lucide -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-white">
-                            <path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44z"></path>
-                        </svg>
+                        <x-lucide-file-edit class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->

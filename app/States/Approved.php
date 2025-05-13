@@ -10,7 +10,7 @@ class Approved extends LetterStatus
     {
         return 'Approved';
     }
-    
+
     public function color(): string
     {
         return 'bg-green-500';
@@ -29,5 +29,21 @@ class Approved extends LetterStatus
     public function userNotificationMessage(array $context): string
     {
         return "Permohonan layanan anda diterima";
+    }
+    public function icon(): string
+    {
+        return 'check-circle';
+    }
+    public function badgeBg(): string
+    {
+        return 'bg-green-500';
+    }
+    public function percentage(): string
+    {
+        return '100%';
+    }
+    public function percentageBar(): string
+    {
+        return 'w-[100%]';
     }
 }
