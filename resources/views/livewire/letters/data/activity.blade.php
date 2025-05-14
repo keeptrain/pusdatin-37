@@ -6,13 +6,13 @@
             <flux:notification.status-stepped :status="$letter->status->label()" />
 
             @foreach ($activity as $date => $hours)
-            <!-- Activity letter -->
-            <div class="border border-gray-200 rounded-lg mt-4 md:mt-8">
-                <div class="p-4 flex items-center">
-                    <flux:icon.calendar />
-                    <flux:heading class="ml-3">{{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
-                    </flux:heading>
-                </div>
+                <!-- Activity letter -->
+                <div class="border border-gray-200 rounded-lg mt-4 md:mt-8">
+                    <div class="p-4 flex items-center">
+                        <flux:icon.calendar />
+                        <flux:heading class="ml-3">{{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
+                        </flux:heading>
+                    </div>
 
                     @foreach ($hours as $hour => $actions)
                         <div class="border-t border-gray-200">
@@ -32,8 +32,6 @@
                                         {{ $hour }}
                                     </div>
                                 </div>
-
-                                {{ $hour }}
                             </div>
                         </div>
                     @endforeach
