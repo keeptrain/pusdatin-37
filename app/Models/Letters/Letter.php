@@ -2,16 +2,15 @@
 
 namespace App\Models\Letters;
 
-use App\Models\letters\LettersMapping;
 use Carbon\Carbon;
 use App\Models\User;
 use App\States\LetterStatus;
 use Spatie\ModelStates\HasStates;
+use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Letter extends Model
 {
@@ -29,7 +28,7 @@ class Letter extends Model
         'responsible_person',
         'reference_number',
         'status',
-        'current_revision',
+        'current_division',
         'active_revision'
     ];
 
@@ -48,15 +47,16 @@ class Letter extends Model
         return $this->hasMany(RequestStatusTrack::class);
     }
 
-    public static function resolveStatusClassFromString(): array
+    public static function resolveStatusClassFromString($statusString)
     {
-        return [
-            'pending'  => \App\States\Pending::class,
+        return match ($statusString) {
+            'disposition'  => \App\States\Disposition::class,
             'process'  => \App\States\Process::class,
-            'approved' => \App\States\Approved::class,
             'replied' => \App\States\Replied::class,
+            'approved_kasatpel' => \App\States\ApprovedKasatpel::class,
+            'approved_kapusdatin' => \App\States\ApprovedKapusdatin::class,
             'rejected' => \App\States\Rejected::class
-        ];
+        };
     }
 
     /**
@@ -80,6 +80,16 @@ class Letter extends Model
         return Carbon::parse($this->created_at)->format('d F Y, H:i');
     }
 
+    public function kasatpelName($value)
+    {
+        return match ($value) {
+            3 => 'Sistem Informasi',
+            4 => 'Pengelolaan Data',
+            5 => 'Hubungan Masyarakat',
+            default => $value, // Default case for other numbers
+        };
+    }
+
     /**
      * Get the updated_at attribute in readable format.
      *
@@ -91,59 +101,81 @@ class Letter extends Model
         return Carbon::parse($value)->format('d F Y, H:i');
     }
 
-    public function transitionStatusOnly($newStatus)
+    public function transitionStatusToProcess($division)
     {
-        $states = self::resolveStatusClassFromString();
-
-        $currentStatusName = $this->status->getValue();
-
-        if ($newStatus !== $currentStatusName) {
-            if (isset($states[$newStatus])) {
-                $this->status->transitionTo($states[$newStatus]);
-            }
-        }
-    }
-
-    public function transitionToStatus($newStatus, ?string $notes): void
-    {
-        $this->status->transitionTo($newStatus);
-
-        $updatedState = $this->status;
-
-        $isReplied = $this->isRepliedState($updatedState);
-
-        if ($isReplied && $this->active_revision === true) {
-            return;
-        }
-
-        if ($isReplied) {
-            $this->update(['active_revision' => true]);
-        } else {
-            $this->update(['active_revision' => false]);
-        }
+        $this->status->transitionTo(\App\States\Process::class);
 
         $this->requestStatusTrack()->create([
             'letter_id'    => $this->id,
-            'action'       => $updatedState->trackingMessage(),
-            'notes'        => $notes,
-            'created_by'   => Auth::user()->name,
+            'action'       => $this->status->trackingMessage($division),
+            'created_by'   => auth()->user()->name
         ]);
     }
 
-    private function isRepliedState($state): bool
+    public function transitionStatusFromDisposition($newStatus, $division)
     {
-        return $state instanceof \App\States\Replied;
+        $newStatus = self::resolveStatusClassFromString($newStatus);
+
+        $this->status->transitionTo($newStatus);
+
+        $this->update([
+            'current_division' => $division,
+        ]);
+
+        $this->requestStatusTrack()->create([
+            'letter_id'    => $this->id,
+            'action'       => $this->status->trackingMessage($division),
+            'created_by'   => auth()->user()->name
+        ]);
+    }
+
+    public function transitionStatusFromProcess($newStatus, $division, ?string $notes): void
+    {
+        $resolveNewStatus = self::resolveStatusClassFromString($newStatus);
+
+        $this->status->transitionTo($resolveNewStatus);
+
+        $resolveNewStatus = match ($newStatus) {
+            'approved_kasatpel' => $this->update(['current_division' => 2]),
+            'replied' => $this->update([
+                'active_revision' => true
+            ])
+        };
+
+        $this->requestStatusTrack()->create([
+            'letter_id'    => $this->id,
+            'action'       => $this->status->trackingMessage($division),
+            'notes'        => $notes,
+            'created_by'   => auth()->user()->name,
+        ]);
+    }
+
+    public function transitionStatusFromApprovedKasatpel($newStatus, $division): void
+    {
+        $resolveNewStatus = self::resolveStatusClassFromString($newStatus);
+
+        $resolveNewStatus = match ($newStatus) {
+            'approved_kapusdatin' => $this->status->transitionTo($resolveNewStatus),
+            'replied' => $this->update([
+                'active_revision' => true
+            ])
+        };
+
+        $this->requestStatusTrack()->create([
+            'letter_id'    => $this->id,
+            'action'       => $this->status->trackingMessage($division),
+            'created_by'   => auth()->user()->name
+        ]);
     }
 
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder
     {
-        $map = static::resolveStatusClassFromString();
+        $resolveStatus = static::resolveStatusClassFromString($filterStatus);
 
-        if ($filterStatus && isset($map[$filterStatus])) {
-            return $query->where('status', $map[$filterStatus]);
+        if (isset($resolveStatus)) {
+            return $query->where('status', $resolveStatus);
         }
 
         return $query;
     }
-
 }

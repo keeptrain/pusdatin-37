@@ -3,8 +3,10 @@
 namespace App\Livewire\Letters\Data;
 
 use Livewire\Component;
+use App\States\Disposition;
 use Livewire\WithPagination;
 use App\Models\Letters\Letter;
+use Livewire\Attributes\Computed;
 
 class ApplicationTable extends Component
 {
@@ -16,7 +18,7 @@ class ApplicationTable extends Component
 
     public array $statuses = [
         'all' => 'All',
-        'pending' => 'Pending',
+        'disposition' => 'Disposition',
         'process' => 'Process',
         'replied' => 'Replied',
         'approved' => 'Approved',
@@ -33,39 +35,54 @@ class ApplicationTable extends Component
 
     public function render()
     {
-        return view('livewire.letters.data.application-table', [
-            'letters' => $this->loadLetters()->paginate($this->perPage),
-        ]);
+        return view('livewire.letters.data.application-table');
+    }
+
+    public function detailPageForProcess(int $id)
+    {
+        $letter = Letter::findOrFail($id);
+
+        if ($letter->status == Disposition::class) {
+            $letter->transitionStatusToProcess($letter->current_division);
+        }
+        return $this->redirect("{$id}", true);
     }
 
     public function detailPage(int $id)
     {
-        return redirect()->route('letter.detail', [$id]);
+        return $this->redirect("{$id}", true);
     }
 
-    public function loadLetters()
+    #[Computed]
+    public function letters()
     {
-        $query = Letter::with([
-            'user:id,name',
-        ])
-            ->when($this->filterStatus !== 'all', function ($query) {
-                $query->filterByStatus($this->filterStatus);
-            })
-            ->when($this->searchQuery, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('title', 'like', '%' . $this->searchQuery . '%')
-                        ->orWhere('responsible_person', 'like', '%' . $this->searchQuery . '%')
-                        ->orWhereHas('user', function ($q) {
-                            $q->where('name', 'like', '%' . $this->searchQuery . '%');
-                        });
-                });
-            });
-
         [$column, $direction] = $this->getSortCriteria();
 
-        $query->orderBy($column, $direction);
-
-        return $query;
+        $user = auth()->user();
+        $roleNames = $user->roles()->pluck('name');
+        $isAdministrator = $roleNames->contains('head_verifier');
+        $allowedRoleIds = $user->roles()->pluck('id');
+        
+        return Letter::with([
+            'user:id,name',
+        ])
+        ->when(!$isAdministrator, function ($query) use ($allowedRoleIds) {
+            $query->whereIn('current_division', $allowedRoleIds);
+        })
+        ->when($this->filterStatus !== 'all', function ($query) {
+            $query->filterByStatus($this->filterStatus);
+        })
+        ->when($this->searchQuery, function ($query) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . $this->searchQuery . '%')
+                    ->orWhere('responsible_person', 'like', '%' . $this->searchQuery . '%')
+                    ->orWhereHas('user', function ($q) {
+                        $q->where('name', 'like', '%' . $this->searchQuery . '%');
+                    });
+            });
+        })
+        ->orderBy($column, $direction)
+        ->paginate($this->perPage);
     }
 
     private function getSortCriteria(): array

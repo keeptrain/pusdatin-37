@@ -1,6 +1,6 @@
 <div class="lg:p-3">
 
-    <flux:heading size="xl" level="1" class="mb-6">{{ __('Letter') }}</flux:heading>
+    <flux:heading size="xl" level="1" class="mb-6">{{ __('List Service Request') }}</flux:heading>
     <flux:menu.tabs :statuses="$statuses" :filterStatus="$filterStatus" />
 
     <div class="flex flex-1 justify-between items-center mb-4 h-10">
@@ -41,31 +41,34 @@
         <!-- Right Side: Search -->
         <div class="flex">
             {{-- for testing --}}
-            <flux:button icon="plus-circle" :href="route('letter')" class="p-2 mr-2"></flux:button>
+            <flux:button icon="plus-circle" :href="route('letter.upload')" class="p-2 mr-2"></flux:button>
             <flux:input wire:model.live.debounce.500ms="searchQuery" icon="magnifying-glass" placeholder="Search..." />
         </div>
     </div>
 
-    <flux:table.base :perPage="$perPage" :paginate="$letters" emptyMessage="No data letter available.">
+    <flux:table.base :perPage="$perPage" :paginate="$this->letters" emptyMessage="No data letter available.">
         <x-slot name="header">
             <flux:table.column class="w-1 border-l-2 border-white dark:border-l-zinc-800">
                 <flux:checkbox wire:click="toggleSelectAll" />
             </flux:table.column>
             <flux:table.column>Responsible person</flux:table.column>
-            <flux:table.column>Title</flux:table.column>
+            <flux:table.column>Judul</flux:table.column>
+            <flux:table.column>Kasatpel</flux:table.column>
             <flux:table.column>Status</flux:table.column>
             <flux:table.column>Created date</flux:table.column>
             <flux:table.column></flux:table.column>
         </x-slot>
 
         <x-slot name="body">
-            @foreach ($letters as $item)
+            @foreach ($this->letters as $item)
                 <tr @if(!in_array($item->id, $selectedLetters)) 
-                    @click="window.location.href='{{ route('letter.detail', ['id' => $item->id]) }}'" 
-                    @endif class="
-                    {{ in_array($item->id, $selectedLetters) ? 'relative bg-zinc-50 dark:bg-zinc-900 ' : 'dark:bg-zinc-800' }}
-                    border-b border-b-zinc-100 dark:border-b-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 cursor-pointer"
-                    wire:navigate>
+                    @hasanyrole('si_verifier|data_verifier|pr_verifier')
+                        @click="$wire.detailPageForProcess({{ $item->id }})"
+                    @endrole
+                        @click="$wire.detailPage({{ $item->id }})"
+                    @endif 
+                    class="{{ in_array($item->id, $selectedLetters) ? 'relative bg-zinc-50 dark:bg-zinc-900 ' : 'dark:bg-zinc-800' }}
+                    border-b border-b-zinc-100 dark:border-b-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 cursor-pointer">
 
                     <flux:table.row @click.stop class="{{ in_array($item->id, $selectedLetters)
                             ? '  border-s-2 border-black dark:border-white'
@@ -75,6 +78,7 @@
 
                     <flux:table.row>{{ $item->user->name }}</flux:table.row>
                     <flux:table.row>{{ $item->title }}</flux:table.row>
+                    <flux:table.row>{{ $item->kasatpelName($item->current_division) }}</flux:table.row>
                     <flux:table.row>
                         <flux:notification.status-badge status="{{ $item->status->label() }}">
                             {{ $item->status->label() }}</flux:notification.status-badge>
@@ -97,6 +101,7 @@
         </x-slot>
 
         <x-slot name="emptyRow">
+            <td class="py-3">&nbsp;</td>
             <td class="py-3">&nbsp;</td>
             <td class="py-3">&nbsp;</td>
             <td class="py-3">&nbsp;</td>
