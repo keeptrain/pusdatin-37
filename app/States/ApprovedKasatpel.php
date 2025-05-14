@@ -30,4 +30,20 @@ class ApprovedKasatpel extends LetterStatus
     {
         return "Permohonan layanan anda diterima";
     }
+    public function icon(): string
+    {
+        return 'check-circle';
+    }
+    public function badgeBg(): string
+    {
+        return 'bg-green-500';
+    }
+    public function percentage(): string
+    {
+        return '100%';
+    }
+    public function percentageBar(): string
+    {
+        return 'w-[100%]';
+    }
 }

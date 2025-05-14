@@ -18,6 +18,14 @@ abstract class LetterStatus extends State
 
     abstract public function color(): string;
 
+    abstract public function badgeBg(): string;
+
+    abstract public function percentage(): string;
+
+    abstract public function percentageBar(): string;
+
+    abstract public function icon(): string;
+
     abstract public function toastMessage(): string;
 
     abstract public function trackingMessage(?int $division): string;
