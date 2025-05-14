@@ -5,6 +5,7 @@ namespace App\Livewire\Letters;
 use Carbon\Carbon;
 use App\Models\User;
 use Livewire\Component;
+use App\Models\Template;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Auth;
 use App\Models\letters\LettersMapping;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -39,7 +41,7 @@ class UploadForm extends Component
             'reference_number' => 'required|string',
             'files.0' => 'required|file|mimes:pdf|max:1048',
             'files.1' => 'required|file|mimes:pdf|max:1048',
-            'files.2' => 'required|file|mimes:pdf|max:1048'
+            'files.2' => 'file|mimes:pdf|max:1048'
         ];
     }
 
@@ -49,9 +51,8 @@ class UploadForm extends Component
             'title.required' => 'Title is required',
             'responsible_person.required' => 'Responsible person is required',
             'reference_number.required' => 'Reference number is required',
-            'files.0.required' => 'Files 1 required',
-            'files.1.required' => 'Files 2 required',
-            'files.2.required' => 'Files 3 required',
+            'files.0.required' => 'Nota dinas harus ada',
+            'files.1.required' => 'SOP harus ada',
         ];
     }
 
@@ -68,7 +69,7 @@ class UploadForm extends Component
                 $uploadIds = $this->insertLetterUploads($uploads);
                 $this->createLetterMappings($letter->id, $uploadIds);
                 $this->createStatusTrack($letter);
-                $user = User::role(['administrator','verifikator'])->get();
+                $user = User::role(['head_verifier'])->get();
                 Notification::send($user, new NewServiceRequestNotification($letter));
             });
 
@@ -109,6 +110,7 @@ class UploadForm extends Component
             'responsible_person' => $this->responsible_person,
             'reference_number' => $this->reference_number,
             'status' => Letter::getDefaultStateFor('status'),
+            'current_division' => 2
         ]);
     }
 
@@ -119,10 +121,8 @@ class UploadForm extends Component
             ->values()
             ->map(function ($file, $index) {
                 return [
-                    'part_name' => 'part' . ($index + 1),
+                    'part_number' => $index + 1,
                     'file_path' => $file->store('letters', 'public'),
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ];
             })->toArray();
     }
@@ -152,8 +152,23 @@ class UploadForm extends Component
     protected function createStatusTrack(Letter $letter): void
     {
         $letter->requestStatusTrack()->create([
-            'action' => (new ($letter->status)($letter))->trackingMessage(),
+            'action' => $letter->status->trackingMessage(null),
             'created_by' => Auth::user()->name
         ]);
+    }
+
+    public function downloadTemplate($typeNumber)
+    {
+        $template = Template::where('type_number', $typeNumber)->where('is_active', '1')->first();
+
+        if ($template) {
+            $filePath = $template->file_path;
+
+            $fileDownload = Storage::disk('public')->path($filePath);
+
+            return response()->download($fileDownload);
+        }
+
+        abort(404, 'Template not found.');
     }
 }

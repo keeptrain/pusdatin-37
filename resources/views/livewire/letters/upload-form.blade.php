@@ -1,5 +1,6 @@
 <x-letters.layout legend="Upload Form">
 
+    <!-- Section 1: Basic information -->
     <form wire:submit="save" class="space-y-6 mb-6 ">
         <div class="border border-gray-200 rounded-lg p-4">
             <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
@@ -15,19 +16,9 @@
                     clearable />
 
                 <div class="grid grid-cols-2 gap-x-6">
-
                     <div>
                         <flux:input wire:model="reference_number" label="Reference number" placeholder="No./xx/xx/2025"
                             clearable />
-                    </div>
-
-                    <div>
-                        <flux:select label="Section" placeholder="Choose section...">
-                            <flux:select.option>Seksi A</flux:select.option>
-                            <flux:select.option>Seksi B</flux:select.option>
-                            <flux:select.option>Seksi C</flux:select.option>
-                            <flux:select.option>Seksi D</flux:select.option>
-                        </flux:select>
                     </div>
                 </div>
             </div>
@@ -50,12 +41,43 @@
                     Upload document
                 </h3>
 
-                <div class="space-y-6">
-                    <!-- File Upload -->
-                    <x-letters.input-file-adapter title="Part 1" model="files.0" />
-                    <x-letters.input-file-adapter title="Part 2" model="files.1" />
-                    <x-letters.input-file-adapter title="Part 3" model="files.2" />
+                <!-- File Upload -->
+                <x-letters.input-file-adapter title="Nota dinas" model="files.0" required template filePath="downloadTemplate('1')"/>
 
+                <x-letters.input-file-adapter title="Standar Operasional Prosedur (SOP)" model="files.1" required
+                    template filePath="downloadTemplate('2')"/>
+
+                <x-letters.input-file-adapter title="Pengesahan" model="files.2" optional template filePath="downloadTemplate('3')"/>
+
+                <div x-data="{ open: false }" class="border-l-2 border-gray-400 bg-gray-50 ">
+                    <div class="p-2 flex justify-between items-center cursor-pointer" @click="open = !open">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <span class="ml-2 text-sm font-medium text-gray-600">When is this required?</span>
+                        </div>
+                        <svg x-show="!open" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                        <svg x-show="open" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </div>
+
+                    <div x-show="open" class="p-3 text-gray-600 border-t border-gray-200">
+                        <p class="text-sm">This section is optional and only needed for special cases requiring
+                            additional documentation. If your submission falls under standard procedures, you can
+                            skip this upload.</p>
+                    </div>
                 </div>
             </div>
 
@@ -65,10 +87,9 @@
                 </flux:button>
 
                 <flux:button type="submit" variant="primary" x-bind:disabled="uploading">
-                    {{ __('Create') }}
+                    {{ __('Send') }}
                 </flux:button>
             </div>
-        </div>
     </form>
 
 </x-letters.layout>
