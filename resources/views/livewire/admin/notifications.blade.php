@@ -3,11 +3,9 @@
         <!-- Header -->
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-semibold text-gray-800">Notification</h1>
+                <h1 class="text-xl font-semibold text-gray-800">Notifications</h1>
             </div>
             <div class="flex space-x-2">
-                <flux:button wire:click="refreshNotifications" icon="arrow-path"
-                    class="p-2 rounded-md border border-gray-200"/>
                 <flux:modal.close>
                     <flux:button icon="x-mark" />
                 </flux:modal.close>
@@ -37,30 +35,31 @@
 
         <!-- Notification list -->
         <div wire:poll.visible>
-            @foreach ($this->notifications as $dateLabel => $items)
-                @if (count($items) > 0)
-                    <h2 class=" text-gray-500 font-medium">{{ $dateLabel }}</h2>
-                    @foreach ($items as $notification)
-                        <div wire:click="goDetailPage('{{ $notification->id }}')" class="mb-3 cursor-pointer ">
-                            <div class="flex px-4 py-3 hover:bg-zinc-100 bg-zinc-50 rounded-lg">
-                                <div class="mr-3">
-                                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100">
-                                        <flux:icon.envelope class="size-5"/>
-                                    </div>
-                                </div>
-                                <div class="flex-1">
-                                    <flux:heading>{{ $notification->data['message'] ?? '-' }}</flux:heading>
-                                    <div class="flex items-center text-sm text-gray-500">
-                                        <span>{{ $notification->data['letter_category'] ?? '-' }} -
-                                            {{ $notification->created_at->format('H:i') }} -
-                                            {{ $notification->created_at->diffForHumans() }}</span>
-                                    </div>
-                                </div>
-                            </div>
+            @if ($this->notifications->isNotEmpty())
+                @foreach ($this->notifications as $dateLabel => $items)
+                    @if (count($items) > 0)
+                        <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
+                            <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
                         </div>
-                    @endforeach
-                @endif
-            @endforeach
+                        @foreach ($items as $notification)
+                            <flux:notification.notification-adapter :notification="$notification" />
+                        @endforeach
+                    @endif
+                @endforeach
+            @else
+                <!-- Empty notificaiton -->
+                <div class="flex flex-col items-center justify-center p-8">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-4">
+                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">No notifications</h3>
+                    <p class="text-center text-gray-500">You're all caught up! Check back later for new updates.</p>
+                </div>
+            @endif
         </div>
     </div>
 </section>
