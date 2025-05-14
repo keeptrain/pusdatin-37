@@ -21,9 +21,11 @@ class Replied extends LetterStatus
         return "Letter successfully update status to replied!";
     }
 
-    public function trackingMessage(): string
+    public function trackingMessage(?int $division): string
     {
-        return 'Surat anda mendapatkan balasan, harap di periksa.';
+        $resolveDivision = $this->getDivisionName($division);
+
+        return "Permohonan anda mendapatkan balasan dari Kepala Satuan Pelaksana {$resolveDivision} , harap di periksa.";
     }
 
     public function userNotificationMessage(array $context): string

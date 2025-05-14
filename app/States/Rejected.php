@@ -21,9 +21,9 @@ class Rejected extends LetterStatus
         return 'Letter successfully update status to rejected!';
     }
 
-    public function trackingMessage(): string
+    public function trackingMessage(?int $division): string
     {
-        return 'Surat di tolak';
+        return "Permohonan layanan anda ditolak";
     }
 
     public function userNotificationMessage(array $context): string

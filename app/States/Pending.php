@@ -10,24 +10,24 @@ class Pending extends LetterStatus
     {
         return 'Pending';
     }
-    
+
     public function color(): string
     {
-        return 'lime';
+        return 'yellow';
     }
 
     public function toastMessage(): string
     {
-        return 'The letter was created successfully';
+        return 'The letter is pending.';
     }
 
-    public function trackingMessage(): string
+    public function trackingMessage(?int $division): string
     {
-        return 'Surat telah di kirim, mohon di cek berkala';
+        return 'Permohonan layanan sudah kami terima, mohon tunggu konfirmasi selanjutnya.';
     }
 
     public function userNotificationMessage(array $context): string
     {
-        return "Surat baru telah diajukan oleh " . $context['responsible_person'];
+        return "The letter is pending for review by " . $this->getDivisionName($context['division']);
     }
 }
