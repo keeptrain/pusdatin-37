@@ -4,7 +4,6 @@ namespace App\Livewire\Letters;
 
 use App\Models\User;
 use Livewire\Component;
-use App\States\LetterStatus;
 use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
@@ -13,7 +12,6 @@ use App\Models\Letters\LetterUpload;
 use App\Models\letters\LettersMapping;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ModalConfirmation extends Component
 {
@@ -30,6 +28,8 @@ class ModalConfirmation extends Component
 
     public bool $activeRevision;
 
+    public $selectedDivision = '';
+
     public $revisionParts = [];
 
     public $revisionNotes = [];
@@ -44,17 +44,24 @@ class ModalConfirmation extends Component
             'status' => [
                 'required',
                 'string',
-                Rule::in($this->getStatusMap()->keys()),
+                Rule::in('approved_kapusdatin', 'approved_kasatpel', 'replied', 'rejected', 'disposition')
             ],
         ];
 
-        if ($this->status === 'replied') {
-            if ($this->activeRevision) {
-                $rules['status'][] = function ($attribute, $value, $fail) {
-                    $fail('Masih ada revisi aktif yang belum diselesaikan. Tidak dapat membuat revisi baru.');
-                };
-            }
+        if ($this->status === 'process') {
+            $rules['status'] = [
+                Rule::in('process', 'rejected')
+            ];
+            $rules['selectedDivision'] = [
+                'required',
+                'string'
+            ];
+        };
 
+        if ($this->status === 'replied') {
+            $rules['status'] = [
+                Rule::in('approved', 'replied', 'rejected')
+            ];
             $rules['revisionParts'] = [
                 'required',
                 'array',
@@ -73,58 +80,93 @@ class ModalConfirmation extends Component
     {
         return [
             'status.required' => 'Status surat tidak boleh kosong',
+            'selectedDivision.required' => 'Tujuan divisi tidak boleh kosong',
             'revisionParts.required' => 'Butuh bagian yang harus di revisi'
         ];
     }
 
-    public function mount()
+    public function mount(int $letterId)
     {
-        $this->showModal = true;
+        $this->letterId = $letterId;
     }
 
-    public function openModal(int $id, $activeRevision)
+    public function saveDisposition()
     {
-        $this->letterId = $id;
-        $this->activeRevision = $activeRevision;
+        $this->validate();
+
+        DB::transaction(function () {
+            $letter = Letter::findOrFail($this->letterId);
+
+            $letter->transitionStatusFromDisposition(
+                $this->status,
+                $this->handleDivision($letter)
+            );
+        });
     }
 
-    public function closeModal()
+    public function save()
     {
-        $this->showModal = false;
+        $this->validate();
+
+        try {
+            DB::transaction(function () {
+                $this->checkRevisionInputForRepliedStatus();
+
+                $letter = Letter::findOrFail($this->letterId);
+
+                $letter->transitionStatusFromProcess($this->status, $letter->current_division, ($this->notes) ? $this->notes : null);
+
+                $this->reset(['status', 'notes']);
+
+                return redirect()->to("/letter/$this->letterId")
+                    ->with('status', [
+                        'variant' => 'success',
+                        'message' => $letter->status->toastMessage(),
+                    ]);
+            });
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+        }
     }
 
-    public function openNotesClosePart()
+    public function saveApproved()
     {
-        $this->showNotes = true;
-        $this->showPart = false;
+        $this->validate();
+
+        DB::transaction(function () {
+            $letter = Letter::findOrFail($this->letterId);
+
+            $letter->transitionStatusFromApprovedKasatpel(
+                $this->status,
+                division: $letter->current_division
+            );
+        });
     }
 
-    public function openPartCloseNotes()
+    public function handleDivision($letter)
     {
-        $this->showNotes = false;
-        $this->showPart = true;
+        if ($this->status == 'rejected') {
+            return $this->handleNotification($letter->user_id, $letter);
+        }
+
+        $role = match ($this->selectedDivision) {
+            'si' => 3,
+            'data' => 4,
+            default => null,
+        };
+
+        $user = User::role($role)->pluck('id')->first();
+
+        $this->handleNotification($user, $letter);
+
+        return $user;
     }
 
-    public function getStatusMap()
+    public function handleNotification($recipientId, $letter)
     {
-        $allowedStates = ['Approved', 'Replied', 'Rejected'];
+        $user = User::findOrFail($recipientId);
 
-        return collect(LetterStatus::getStateMapping())->filter(
-            fn($class) => in_array(class_basename($class), $allowedStates)
-        )->mapWithKeys(
-            fn($class) => [
-                strtolower(class_basename($class)) => $class,
-            ]
-        );
-    }
-
-    private function getStatusFromInput()
-    {
-        $map = $this->getStatusMap();
-
-        $stateClass = $map[$this->status];
-
-        return $stateClass;
+        Notification::send($user, new NewServiceRequestNotification($letter));
     }
 
     public function updateRevisionFromMapping(int $letterId, string $partName, string $note)
@@ -132,7 +174,7 @@ class ModalConfirmation extends Component
         $mapping = LettersMapping::where('letter_id', $letterId)
             ->where('letterable_type', LetterUpload::class)
             ->whereHasMorph('letterable', [LetterUpload::class], function ($query) use ($partName) {
-                $query->where('part_name', $partName);
+                $query->where('part_number', $partName);
             })
             ->first();
 
@@ -150,52 +192,20 @@ class ModalConfirmation extends Component
 
         $letterUpload->update([
             'needs_revision' => true,
-            'revision_note' => $note,
             // 'version' => DB::raw('version + 1'),`
         ]);
+
+        
     }
 
     public function checkRevisionInputForRepliedStatus()
     {
         if (in_array($this->status, ['replied', 'rejected'])) {
-            foreach ($this->revisionParts as $partName) {
-                $note = $this->revisionNotes[$partName] ?? null;
+            foreach ($this->revisionParts as $partNumber) {
+                $note = $this->revisionNotes[$partNumber] ?? null;
 
-                $this->updateRevisionFromMapping($this->letterId, $partName, $note);
+                $this->updateRevisionFromMapping($this->letterId, $partNumber, $note);
             }
-        }
-    }
-
-    public function save()
-    {
-        try {
-            $this->validate();
-
-            DB::transaction(function () {
-                $this->checkRevisionInputForRepliedStatus();
-
-                $letter = Letter::findOrFail($this->letterId);
-
-                $letter->transitionToStatus($this->getStatusFromInput(), ($this->notes) ? $this->notes : null);
-
-                $user = User::findOrFail($letter->user_id);
-                Notification::send($user, new NewServiceRequestNotification($letter, auth()->user()));
-
-                $this->reset(['status', 'notes']);
-                $this->closeModal();
-
-                return redirect()->to("/letter/$this->letterId")
-                    ->with('status', [
-                        'variant' => 'success',
-                        'message' => $letter->status->toastMessage(),
-                    ]);
-            });
-        } catch (ModelNotFoundException $e) {
-            $this->dispatch('alert', [
-                'type' => 'error',
-                'message' => 'Letter not found',
-            ]);
-            return;
         }
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Notifications;
 
-use App\States\Pending;
 use App\States\Process;
-use App\States\Approved;
+use App\States\ApprovedKapusdatin;
+use App\States\Disposition;
 use App\States\Rejected;
 use App\States\Replied;
 use Illuminate\Bus\Queueable;
@@ -47,7 +47,7 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
         $status = $this->letter->status;
 
         $context = match(true) {
-            $status instanceof Pending => [
+            $status instanceof Disposition => [
                 'responsible_person' => $this->letter->responsible_person,
             ],
             $status instanceof Process => [
@@ -56,14 +56,13 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
             $status instanceof Replied => [
                 'verifikator_role' => $this->verifikator->getRoleNames()->first(),
             ],
-            $status instanceof Approved,
+            $status instanceof ApprovedKapusdatin,
             $status instanceof Rejected => [],
             default => []
         };
 
         return [
             'id' => $this->letter->id,
-            'letter_category' => 'Applications',
             'status' => $status,
             'message' => $status->userNotificationMessage($context)
         ];
