@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
             $table->string('status', 86)->default(Letter::getDefaultStates());
-            $table->int('current_division')->default(2);
+            $table->integer('current_division')->default(2);
             // $table->int('previous_division')->nullable();
             $table->boolean('active_revision')->default(false);
             $table->timestamps();
@@ -60,25 +60,26 @@ return new class extends Migration
             $table->integer('part_number');
             $table->string('file_path');
             $table->integer('version')->default(0);
-            $table->boolean('needs_revision')->default(false);
-            $table->string('revision_note')->nullable();
+            $table->boolean('need_revision')->default(false);
             $table->timestamps();
         });
 
-        // /**
-        //  * Create the letter_uploads_revisions table
-        //  */
-        // Schema::create('letter_uploads_revisions', function (Blueprint $table) {
-        //     $table->id();
-        //     $table->unsignedBigInteger('letter_upload_id');
-        //     $table->string('file_path');
-        //     $table->integer('version')->default(1);
-        //     $table->revision_note('revision_note')->nullable();
-        //     $table->timestamps();
+        /**
+         * Create the letter_uploads_revisions table
+         */
+        Schema::create('letter_uploads_revisions', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('letter_upload_id');
+            $table->string('file_path');
+            $table->integer('version')->default(1);
+            $table->string('revision_note')->nullable();
+            $table->timestamps();
 
-
-        //     $table->foreign('letter_upload_id')->references('id')->on('letter_uploads')->onDelete('cascade');
-        // });
+            /**
+             * Add Foreign Key to Letter uploads Table
+             */
+            $table->foreign('letter_upload_id')->references('id')->on('letter_uploads')->onDelete('cascade');
+        });
 
         /**
          * Create the letter_directs table
@@ -117,7 +118,7 @@ return new class extends Migration
         Schema::create('document_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->int('part_number');
+            $table->integer('part_number');
             $table->string('file_path');
             $table->boolean('is_active')->default(false);
             $table->timestamps();
