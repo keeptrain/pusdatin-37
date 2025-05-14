@@ -27,7 +27,7 @@
         <!-- Tabs -->
         <div class="border-b border-gray-200 overflow-x-auto">
             <div class="flex space-x-4 md:space-x-8 px-2 md:px-2">
-                <template x-for="tab in ['Overview', 'Activity', 'Chat']" :key="tab">
+                <template x-for="tab in ['Overview', 'Activity']" :key="tab">
                     <button @click="goTo(tab)"
                         :class="{
                             'text-blue-600 border-b-2 border-blue-600': activeTab === tab,
