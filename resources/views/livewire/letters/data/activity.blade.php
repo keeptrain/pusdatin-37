@@ -20,7 +20,7 @@
 
                                 <div class="mb-3 md:mb-0">
                                     @foreach ($actions as $action)
-                                        <flux:subheading>
+                                        <flux:subheading class="max-w-[800px] overflow-wrap-break">
                                             {{ $action->action }}
                                         </flux:subheading>
                                         @if (!empty($action->notes))

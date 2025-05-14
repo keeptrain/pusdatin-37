@@ -46,7 +46,7 @@ class Activity extends Component
             ->sortByDesc('created_at')
             ->groupBy([
                 fn($item) => $item->created_at->format('Y-m-d'),
-                fn($item) => $item->created_at->format('H:m:s')
+                fn($item) => $item->created_at->format('H:i:s')
             ]);
     }
 
