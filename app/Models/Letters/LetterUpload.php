@@ -20,11 +20,25 @@ class LetterUpload extends Model
         'revision_note'
     ];
 
-    const PART_ATTACHMENT = ['part1', 'part2', 'part3'];
-
     public function mapping()
     {
         return $this->morphOne(LettersMapping::class, 'letterable');
+    }
+
+    /**
+     * Get the custom part number string.
+     *
+     * @param  int  $value
+     * @return string
+     */
+    public function getPartNumberAttribute($value)
+    {
+        return match ($value) {
+            1 => 'Nota Dinas',
+            2 => 'SOP',
+            3 => 'Pengesahan',
+            default => 'UNKNOWN_PART_' . $value, // Default case for other numbers
+        };
     }
 
     public static function getLetterUpload()

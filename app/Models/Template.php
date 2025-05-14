@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Template extends Model
 {
-    protected $table="document_templates";
+    protected $table="letter_templates";
 
     protected $fillable=[
         'name',

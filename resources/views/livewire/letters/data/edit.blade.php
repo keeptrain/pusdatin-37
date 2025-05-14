@@ -63,10 +63,10 @@
 
                         <!-- File Upload -->
                         <div>
-                            <x-letters.input-file-adapter title="{{ $upload->part_name }}"
-                                model="revisedFiles.{{ $upload->part_name }}" />
-                            <label class="block text-sm font-medium text-zinc-400 mt-2 mb-2">
-                                Note: {{ $upload->revision_note }}</label>
+                            <x-letters.input-file-adapter title="{{ $upload->part_number }}"
+                                model="revisedFiles.{{ $upload->part_number }}" required/>
+                            <x-letters.warning-note note="{{ $upload->revision_note }}"/>    
+                          
                         </div>
 
                         {{-- <div
