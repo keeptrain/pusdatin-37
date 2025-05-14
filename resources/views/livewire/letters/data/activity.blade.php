@@ -17,7 +17,6 @@
                     @foreach ($hours as $hour => $actions)
                         <div class="border-t border-gray-200">
                             <div class="flex flex-col md:flex-row md:justify-between md:items-center p-4">
-
                                 <div class="mb-3 md:mb-0">
                                     @foreach ($actions as $action)
                                         <flux:subheading class="max-w-[800px] overflow-wrap-break">
@@ -30,11 +29,11 @@
                                 </div>
                                 <div class="flex flex-col md:flex-row md:items-center md:space-x-4">
                                     <div class="mb-2 md:mb-0">
-
                                         {{ $hour }}
                                     </div>
                                 </div>
 
+                                {{ $hour }}
                             </div>
                         </div>
                     @endforeach
@@ -42,5 +41,4 @@
             @endforeach
         </div>
     </x-letters.detail-layout>
-
 </div>

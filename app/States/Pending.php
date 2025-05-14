@@ -30,4 +30,20 @@ class Pending extends LetterStatus
     {
         return "The letter is pending for review by " . $this->getDivisionName($context['division']);
     }
+    public function icon(): string
+    {
+        return 'circle-pause';
+    }
+    public function badgeBg(): string
+    {
+        return 'bg-gray-500';
+    }
+    public function percentage(): string
+    {
+        return '10%';
+    }
+    public function percentageBar(): string
+    {
+        return 'w-[10%]';
+    }
 }

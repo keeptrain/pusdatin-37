@@ -31,6 +31,7 @@
         }
     }
 </style>
+
 <body class="font-[Poppins] scroll-smooth">
     <div class="min-h-screen flex flex-col">
         <x-user.landing-nav />
@@ -38,9 +39,9 @@
         <x-user.service />
         <x-user.cara-kerja />
     </div>
-    
+
     <script>
-        window.addEventListener('scroll', function () {
+        window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');
             if (window.scrollY > 10) {
                 navbar.classList.add('bg-white/90', 'backdrop-blur-md', 'shadow-sm');
@@ -70,9 +71,8 @@
         // animasi teks hero
         const textElement = document.getElementById("typing-text");
         const texts = [
-            "Permintaan Aplikasi",
-            "Permintaan Data",
-            "Humas Multimedia"
+            "Sistem Informasi & Data",
+            "Kehumasan",
         ];
         let textIndex = 0;
         let charIndex = 0;
