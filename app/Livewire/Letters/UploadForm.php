@@ -159,7 +159,7 @@ class UploadForm extends Component
 
     public function downloadTemplate($typeNumber)
     {
-        $template = Template::where('type_number', $typeNumber)->where('is_active', '1')->first();
+        $template = Template::where('part_number', $typeNumber)->where('is_active', '1')->first();
 
         if ($template) {
             $filePath = $template->file_path;
