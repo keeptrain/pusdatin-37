@@ -10,7 +10,7 @@ class Disposition extends LetterStatus
     {
         return 'Disposition';
     }
-    
+
     public function color(): string
     {
         return 'lime';
@@ -24,7 +24,7 @@ class Disposition extends LetterStatus
     public function trackingMessage(?int $division): string
     {
         $divisionName = $this->getDivisionName($division);
-        
+
         return "Permohonan layanan anda di disposisikan oleh Kepala Pusat Data dan Teknologi Dinas Kesehatan 
                 ke Kepala Satuan Pelaksana {$divisionName}";
     }
@@ -32,5 +32,25 @@ class Disposition extends LetterStatus
     public function userNotificationMessage(array $context): string
     {
         return "Surat baru telah diajukan oleh " . $context['responsible_person'];
+    }
+
+    public function icon(): string
+    {
+        return 'locate';
+    }
+
+    public function badgeBg(): string
+    {
+        return 'bg-zinc-500';
+    }
+
+    public function percentage(): string
+    {
+        return '25%';
+    }
+
+    public function percentageBar(): string
+    {
+        return 'w-[25%]';
     }
 }
