@@ -10,7 +10,7 @@
         :title="$track->letter->title"
         :status="$track->letter->status"
         :reference-number="$track->letter->reference_number"
-        created-at="{{ $track->created_at->format('M d, Y') }}" />
+        :created-at="$track->created_at->format('M d, Y')" />
       @empty
       <p class="text-center text-gray-500">No requests found.</p>
       @endforelse

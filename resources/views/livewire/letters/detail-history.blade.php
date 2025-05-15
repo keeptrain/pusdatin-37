@@ -12,7 +12,7 @@
     <div class=" py-6">
         <x-user.card-basic-info
             :request-id="$track->letter->request_id"
-            submitted-at="{{ $track->created_at->format('d M Y H:i') }}"
+           :created-at="$track->created_at->format('M d, Y')"
             :status="$track->letter->status->label()"
             :title="$track->letter->title" />
     </div>
