@@ -12,9 +12,15 @@
     <div class=" py-6">
         <x-user.card-basic-info
             :request-id="$track->letter->request_id"
-           :created-at="$track->created_at->format('M d, Y')"
-            :status="$track->letter->status->label()"
-            :title="$track->letter->title" />
+            :created-at="$track->created_at->format('M d, Y')"
+            :status="$track->letter->status"
+            :title="$track->letter->title"
+            :person="$track->letter->responsible_person" />
     </div>
     <x-user.tracking-progres />
+
+
+
+
+    <liviwire:data.edit />
 </div>

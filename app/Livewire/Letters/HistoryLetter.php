@@ -11,7 +11,7 @@ class HistoryLetter extends Component
 {
     use WithPagination;
 
-    public $perPage     = 10;
+    public $perPage     = 2;
     public $searchQuery = '';
 
     // Reset pagination saat search berubah
@@ -27,9 +27,11 @@ class HistoryLetter extends Component
             ->filterByUser(Auth::user()->name)
             ->when(
                 $this->searchQuery,
-                fn($q) => $q->whereHas('letter', fn($q2) =>
-                    $q2->where('title','like',"%{$this->searchQuery}%")
-                       ->orWhere('reference_number','like',"%{$this->searchQuery}%")
+                fn($q) => $q->whereHas(
+                    'letter',
+                    fn($q2) =>
+                    $q2->where('title', 'like', "%{$this->searchQuery}%")
+                        ->orWhere('reference_number', 'like', "%{$this->searchQuery}%")
                 )
             )
             ->latest('created_at')

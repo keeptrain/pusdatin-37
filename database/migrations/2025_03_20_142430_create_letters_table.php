@@ -60,7 +60,7 @@ return new class extends Migration
             $table->integer('part_number');
             $table->string('file_path');
             $table->integer('version')->default(0);
-            $table->boolean('need_revision')->default(false);
+            $table->boolean('needs_revision')->default(false);
             $table->timestamps();
         });
 
