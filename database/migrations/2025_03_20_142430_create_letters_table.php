@@ -57,9 +57,9 @@ return new class extends Migration
          */
         Schema::create('letter_uploads', function (Blueprint $table) {
             $table->id();
-            $table->integer('part_number');
+            $table->tinyInteger('part_number');
             $table->string('file_path');
-            $table->integer('version')->default(0);
+            $table->tinyInteger('version')->default(0);
             $table->boolean('need_revision')->default(false);
             $table->timestamps();
         });
@@ -67,18 +67,20 @@ return new class extends Migration
         /**
          * Create the letter_uploads_revisions table
          */
-        Schema::create('letter_uploads_revisions', function (Blueprint $table) {
+        Schema::create('document_uploads_revisions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('letter_upload_id');
+            $table->unsignedBigInteger('document_upload_id');
+            $table->tinyInteger('part_number');
             $table->string('file_path');
-            $table->integer('version')->default(1);
+            $table->tinyInteger('version')->default(1);
             $table->string('revision_note')->nullable();
+            $table->boolean('is_resolved')->default(false);
             $table->timestamps();
 
             /**
              * Add Foreign Key to Letter uploads Table
              */
-            $table->foreign('letter_upload_id')->references('id')->on('letter_uploads')->onDelete('cascade');
+            $table->foreign('document_upload_id')->references('id')->on('letter_uploads')->onDelete('cascade');
         });
 
         /**
@@ -118,7 +120,7 @@ return new class extends Migration
         Schema::create('document_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('part_number');
+            $table->tinyInteger('part_number');
             $table->string('file_path');
             $table->boolean('is_active')->default(false);
             $table->timestamps();
@@ -150,10 +152,11 @@ return new class extends Migration
     {
         Schema::dropIfExists('letters');
         Schema::dropIfExists('request_status_tracks');
+        Schema::dropIfExists('letters_mappings');
         Schema::dropIfExists('letter_uploads');
         Schema::dropIfExists('letter_directs');
-        Schema::dropIfExists('letters_mappings');
         Schema::dropIfExists('letter_messages');
+        Schema::dropIfExists('document_uploads_revisions');
         Schema::dropIfExists('document_templates');
     }
 };
