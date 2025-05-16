@@ -38,6 +38,7 @@ class PermissionRoleSeeder extends Seeder
             'si_verifier',
             'data_verifier',
             'pr_verifier',
+            'kesmas_verifier',
             'user',
         ];
 
@@ -59,6 +60,9 @@ class PermissionRoleSeeder extends Seeder
         $role->givePermissionTo(['read', 'update']);
 
         $role = \Spatie\Permission\Models\Role::findByName('pr_verifier');
+        $role->givePermissionTo(['read', 'update']);
+
+        $role = \Spatie\Permission\Models\Role::findByName('kesmas_verifier');
         $role->givePermissionTo(['read', 'update']);
 
         $role = \Spatie\Permission\Models\Role::findByName('user');
