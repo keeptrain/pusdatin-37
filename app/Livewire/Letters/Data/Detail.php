@@ -19,11 +19,9 @@ class Detail extends Component
 
     public $directs;
 
-    public $showModal = false;
-
-    public $activeRevision;
-
     public $processedUploads;
+
+    public $availablePart;
 
     public function mount(int $id)
     {
@@ -57,6 +55,12 @@ class Detail extends Component
         });
 
         $this->uploads = $this->uploads->sortBy('part_number');
+
+        $this->availablePart = $this->uploads
+            ->filter(fn($part) => !empty($part->part_number))
+            ->pluck('part_number')
+            ->values()
+            ->toArray();
     }
 
     private function getProcessedUploadsProperty(): Collection
@@ -81,12 +85,6 @@ class Detail extends Component
                 }
             }
         }
-        return $processed->sortBy('part_number'); // Urutkan untuk tampilan konsisten
-    }
-
-    public function repliedLetter()
-    {
-        $this->activeRevision = $this->letter->active_revision;
-        $this->showModal = true;
+        return $processed->sortBy('part_number');
     }
 }

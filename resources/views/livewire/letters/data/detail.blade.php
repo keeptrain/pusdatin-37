@@ -1,5 +1,5 @@
 @php
-    $status = $letter->status->label()
+    $status = $letter->status->label();
 @endphp
 
 <div class="overflow-x-auto">
@@ -24,7 +24,7 @@
                     <div>{{ $fileData['type'] }}</div> --}}
                  @endforeach
                 
-                <livewire:letters.modal-confirmation :letterId="$letterId" />
+                <livewire:letters.modal-confirmation :letterId="$letterId" :part="$availablePart" />
             </div>
             @endif
 

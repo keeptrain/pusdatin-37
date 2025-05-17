@@ -18,11 +18,11 @@ class ModalConfirmation extends Component
     #[Locked]
     public int $letterId;
 
+    public $availablePart;
+
     public $status = '';
 
     public $notes = '';
-
-    public bool $activeRevision;
 
     public $selectedDivision = '';
 
@@ -40,6 +40,12 @@ class ModalConfirmation extends Component
             ],
         ];
 
+        if ($this->status === 'disposition') {
+            $rules['selectedDivision'] = [
+                'required',
+            ];
+        }
+
         if ($this->status === 'process') {
             $rules['status'] = [
                 Rule::in('process', 'rejected')
@@ -54,6 +60,7 @@ class ModalConfirmation extends Component
             $rules['status'] = [
                 Rule::in('approved', 'replied', 'rejected')
             ];
+
             $rules['revisionParts'] = [
                 'required',
                 'array',
@@ -71,15 +78,16 @@ class ModalConfirmation extends Component
     public function messages()
     {
         return [
-            'status.required' => 'Status surat tidak boleh kosong',
+            'status.required' => 'Status tidak boleh kosong',
             'selectedDivision.required' => 'Tujuan divisi tidak boleh kosong',
             'revisionParts.required' => 'Butuh bagian yang harus di revisi'
         ];
     }
 
-    public function mount(int $letterId)
+    public function mount(int $letterId, $part)
     {
         $this->letterId = $letterId;
+        $this->availablePart = $part;
     }
 
     public function saveDisposition()
@@ -218,7 +226,6 @@ class ModalConfirmation extends Component
         if (in_array($this->status, ['replied', 'rejected'])) {
             foreach ($this->revisionParts as $partNumber) {
                 $note = $this->revisionNotes[$partNumber] ?? null;
-
 
                 $this->updateRevisionFromMapping($this->letterId, $partNumber, $note);
             }
