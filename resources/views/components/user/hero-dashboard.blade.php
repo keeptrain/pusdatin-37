@@ -1,5 +1,5 @@
-<section class="bg-[#f3f5f8] py-12 w-full">
-    <div class="max-w-7xl mx-auto px-4 ">
+<section>
+    <div class="max-w-7xl mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {{-- Card 1 --}}
@@ -14,7 +14,7 @@
                 </a>
             </div>
 
-            {{-- Card 3 --}}
+            {{-- Card 2 --}}
             <div class="bg-white rounded-lg shadow-sm p-6 text-center">
                 <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
                     <x-lucide-file-video class="w-6" />
@@ -25,7 +25,6 @@
                     Ajukan Permohonan
                 </a>
             </div>
-
         </div>
     </div>
 </section>
