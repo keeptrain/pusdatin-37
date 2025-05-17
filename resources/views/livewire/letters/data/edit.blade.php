@@ -21,7 +21,7 @@
                         <div class="grid grid-cols-2 gap-x-6">
 
                             <div>
-                                <flux:input wire:model="Nomor surat" label="Reference number"
+                                <flux:input wire:model="reference_number" label="Nomor surat"
                                     placeholder="Masukkan nomor surat" clearable />
                             </div>
 
@@ -94,7 +94,7 @@
 
                     <div class="space-y-4">
                         <div>
-                            <flux:textarea wire:model="revisionNote"
+                            <flux:textarea wire:model="notes"
                                 placeholder="Masukkan informasi tambahan tentang perubahan">
                             </flux:textarea>
                         </div>

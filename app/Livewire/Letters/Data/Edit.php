@@ -27,9 +27,7 @@ class Edit extends Component
 
     public $revisedFiles = [];
 
-    public array $revisionNotes = [];
-
-    public $notes;
+    public $notes = '';
 
     public function rules()
     {
