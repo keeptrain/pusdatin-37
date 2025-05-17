@@ -13,12 +13,12 @@ class Pending extends LetterStatus
 
     public function color(): string
     {
-        return 'yellow';
+        return 'amber';
     }
 
     public function toastMessage(): string
     {
-        return 'The letter is pending.';
+        return 'Berhasil mengajukan permohonan layanan';
     }
 
     public function trackingMessage(?int $division): string
@@ -28,20 +28,24 @@ class Pending extends LetterStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "The letter is pending for review by " . $this->getDivisionName($context['division']);
+        return "Permohonan layanan dari " . $context['responsible_person'] . " perlu disposisi" ;
     }
+
     public function icon(): string
     {
         return 'circle-pause';
     }
+
     public function badgeBg(): string
     {
         return 'bg-gray-500';
     }
+
     public function percentage(): string
     {
         return '10%';
     }
+
     public function percentageBar(): string
     {
         return 'w-[10%]';

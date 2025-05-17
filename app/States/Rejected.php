@@ -18,7 +18,7 @@ class Rejected extends LetterStatus
 
     public function toastMessage(): string
     {
-        return 'Letter successfully update status to rejected!';
+        return 'Berhasil menolak permohonan layanan';
     }
 
     public function trackingMessage(?int $division): string
@@ -30,18 +30,22 @@ class Rejected extends LetterStatus
     {
         return "Permohonan layanan anda ditolak";
     }
+
     public function icon(): string
     {
         return 'x';
     }
+
     public function badgeBg(): string
     {
         return 'bg-red-500';
     }
+    
     public function percentage(): string
     {
         return '0%';
     }
+    
     public function percentageBar(): string
     {
         return 'w-[0%]';

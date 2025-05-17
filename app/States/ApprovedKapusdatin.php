@@ -18,7 +18,7 @@ class ApprovedKapusdatin extends LetterStatus
 
     public function toastMessage(): string
     {
-        return 'Letter successfully update status to approved!';
+        return 'Berhasil menyetujui permohonan layanan';
     }
 
     public function trackingMessage($division): string
@@ -33,7 +33,7 @@ class ApprovedKapusdatin extends LetterStatus
 
     public function icon(): string
     {
-        return 'check-circle';
+        return 'check-check';
     }
 
     public function badgeBg(): string

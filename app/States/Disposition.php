@@ -13,12 +13,12 @@ class Disposition extends LetterStatus
 
     public function color(): string
     {
-        return 'lime';
+        return 'yellow';
     }
 
     public function toastMessage(): string
     {
-        return 'The letter was created successfully';
+        return 'Berhasil mendisposisikan permohonan layanan';
     }
 
     public function trackingMessage(?int $division): string
@@ -31,7 +31,8 @@ class Disposition extends LetterStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "Surat baru telah diajukan oleh " . $context['responsible_person'];
+
+        return "Permohonan layanan telah diajukan oleh " . $context['responsible_person'];
     }
 
     public function icon(): string

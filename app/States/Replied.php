@@ -18,7 +18,7 @@ class Replied extends LetterStatus
 
     public function toastMessage(): string
     {
-        return "Letter successfully update status to replied!";
+        return "Berhasil memberikan balasan kepada pemohon";
     }
 
     public function trackingMessage(?int $division): string
@@ -36,20 +36,24 @@ class Replied extends LetterStatus
 
         return 'Permohonan layanan ini direvisi oleh pemohon';
     }
+
     public function icon(): string
     {
         return 'send-horizontal';
     }
+
     public function badgeBg(): string
     {
         return 'bg-orange-500';
     }
+
     public function percentage(): string
     {
-        return '70%';
+        return '50%';
     }
+    
     public function percentageBar(): string
     {
-        return 'w-[70%]';
+        return 'w-[50%]';
     }
 }

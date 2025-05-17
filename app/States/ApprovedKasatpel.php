@@ -13,12 +13,12 @@ class ApprovedKasatpel extends LetterStatus
 
     public function color(): string
     {
-        return 'green';
+        return 'emerald';
     }
 
     public function toastMessage(): string
     {
-        return 'Letter successfully update status to approved!';
+        return 'Berhasil menyetujui permohonan layanan';
     }
 
     public function trackingMessage($division): string
@@ -30,20 +30,24 @@ class ApprovedKasatpel extends LetterStatus
     {
         return "Permohonan layanan anda diterima";
     }
+
     public function icon(): string
     {
-        return 'check-circle';
+        return 'check';
     }
+
     public function badgeBg(): string
     {
-        return 'bg-green-500';
+        return 'bg-green-400';
     }
+
     public function percentage(): string
     {
-        return '100%';
+        return '75%';
     }
+    
     public function percentageBar(): string
     {
-        return 'w-[100%]';
+        return 'w-[75%]';
     }
 }
