@@ -9,7 +9,7 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-800">Layanan Sistem Informasi & Data</h3>
                 <p class="mt-2 text-sm text-gray-600">Custom software solutions tailored to your needs</p>
-                <a href="{{route('letter')}}" class=" mt-4 inline-block bg-[#364872] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#2c3751] transition">
+                <a href="{{ route('letter.upload') }}" class=" mt-4 inline-block bg-[#364872] text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-[#2c3751] transition">
                     Ajukan Permohonan
                 </a>
             </div>
