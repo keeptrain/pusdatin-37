@@ -90,7 +90,7 @@ class Review extends Component
                         /** @var LetterUpload $letterUpload */
                         $letterUpload = $mapping->letterable;
 
-                        $allVersions = $letterUpload->version;
+                        $allVersions = $letterUpload->version();
 
                         $latestUnapprovedRevision = $allVersions
                             ->where('is_resolved', false)
