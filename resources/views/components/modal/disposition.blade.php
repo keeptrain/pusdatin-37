@@ -32,9 +32,9 @@
             </flux:fieldset>
         </template>
 
-        <template x-if="status === 'approved'">
+        {{-- <template x-if="status === 'approved'">
             <flux:textarea wire:model="notes" cols="66" rows="2" placeholder="Catatan tambahan..." resize="vertical" />
-        </template>
+        </template> --}}
 
         <!-- Template untuk Replied -->
         <template x-if="status === 'replied'">
@@ -43,7 +43,7 @@
 
         <!-- Template untuk Rejected -->
         <template x-if="status === 'rejected'">
-            <flux:textarea cols="66" rows="2" placeholder="Catatan penolakan (opsional) " resize="vertical" />
+            <flux:textarea wire:model="notes" cols="66" rows="2" placeholder="Catatan penolakan (opsional) " resize="vertical" />
         </template>
 
         <!-- Template untuk Test Failed -->
