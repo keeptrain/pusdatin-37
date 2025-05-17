@@ -51,10 +51,10 @@
             <flux:table.column class="w-1 border-l-2 border-white dark:border-l-zinc-800">
                 <flux:checkbox wire:click="toggleSelectAll" />
             </flux:table.column>
-            <flux:table.column>Responsible person</flux:table.column>
+            <flux:table.column>Penanggung jawab</flux:table.column>
             <flux:table.column>Judul</flux:table.column>
-            <flux:table.column>Kasatpel</flux:table.column>
             <flux:table.column>Status</flux:table.column>
+            <flux:table.column>Kasatpel</flux:table.column>
             <flux:table.column>Created date</flux:table.column>
             <flux:table.column></flux:table.column>
         </x-slot>
@@ -76,13 +76,13 @@
                         <flux:checkbox wire:model.live="selectedLetters" value="{{ $item->id }}" />
                     </flux:table.row>
 
-                    <flux:table.row>{{ $item->user->name }}</flux:table.row>
+                    <flux:table.row>{{ $item->responsible_person }}</flux:table.row>
                     <flux:table.row>{{ $item->title }}</flux:table.row>
-                    <flux:table.row>{{ $item->kasatpelName($item->current_division) }}</flux:table.row>
                     <flux:table.row>
-                        <flux:notification.status-badge status="{{ $item->status->label() }}">
+                        <flux:notification.status-badge :status="$item->status->label()">
                             {{ $item->status->label() }}</flux:notification.status-badge>
                     </flux:table.row>
+                    <flux:table.row>{{ $item->kasatpelName($item->current_division) }}</flux:table.row>
                     <flux:table.row>{{ $item->createdAtDMY() }}</flux:table.row>
                     <flux:table.row>
                         <flux:dropdown @click.stop >

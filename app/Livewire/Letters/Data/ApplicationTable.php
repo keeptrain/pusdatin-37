@@ -21,7 +21,8 @@ class ApplicationTable extends Component
         'disposition' => 'Disposition',
         'process' => 'Process',
         'replied' => 'Replied',
-        'approved' => 'Approved',
+        'approved_kasatpel' => 'Approved by Kasatpel',
+        'approved_kapusdatin' => 'Approved by Kaspudatin',
         'rejected' => 'Rejected',
     ];
 
@@ -32,11 +33,6 @@ class ApplicationTable extends Component
     public $searchQuery = '';
 
     public function mount() {}
-
-    public function render()
-    {
-        return view('livewire.letters.data.application-table');
-    }
 
     public function detailPageForProcess(int $id)
     {
@@ -53,26 +49,24 @@ class ApplicationTable extends Component
         return $this->redirect("{$id}", true);
     }
 
-    #[Computed]
+    #[Computed()]
     public function letters()
     {
+        // Kriteria sorting
         [$column, $direction] = $this->getSortCriteria();
 
-        $user = auth()->user();
-        $roleNames = $user->roles()->pluck('name');
-        $isAdministrator = $roleNames->contains('head_verifier');
-        $allowedRoleIds = $user->roles()->pluck('id');
-        
-        return Letter::with([
-            'user:id,name',
-        ])
-        ->when(!$isAdministrator, function ($query) use ($allowedRoleIds) {
-            $query->whereIn('current_division', $allowedRoleIds);
-        })
-        ->when($this->filterStatus !== 'all', function ($query) {
+        $query = Letter::with(['user:id,name']);
+
+        // Filter berdasarkan pengguna saat ini
+        $query->filterByCurrentUser();
+
+        // Filter berdasarkan status jika filterStatus tidak 'all'
+        if ($this->filterStatus !== 'all') {
             $query->filterByStatus($this->filterStatus);
-        })
-        ->when($this->searchQuery, function ($query) {
+        }
+
+        // Filter berdasarkan search query
+        if ($this->searchQuery) {
             $query->where(function ($q) {
                 $q->where('title', 'like', '%' . $this->searchQuery . '%')
                     ->orWhere('responsible_person', 'like', '%' . $this->searchQuery . '%')
@@ -80,9 +74,11 @@ class ApplicationTable extends Component
                         $q->where('name', 'like', '%' . $this->searchQuery . '%');
                     });
             });
-        })
-        ->orderBy($column, $direction)
-        ->paginate($this->perPage);
+        }
+
+        $query->orderBy($column, $direction);
+
+        return $query->paginate($this->perPage);
     }
 
     private function getSortCriteria(): array
