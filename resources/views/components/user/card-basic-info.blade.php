@@ -3,13 +3,13 @@
         <!-- Header: Request ID & Status -->
         <div class="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-                <h3 class="text-lg font-semibold text-gray-900">Request ID: Tes</h3>
-                <p class="mt-1 text-sm text-gray-500">Submitted on Tes</p>
+                <h3 class="text-lg font-semibold text-gray-900">{{$title}}</h3>
+                <p class="mt-1 text-sm text-gray-500">Submitted on {{$createdAt}}</p>
             </div>
 
             <div class="mt-4 md:mt-0">
-                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm font-medium">
-                    Status
+                <span class="inline-flex items-center px-3 py-1 rounded-full {{ $status->badgeBg() }} text-white text-sm font-medium">
+                    {{$status->label()}}
                 </span>
             </div>
 
@@ -20,16 +20,16 @@
         <div class="px-6 py-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <p class="text-xs font-medium text-gray-500 uppercase">Application Title</p>
-                    <p class="mt-1 text-gray-900">Tes</p>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Nama Penanggung Jawab</p>
+                    <p class="mt-1 text-gray-900">{{$person}}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-gray-500 uppercase">Category</p>
-                    <p class="mt-1 text-gray-900">Tes</p>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Jenis Layanan</p>
+                    <p class="mt-1 text-gray-900">Sistem Informasi & Data</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-gray-500 uppercase">Requested By</p>
-                    <p class="mt-1 text-gray-900">Tes</p>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Estimasi Waktu Selesai</p>
+                    <p class="mt-1 text-gray-900">-</p>
                 </div>
             </div>
         </div>

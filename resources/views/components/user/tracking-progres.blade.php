@@ -8,37 +8,119 @@
             <!-- Progress Line -->
             <div class="absolute top-6 left-0 w-full h-0.5 bg-gray-300">
                 <!-- ubah persenan di width nya untuk progres yang selesai -->
-                <div class="absolute top-0 left-0 h-full bg-red-500" style="width: 33%;"></div>
+                <div class="absolute top-0 left-0 h-full bg-[#364872]" style="width: 33%;"></div>
             </div>
 
             <!-- Steps -->
             <div class="flex justify-between relative">
-                <!-- Step 1: Document Received -->
+                <!-- Step 1: Document Diterima -->
                 <div class="flex flex-col items-center">
 
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
                         <!-- FileEdit Icon from Lucide -->
-                        <x-lucide-file-edit class="w-6 text-white" />
+                        <x-lucide-file class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->
                     <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800"></div>
                     </div>
 
                     <!-- Step Name -->
-                    <p class="text-center text-sm font-medium mt-2 w-24">Document Received</p>
+                    <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Diterima</p>
                 </div>
 
-                <!-- Step 2: Document Verification -->
+                <!-- Step 2: Document Disposisi -->
                 <div class="flex flex-col items-center">
                     <!-- Icon Circle -->
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
                         <!-- Search Icon from Lucide -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-white">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.3-4.3"></path>
-                        </svg>
+                        <x-lucide-search class="w-6 text-white" />
+                    </div>
+
+                    <!-- Step Indicator -->
+                    <div class="flex items-center justify-center">
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800"></div>
+                    </div>
+
+                    <!-- Step Name -->
+                    <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Disposisi</p>
+                </div>
+
+                <!-- Step 3: Dokumen di proses -->
+                <div class="flex flex-col items-center">
+                    <!-- Icon Circle -->
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
+                        <!-- Code2 Icon from Lucide -->
+                        <x-lucide-file-clock class="w-6 text-white" />
+                    </div>
+
+                    <!-- Step Indicator -->
+                    <div class="flex items-center justify-center">
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white"></div>
+                    </div>
+
+                    <!-- Step Name -->
+                    <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Di Proses</p>
+                </div>
+
+                <!-- Step 4: Dokumen Revisi -->
+                <div class="flex flex-col items-center">
+                    <!-- Icon Circle -->
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-orange-600">
+                        <!-- Code2 Icon from Lucide -->
+                        <x-lucide-folder-cog class="w-6 text-white" />
+                    </div>
+
+                    <!-- Step Indicator -->
+                    <div class="flex items-center justify-center">
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-orange-600"></div>
+                    </div>
+
+                    <!-- Step Name -->
+                    <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Revisi</p>
+                </div>
+
+                <!-- Step 5: Finish -->
+                <div class="flex flex-col items-center">
+                    <!-- Icon Circle -->
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-400">
+                        <!-- CheckCircle Icon from Lucide -->
+                        <x-lucide-check-circle class="w-6 text-white" />
+                    </div>
+
+                    <!-- Step Indicator -->
+                    <div class="flex items-center justify-center">
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white"></div>
+                    </div>
+
+                    <!-- Step Name -->
+                    <p class="text-center text-sm font-medium mt-2 w-24">Disetujui Kasatpel</p>
+                </div>
+
+                <!-- Step 5: Finish -->
+                <div class="flex flex-col items-center">
+                    <!-- Icon Circle -->
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-400">
+                        <!-- CheckCircle Icon from Lucide -->
+                        <x-lucide-check-circle class="w-6 text-white" />
+                    </div>
+
+                    <!-- Step Indicator -->
+                    <div class="flex items-center justify-center">
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white"></div>
+                    </div>
+
+                    <!-- Step Name -->
+                    <p class="text-center text-sm font-medium mt-2 w-24">Disetujui KaPusdatin</p>
+                </div>
+
+                <!-- Step 5.1: Reject -->
+                <div class="flex flex-col items-center">
+                    <!-- Icon Circle -->
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-red-500">
+                        <!-- CheckCircle Icon from Lucide -->
+                        <x-lucide-circle-x class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->
@@ -47,48 +129,7 @@
                     </div>
 
                     <!-- Step Name -->
-                    <p class="text-center text-sm font-medium mt-2 w-24">Document Verification</p>
-                </div>
-
-                <!-- Step 3: Development Process -->
-                <div class="flex flex-col items-center">
-                    <!-- Icon Circle -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
-                        <!-- Code2 Icon from Lucide -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-white">
-                            <path d="m18 16 4-4-4-4"></path>
-                            <path d="m6 8-4 4 4 4"></path>
-                            <path d="m14.5 4-5 16"></path>
-                        </svg>
-                    </div>
-
-                    <!-- Step Indicator -->
-                    <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white"></div>
-                    </div>
-
-                    <!-- Step Name -->
-                    <p class="text-center text-sm font-medium mt-2 w-24">Development Process</p>
-                </div>
-
-                <!-- Step 4: Finish Project -->
-                <div class="flex flex-col items-center">
-                    <!-- Icon Circle -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-400">
-                        <!-- CheckCircle Icon from Lucide -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-white">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                    </div>
-
-                    <!-- Step Indicator -->
-                    <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white"></div>
-                    </div>
-
-                    <!-- Step Name -->
-                    <p class="text-center text-sm font-medium mt-2 w-24">Finish Project</p>
+                    <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Ditolak</p>
                 </div>
             </div>
         </div>

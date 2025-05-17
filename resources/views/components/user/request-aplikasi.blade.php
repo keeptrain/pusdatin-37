@@ -3,7 +3,7 @@
 
         {{-- Judul --}}
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Layanan Permohonan <span class="text-[#435d94]">Aplikasi</span>
+            Layanan <span class="text-[#435d94]">Sistem Informasi & Data</span>
         </h2>
 
         {{-- Deskripsi --}}
@@ -13,7 +13,7 @@
         </p>
 
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 gap-6">
 
             {{-- Upload Data --}}
             <a href="{{route('letter.upload')}}"
@@ -21,14 +21,6 @@
                 <x-lucide-cloud-upload class="w-16" />
                 <h3 class="text-xl font-semibold text-gray-800">Upload Data</h3>
                 <p class="text-sm text-gray-500 mt-1">Click to upload your files</p>
-            </a>
-
-            {{-- Create Letter --}}
-            <a href="{{route('letter.form')}}"
-                class="border border-blue-500 rounded-xl p-10 flex flex-col items-center hover:bg-blue-50 transition">
-                <x-lucide-file class="w-16" />
-                <h3 class="text-xl font-semibold text-gray-800">Create Letter</h3>
-                <p class="text-sm text-gray-500 mt-1">Start creating a new document</p>
             </a>
 
         </div>
