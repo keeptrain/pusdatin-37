@@ -4,8 +4,9 @@
         <div class="mb-6 ">
             <flux:breadcrumbs>
                 {{-- <flux:breadcrumbs.item :href="route('dashboard')" wire:navigate icon="home" /> --}}
-                <flux:breadcrumbs.item :href="route('letter')" wire:navigate>Letter</flux:breadcrumbs.item>
-                <flux:breadcrumbs.item>Create</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item :href="route('dashboard')" wire:navigate>Permohonan</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item>Sistem Informasi & data</flux:breadcrumbs.item>
+                <flux:breadcrumbs.item>Ajukan</flux:breadcrumbs.item>
             </flux:breadcrumbs>
         </div>
     </div>
