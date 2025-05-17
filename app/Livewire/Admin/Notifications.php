@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
+use App\Models\Letters\Letter;
 use Livewire\Attributes\Computed;
 
 class Notifications extends Component
@@ -66,6 +67,12 @@ class Notifications extends Component
             $notification->markAsRead();
 
             $letterId = $notification->data['id'] ?? null;
+
+            $letter = Letter::findOrFail($letterId);
+
+            if(!auth()->user()->hasRole('head_verifier')) {
+                $letter->transitionStatusToProcess($letter->current_division);
+            }
 
             if ($letterId) {
                 return redirect()->to("/letter/$letterId");

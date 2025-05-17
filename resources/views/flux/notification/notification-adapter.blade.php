@@ -1,6 +1,5 @@
 <section wire:click="goDetailPage('{{ $notification->id }}')">
-    <div
-        class="relative flex gap-3 p-4 bg-zinc-50 border-l-2 border-{{ $this->getNotificationColor($notification->data['status'] ?? '') }}-300 hover:bg-blue-100 transition cursor-pointer">
+    <div class="relative flex gap-3 p-4 bg-zinc-50 hover:bg-blue-50 transition cursor-pointer">
         <div class="flex-shrink-0">
             <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
