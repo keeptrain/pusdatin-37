@@ -9,7 +9,6 @@ use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterUpload;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
 
@@ -23,18 +22,20 @@ class Edit extends Component
     public $letter;
 
     public $title;
-    public $responsible_person;
     public $reference_number;
     public $body;
 
     public $revisedFiles = [];
-    public $revisionNote;
+
+    public array $revisionNotes = [];
+
+    public $notes;
 
     public function rules()
     {
         $rules = [
             'title' => 'required|string',
-            'responsible_person' => 'required|string',
+            // 'responsible_person' => 'required|string',
             'reference_number' => 'required|string'
         ];
 
@@ -49,9 +50,12 @@ class Edit extends Component
 
     public function messages()
     {
-        $messages = [];
-
-        return $messages;
+        return [
+            'title.required' => 'Title is required',
+            'reference_number.required' => 'Reference number is required',
+            'revisedFiles.1.required' => 'Nota dinas harus ada',
+            'revisedFiles.2.required' => 'SOP harus ada',
+        ];
     }
 
     public function mount(int $id)
@@ -60,7 +64,9 @@ class Edit extends Component
         $this->letter = Letter::with([
             'mapping.letterable' => function ($morphTo) {
                 $morphTo->morphWith([
-                    \App\Models\Letters\LetterUpload::class => [],
+                    \App\Models\Letters\LetterUpload::class => [
+                        'version'
+                    ],
                     \App\Models\Letters\LetterDirect::class => [],
                 ]);
             }
@@ -77,36 +83,52 @@ class Edit extends Component
 
         DB::transaction(function () {
             $letter = $this->letter;
-            $user = Auth::user();
 
             $letter->update([
                 'title' => $this->title,
-                'responsible_person' => $this->responsible_person,
                 'reference_number' => $this->reference_number,
-                'current_revision' => $letter->current_revision + 1,
-                'active_revision' => false,
             ]);
 
             $revisedParts = [];
 
-            foreach ($this->revisedFiles as $partName => $file) {
-                $uploadsByPart = collect($this->letter->mapping)
-                    ->mapWithKeys(fn($m) => [$m->letterable->part_name => $m->letterable]);
+            foreach ($this->revisedFiles as $partNumber => $file) {
+                // Cari LetterUpload yang sesuai dengan part_number
+                $letterUpload = $letter->mapping
+                    ->map(fn($m) => $m->letterable)
+                    ->whereInstanceOf(\App\Models\Letters\LetterUpload::class)
+                    ->first(fn($upload) => $upload->part_number == $partNumber);
 
-                $letterUpload = $uploadsByPart[$partName] ?? null;
-
-                if ($letterUpload) {
-                    $path = $file->store('letters', 'public');
-
-                    $letterUpload->update([
-                        'file_path' => $path,
-                        'version' => $letterUpload->version + 1,
-                        'needs_revision' => false,
-                        'revision_note' => null,
-                        'updated_at' => now()
-                    ]);
+                if (!$letterUpload) {
+                    throw new \Exception("LetterUpload not found for part_number: $partNumber");
                 }
 
+                // Simpan file ke storage
+                $path = $file->store('documents', 'public');
+
+                $revision = $letterUpload->version()
+                    ->where('is_resolved', false)
+                    // ->whereNull('file_path')
+                    ->orderBy('id', 'desc')
+                    ->first();
+
+                if (!$revision) {
+                    throw new \Exception("No valid revision found for part_number: $partNumber");
+                }
+
+                // Update data
+                $letter->update([
+                    'need_review' => true,
+                ]);
+
+                $letterUpload->update([
+                    'need_revision' => false,
+                ]);
+
+                $revision->update([
+                    'file_path' => $path, // Update file path
+                ]);
+
+                $partName = $letterUpload->part_number_label;
                 $revisedParts[] = $partName;
             }
 
@@ -114,19 +136,20 @@ class Edit extends Component
                 $letter->save();
             }
 
-            if (!empty($revisedParts)) {
+            if (!empty($this->revisedFiles)) {
+                $userName = auth()->user()->name;
                 $statusTrack = $this->letter->requestStatusTrack()->create([
                     'letter_id' => $letter->id,
-                    'action' => $user->name . ' telah melakukan revisi di bagian: ' . implode(', ', $revisedParts),
-                    'created_by' => $user->name,
+                    'action' => auth()->user()->name . ' telah melakukan revisi di bagian: ' . implode(' ,', $revisedParts),
+                    'created_by' => $userName,
                 ]);
 
-                if (!empty($this->revisionNote)) {
-                    $statusTrack->notes = $this->revisionNote;
+                if (!empty($this->notes)) {
+                    $statusTrack->notes = $this->notes;
                     $statusTrack->save();
                 }
 
-                $user = User::role(['administrator','verifikator'])->get();
+                $user = User::role(['administrator', 'si_verifier'])->get();
                 Notification::send($user, new NewServiceRequestNotification($letter, auth()->user()));
             }
 
@@ -138,14 +161,12 @@ class Edit extends Component
         });
     }
 
-    public function updateForRevision() {}
-
     public function letterNeedRevision($instanceof)
     {
         return collect($this->letter->mapping)
             ->filter(fn($map) => $map->letterable instanceof $instanceof)
-            ->filter(fn($map) => $map->letterable->needs_revision)
-            ->map(fn($map) => $map->letterable->part_name)
+            ->filter(fn($map) => $map->letterable->need_revision)
+            ->map(fn($map) => $map->letterable->part_number)
             ->values();
     }
 }

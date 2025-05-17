@@ -7,21 +7,25 @@
 
     <div x-data="{ partTab: '{{ $uploads->first()->part_number ?? '' }}' }">
         <x-letters.detail-layout :letterId="$letterId">
-            @if (!empty($uploads))
-                <!-- Tab Content -->
-                <div class="mt-3 mr-3">
-                    @foreach ($uploads as $file)
-                        <div x-show="partTab === '{{ $file->part_number }}'" x-cloak>
-                            <iframe loading="lazy" src="{{ asset($file->file_path) }}" width="100%" height="800"
-                                class="rounded shadow border-none">
-                                This browser does not support PDFs. Please download the PDF to view it:
-                                <a href="{{ asset($file->file_path) }}">Download PDF</a>
-                            </iframe>
-                        </div>
-                    @endforeach
-                    
-                    <livewire:letters.modal-confirmation :letterId="$letterId" />
-                </div>
+            @if (!empty($processedUploads))
+            <div class="mt-3 mr-3">
+                @foreach ($processedUploads as $fileData)
+                    <div x-show="partTab === '{{ $fileData['part_number'] }}'" x-cloak>
+                        <iframe loading="lazy" src="{{ asset($fileData['file_path']) }}" width="100%" height="800"
+                            class="rounded shadow border-none">
+                            This browser does not support PDFs. Please download the PDF to view it:
+                            <a href="{{ asset($fileData['file_path']) }}">Download PDF</a>
+                        </iframe>
+                    </div>
+                    {{-- {{ $fileData['document_upload_version_id'] }} --}}
+                    {{-- <div>{{ $fileData['revision_id'] }}</div>
+                    <div>{{ $fileData['version'] }} </div>
+                    <div>{{ $fileData['file_path'] }}</div>
+                    <div>{{ $fileData['type'] }}</div> --}}
+                 @endforeach
+                
+                <livewire:letters.modal-confirmation :letterId="$letterId" />
+            </div>
             @endif
 
             @foreach ($directs as $item)
@@ -77,7 +81,7 @@
                                   <flux:icon.document-magnifying-glass class="size-4"/>
                                 </div>
                                 <button @click="partTab = '{{ $file->part_number }}'" class="text-gray-800 cursor-pointer"
-                                    :class="{'border-b-2 border-blue-500 text-blue-600': partTab === '{{ $file->part_number }}' }">{{ $file->part_number }}</button>
+                                    :class="{'border-b-2 border-blue-500 text-blue-600': partTab === '{{ $file->part_number }}' }">{{ $file->part_number_label }}</button>
                             </div>
                         @endforeach
                     </div>
@@ -87,12 +91,17 @@
                     @switch($status)
                         @case('Process')
                         @case('Replied')
-                        <flux:modal.trigger name="verification-modal" x-on:click="$dispatch('modal-show', { name: 'verification-modal' })">
-                            <flux:button variant="primary" type="click" icon="check-badge" class="w-full" :disabled="$letter->active_revision == 1">
-                                {{ __('Verifikasi') }}
+                            @if ($letter->need_review && auth()->user()->hasRole(['si_verifier|data_verifier|humas_verifier']))
+                            <flux:button href="{{ route('letter.review', [ $letterId ]) }}" variant="primary" type="click" icon="viewfinder-circle" class="w-full" :disabled="$letter->active_revision == true" wire:navigate>
+                                {{ __('Review') }}
                             </flux:button>
-                        </flux:modal.trigger>
-
+                            @elseif ($letter->need_review == false  && auth()->user()->hasRole(['si_verifier|data_verifier|humas_verifier']) )
+                            <flux:modal.trigger name="verification-modal" x-on:click="$dispatch('modal-show', { name: 'verification-modal' })">
+                                <flux:button variant="primary" type="click" icon="check-badge" class="w-full" :disabled="$letter->active_revision == true">
+                                    {{ __('Verifikasi') }}
+                                </flux:button>
+                            </flux:modal.trigger>
+                            @endif
                         <flux:dropdown>
                             <flux:button icon="ellipsis-horizontal"/>
                             <flux:menu>
@@ -107,10 +116,20 @@
                                 <flux:button x-on:click="$dispatch('modal-show', { name: 'disposition-modal' })" variant="primary" icon:trailing="arrow-right" class="w-full">Disposisi</flux:button>
                             </flux:modal.trigger>
                         @break
-                        @case('Approved by Kasatpel')  
+                        @case('Approved by Kasatpel')
+                            @if (auth()->user()->hasRole('head_verifier'))
                             <flux:modal.trigger name="approved-modal">
-                                <flux:button x-on:click="$dispatch('modal-show', { name: 'approved-modal' })" variant="primary" icon:trailing="check" class="w-full">Approved</flux:button>
+                                <flux:button x-on:click="$dispatch('modal-show', { name: 'approved-modal' })" variant="primary" icon:trailing="check" class="w-full" :disabled="$letter->active_revision == true">Approved</flux:button>
                             </flux:modal.trigger>
+                            @endif
+                            <flux:dropdown >
+                                <flux:button icon="ellipsis-horizontal"/>
+                                <flux:menu>
+                                    <flux:menu.item :href="route('letter.edit', [$letterId])" icon="pencil-square">Force edit</flux:menu.item>
+                                    <flux:menu.item :href="route('letter.rollback', [$letterId])" icon="backward">Rollback</flux:menu.item>
+                                    <flux:menu.item icon="trash" variant="danger">Delete</flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
                         @break
                         @default
                             <flux:dropdown class="w-full">

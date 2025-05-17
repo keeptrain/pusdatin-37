@@ -18,6 +18,8 @@ use App\Livewire\Letters\HistoryLetter;
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Letters\Data\ApplicationTable;
 use App\Http\Controllers\Admin\TemplateController;
+use App\Livewire\Documents\Review;
+use App\Livewire\Documents\RevisionComparision;
 
 Route::get('/', function () {
     return view('welcome');
@@ -39,9 +41,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('letter/{id}', Detail::class)->name('letter.detail');
     Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
+    Route::get('letter/{id}/review', Review::class)->name('letter.review');
     Route::get('letter/{id}/activity', Activity::class)->name('letter.activity');
     Route::get('letter/{id}/chat', Chat::class)->name('letter.chat');
     Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
+    Route::get('letter/{id}/version', RevisionComparision::class)->name('letter.version');
 
 
     // Route::prefix('letter/{id}')->group(function() {

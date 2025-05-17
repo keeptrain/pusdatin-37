@@ -8,13 +8,16 @@
         const path = window.location.pathname;
         if (path.includes('overview')) this.activeTab = 'Overview';
         else if (path.includes('activity')) this.activeTab = 'Activity';
-        else if (path.includes('chat')) this.activeTab = 'Chat';
+        {{-- else if (path.includes('chat')) this.activeTab = 'Chat'; --}}
+        else if (path.includes('version')) this.activeTab = 'Version';
     },
     goTo(tab) {
         const routes = {
             'Overview': '{{ route('letter.detail', $letterId) }}',
             'Activity': '{{ route('letter.activity', $letterId) }}',
-            'Chat': '{{ route('letter.chat', $letterId) }}',
+            {{-- 'Chat': '{{ route('letter.chat', $letterId) }}', --}}
+            'Version': '{{ route('letter.version', $letterId) }}'
+            
         };
         window.location.href = routes[tab];
     }
@@ -27,7 +30,7 @@
         <!-- Tabs -->
         <div class="border-b border-gray-200 overflow-x-auto">
             <div class="flex space-x-4 md:space-x-8 px-2 md:px-2">
-                <template x-for="tab in ['Overview', 'Activity']" :key="tab">
+                <template x-for="tab in ['Overview', 'Activity', 'Version']" :key="tab">
                     <button @click="goTo(tab)"
                         :class="{
                             'text-blue-600 border-b-2 border-blue-600': activeTab === tab,
@@ -35,6 +38,7 @@
                         }"
                         class="py-4 px-2 text-sm font-medium whitespace-nowrap cursor-pointer" x-text="tab">
                     </button>
+                    
                 </template>
             </div>
         </div>

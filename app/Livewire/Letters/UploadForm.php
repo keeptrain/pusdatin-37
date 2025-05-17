@@ -14,18 +14,16 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Auth;
 use App\Models\letters\LettersMapping;
+use App\Models\Documents\UploadVersion;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UploadForm extends Component
 {
     use WithFileUploads;
 
     public $title = '';
-
-    public $responsible_person = '';
 
     public $reference_number = '';
 
@@ -37,7 +35,7 @@ class UploadForm extends Component
     {
         return [
             'title' => 'required|string|max:255',
-            'responsible_person' => 'required|string',
+            // 'responsible_person' => 'required|string',
             'reference_number' => 'required|string',
             'files.0' => 'required|file|mimes:pdf|max:1048',
             'files.1' => 'required|file|mimes:pdf|max:1048',
@@ -49,7 +47,7 @@ class UploadForm extends Component
     {
         return [
             'title.required' => 'Title is required',
-            'responsible_person.required' => 'Responsible person is required',
+            // 'responsible_person.required' => 'Responsible person is required',
             'reference_number.required' => 'Reference number is required',
             'files.0.required' => 'Nota dinas harus ada',
             'files.1.required' => 'SOP harus ada',
@@ -60,27 +58,24 @@ class UploadForm extends Component
 
     public function save()
     {
-        try {
-            $this->validate();
+        $this->validate();
 
-            DB::transaction(function () {
-                $letter = $this->createLetter();
-                $uploads = $this->storeFiles();
-                $uploadIds = $this->insertLetterUploads($uploads);
-                $this->createLetterMappings($letter->id, $uploadIds);
-                $this->createStatusTrack($letter);
-                $user = User::role(['head_verifier'])->get();
-                Notification::send($user, new NewServiceRequestNotification($letter));
-            });
+        DB::transaction(function () {
+            $letter = $this->createLetter();
+            $uploads = $this->storeFiles();
+            $uploadIds = $this->insertLetterUploads($uploads);
+            $this->createLetterMappings($letter->id, $uploadIds);
+            $this->createStatusTrack($letter);
 
-            return redirect()->to('/letter')
+            $user = User::role('head_verifier')->get();
+            Notification::sendNow($user, new NewServiceRequestNotification($letter));
+
+            return redirect()->to('letter/history')
                 ->with('status', [
                     'variant' => 'success',
                     'message' => 'Create direct Letter successfully!'
                 ]);
-        } catch (ModelNotFoundException $e) {
-            // Handle error
-        }
+        });
     }
 
     public function nameFile(): string
@@ -102,19 +97,18 @@ class UploadForm extends Component
         return now()->timestamp . '.' . $extension;
     }
 
-    protected function createLetter(): Letter
+    public function createLetter()
     {
         return Letter::create([
-            'user_id' => Auth::id(),
+            'user_id' => auth()->user()->id,
             'title' => $this->title,
-            'responsible_person' => $this->responsible_person,
+            'responsible_person' => auth()->user()->name,
             'reference_number' => $this->reference_number,
-            'status' => Letter::getDefaultStateFor('status'),
-            'current_division' => 2
+            'active_checking' => 2,
         ]);
     }
 
-    protected function storeFiles(): array
+    public function storeFiles(): array
     {
         return collect($this->files)
             ->sortKeys()
@@ -122,18 +116,36 @@ class UploadForm extends Component
             ->map(function ($file, $index) {
                 return [
                     'part_number' => $index + 1,
-                    'file_path' => $file->store('letters', 'public'),
+                    'file_path' => $file->store('documents', 'public'),
                 ];
             })->toArray();
     }
 
-    protected function insertLetterUploads(array $uploads): Collection
+    protected function insertLetterUploads(array $uploads)
     {
-        LetterUpload::insert($uploads);
 
-        return LetterUpload::latest('id')
-            ->take(count($uploads))
-            ->pluck('id');
+        $documentVersionId = collect();
+        foreach ($uploads as $upload) {
+            $documentUpload = LetterUpload::create([
+                'part_number' => $upload['part_number']
+            ]);
+
+            $version = UploadVersion::create([
+                'document_upload_id' => $documentUpload->id,
+                'file_path' => $upload['file_path'],
+                'is_resolved' => true,
+            ]);
+
+            // $this->createDocumentUploadVersion($documentUpload,$upload['file_path']);
+
+            $documentUpload->update([
+                'document_upload_version_id' => $version->id,
+            ]);
+
+            $documentVersionId->push($documentUpload->id);
+        }
+
+        return $documentVersionId;
     }
 
     protected function createLetterMappings(int $letterId, Collection $uploadIds): void
@@ -153,7 +165,7 @@ class UploadForm extends Component
     {
         $letter->requestStatusTrack()->create([
             'action' => $letter->status->trackingMessage(null),
-            'created_by' => Auth::user()->name
+            'created_by' => auth()->user()->name
         ]);
     }
 

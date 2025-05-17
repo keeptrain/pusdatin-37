@@ -28,8 +28,10 @@ class Letter extends Model
         'responsible_person',
         'reference_number',
         'status',
+        'active_checking',
         'current_division',
-        'active_revision'
+        'active_revision',
+        'need_review'
     ];
 
     public function user()
@@ -86,7 +88,7 @@ class Letter extends Model
             3 => 'Sistem Informasi',
             4 => 'Pengelolaan Data',
             5 => 'Hubungan Masyarakat',
-            default => $value, // Default case for other numbers
+            default => 'Perlu disposisi', // Default case for other numbers
         };
     }
 
@@ -101,6 +103,22 @@ class Letter extends Model
         return Carbon::parse($value)->format('d F Y, H:i');
     }
 
+    public function scopeFilterByCurrentUser($query)
+    {
+        $user = auth()->user();
+
+        // Periksa apakah pengguna memiliki role 'head_verifier'
+        $isHeadVerifier = $user->roles()->where('name', 'head_verifier')->exists();
+
+        return $query->when(
+            !$isHeadVerifier, // Kondisi: jika bukan head_verifier
+            function ($query) use ($user) {
+                // Filter berdasarkan current_division
+                $query->where('current_division', $user->roles()->pluck('id'));
+            }
+        );
+    }
+
     public function transitionStatusToProcess($division)
     {
         $this->status->transitionTo(\App\States\Process::class);
@@ -112,19 +130,23 @@ class Letter extends Model
         ]);
     }
 
-    public function transitionStatusFromDisposition($newStatus, $division)
+    public function transitionStatusFromDisposition($newStatus, $division, ?string $notes)
     {
         $newStatus = self::resolveStatusClassFromString($newStatus);
 
         $this->status->transitionTo($newStatus);
 
-        $this->update([
-            'current_division' => $division,
-        ]);
+        if ($division) {
+            $this->update([
+                'active_checking' => $division,
+                'current_division' => $division,
+            ]);
+        }
 
         $this->requestStatusTrack()->create([
             'letter_id'    => $this->id,
             'action'       => $this->status->trackingMessage($division),
+            'notes' => $notes,
             'created_by'   => auth()->user()->name
         ]);
     }
@@ -135,8 +157,8 @@ class Letter extends Model
 
         $this->status->transitionTo($resolveNewStatus);
 
-        $resolveNewStatus = match ($newStatus) {
-            'approved_kasatpel' => $this->update(['current_division' => 2]),
+        match ($newStatus) {
+            'approved_kasatpel' => $this->update(['active_checking' => 2]),
             'replied' => $this->update([
                 'active_revision' => true
             ])

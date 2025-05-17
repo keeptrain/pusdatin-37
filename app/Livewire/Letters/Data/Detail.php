@@ -6,6 +6,7 @@ namespace App\Livewire\Letters\Data;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
+use Illuminate\Support\Collection;
 
 class Detail extends Component
 {
@@ -22,21 +23,26 @@ class Detail extends Component
 
     public $activeRevision;
 
+    public $processedUploads;
+
     public function mount(int $id)
     {
         $this->letterId = $id;
         $this->letter = Letter::with([
             'mapping.letterable' => function ($morphTo) {
                 $morphTo->morphWith([
-                    \App\Models\Letters\LetterUpload::class => [],
+                    \App\Models\Letters\LetterUpload::class => [
+                        'version'
+                    ],
                     \App\Models\Letters\LetterDirect::class => [],
                 ]);
             }
         ])->findOrFail($id);
 
         $this->processMappings();
+        $this->processedUploads = $this->getProcessedUploadsProperty();
     }
-    
+
     protected function processMappings()
     {
         $this->uploads = collect();
@@ -50,7 +56,32 @@ class Detail extends Component
             }
         });
 
-        // Sorted part_number
+        $this->uploads = $this->uploads->sortBy('part_number');
+    }
+
+    private function getProcessedUploadsProperty(): Collection
+    {
+        $processed = new Collection();
+
+        if ($this->letter && $this->letter->mapping->isNotEmpty()) {
+            foreach ($this->letter->mapping as $map) {
+                if ($map->letterable_type === \App\Models\Letters\LetterUpload::class && $map->letterable) {
+                    $letterUpload = $map->letterable;
+
+                    $activeVersionObject = $letterUpload->activeVersion->first();
+
+                    $filePath = null;
+                    if ($activeVersionObject) {
+                        $filePath = $activeVersionObject->file_path;
+                    }
+                    $processed->push([
+                        'part_number' => $letterUpload->part_number,
+                        'file_path' => $filePath
+                    ]);
+                }
+            }
+        }
+        return $processed->sortBy('part_number'); // Urutkan untuk tampilan konsisten
     }
 
     public function repliedLetter()
@@ -58,5 +89,4 @@ class Detail extends Component
         $this->activeRevision = $this->letter->active_revision;
         $this->showModal = true;
     }
-
 }

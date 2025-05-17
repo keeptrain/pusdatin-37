@@ -22,9 +22,11 @@ return new class extends Migration
             $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
             $table->string('status', 86)->default(Letter::getDefaultStates());
-            $table->integer('current_division')->default(2);
+            $table->integer('active_checking');
+            $table->integer('current_division')->nullable();
             // $table->int('previous_division')->nullable();
             $table->boolean('active_revision')->default(false);
+            $table->boolean('need_review')->default(false);
             $table->timestamps();
             $table->softDeletes();
 
@@ -55,11 +57,10 @@ return new class extends Migration
         /**
          * Create the letter_uploads table
          */
-        Schema::create('letter_uploads', function (Blueprint $table) {
+        Schema::create('document_uploads', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('document_upload_version_id')->nullable();
             $table->tinyInteger('part_number');
-            $table->string('file_path');
-            $table->tinyInteger('version')->default(0);
             $table->boolean('need_revision')->default(false);
             $table->timestamps();
         });
@@ -67,12 +68,11 @@ return new class extends Migration
         /**
          * Create the letter_uploads_revisions table
          */
-        Schema::create('document_uploads_revisions', function (Blueprint $table) {
+        Schema::create('document_upload_versions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('document_upload_id');
-            $table->tinyInteger('part_number');
-            $table->string('file_path');
-            $table->tinyInteger('version')->default(1);
+            $table->string('file_path')->nullable();
+            $table->tinyInteger('version')->default(0);
             $table->string('revision_note')->nullable();
             $table->boolean('is_resolved')->default(false);
             $table->timestamps();
@@ -80,7 +80,11 @@ return new class extends Migration
             /**
              * Add Foreign Key to Letter uploads Table
              */
-            $table->foreign('document_upload_id')->references('id')->on('letter_uploads')->onDelete('cascade');
+            $table->foreign('document_upload_id')->references('id')->on('document_uploads')->onDelete('cascade');
+        });
+
+        Schema::table('document_uploads', function (Blueprint $table) {
+            $table->foreign('document_upload_version_id')->references('id')->on('document_upload_versions')->onDelete('cascade');
         });
 
         /**

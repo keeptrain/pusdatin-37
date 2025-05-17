@@ -4,40 +4,48 @@ namespace App\Models\Letters;
 
 use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Documents\UploadVersion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class LetterUpload extends Model
 {
     use HasFactory;
 
-    protected $table = 'letter_uploads';
+    protected $table = 'document_uploads';
 
     public $fillable = [
-        'part_name',
-        'file_path',
-        'version',
-        'needs_revision',
-        'revision_note'
+        'document_upload_version_id',
+        'part_number',
+        'need_revision',
     ];
 
     public function mapping()
     {
         return $this->morphOne(LettersMapping::class, 'letterable');
     }
+    
+    public function activeVersion()
+    {
+        return $this->hasMany(UploadVersion::class, 'id', 'document_upload_version_id');
+    }
+
+    public function version()
+    {
+        return $this->hasMany(UploadVersion::class, 'document_upload_id');
+    }
 
     /**
      * Get the custom part number string.
      *
-     * @param  int  $value
      * @return string
      */
-    public function getPartNumberAttribute($value)
+    public function getPartNumberLabelAttribute()
     {
-        return match ($value) {
+        return match ($this->part_number) {
             1 => 'Nota Dinas',
             2 => 'SOP',
             3 => 'Pengesahan',
-            default => 'UNKNOWN_PART_' . $value, // Default case for other numbers
+            default => 'UNKNOWN_PART_' . $this->part_number, // Default case for other numbers
         };
     }
 

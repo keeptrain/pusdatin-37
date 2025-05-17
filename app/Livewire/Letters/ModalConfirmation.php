@@ -15,12 +15,8 @@ use App\Notifications\NewServiceRequestNotification;
 
 class ModalConfirmation extends Component
 {
-    public $showModal = false;
-
     #[Locked]
     public int $letterId;
-
-    public Letter $letter;
 
     public $status = '';
 
@@ -33,10 +29,6 @@ class ModalConfirmation extends Component
     public $revisionParts = [];
 
     public $revisionNotes = [];
-
-    public $showPart = false;
-
-    public $showNotes = false;
 
     public function rules()
     {
@@ -99,8 +91,15 @@ class ModalConfirmation extends Component
 
             $letter->transitionStatusFromDisposition(
                 $this->status,
-                $this->handleDivision($letter)
+                $this->handleDivision($letter),
+                ($this->notes) ? $this->notes : null
             );
+
+            return redirect()->to("/letter/$this->letterId")
+                ->with('status', [
+                    'variant' => 'success',
+                    'message' => $letter->status->toastMessage(),
+                ]);
         });
     }
 
@@ -140,6 +139,12 @@ class ModalConfirmation extends Component
                 $this->status,
                 division: $letter->current_division
             );
+
+            return redirect()->to("/letter/$this->letterId")
+                ->with('status', [
+                    'variant' => 'success',
+                    'message' => $letter->status->toastMessage(),
+                ]);
         });
     }
 
@@ -169,33 +174,43 @@ class ModalConfirmation extends Component
         Notification::send($user, new NewServiceRequestNotification($letter));
     }
 
-    public function updateRevisionFromMapping(int $letterId, string $partName, string $note)
+    public function updateRevisionFromMapping(int $letterId, string $partNumber, string $note)
     {
         $mapping = LettersMapping::where('letter_id', $letterId)
             ->where('letterable_type', LetterUpload::class)
-            ->whereHasMorph('letterable', [LetterUpload::class], function ($query) use ($partName) {
-                $query->where('part_number', $partName);
+            ->whereHasMorph('letterable', [LetterUpload::class], function ($query) use ($partNumber) {
+                $query->where('part_number', $partNumber);
             })
             ->first();
 
         if (!$mapping) {
-            throw new \Exception("Mapping tidak ditemukan untuk letter ID $letterId dan part $partName.");
+            throw new \Exception("Mapping tidak ditemukan untuk letter ID $letterId dan part $partNumber.");
         }
 
         $letterUpload = LetterUpload::where('id', $mapping->letterable_id)
-            ->latest('version')
             ->first();
 
         if (!$letterUpload) {
             throw new \Exception("LetterUpload tidak ditemukan.");
         }
 
-        $letterUpload->update([
-            'needs_revision' => true,
-            // 'version' => DB::raw('version + 1'),`
-        ]);
+        $latestRevision = $letterUpload->version()->latest('version')->first();
+        $nextVersion = $latestRevision ? $latestRevision->version + 1 : 1;
 
-        
+        if ($letterUpload->need_revision == false) {
+            $revision = $letterUpload->version()->create([
+                'document_upload_id' => $letterId,
+                'version' => $nextVersion,
+                'revision_note' => $note,
+                'part_number' => $partNumber,
+            ]);
+        }
+
+        if ($revision) {
+            $letterUpload->update([
+                'need_revision' => true,
+            ]);
+        }
     }
 
     public function checkRevisionInputForRepliedStatus()
@@ -203,6 +218,7 @@ class ModalConfirmation extends Component
         if (in_array($this->status, ['replied', 'rejected'])) {
             foreach ($this->revisionParts as $partNumber) {
                 $note = $this->revisionNotes[$partNumber] ?? null;
+
 
                 $this->updateRevisionFromMapping($this->letterId, $partNumber, $note);
             }
