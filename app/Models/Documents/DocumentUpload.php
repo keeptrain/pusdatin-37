@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Models\Letters;
+namespace App\Models\Documents;
 
 use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\UploadVersion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class LetterUpload extends Model
+class DocumentUpload extends Model
 {
     use HasFactory;
 

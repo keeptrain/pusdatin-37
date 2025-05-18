@@ -11,8 +11,8 @@ use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Documents\DocumentUpload;
 use App\Models\letters\LettersMapping;
 use App\Models\Documents\UploadVersion;
 use Illuminate\Support\Facades\Storage;
@@ -63,7 +63,7 @@ class UploadForm extends Component
         DB::transaction(function () {
             $letter = $this->createLetter();
             $uploads = $this->storeFiles();
-            $uploadIds = $this->insertLetterUploads($uploads);
+            $uploadIds = $this->insertDocumentUploads($uploads);
             $this->createLetterMappings($letter->id, $uploadIds);
             $this->createStatusTrack($letter);
 
@@ -121,12 +121,12 @@ class UploadForm extends Component
             })->toArray();
     }
 
-    protected function insertLetterUploads(array $uploads)
+    protected function insertDocumentUploads(array $uploads)
     {
 
         $documentVersionId = collect();
         foreach ($uploads as $upload) {
-            $documentUpload = LetterUpload::create([
+            $documentUpload = DocumentUpload::create([
                 'part_number' => $upload['part_number']
             ]);
 
@@ -153,7 +153,7 @@ class UploadForm extends Component
         $mappings = $uploadIds->map(function ($uploadId) use ($letterId) {
             return [
                 'letter_id' => $letterId,
-                'letterable_type' => LetterUpload::class,
+                'letterable_type' => DocumentUpload::class,
                 'letterable_id' => $uploadId,
             ];
         })->toArray();

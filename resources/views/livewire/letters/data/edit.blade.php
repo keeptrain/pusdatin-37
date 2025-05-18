@@ -42,7 +42,7 @@
             <!-- Section 2: Document Upload -->
             @if (
                     $letter->mapping->contains(function ($map) {
-                        return $map->letterable instanceof \App\Models\Letters\LetterUpload && $map->letterable->need_revision;
+                        return $map->letterable instanceof DocumentUpload && $map->letterable->need_revision;
                     })
                 )
                 <section>
@@ -68,7 +68,7 @@
                                     $upload = $item->letterable;
                                 @endphp
 
-                                @if ($upload instanceof \App\Models\Letters\LetterUpload && $upload->need_revision == true)
+                                @if ($upload instanceof DocumentUpload && $upload->need_revision == true)
                                     <section>
                                         <x-letters.input-file-adapter :title="$upload->part_number_label"
                                             model="revisedFiles.{{ $upload->part_number }}" required />
