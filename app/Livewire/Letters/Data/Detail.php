@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Letters\Data;
 
-
+use App\Models\Letters\DocumentUpload;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
@@ -29,7 +29,7 @@ class Detail extends Component
         $this->letter = Letter::with([
             'mapping.letterable' => function ($morphTo) {
                 $morphTo->morphWith([
-                    \App\Models\Letters\LetterUpload::class => [
+                    DocumentUpload::class => [
                         'version'
                     ],
                     \App\Models\Letters\LetterDirect::class => [],
@@ -47,7 +47,7 @@ class Detail extends Component
         $this->directs = collect();
 
         $this->letter->mapping->each(function ($mapping) {
-            if ($mapping->letterable instanceof \App\Models\Letters\LetterUpload) {
+            if ($mapping->letterable instanceof DocumentUpload) {
                 $this->uploads->push($mapping->letterable);
             } elseif ($mapping->letterable instanceof \App\Models\Letters\LetterDirect) {
                 $this->directs->push($mapping->letterable);
@@ -69,17 +69,17 @@ class Detail extends Component
 
         if ($this->letter && $this->letter->mapping->isNotEmpty()) {
             foreach ($this->letter->mapping as $map) {
-                if ($map->letterable_type === \App\Models\Letters\LetterUpload::class && $map->letterable) {
-                    $letterUpload = $map->letterable;
+                if ($map->letterable_type === DocumentUpload::class && $map->letterable) {
+                    $documentUpload = $map->letterable;
 
-                    $activeVersionObject = $letterUpload->activeVersion->first();
+                    $activeVersionObject = $documentUpload->activeVersion->first();
 
                     $filePath = null;
                     if ($activeVersionObject) {
                         $filePath = $activeVersionObject->file_path;
                     }
                     $processed->push([
-                        'part_number' => $letterUpload->part_number,
+                        'part_number' => $documentUpload->part_number,
                         'file_path' => $filePath
                     ]);
                 }

@@ -5,10 +5,10 @@ namespace App\Livewire\Letters;
 use App\Models\User;
 use Livewire\Component;
 use App\Models\Letters\Letter;
+use App\Models\Letters\DocumentUpload;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
-use App\Models\Letters\LetterUpload;
 use App\Models\letters\LettersMapping;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
@@ -185,8 +185,8 @@ class ModalConfirmation extends Component
     public function updateRevisionFromMapping(int $letterId, string $partNumber, string $note)
     {
         $mapping = LettersMapping::where('letter_id', $letterId)
-            ->where('letterable_type', LetterUpload::class)
-            ->whereHasMorph('letterable', [LetterUpload::class], function ($query) use ($partNumber) {
+            ->where('letterable_type', DocumentUpload::class)
+            ->whereHasMorph('letterable', [DocumentUpload::class], function ($query) use ($partNumber) {
                 $query->where('part_number', $partNumber);
             })
             ->first();
@@ -195,18 +195,18 @@ class ModalConfirmation extends Component
             throw new \Exception("Mapping tidak ditemukan untuk letter ID $letterId dan part $partNumber.");
         }
 
-        $letterUpload = LetterUpload::where('id', $mapping->letterable_id)
+        $documentUpload = DocumentUpload::where('id', $mapping->letterable_id)
             ->first();
 
-        if (!$letterUpload) {
-            throw new \Exception("LetterUpload tidak ditemukan.");
+        if (!$documentUpload) {
+            throw new \Exception("DocumentUpload tidak ditemukan.");
         }
 
-        $latestRevision = $letterUpload->version()->latest('version')->first();
+        $latestRevision = $documentUpload->version()->latest('version')->first();
         $nextVersion = $latestRevision ? $latestRevision->version + 1 : 1;
 
-        if ($letterUpload->need_revision == false) {
-            $revision = $letterUpload->version()->create([
+        if ($documentUpload->need_revision == false) {
+            $revision = $documentUpload->version()->create([
                 'document_upload_id' => $letterId,
                 'version' => $nextVersion,
                 'revision_note' => $note,
@@ -215,7 +215,7 @@ class ModalConfirmation extends Component
         }
 
         if ($revision) {
-            $letterUpload->update([
+            $documentUpload->update([
                 'need_revision' => true,
             ]);
         }

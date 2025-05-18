@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Letters\Data;
 
+use App\Models\Letters\DocumentUpload;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
-use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
 
@@ -37,7 +37,7 @@ class Edit extends Component
             'reference_number' => 'required|string'
         ];
 
-        $revisedParts = $this->letterNeedRevision(LetterUpload::class);
+        $revisedParts = $this->letterNeedRevision(DocumentUpload::class);
 
         foreach ($revisedParts as $partName) {
             $rules["revisedFiles.$partName"] = 'required|file|mimes:pdf|max:1048';
@@ -62,7 +62,7 @@ class Edit extends Component
         $this->letter = Letter::with([
             'mapping.letterable' => function ($morphTo) {
                 $morphTo->morphWith([
-                    \App\Models\Letters\LetterUpload::class => [
+                    \App\Models\Letters\DocumentUpload::class => [
                         'version'
                     ],
                     \App\Models\Letters\LetterDirect::class => [],
@@ -90,20 +90,20 @@ class Edit extends Component
             $revisedParts = [];
 
             foreach ($this->revisedFiles as $partNumber => $file) {
-                // Cari LetterUpload yang sesuai dengan part_number
-                $letterUpload = $letter->mapping
+                // Cari DocumentUpload yang sesuai dengan part_number
+                $documentUpload = $letter->mapping
                     ->map(fn($m) => $m->letterable)
-                    ->whereInstanceOf(\App\Models\Letters\LetterUpload::class)
+                    ->whereInstanceOf(\App\Models\Letters\DocumentUpload::class)
                     ->first(fn($upload) => $upload->part_number == $partNumber);
 
-                if (!$letterUpload) {
-                    throw new \Exception("LetterUpload not found for part_number: $partNumber");
+                if (!$documentUpload) {
+                    throw new \Exception("DocumentUpload not found for part_number: $partNumber");
                 }
 
                 // Simpan file ke storage
                 $path = $file->store('documents', 'public');
 
-                $revision = $letterUpload->version()
+                $revision = $documentUpload->version()
                     ->where('is_resolved', false)
                     // ->whereNull('file_path')
                     ->orderBy('id', 'desc')
@@ -118,7 +118,7 @@ class Edit extends Component
                     'need_review' => true,
                 ]);
 
-                $letterUpload->update([
+                $documentUpload->update([
                     'need_revision' => false,
                 ]);
 
@@ -126,7 +126,7 @@ class Edit extends Component
                     'file_path' => $path, // Update file path
                 ]);
 
-                $partName = $letterUpload->part_number_label;
+                $partName = $documentUpload->part_number_label;
                 $revisedParts[] = $partName;
             }
 

@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Documents;
 
+use App\Models\Letters\DocumentUpload;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Collection;
-use App\Models\Letters\LetterUpload;
 
 class RevisionComparision extends Component
 {
@@ -31,7 +31,7 @@ class RevisionComparision extends Component
         return Letter::with([
             'mapping.letterable' => function ($morphTo) {
                 $morphTo->morphWith([
-                    \App\Models\Letters\LetterUpload::class => [
+                    DocumentUpload::class => [
                         'version'
                     ],
                     \App\Models\Letters\LetterDirect::class => [],
@@ -47,17 +47,17 @@ class RevisionComparision extends Component
 
         if ($this->letter && $this->letter->mapping->isNotEmpty()) {
             foreach ($this->letter->mapping as $map) {
-                if ($map->letterable_type === LetterUpload::class && $map->letterable) {
-                    $letterUpload = $map->letterable;
+                if ($map->letterable_type === DocumentUpload::class && $map->letterable) {
+                    $documentUpload = $map->letterable;
 
-                    $activeVersion = $letterUpload->version->first();
+                    $activeVersion = $documentUpload->version->first();
 
-                    if ($letterUpload) {
+                    if ($documentUpload) {
                         $latestRevisions->push([
-                            'part_number' => $letterUpload->part_number,
-                            'part_number_label' => $letterUpload->part_number_label,
+                            'part_number' => $documentUpload->part_number,
+                            'part_number_label' => $documentUpload->part_number_label,
                             'file_path' => $activeVersion->file_path,
-                            'version' => $letterUpload->version,
+                            'version' => $documentUpload->version,
                         ]);
                     }
                 }

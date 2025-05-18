@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Documents;
 
+use App\Models\Letters\DocumentUpload;
 use App\Models\User;
 use Livewire\Component;
 use App\Models\Letters\Letter;
@@ -9,7 +10,6 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Letters\LetterDirect;
-use App\Models\Letters\LetterUpload;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
 
@@ -64,7 +64,7 @@ class Review extends Component
         return Letter::with([
             'mapping.letterable' => function ($morphTo) {
                 $morphTo->morphWith([
-                    LetterUpload::class => [
+                    DocumentUpload::class => [
                         'version' => function ($query) {
                             $query->orderBy('version', 'desc');
                         }
@@ -83,21 +83,21 @@ class Review extends Component
                 $this->letter->mapping()
                     ->get()
                     ->filter(function ($map) {
-                        return $map->letterable instanceof LetterUpload &&
+                        return $map->letterable instanceof DocumentUpload &&
                             in_array($map->letterable->part_number, $this->partAccepted);
                     })
                     ->each(function ($mapping) {
-                        /** @var LetterUpload $letterUpload */
-                        $letterUpload = $mapping->letterable;
+                        /** @var DocumentUpload $documentUpload */
+                        $documentUpload = $mapping->letterable;
 
-                        $allVersions = $letterUpload->version();
+                        $allVersions = $documentUpload->version();
 
                         $latestUnapprovedRevision = $allVersions
                             ->where('is_resolved', false)
                             ->first();
 
                         if ($latestUnapprovedRevision) {
-                            $letterUpload->update([
+                            $documentUpload->update([
                                 'document_upload_version_id' => $latestUnapprovedRevision->id,
                                 'need_revision' => false,
                             ]);
@@ -115,13 +115,13 @@ class Review extends Component
                 $this->letter->mapping()
                     ->get()
                     ->filter(function ($map) {
-                        return $map->letterable instanceof LetterUpload;
+                        return $map->letterable instanceof DocumentUpload;
                     })
                     ->each(function ($mapping) {
-                        /** @var LetterUpload $letterUpload */
-                        $letterUpload = $mapping->letterable;
+                        /** @var DocumentUpload $documentUpload */
+                        $documentUpload = $mapping->letterable;
 
-                        $letterUpload->update([
+                        $documentUpload->update([
                             'need_revision' => true,
                         ]);
                     });
@@ -149,15 +149,15 @@ class Review extends Component
 
         if ($this->letter && $this->letter->mapping->isNotEmpty()) {
             foreach ($this->letter->mapping as $map) {
-                if ($map->letterable_type === LetterUpload::class && $map->letterable) {
-                    $letterUpload = $map->letterable;
+                if ($map->letterable_type === DocumentUpload::class && $map->letterable) {
+                    $documentUpload = $map->letterable;
 
-                    $activeVersion = $letterUpload->activeVersion->first();
-                    $allVersions = $letterUpload->getRelation('version');
+                    $activeVersion = $documentUpload->activeVersion->first();
+                    $allVersions = $documentUpload->getRelation('version');
 
                     $previousVersionsData->push([
-                        'part_number' => $letterUpload->part_number,
-                        'part_number_label' => $letterUpload->part_number_label,
+                        'part_number' => $documentUpload->part_number,
+                        'part_number_label' => $documentUpload->part_number_label,
                         'file_path' => $activeVersion->file_path,
                         'revision_note' => $allVersions->first()->revision_note,
                     ]);
@@ -169,8 +169,8 @@ class Review extends Component
 
                     if ($latestUnapprovedRevision) {
                         $latestUnapprovedRevisionsData->push([
-                            'part_number' => $letterUpload->part_number,
-                            'part_number_label' => $letterUpload->part_number_label,
+                            'part_number' => $documentUpload->part_number,
+                            'part_number_label' => $documentUpload->part_number_label,
                             'file_path' => $latestUnapprovedRevision->file_path,
                             'revision_note' => $latestUnapprovedRevision->revision_note
                         ]);
