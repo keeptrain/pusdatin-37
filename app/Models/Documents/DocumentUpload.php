@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Letters;
+namespace App\Models\Documents;
 
 use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
@@ -23,7 +23,7 @@ class DocumentUpload extends Model
     {
         return $this->morphOne(LettersMapping::class, 'letterable');
     }
-    
+
     public function activeVersion()
     {
         return $this->hasMany(UploadVersion::class, 'id', 'document_upload_version_id');

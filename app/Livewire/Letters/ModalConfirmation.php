@@ -5,7 +5,7 @@ namespace App\Livewire\Letters;
 use App\Models\User;
 use Livewire\Component;
 use App\Models\Letters\Letter;
-use App\Models\Letters\DocumentUpload;
+use App\Models\Documents\DocumentUpload;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;

@@ -2,7 +2,7 @@
 
 namespace App\Models\Documents;
 
-use App\Models\Letters\LetterUpload;
+use App\Models\Documents\DocumentUpload;
 use Illuminate\Database\Eloquent\Model;
 
 class UploadVersion extends Model
@@ -20,11 +20,11 @@ class UploadVersion extends Model
 
     public function letterUpload()
     {
-        return $this->belongsTo(LetterUpload::class);
+        return $this->belongsTo(DocumentUpload::class, 'document_upload_id');
     }
 
     public function documentUpload()
     {
-        return $this->hasOne(LetterUpload::class,'document_upload_version_id');
+        return $this->hasOne(DocumentUpload::class, 'document_upload_version_id');
     }
 }

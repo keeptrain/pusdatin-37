@@ -17,7 +17,8 @@
             :title="$track->letter->title"
             :person="$track->letter->responsible_person" />
     </div>
-    <x-user.tracking-progres />
+    <x-user.tracking-progres
+        :status="$track->letter->status" />
 
 
 
