@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Documents\DocumentUpload;
 use App\Models\letters\LettersMapping;
-use App\Models\Documents\UploadVersion;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
@@ -63,7 +62,7 @@ class UploadForm extends Component
         DB::transaction(function () {
             $letter = $this->createLetter();
             $uploads = $this->storeFiles();
-            $uploadIds = $this->insertDocumentUploads($uploads);
+            $uploadIds = $this->insertDocumentUploads($uploads, $letter);
             $this->createLetterMappings($letter->id, $uploadIds);
             $this->createStatusTrack($letter);
 
@@ -121,16 +120,16 @@ class UploadForm extends Component
             })->toArray();
     }
 
-    protected function insertDocumentUploads(array $uploads)
+    protected function insertDocumentUploads(array $uploads, $letter)
     {
 
         $documentVersionId = collect();
         foreach ($uploads as $upload) {
-            $documentUpload = DocumentUpload::create([
+            $documentUpload = $letter->documentUploads()->create([
                 'part_number' => $upload['part_number']
-            ]);
+            ]);  
 
-            $version = UploadVersion::create([
+            $version = $documentUpload->versions()->create([
                 'document_upload_id' => $documentUpload->id,
                 'file_path' => $upload['file_path'],
                 'is_resolved' => true,

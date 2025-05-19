@@ -8,6 +8,7 @@ use App\States\LetterStatus;
 use Spatie\ModelStates\HasStates;
 use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Documents\DocumentUpload;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,6 +40,11 @@ class Letter extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function documentUploads()
+    {
+        return $this->morphMany(DocumentUpload::class, 'documentable');
+    }
+
     public function mapping()
     {
         return $this->hasMany(LettersMapping::class);
@@ -46,7 +52,7 @@ class Letter extends Model
 
     public function requestStatusTrack()
     {
-        return $this->hasMany(RequestStatusTrack::class);
+        return $this->morphMany(RequestStatusTrack::class, 'statusable');
     }
 
     public static function resolveStatusClassFromString($statusString)

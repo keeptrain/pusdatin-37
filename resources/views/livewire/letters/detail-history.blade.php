@@ -1,27 +1,25 @@
 <div>
+    <flux:button :href="route('history')" icon="arrow-long-left" variant="subtle">Kembali</flux:button>
     <div class="bg-white border-b border-gray-200 px-4 py-6">
         <div class="max-w-screen-xl mx-auto">
             <div class="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-900">Detail History Permohonan</h2>
-                    <p class="mt-1 text-sm text-gray-500">View and manage all your application requests in one place</p>
-                </div>
+                <h2 class="text-2xl font-semibold text-gray-900">Detail Permohonan</h2>
             </div>
         </div>
     </div>
-    <div class=" py-6">
+    <div class="py-6">
         <x-user.card-basic-info
-            :request-id="$track->letter->request_id"
-            :created-at="$track->created_at->format('M d, Y')"
-            :status="$track->letter->status"
-            :title="$track->letter->title"
-            :person="$track->letter->responsible_person" />
+            :id="$letter->id"
+            :created-at="$letter->created_at"
+            :status="$letter->status"
+            :title="$letter->title"
+            :person="$letter->responsible_person"
+            :activerevision="$letter->active_revision"/>
     </div>
-    <x-user.tracking-progres
-        :status="$track->letter->status" />
 
+    <x-user.tracking-progres :status="$letter->status" />
 
-
+    <x-user.tracking-list :activity="$this->activities"/>    
 
     <liviwire:data.edit />
 </div>

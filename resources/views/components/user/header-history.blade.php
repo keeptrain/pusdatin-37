@@ -4,7 +4,7 @@
             <div>
                 <h2 class="text-2xl font-semibold text-gray-900">History Permohonan</h2>
                 <p class="mt-1 text-sm text-gray-500">
-                    View and manage all your application requests in one place
+                    Seluruh permohonan layanan yang diajukan terdata disini. 
                 </p>
             </div>
             <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
