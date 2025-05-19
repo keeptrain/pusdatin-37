@@ -1,5 +1,5 @@
 @php
-    $layout = auth()->user()->hasRole(['administrator', 'head_verifier', 'si_verifier', 'data_verifier', 'pr_verifier'], ) ? 'layouts.app.sidebar' : 'layouts.app.header';
+    $layout = auth()->user()->hasRole(['administrator', 'head_verifier', 'si_verifier', 'data_verifier', 'pr_verifier', 'promkes_verifier'], ) ? 'layouts.app.sidebar' : 'layouts.app.header';
     $shouldUseContainer = ($layout === 'layouts.app.header');
 @endphp
 

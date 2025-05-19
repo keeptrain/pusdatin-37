@@ -12,7 +12,7 @@ class DashboardController extends Controller
         $userRoles = $user->roles()->pluck('id');
 
         return match (true) {
-            $user->hasRole(['administrator', 'head_verifier', 'si_verifier', 'data_verifier', 'pr_verifier']) 
+            $user->hasRole(['administrator', 'head_verifier', 'si_verifier', 'data_verifier', 'pr_verifier', 'promkes_verifier']) 
                 => view('dashboard', [
                     'totalServices' => $this->totalRequestServices($userRoles)
                 ]),

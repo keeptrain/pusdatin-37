@@ -53,10 +53,10 @@ class UserSeeder extends Seeder
         ]);
         $verifikator->assignRole($verifikatorRole);
 
-        $verifikatorRole = Role::findByName('kesmas_verifier');
+        $verifikatorRole = Role::findByName('promkes_verifier');
         $verifikator = User::create([
-                'name' => 'Kesehatan Masyarakat',
-                'email' => 'kesmas@gmail.com',
+                'name' => 'Promosi Kesehatan',
+                'email' => 'promkes@gmail.com',
                 'password' => bcrypt('login'),
         ]);
         $verifikator->assignRole($verifikatorRole);
