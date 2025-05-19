@@ -7,19 +7,14 @@
             </div>
         </div>
     </div>
+
     <div class="py-6">
-        <x-user.card-basic-info
-            :id="$letter->id"
-            :created-at="$letter->created_at"
-            :status="$letter->status"
-            :title="$letter->title"
-            :person="$letter->responsible_person"
-            :activerevision="$letter->active_revision"/>
+        <x-user.card-basic-info :id="$letter->id" :created-at="$letter->createdAtDMY()" :status="$letter->status"
+            :title="$letter->title" :person="$letter->responsible_person" :activerevision="$letter->active_revision" :uploadedFile="$this->uploadedFile" />
     </div>
 
     <x-user.tracking-progres :status="$letter->status" />
 
-    <x-user.tracking-list :activity="$this->activities"/>    
+    
 
-    <liviwire:data.edit />
 </div>

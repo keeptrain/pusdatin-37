@@ -105,7 +105,7 @@
 
         <!-- Form Actions -->
         <div class="flex justify-between">
-            <flux:button href="{{ route('history') }}" wire:navigate>
+            <flux:button href="{{ route('history.detail', [$letterId]) }}">
                 Cancel
             </flux:button>
             <flux:button type="submit" variant="primary">

@@ -64,10 +64,11 @@ class DocumentUpload extends Model
                     4 => 'Media',
                     default => 'PR_UNKNOWN_PART_' . $this->part_number,
                 };
-            case 'AnotherDocumentableModel':
+            case 'Letter':
                 return match ($this->part_number) {
-                1 => 'Formulir A (Other)',
-                    2 => 'Laporan B (Other)',
+                    1 => 'Nota dinas',
+                    2 => 'SOP',
+                    3 => 'Pendukung',
                     default => 'OTHER_UNKNOWN_PART_' . $this->part_number,
                 };
             default:

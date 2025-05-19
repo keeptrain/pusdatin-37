@@ -11,27 +11,26 @@
         case 'pending':
             $width = 5;
             break;
-        case 'disposisi':
-            $width = 23;
+        case 'disposition':
+            $width = 25;
             break;
-        case 'proses':
-            $width = 42;
+        case 'process':
+            $width = 50;
             break;
         case 'replied':
             $width = 60;
             break;
         case 'approved by kasatpel':
-            $width = 77;
+            $width = 75;
             break;
         case 'approved by kapusdatin':
-            $width = 95;
+            $width = 100;
             break;
     }
 @endphp
 <div class="max-w-screen-xl px-4 lg:px-0 mx-auto">
-
     <div class="w-fulll p-6 bg-white rounded-lg border">
-        <h2 class="text-2xl font-bold text-gray-800 mb-8">Tracking Progress</h2>
+        <h2 class="text-lg font-bold text-gray-800 mb-8">Tracking Progress</h2>
 
         <!-- ini buat di desktop di hidden di mobile -->
         <div class="relative hidden md:block">
@@ -133,7 +132,7 @@
                 <!-- Step 5: Finish -->
                 <div class="flex flex-col items-center">
                     <!-- Icon Circle -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-400">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-green-500">
                         <!-- CheckCircle Icon from Lucide -->
                         <x-lucide-check-circle class="w-6 text-white" />
                     </div>
@@ -294,5 +293,8 @@
                 </div>
             </div>
         </div>
+
+        <x-user.tracking-list :activity="$this->activities" />
+            
     </div>
 </div>

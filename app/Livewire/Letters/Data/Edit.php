@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Letters\Data;
 
-use App\Models\Letters\DocumentUpload;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
+use App\Models\Documents\DocumentUpload;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -62,12 +62,12 @@ class Edit extends Component
         $this->letter = Letter::with([
             'mapping.letterable' => function ($morphTo) {
                 $morphTo->morphWith([
-                    \App\Models\Letters\DocumentUpload::class => [
-                        'version'
+                    DocumentUpload::class => [
+                        'versions',
                     ],
                     \App\Models\Letters\LetterDirect::class => [],
                 ]);
-            }
+            }, 'documentUploads'
         ])->findOrFail($id);
 
         $this->fill(
@@ -93,7 +93,7 @@ class Edit extends Component
                 // Cari DocumentUpload yang sesuai dengan part_number
                 $documentUpload = $letter->mapping
                     ->map(fn($m) => $m->letterable)
-                    ->whereInstanceOf(\App\Models\Letters\DocumentUpload::class)
+                    ->whereInstanceOf(DocumentUpload::class)
                     ->first(fn($upload) => $upload->part_number == $partNumber);
 
                 if (!$documentUpload) {

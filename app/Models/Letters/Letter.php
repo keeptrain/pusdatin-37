@@ -47,7 +47,7 @@ class Letter extends Model
 
     public function mapping()
     {
-        return $this->hasMany(LettersMapping::class);
+        return $this->morphMany(LettersMapping::class, 'letterable');
     }
 
     public function requestStatusTrack()

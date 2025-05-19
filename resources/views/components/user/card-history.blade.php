@@ -1,9 +1,9 @@
 <!-- card-history.blade.php -->
 <div class="w-full max-w-4xl md:ml-5 2xl:ml-5 ">
     <div class="bg-white rounded-xl  p-6 mb-4 border-2 border-gray-100">
-        <div class="flex justify-between items-center mb-6 ">
+        <div class="flex justify-between items-center mb-3 ">
             <div class="flex items-center w-1/2 ">
-                <h2 class="text-xl font-bold text-gray-800">{{$title}}</h2>
+                <h2 class="text-xl font-bold text-gray-800">Judul: {{$title}}</h2>
             </div>
             <div class="flex items-center {{ $status->badgeBg() }} text-white px-3 py-1 rounded-full ">
                 <x-dynamic-component :component=" 'lucide-' . $status->icon() " class="w-4 h-4 mr-1" />
@@ -41,7 +41,7 @@
             </div>
             <template x-if="{{ $status->label() == 'Replied' }}">
                 <a href="{{ route('letter.edit', [$id]) }}"
-                    class="ml-0 sm:ml-4 bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition duration-300 w-fit self-end">
+                    class="ml-0 sm:ml-4 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition duration-300 w-fit self-end">
                     Revisi
                     <x-lucide-edit class="text-white w-5 ml-2" />
                 </a>
