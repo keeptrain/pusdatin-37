@@ -1,32 +1,41 @@
 @props(['status'])
 
 @php
-    // Ambil teks label dari objek status
-    $label = strtolower($status->label());
+// Ambil teks label dari objek status
+$label = strtolower($status->label());
 
-    // Default width
-    $width = 0;
+// Default width
+$width = 0;
 
-    switch ($label) {
-        case 'pending':
-            $width = 5;
-            break;
-        case 'disposition':
-            $width = 25;
-            break;
-        case 'process':
-            $width = 50;
-            break;
-        case 'replied':
-            $width = 60;
-            break;
-        case 'approved by kasatpel':
-            $width = 75;
-            break;
-        case 'approved by kapusdatin':
-            $width = 100;
-            break;
-    }
+$step1ActiveStatuses = ['pending', 'disposition', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
+$step2ActiveStatuses = ['disposition', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
+$step3ActiveStatuses = ['proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
+
+
+$step1IsActive = in_array($label, $step1ActiveStatuses);
+$step2IsActive = in_array($label, $step2ActiveStatuses);
+$step3IsActive = in_array($label, $step3ActiveStatuses);
+
+switch ($label) {
+case 'pending':
+$width = 5;
+break;
+case 'disposition':
+$width = 25;
+break;
+case 'process':
+$width = 50;
+break;
+case 'replied':
+$width = 60;
+break;
+case 'approved by kasatpel':
+$width = 75;
+break;
+case 'approved by kapusdatin':
+$width = 100;
+break;
+}
 @endphp
 <div class="max-w-screen-xl px-4 lg:px-0 mx-auto">
     <div class="w-fulll p-6 bg-white rounded-lg border">
@@ -45,14 +54,14 @@
                 <!-- Step 1: Document Diterima -->
                 <div class="flex flex-col items-center">
 
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 circle-bg  {{ $step1IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
                         <!-- FileEdit Icon from Lucide -->
                         <x-lucide-file class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->
                     <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800"></div>
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white step-indi  {{ $step1IsActive ? 'bg-gray-800' : 'bg-gray-400' }}"></div>
                     </div>
 
                     <!-- Step Name -->
@@ -62,14 +71,14 @@
                 <!-- Step 2: Document Disposisi -->
                 <div class="flex flex-col items-center">
                     <!-- Icon Circle -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2  {{ $step2IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
                         <!-- Search Icon from Lucide -->
                         <x-lucide-search class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->
                     <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800"></div>
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white  {{ $step2IsActive ? 'bg-gray-800' : 'bg-gray-400' }}"></div>
                     </div>
 
                     <!-- Step Name -->
@@ -79,14 +88,14 @@
                 <!-- Step 3: Dokumen di proses -->
                 <div class="flex flex-col items-center">
                     <!-- Icon Circle -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2  {{ $step3IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
                         <!-- Code2 Icon from Lucide -->
                         <x-lucide-file-clock class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->
                     <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white"></div>
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white  {{ $step3IsActive ? 'bg-gray-800' : 'bg-gray-400' }}"></div>
                     </div>
 
                     <!-- Step Name -->
@@ -94,22 +103,22 @@
                 </div>
 
                 @if ($status === 'replied')
-                    <!-- Step 4: Dokumen Revisi -->
-                    <div class="flex flex-col items-center">
-                        <!-- Icon Circle -->
-                        <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-orange-600">
-                            <!-- Code2 Icon from Lucide -->
-                            <x-lucide-folder-cog class="w-6 text-white" />
-                        </div>
-
-                        <!-- Step Indicator -->
-                        <div class="flex items-center justify-center">
-                            <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-orange-600"></div>
-                        </div>
-
-                        <!-- Step Name -->
-                        <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Revisi</p>
+                <!-- Step 4: Dokumen Revisi -->
+                <div class="flex flex-col items-center">
+                    <!-- Icon Circle -->
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-orange-600">
+                        <!-- Code2 Icon from Lucide -->
+                        <x-lucide-folder-cog class="w-6 text-white" />
                     </div>
+
+                    <!-- Step Indicator -->
+                    <div class="flex items-center justify-center">
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-orange-600"></div>
+                    </div>
+
+                    <!-- Step Name -->
+                    <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Revisi</p>
+                </div>
                 @endif
 
                 <!-- Step 5: Finish -->
@@ -295,6 +304,6 @@
         </div>
 
         <x-user.tracking-list :activity="$this->activities" />
-            
+
     </div>
 </div>
