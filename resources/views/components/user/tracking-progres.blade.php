@@ -1,3 +1,33 @@
+@props(['status'])
+
+@php
+// Ambil teks label dari objek status
+$label = strtolower($status->label());
+
+// Default width
+$width = 0;
+
+switch ($label) {
+case 'pending':
+$width = 5;
+break;
+case 'disposisi':
+$width = 23;
+break;
+case 'proses':
+$width = 42;
+break;
+case 'replied':
+$width = 60;
+break;
+case 'approved by kasatpel':
+$width = 77;
+break;
+case 'approved by kapusdatin':
+$width = 95;
+break;
+}
+@endphp
 <div class="max-w-screen-xl px-4 lg:px-0  mx-auto">
 
     <div class="w-fulll  p-6 bg-white rounded-lg shadow-md">
@@ -8,7 +38,8 @@
             <!-- Progress Line -->
             <div class="absolute top-6 left-0 w-full h-0.5 bg-gray-300">
                 <!-- ubah persenan di width nya untuk progres yang selesai -->
-                <div class="absolute top-0 left-0 h-full bg-[#364872]" style="width: 33%;"></div>
+                <div class="absolute top-0 left-0 h-full bg-[#364872] progres-bar"
+                    style="width: {{ $width }}%;"></div>
             </div>
 
             <!-- Steps -->
@@ -116,7 +147,7 @@
                 </div>
 
                 <!-- Step 5.1: Reject -->
-                <div class="flex flex-col items-center">
+                <div class=" flex-col items-center hidden ">
                     <!-- Icon Circle -->
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-red-500">
                         <!-- CheckCircle Icon from Lucide -->

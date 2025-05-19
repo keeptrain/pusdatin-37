@@ -2,10 +2,11 @@
 
 namespace Database\Factories\Letters;
 
+use App\Models\Documents\DocumentUpload;
 use App\Models\User;
 use App\Models\Letters\Letter;
 use App\Models\Letters\LetterDirect;
-use App\Models\Letters\LetterUpload;
+// use App\Models\Letters\LetterUpload;
 use App\Models\Letters\RequestStatusTrack;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -29,7 +30,7 @@ class LetterFactory extends Factory
     public function definition(): array
     {
         $letterableTypes = [
-            LetterUpload::class,
+            DocumentUpload::class,
             LetterDirect::class,
         ];
 
@@ -38,15 +39,15 @@ class LetterFactory extends Factory
         $letterableType = fake()->randomElement($letterableTypes);
         $letterableId = null;
 
-        if ($letterableType === LetterUpload::class) {
-            $letterableId = LetterUpload::factory();
-        } elseif ($letterableType === LetterUpload::class) {
-            $letterableId = LetterUpload::factory();
+        if ($letterableType === DocumentUpload::class) {
+            $letterableId = DocumentUpload::factory();
+        } elseif ($letterableType === DocumentUpload::class) {
+            $letterableId = DocumentUpload::factory();
         }
 
         return [
             'user_id' => User::factory(),
-            'letterable_type' => LetterUpload::class,
+            'letterable_type' => DocumentUpload::class,
             'letterable_id' => 0,
             'title' => fake()->title(),
             'responsible_person' => fake()->userName(),
@@ -64,7 +65,7 @@ class LetterFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function (Letter $letter) {
-            LetterUpload::factory()->count(3)->create(['letter_id' => $letter->id]);
+            DocumentUpload::factory()->count(3)->create(['letter_id' => $letter->id]);
             RequestStatusTrack::factory()->create(['letter_id' => $letter->id]);
         });
     }

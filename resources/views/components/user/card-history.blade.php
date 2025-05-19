@@ -1,5 +1,5 @@
 <!-- card-history.blade.php -->
-<div class="w-full max-w-4xl md:ml-5 2xl:ml-10 ">
+<div class="w-full max-w-4xl md:ml-5 2xl:ml-5 ">
     <div class="bg-white rounded-xl shadow-lg p-6 mb-4 border border-gray-100">
         <div class="flex justify-between items-center mb-6 ">
             <div class="flex items-center w-1/2 ">
