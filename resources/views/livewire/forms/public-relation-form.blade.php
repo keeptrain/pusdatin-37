@@ -1,0 +1,130 @@
+<x-letters.layout legend="Form Permohonan layanan">
+
+    <!-- Section 1: Basic information -->
+    <form wire:submit="save" class="space-y-6 mt-6">
+        <div class="grid lg:grid-cols-2 gap-4">
+            <section>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
+                        <span
+                            class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>
+                        Basic information
+                    </h3>
+
+                    <div class="space-y-6">
+                        <flux:input label="Penanggung Jawab" placeholder="{{ auth()->user()->name }}" disabled />
+
+                        <flux:input label="Kontak Penanggung Jawab" placeholder="08123456789" disabled />
+
+                        <flux:input label="Seksi/Subbag/Subkel Pengusul" placeholder="Umum" disabled />
+
+                        <flux:select wire:model="month" label="Bulan usulan publikasi" placeholder="Pilih bulan...">
+                            <flux:select.option value="1">Januari</flux:select.option>
+                            <flux:select.option value="2">Februari</flux:select.option>
+                            <flux:select.option value="3">Maret</flux:select.option>
+                            <flux:select.option value="4">April</flux:select.option>
+                        </flux:select>
+
+                        <flux:input wire:model="spesificDate" label="Tanggal Spesifik Publikasi Media"
+                            description="Khusus pada usulan untuk Hari Besar Kesehatan" placeholder="Umum"
+                            type="date" />
+
+                        <flux:input wire:model="theme" label="Tema pesan kesehatan"
+                            description="Berdasarkan tema umum atau tema khusus pada peringatan hari kesehatan atau lainnya"
+                            placeholder="contoh: KIA, Kesehatan Jiwa, Hari Gizi Nasional, Germas, TB TPT" />
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Document Upload -->
+            <div x-data="{
+                selectedMediaType:  @entangle('mediaType'),
+                uploadedFiles: {},
+                progress: 0,
+                    get uploading() {
+                        return this.activeUploads > 0;
+                    }
+                }" x-on:livewire-upload-start="activeUploads++" x-on:livewire-upload-finish="activeUploads--"
+                x-on:livewire-upload-error="activeUploads--" x-on:livewire-upload-cancel="activeUploads--"
+                x-on:livewire-upload-progress="progress = $event.detail.progress"
+                class="space-y-6 border border-gray-200 rounded-lg p-4">
+
+                <flux:radio.group wire:model="target" label="Sasaran">
+                    <flux:radio label="Masyarakat Umum" value="masyarakat_umum" />
+                    <flux:radio label="Tenaga Kesehatan" value="tenaga_kesehatan" />
+                    <flux:radio label="Anak Sekolah" value="anak_sekolah" />
+                    <flux:radio label="Other:" value="video" />
+                </flux:radio.group>
+
+                <flux:checkbox.group wire:model="mediaType" label="Jenis Media yang Diusulkan"
+                    x-model="selectedMediaType">
+                    <flux:checkbox label="Audio" value="1" />
+                    <flux:checkbox label="Infografis" value="2" />
+                    <flux:checkbox label="Poster" value="3" />
+                    <flux:checkbox label="Video" value="4" />
+                </flux:checkbox.group>
+
+                <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
+                    <span
+                        class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
+                    Upload document
+                </h3>
+                <div class="p-2 bg-amber-100 flex justify-between items-center rounded-lg">
+                    <div class="flex items-center">
+                        <flux:icon.arrow-down-circle class="text-amber-600 dark:text-amber-300" />
+                        <flux:heading class="ml-2 text-amber-800 underline cursor-pointer">Download template
+                        </flux:heading>
+                        
+                    </div>
+                    <flux:subheading>Semua materi templatenya sama</flux:subheading>
+                </div>
+
+                <section>
+                    <template x-if="selectedMediaType.includes('1')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Audio" model="uploadFile.1" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('2')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Infographics" model="uploadFile.2" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('3')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Poster" model="uploadFile.3" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('4')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Video" model="uploadFile.4" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType === null || selectedMediaType.length === 0">
+                        <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3"
+                            role="alert">
+                            <div>
+                                <h4 class="font-bold text-lg mb-1">Perhatian!</h4>
+                                <p class="text-base">
+                                    Sepertinya Anda belum memilih **jenis media yang diusulkan** di bagian atas.
+                                    Silakan pilih setidaknya satu jenis media untuk dapat mengunggah dokumen terkait.
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                </section>
+            </div>
+        </div>
+
+        <div class="flex flex-row justify-between mt-4">
+            <flux:button type="button" :href="route('letter')" wire:navigate>
+                {{ __('Cancel') }}
+            </flux:button>
+
+            <flux:button type="submit" variant="primary">
+                {{ __('Ajukan') }}
+            </flux:button>
+        </div>
+    </form>
+
+</x-letters.layout>

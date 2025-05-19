@@ -52,8 +52,14 @@
                 @hasanyrole('administrator|head_verifier')
                 <flux:navlist.item href="#" icon="arrow-right-end-on-rectangle">Disposisi</flux:navlist.item>
                 @endrole
+                @hasanyrole('head_verifier|si_verifier')
                 <flux:navlist.item :href="route('letter.table')" icon="folder-open"
                     :current="request()->routeIs('letter.table')" wire:navigate>Services Request</flux:navlist.item>
+                @endrole
+                @hasanyrole('promkes_verifier')
+                <flux:navlist.item :href="route('pr.index')" icon="folder-open"
+                    :current="request()->routeIs('pr.index')" wire:navigate>Services Request</flux:navlist.item>
+                @endrole
                 {{-- <flux:navlist.group expandable heading="Services request" class=" lg:grid">
                     <flux:navlist.item :href="route('letter.table')" wire:navigate>Sistem informasi</flux:navlist.item>
                     <flux:navlist.item :href="route('letter.table')" wire:navigate>Data</flux:navlist.item>

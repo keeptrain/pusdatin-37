@@ -2,6 +2,7 @@
 
 namespace App\Models\Letters;
 
+use App\Models\PublicRelationRequest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,7 +15,8 @@ class RequestStatusTrack extends Model
     protected $table = 'request_status_tracks';
 
     protected $fillable = [
-        'letter_id',
+        'statusable_id',
+        'statusable_type',
         'action',
         'notes',
         'created_by'
@@ -23,6 +25,11 @@ class RequestStatusTrack extends Model
     public function letter()
     {
         return $this->belongsTo(Letter::class);
+    }
+
+    public function publicRelation()
+    {
+        return $this->belongsTo(PublicRelationRequest::class);
     }
 
     public function scopeFilterByUser(Builder $query, $userName)

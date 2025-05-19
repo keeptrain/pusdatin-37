@@ -41,50 +41,12 @@ return new class extends Migration
          */
         Schema::create('request_status_tracks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('letter_id');
+            $table->morphs('statusable');
             $table->string('action', 255);
             $table->text('notes')->nullable();
             $table->string('created_by', 100);
             $table->timestamps();
             $table->softDeletes();
-
-            /**
-             * Add Foreign Key to Letters Table
-             */
-            $table->foreign('letter_id')->references('id')->on('letters');
-        });
-
-        /**
-         * Create the letter_uploads table
-         */
-        Schema::create('document_uploads', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('document_upload_version_id')->nullable();
-            $table->tinyInteger('part_number');
-            $table->boolean('need_revision')->default(false);
-            $table->timestamps();
-        });
-
-        /**
-         * Create the letter_uploads_revisions table
-         */
-        Schema::create('document_upload_versions', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('document_upload_id');
-            $table->string('file_path')->nullable();
-            $table->tinyInteger('version')->default(0);
-            $table->string('revision_note')->nullable();
-            $table->boolean('is_resolved')->default(false);
-            $table->timestamps();
-
-            /**
-             * Add Foreign Key to Letter uploads Table
-             */
-            $table->foreign('document_upload_id')->references('id')->on('document_uploads')->onDelete('cascade');
-        });
-
-        Schema::table('document_uploads', function (Blueprint $table) {
-            $table->foreign('document_upload_version_id')->references('id')->on('document_upload_versions')->onDelete('cascade');
         });
 
         /**
@@ -160,7 +122,6 @@ return new class extends Migration
         Schema::dropIfExists('letter_uploads');
         Schema::dropIfExists('letter_directs');
         Schema::dropIfExists('letter_messages');
-        Schema::dropIfExists('document_uploads_revisions');
         Schema::dropIfExists('document_templates');
     }
 };

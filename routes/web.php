@@ -20,6 +20,9 @@ use App\Livewire\Letters\Data\ApplicationTable;
 use App\Http\Controllers\Admin\TemplateController;
 use App\Livewire\Documents\Review;
 use App\Livewire\Documents\RevisionComparision;
+use App\Livewire\Forms\PublicRelationForm;
+use App\Livewire\Requests\PublicRelation\Index;
+use App\Livewire\Requests\PublicRelation\Show;
 
 Route::get('/', function () {
     return view('welcome');
@@ -34,6 +37,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('letter/upload', UploadForm::class)->name('letter.upload');
     Route::get('letter/form', DirectForm::class)->name('letter.form');
     Route::get('letter/table', ApplicationTable::class)->name('letter.table');
+
+     // Public relation form
+    Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form');
+    Route::get('public-relation', Index::class)->name('pr.index');
+    Route::get('public-relation/{id}', Show::class)->name('pr.show');
 
     Route::get('letter/history', HistoryLetter::class)->name('history');
     Route::get('letter/history/{track}', DetailHistory::class)->name('history.detail');
