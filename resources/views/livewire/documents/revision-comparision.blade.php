@@ -4,12 +4,12 @@
     <x-letters.detail-layout :letterId="$letterId">
         {{-- Comparison Container --}}
         @php
-            $mapping = $letter->mapping;
+            $mapping = $letter->documentUploads;
         @endphp
 
-        @if ($mapping->first()->letterable->version)
+        @if ($mapping->first()->version)
             <div class="grid lg:grid-cols-2 gap-0 divide-x divide-gray-200">
-                <x-documents.previous-document title="Versi sebelumnya" :mapping="$mapping"/>
+                {{-- <x-documents.previous-document title="Versi sebelumnya" :mapping="$mapping"/> --}}
 
                 <x-documents.current-document title="Versi saat ini" :mapping="$this->currentVersion()" />
 

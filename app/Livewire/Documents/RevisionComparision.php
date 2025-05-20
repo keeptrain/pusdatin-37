@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Documents;
 
-use App\Models\Letters\DocumentUpload;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
@@ -29,14 +28,8 @@ class RevisionComparision extends Component
     public function letters()
     {
         return Letter::with([
-            'mapping.letterable' => function ($morphTo) {
-                $morphTo->morphWith([
-                    DocumentUpload::class => [
-                        'version'
-                    ],
-                    \App\Models\Letters\LetterDirect::class => [],
-                ]);
-            }
+            'documentUploads'
+
         ])->findOrFail($this->letterId);
     }
 
@@ -45,25 +38,22 @@ class RevisionComparision extends Component
     {
         $latestRevisions = new Collection();
 
-        if ($this->letter && $this->letter->mapping->isNotEmpty()) {
-            foreach ($this->letter->mapping as $map) {
-                if ($map->letterable_type === DocumentUpload::class && $map->letterable) {
-                    $documentUpload = $map->letterable;
+        if ($this->letter && $this->letter->documentUploads->isNotEmpty()) {
+            foreach ($this->letter->documentUploads as $map) {
+                $documentUpload = $map;
 
-                    $activeVersion = $documentUpload->version->first();
+                $activeVersion = $documentUpload->versions->first();
 
-                    if ($documentUpload) {
-                        $latestRevisions->push([
-                            'part_number' => $documentUpload->part_number,
-                            'part_number_label' => $documentUpload->part_number_label,
-                            'file_path' => $activeVersion->file_path,
-                            'version' => $documentUpload->version,
-                        ]);
-                    }
+                if ($documentUpload) {
+                    $latestRevisions->push([
+                        'part_number' => $documentUpload->part_number,
+                        'part_number_label' => $documentUpload->part_number_label,
+                        'file_path' => $activeVersion->file_path,
+                        'version' => $documentUpload->version,
+                    ]);
                 }
             }
         }
         return $latestRevisions->sortBy('part_number');
     }
-    
 }
