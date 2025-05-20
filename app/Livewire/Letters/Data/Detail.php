@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Letters\Data;
 
-use App\Models\Letters\DocumentUpload;
+
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
-use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
+
 
 class Detail extends Component
 {
@@ -15,76 +16,35 @@ class Detail extends Component
 
     public ?Letter $letter;
 
-    public $uploads;
-
-    public $directs;
-
     public $processedUploads;
-
-    public $availablePart;
 
     public function mount(int $id)
     {
         $this->letterId = $id;
         $this->letter = Letter::with([
-            'mapping.letterable' => function ($morphTo) {
-                $morphTo->morphWith([
-                    DocumentUpload::class => [
-                        'version'
-                    ],
-                    \App\Models\Letters\LetterDirect::class => [],
-                ]);
-            }
+            'documentUploads'
         ])->findOrFail($id);
-
-        $this->processMappings();
-        $this->processedUploads = $this->getProcessedUploadsProperty();
     }
 
-    protected function processMappings()
+    #[Computed]
+    public function detailItem()
     {
-        $this->uploads = collect();
-        $this->directs = collect();
+        return $this->letter->documentUploads->need_revision;
+    }
 
-        $this->letter->mapping->each(function ($mapping) {
-            if ($mapping->letterable instanceof DocumentUpload) {
-                $this->uploads->push($mapping->letterable);
-            } elseif ($mapping->letterable instanceof \App\Models\Letters\LetterDirect) {
-                $this->directs->push($mapping->letterable);
-            }
-        });
-
-        $this->uploads = $this->uploads->sortBy('part_number');
-
-        $this->availablePart = $this->uploads
+    #[Computed]
+    public function availablePart()
+    {
+        return $this->letter->documentUploads
             ->filter(fn($part) => !empty($part->part_number))
             ->pluck('part_number')
             ->values()
             ->toArray();
     }
 
-    private function getProcessedUploadsProperty(): Collection
+    #[Computed]
+    public function currentStatusLabel()
     {
-        $processed = new Collection();
-
-        if ($this->letter && $this->letter->mapping->isNotEmpty()) {
-            foreach ($this->letter->mapping as $map) {
-                if ($map->letterable_type === DocumentUpload::class && $map->letterable) {
-                    $documentUpload = $map->letterable;
-
-                    $activeVersionObject = $documentUpload->activeVersion->first();
-
-                    $filePath = null;
-                    if ($activeVersionObject) {
-                        $filePath = $activeVersionObject->file_path;
-                    }
-                    $processed->push([
-                        'part_number' => $documentUpload->part_number,
-                        'file_path' => $filePath
-                    ]);
-                }
-            }
-        }
-        return $processed->sortBy('part_number');
+        return $this->letter->status->label();
     }
 }
