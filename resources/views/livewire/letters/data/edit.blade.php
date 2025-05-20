@@ -40,11 +40,7 @@
             </section>
 
             <!-- Section 2: Document Upload -->
-            @if (
-                    $letter->mapping->contains(function ($map) {
-                        return $map->letterable instanceof DocumentUpload && $map->letterable->need_revision;
-                    })
-                )
+            @if ($this->checkDocumentUploadNeedRevision)
                 <section>
                     <div class="border border-gray-200 rounded-lg p-4">
                         <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
@@ -54,28 +50,25 @@
                         </h3>
 
                         <div x-data="{
-                                        activeUploads: 0,
-                                        progress: 0,
-                                        get uploading() {
-                                            return this.activeUploads > 0;
-                                        }
-                                    }" x-on:livewire-upload-start="activeUploads++"
+                                activeUploads: 0,
+                                progress: 0,
+                                get uploading() {
+                                    return this.activeUploads > 0;
+                                }
+                            }" x-on:livewire-upload-start="activeUploads++"
                             x-on:livewire-upload-finish="activeUploads--" x-on:livewire-upload-error="activeUploads--"
                             x-on:livewire-upload-cancel="activeUploads--"
                             x-on:livewire-upload-progress="progress = $event.detail.progress" class="space-y-6">
-                            @foreach ($letter->mapping as $item)
-                                @php
-                                    $upload = $item->letterable;
-                                @endphp
 
-                                @if ($upload instanceof DocumentUpload && $upload->need_revision == true)
-                                    <section>
-                                        <x-letters.input-file-adapter :title="$upload->part_number_label"
-                                            model="revisedFiles.{{ $upload->part_number }}" required />
-                                        @foreach ($upload->version->where('is_resolved', false) as $revision)
-                                            <x-letters.warning-note :note="$revision->revision_note" />
-                                        @endforeach
-                                    </section>
+                            @foreach ($letter->documentUploads as $documentUpload)
+                                @if ($documentUpload->need_revision)
+                                <section>
+                                    <x-letters.input-file-adapter :title="$documentUpload->part_number_label"
+                                        model="revisedFiles.{{ $documentUpload->part_number }}" required />
+                                    @foreach ($documentUpload->versions->where('is_resolved', false) as $revision)
+                                        <x-letters.warning-note :note="$revision->revision_note" />
+                                    @endforeach
+                                </section>
                                 @endif
                             @endforeach
                         </div>
@@ -105,7 +98,7 @@
 
         <!-- Form Actions -->
         <div class="flex justify-between">
-            <flux:button href="{{ route('history.detail', [$letterId]) }}">
+            <flux:button href="{{ route('history.detail', ['type' => 'information-system' ,$letterId]) }}">
                 Cancel
             </flux:button>
             <flux:button type="submit" variant="primary">
