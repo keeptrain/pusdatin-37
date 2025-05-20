@@ -16,13 +16,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('status', 86)->default(PublicRelationRequest::getDefaultStates());
-            $table->date('month_publication')->nullable();
+            $table->tinyInteger('month_publication');
             $table->date('spesific_date')->nullable();
             $table->string('theme');
-            // $table->string('media_type');
             $table->string('target');
-            $table->boolean('active_review')->default(true);
             $table->text('links')->nullable();
+            $table->boolean('active_review')->default(true);
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');
