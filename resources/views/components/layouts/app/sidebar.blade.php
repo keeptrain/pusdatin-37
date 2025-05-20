@@ -50,30 +50,28 @@
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Manage')" class="grid">
                 @hasanyrole('administrator|head_verifier')
-                <flux:navlist.item href="#" icon="arrow-right-end-on-rectangle">Disposisi</flux:navlist.item>
+                <flux:navlist.item href="#" icon="arrow-right-circle">Disposisi</flux:navlist.item>
                 @endrole
-                @hasanyrole('head_verifier|si_verifier')
+                @hasanyrole('head_verifier')
                 <flux:navlist.item :href="route('letter.table')" icon="folder-open"
-                    :current="request()->routeIs('letter.table')" wire:navigate>Services Request</flux:navlist.item>
+                    :current="request()->routeIs('letter.table')" wire:navigate>Layanan SI & Data</flux:navlist.item>
                 @endrole
-                @hasanyrole('promkes_verifier')
+                @hasanyrole('si_verifier')
+                <flux:navlist.item :href="route('letter.table')" icon="folder-open"
+                    :current="request()->routeIs('letter.table')" wire:navigate>Layanan SI</flux:navlist.item>
+                @endrole
+                @hasanyrole('data_verifier')
+                <flux:navlist.item :href="route('letter.table')" icon="folder-open"
+                    :current="request()->routeIs('letter.table')" wire:navigate>Layanan Data</flux:navlist.item>
+                @endrole
+                @hasanyrole('head_verifier|pr_verifier|promkes_verifier')
                 <flux:navlist.item :href="route('pr.index')" icon="folder-open"
-                    :current="request()->routeIs('pr.index')" wire:navigate>Services Request</flux:navlist.item>
+                    :current="request()->routeIs('pr.index')" wire:navigate>Layanan Kehumasan</flux:navlist.item>
                 @endrole
-                {{-- <flux:navlist.group expandable heading="Services request" class=" lg:grid">
-                    <flux:navlist.item :href="route('letter.table')" wire:navigate>Sistem informasi</flux:navlist.item>
-                    <flux:navlist.item :href="route('letter.table')" wire:navigate>Data</flux:navlist.item>
-                    <flux:navlist.item href="#">Humas</flux:navlist.item>
-                </flux:navlist.group> --}}
-
-                {{-- <flux:navlist.group expandable heading="System" class=" lg:grid">
-                    <flux:navlist.item :href="route('admin.users')" wire:navigate>User</flux:navlist.item>
-                    <flux:navlist.item wire:navigate>Template</flux:navlist.item>
-                </flux:navlist.group> --}}
-
             </flux:navlist.group>
         </flux:navlist>
 
+        @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier|administrator')
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Systems')" class="grid">
                 @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier')
@@ -84,23 +82,15 @@
                 @hasanyrole('si_verifier|data_verifier|pr_verifier')
                 <flux:navlist.item :href="route('manage.templates')" icon="document-text" wire:navigate>Templates
                 </flux:navlist.item>
-                @endrole
+                @endhasanyrole
 
                 @hasanyrole('administrator')
                 <flux:navlist.item :href="route('manage.users')" icon="globe-alt" wire:navigate>User
                 </flux:navlist.item>
-                @endrole
+                @endhasanyrole
             </flux:navlist.group>
         </flux:navlist>
-
-        {{-- <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Monitoring')" class="grid">
-                <flux:navlist.item icon="newspaper" :href="route('letter')" :current="request()->routeIs('letter')"
-                    wire:navigate>{{ __('Reporting') }}</flux:navlist.item>
-                <flux:navlist.item icon="cake" :href="route('letter')" :current="request()->routeIs('letter')"
-                    wire:navigate>{{ __('Events & Logs') }}</flux:navlist.item>
-            </flux:navlist.group>
-        </flux:navlist> --}}
+        @endhasanyrole
 
         <flux:spacer />
 
