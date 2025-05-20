@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
@@ -15,9 +16,11 @@ class UserSeeder extends Seeder
     {
         $adminRole = Role::findByName('administrator');
         $admin = User::create([
-            'name' => 'Administrator',
+                'name' => 'Administrator',
                 'email' => 'administrator@gmail.com',
                 'password' => bcrypt('login'),
+                'section' => 'Pusdatin',
+                'contact' => '08123456789'
         ]);
         $admin->assignRole($adminRole);
 
@@ -26,6 +29,8 @@ class UserSeeder extends Seeder
                 'name' => 'Kapusdatin',
                 'email' => 'kapusdatin@gmail.com',
                 'password' => bcrypt('login'),
+                'section' => 'Pusdatin',
+                'contact' => '08123456789'
         ]);
         $verifikator->assignRole($headVerifierRole);
 
@@ -34,6 +39,8 @@ class UserSeeder extends Seeder
                 'name' => 'Kasatpel SI',
                 'email' => 'kasatpel_si@gmail.com',
                 'password' => bcrypt('login'),
+                'section' => 'Pusdatin',
+                'contact' => '08123456789'
         ]);
         $verifikator->assignRole($verifikatorRole);
 
@@ -42,6 +49,8 @@ class UserSeeder extends Seeder
                 'name' => 'Kasatpel Data',
                 'email' => 'kasatpel_data@gmail.com',
                 'password' => bcrypt('login'),
+                'section' => 'Pusdatin',
+                'contact' => '08123456789'
         ]);
         $verifikator->assignRole($verifikatorRole);
 
@@ -50,6 +59,9 @@ class UserSeeder extends Seeder
                 'name' => 'Kasatpel Humas',
                 'email' => 'kasatpel_humas@gmail.com',
                 'password' => bcrypt('login'),
+                'section' => 'Pusdatin',
+                'contact' => '08123456789'
+                
         ]);
         $verifikator->assignRole($verifikatorRole);
 
@@ -58,15 +70,21 @@ class UserSeeder extends Seeder
                 'name' => 'Promosi Kesehatan',
                 'email' => 'promkes@gmail.com',
                 'password' => bcrypt('login'),
+                'section' => 'Promosi Kesehatan',
+                'contact' => '08123456789'
         ]);
         $verifikator->assignRole($verifikatorRole);
 
-        $userRole = Role::findByName('user');        
+        $userRole = Role::findByName('user');  
+        $sections = ['kepegawaian', 'kesehatan', 'tenaga kesehatan', 'umum'];      
         for ($i = 1; $i <= 5; $i++) {
             $regularUsers = User::create([
                 'name' => 'User' . $i,
                 'email' => 'user' . $i . '@gmail.com',
                 'password' => bcrypt('login'),
+                'section' => Arr::random($sections),
+                'contact' => '08123456789'
+
             ]);
             $regularUsers->assignRole($userRole);
         }

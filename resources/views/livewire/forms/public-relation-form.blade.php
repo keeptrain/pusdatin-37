@@ -14,9 +14,9 @@
                     <div class="space-y-6">
                         <flux:input label="Penanggung Jawab" placeholder="{{ auth()->user()->name }}" disabled />
 
-                        <flux:input label="Kontak Penanggung Jawab" placeholder="08123456789" disabled />
+                        <flux:input label="Kontak Penanggung Jawab" placeholder="{{ auth()->user()->contact }}" disabled />
 
-                        <flux:input label="Seksi/Subbag/Subkel Pengusul" placeholder="Umum" disabled />
+                        <flux:input label="Seksi/Subbag/Subkel Pengusul" placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
 
                         <flux:select wire:model="month" label="Bulan usulan publikasi" placeholder="Pilih bulan...">
                             <flux:select.option value="1">Januari</flux:select.option>

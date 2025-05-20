@@ -65,9 +65,7 @@ class PublicRelationForm extends Component
     public function createPublicRelationForm()
     {
         return PublicRelationRequest::create([
-            'responsible_person' => auth()->user()->name,
-            'contact' => auth()->user()->name,
-            'section' => auth()->user()->name,
+            'user_id' => auth()->user()->id,
             'month_publication' => now(),
             'spesific_date' => now(),
             'theme' => $this->theme,

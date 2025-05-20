@@ -101,7 +101,6 @@ class UploadForm extends Component
         return Letter::create([
             'user_id' => auth()->user()->id,
             'title' => $this->title,
-            'responsible_person' => auth()->user()->name,
             'reference_number' => $this->reference_number,
             'active_checking' => 2,
         ]);

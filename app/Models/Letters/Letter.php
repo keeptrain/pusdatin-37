@@ -26,7 +26,6 @@ class Letter extends Model
     public $fillable = [
         'user_id',
         'title',
-        'responsible_person',
         'reference_number',
         'status',
         'active_checking',

@@ -16,6 +16,10 @@
 
                         <flux:input label="Penanggung jawab" placeholder="{{ auth()->user()->name }}" disabled />
 
+                        <flux:input label="Kontak penanggung jawab" placeholder="{{ auth()->user()->contact }}" disabled />
+
+                        <flux:input label="Seksi/Subbag/Subkel Pengusul" placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
+
                         <div class="grid grid-cols-2 gap-x-6">
                             <div>
                                 <flux:input wire:model="reference_number" label="Nomor surat"

@@ -21,9 +21,7 @@ class PublicRelationRequest extends Model
     ];
 
     protected $fillable = [
-        'responsible_person',
-        'contact',
-        'section',
+        'user_id',
         'month_publication',
         'spesific_date',
         'theme',
@@ -32,6 +30,11 @@ class PublicRelationRequest extends Model
         'active_review',
         'links',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function documentUploads()
     {

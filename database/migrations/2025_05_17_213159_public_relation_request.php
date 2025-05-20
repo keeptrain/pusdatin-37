@@ -16,9 +16,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('status', 86)->default(PublicRelationRequest::getDefaultStates());
-            $table->string('responsible_person');
-            $table->string('contact');
-            $table->string('section');
             $table->date('month_publication')->nullable();
             $table->date('spesific_date')->nullable();
             $table->string('theme');

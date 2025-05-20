@@ -18,10 +18,9 @@ return new class extends Migration
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('title', 255);
-            $table->string('responsible_person', 255);
-            $table->string('reference_number', 255);
             $table->string('status', 86)->default(Letter::getDefaultStates());
+            $table->string('title', 255);
+            $table->string('reference_number', 255);
             $table->integer('active_checking');
             $table->integer('current_division')->nullable();
             // $table->int('previous_division')->nullable();
