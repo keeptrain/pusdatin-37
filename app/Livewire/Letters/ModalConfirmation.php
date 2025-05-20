@@ -5,11 +5,9 @@ namespace App\Livewire\Letters;
 use App\Models\User;
 use Livewire\Component;
 use App\Models\Letters\Letter;
-use App\Models\Documents\DocumentUpload;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
-use App\Models\letters\LettersMapping;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewServiceRequestNotification;
 
@@ -84,10 +82,10 @@ class ModalConfirmation extends Component
         ];
     }
 
-    public function mount(int $letterId, $part)
+    public function mount(int $letterId, $availablePart)
     {
         $this->letterId = $letterId;
-        $this->availablePart = $part;
+        $this->availablePart = $availablePart;
     }
 
     public function saveDisposition()
@@ -117,18 +115,18 @@ class ModalConfirmation extends Component
 
         try {
             DB::transaction(function () {
-                $this->checkRevisionInputForRepliedStatus();
+                $siRequest = Letter::with('documentUploads')->findOrFail($this->letterId);
 
-                $letter = Letter::findOrFail($this->letterId);
+                $this->checkRevisionInputForRepliedStatus($siRequest);
 
-                $letter->transitionStatusFromProcess($this->status, $letter->current_division, ($this->notes) ? $this->notes : null);
+                $siRequest->transitionStatusFromProcess($this->status, $siRequest->current_division, ($this->notes) ? $this->notes : null);
 
                 $this->reset(['status', 'notes']);
 
                 return redirect()->to("/letter/$this->letterId")
                     ->with('status', [
                         'variant' => 'success',
-                        'message' => $letter->status->toastMessage(),
+                        'message' => $siRequest->status->toastMessage(),
                     ]);
             });
         } catch (\Exception $e) {
@@ -182,53 +180,33 @@ class ModalConfirmation extends Component
         Notification::send($user, new NewServiceRequestNotification($letter));
     }
 
-    public function updateRevisionFromMapping(int $letterId, string $partNumber, string $note)
-    {
-        $mapping = LettersMapping::where('letter_id', $letterId)
-            ->where('letterable_type', DocumentUpload::class)
-            ->whereHasMorph('letterable', [DocumentUpload::class], function ($query) use ($partNumber) {
-                $query->where('part_number', $partNumber);
-            })
-            ->first();
-
-        if (!$mapping) {
-            throw new \Exception("Mapping tidak ditemukan untuk letter ID $letterId dan part $partNumber.");
-        }
-
-        $documentUpload = DocumentUpload::where('id', $mapping->letterable_id)
-            ->first();
-
-        if (!$documentUpload) {
-            throw new \Exception("DocumentUpload tidak ditemukan.");
-        }
-
-        $latestRevision = $documentUpload->version()->latest('version')->first();
-        $nextVersion = $latestRevision ? $latestRevision->version + 1 : 1;
-
-        if ($documentUpload->need_revision == false) {
-            $revision = $documentUpload->version()->create([
-                'document_upload_id' => $letterId,
-                'version' => $nextVersion,
-                'revision_note' => $note,
-                'part_number' => $partNumber,
-            ]);
-        }
-
-        if ($revision) {
-            $documentUpload->update([
-                'need_revision' => true,
-            ]);
-        }
-    }
-
-    public function checkRevisionInputForRepliedStatus()
+    public function checkRevisionInputForRepliedStatus($siRequest)
     {
         if (in_array($this->status, ['replied', 'rejected'])) {
-            foreach ($this->revisionParts as $partNumber) {
-                $note = $this->revisionNotes[$partNumber] ?? null;
+            $documentUploadsByPartNumber = $siRequest->documentUploads->keyBy('part_number');
 
-                $this->updateRevisionFromMapping($this->letterId, $partNumber, $note);
+            foreach ($this->revisionParts as $partNumber) {
+                if (isset($this->revisionNotes[$partNumber])) {
+                    $revisionNote = $this->revisionNotes[$partNumber];
+
+                    $documentUpload = $documentUploadsByPartNumber->get($partNumber);
+
+                    if ($documentUpload) {
+                        // Lanjutkan dengan membuat catatan version
+                        $latestRevision = $documentUpload->versions()->latest('version')->first();
+                        $nextVersion = $latestRevision ? $latestRevision->version + 1 : 1;
+
+                        $documentUpload->versions()->create([
+                            'version' => $nextVersion,
+                            'revision_note' => $revisionNote
+                        ]);
+
+                        $documentUpload->update(['need_revision' => true]);
+                    } 
+                } 
             }
         }
     }
+
+ 
 }
