@@ -8,7 +8,7 @@ class Pending extends LetterStatus
 {
     public function label(): string
     {
-        return 'Pending';
+        return 'Permohonan Masuk';
     }
 
     public function color(): string
@@ -33,7 +33,7 @@ class Pending extends LetterStatus
 
     public function icon(): string
     {
-        return 'circle-pause';
+        return 'folder-check';
     }
 
     public function badgeBg(): string
