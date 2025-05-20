@@ -43,9 +43,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('public-relation', Index::class)->name('pr.index');
     Route::get('public-relation/{id}', Show::class)->name('pr.show');
 
-    Route::get('letter/history', HistoryLetter::class)->name('history');
-    Route::get('letter/history/{id}', DetailHistory::class)->name('history.detail');
-
+    Route::get('history', HistoryLetter::class)->name('history');
+    Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
 
     Route::get('letter/{id}', Detail::class)->name('letter.detail');
     Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');

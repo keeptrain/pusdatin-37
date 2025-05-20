@@ -23,7 +23,7 @@
             </div>
             <div>
                 <p class="text-gray-500 text-sm mb-1">Jenis Layanan</p>
-                <p class="font-semibold text-gray-800">Layanan Sistem Informasi & Data</p>
+                <p class="font-semibold text-gray-800">Sistem Informasi & data</p>
             </div>
             <div>
                 <p class="text-gray-500 text-sm mb-1">Estimasi Waktu Selesai</p>
@@ -39,14 +39,14 @@
                 </div>
                 <span class="text-gray-600 font-medium">{{ $status->percentage() }}</span>
             </div>
-            <template x-if="{{ $status->label() == 'Replied' }}">
+            <template x-if="{{ $activeRevision }}">
                 <a href="{{ route('letter.edit', [$id]) }}"
                     class="ml-0 sm:ml-4 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition duration-300 w-fit self-end">
                     Revisi
                     <x-lucide-edit class="text-white w-5 ml-2" />
                 </a>
             </template>
-            <a href="{{ route('history.detail', [$id]) }}"
+            <a href="{{ route('history.detail', ['type' => 'information-system' ,$id]) }}"
                 class="ml-0bg-zinc-50 hover:bg-zinc-100 text-black border font-medium py-2 px-4 rounded-lg flex items-center transition duration-300 w-fit self-end">
                 Detail
             </a>
