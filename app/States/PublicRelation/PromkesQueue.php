@@ -16,4 +16,29 @@ class PromkesQueue extends PublicRelationStatus
     {
         return "Sedang dalam antrian Promkes";
     }
+
+    public function color(): string
+    {
+        return "blue";
+    }
+
+    public function icon(): string
+    {
+        return 'ticket';
+    }
+
+    public function badgeBg(): string
+    {
+        return 'bg-blue-400';
+    }
+
+    public function percentage(): string
+    {
+        return '15%';
+    }
+
+    public function percentageBar(): string
+    {
+        return 'w-[15%]';
+    }
 }

@@ -16,4 +16,29 @@ class PromkesComplete extends PublicRelationStatus
     {
         return "Permohonan layanan telah di kurasi oleh promkes";
     }
+
+    public function color(): string
+    {
+        return "green";
+    }
+
+    public function icon(): string
+    {
+        return 'clipboard-check';
+    }
+
+    public function badgeBg(): string
+    {
+        return 'bg-blue-600';
+    }
+
+    public function percentage(): string
+    {
+        return '50%';
+    }
+
+    public function percentageBar(): string
+    {
+        return 'w-[50%]';
+    }
 }
