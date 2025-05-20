@@ -69,7 +69,7 @@ class UploadForm extends Component
             $user = User::role('head_verifier')->get();
             Notification::sendNow($user, new NewServiceRequestNotification($letter));
 
-            return redirect()->to('letter/history')
+            return redirect()->to('history')
                 ->with('status', [
                     'variant' => 'success',
                     'message' => 'Create direct Letter successfully!'
@@ -126,7 +126,7 @@ class UploadForm extends Component
         foreach ($uploads as $upload) {
             $documentUpload = $letter->documentUploads()->create([
                 'part_number' => $upload['part_number']
-            ]);  
+            ]);
 
             $version = $documentUpload->versions()->create([
                 'document_upload_id' => $documentUpload->id,
