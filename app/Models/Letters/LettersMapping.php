@@ -2,6 +2,7 @@
 
 namespace App\Models\letters;
 
+use App\Models\Documents\DocumentUpload;
 use Illuminate\Database\Eloquent\Model;
 
 class LettersMapping extends Model
@@ -14,6 +15,8 @@ class LettersMapping extends Model
         'letterable_id'
     ];
 
+    public $timestamps = false;
+
     public function letter()
     {
         return $this->belongsTo(Letter::class);
@@ -22,5 +25,10 @@ class LettersMapping extends Model
     public function letterable()
     {
         return $this->morphTo();
+    }
+
+    public function documentUploads()
+    {
+        return $this->hasMany(DocumentUpload::class);
     }
 }
