@@ -34,22 +34,24 @@ class UploadForm extends Component
     {
         return [
             'title' => 'required|string|max:255',
-            // 'responsible_person' => 'required|string',
             'reference_number' => 'required|string',
             'files.0' => 'required|file|mimes:pdf|max:1048',
             'files.1' => 'required|file|mimes:pdf|max:1048',
-            'files.2' => 'file|mimes:pdf|max:1048'
+            'files.2' => 'file|mimes:pdf|max:1048',
+            // 'files.3' => 'required|file|mimes:pdf|max:1048',
+            // 'files.4' => 'file|mimes:pdf|max:1048',
         ];
     }
 
     public function messages()
     {
         return [
-            'title.required' => 'Title is required',
-            // 'responsible_person.required' => 'Responsible person is required',
-            'reference_number.required' => 'Reference number is required',
-            'files.0.required' => 'Nota dinas harus ada',
-            'files.1.required' => 'SOP harus ada',
+            'title.required' => 'Judul harus ada',
+            'reference_number.required' => 'Nomor surat harus ada',
+            'files.0.required' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus ada',
+            'files.1.required' => 'SOP Aplikasi SPBE harus ada',
+            'files.2.required' => 'Pakta Integritas Pemanfaatan Aplikasi ada',
+            // 'files.3.required' => 'NDA Pusdatin Dinkes harus ada',
         ];
     }
 
@@ -66,10 +68,11 @@ class UploadForm extends Component
             $this->createLetterMappings($letter->id, $uploadIds);
             $this->createStatusTrack($letter);
 
+            // Notifikasi kirim ke kapusdatin
             $user = User::role('head_verifier')->get();
             Notification::sendNow($user, new NewServiceRequestNotification($letter));
 
-            return redirect()->to('letter/history')
+            return redirect()->to('history')
                 ->with('status', [
                     'variant' => 'success',
                     'message' => 'Create direct Letter successfully!'
@@ -81,19 +84,13 @@ class UploadForm extends Component
     {
         $user = Auth::user();
 
-        $dateTime = Carbon::now()->format('YmdHis');
+        $dateTime = Carbon::now()->format(format: 'YmdHis');
 
         $nameWithoutExtension = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
 
         $fileName = $nameWithoutExtension . '-' . Str::slug($user->name) . '-' . $dateTime . '.pdf';
 
         return $fileName;
-    }
-
-    public function pathFile()
-    {
-        $extension = $this->file->guessExtension();
-        return now()->timestamp . '.' . $extension;
     }
 
     public function createLetter()
@@ -121,8 +118,8 @@ class UploadForm extends Component
 
     protected function insertDocumentUploads(array $uploads, $letter)
     {
-
         $documentVersionId = collect();
+
         foreach ($uploads as $upload) {
             $documentUpload = $letter->documentUploads()->create([
                 'part_number' => $upload['part_number']

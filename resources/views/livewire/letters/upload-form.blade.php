@@ -8,7 +8,7 @@
                     <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                         <span
                             class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>
-                        Basic information
+                        Informasi Dasar
                     </h3>
 
                     <div class="space-y-6">
@@ -45,17 +45,17 @@
                         <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                             <span
                                 class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
-                            Upload document
+                            Upload Dokumen
                         </h3>
 
                         <!-- File Upload -->
-                        <x-letters.input-file-adapter title="Nota dinas" model="files.0" required template
+                        <x-letters.input-file-adapter title="Dokumen Identifikasi Aplikasi SPBE" model="files.0" required template
                             filePath="downloadTemplate('1')" />
 
-                        <x-letters.input-file-adapter title="Standar Operasional Prosedur (SOP)" model="files.1"
+                        <x-letters.input-file-adapter title="SOP Aplikasi SPBE"  model="files.1"
                             required template filePath="downloadTemplate('2')" />
 
-                        <x-letters.input-file-adapter title="Pengesahan" model="files.2" optional template
+                        <x-letters.input-file-adapter title="RFC Pusdatinkes" model="files.2" optional template
                             filePath="downloadTemplate('3')" />
 
                         <div x-data="{ open: false }" class="border-l-2 border-gray-400 bg-gray-50 ">
@@ -95,7 +95,7 @@
         </div>
 
         <div class="flex flex-row justify-between mt-4">
-            <flux:button type="button" :href="route('letter')" wire:navigate>
+            <flux:button type="button" :href="route('dashboard')" wire:navigate>
                 {{ __('Cancel') }}
             </flux:button>
 
