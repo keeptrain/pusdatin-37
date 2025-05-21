@@ -21,7 +21,7 @@
             <x-slot name="rightSidebar">
                 <h3 class="text-lg font-bold mb-4">General</h3>
 
-                <div x-data="{ status: '{{ $this->publicRelations->status->label() }}' }" class="space-y-6">
+                <div x-data="{ status: '{{ $this->publicRelations->status->label() }}', activeReview: '' }" class="space-y-6">
                     <h4 class="text-gray-500 mb-1">Tema</h4>
                     <p class="text-gray-800">
                         {{ $this->publicRelations->theme }}
@@ -91,7 +91,7 @@
                             </flux:modal.trigger>
                         </template>
 
-                        <template x-if="status === 'Kurasi Promkes'">
+                        <template x-if="status === 'Antrean Pusdatin'">
                             <flux:modal.trigger name="process-modal" >
                                 <flux:button x-on:click="$dispatch('modal-show', { name: 'process-modal' })" variant="primary" icon:trailing="arrow-right" class="w-full" >
                                     {{ __('Proses') }}
@@ -99,6 +99,7 @@
                             </flux:modal.trigger>
                         </template>
 
+                        @hasanyrole('pr_verifier')
                         <template x-if="status === 'Proses pusdatin'">
                             <flux:modal.trigger name="completed-modal" >
                                 <flux:button x-on:click="$dispatch('modal-show', { name: 'completed-modal' })" variant="primary" class="w-full" >
@@ -106,10 +107,11 @@
                                 </flux:button>
                             </flux:modal.trigger>
                         </template>
+                        @endhasanyrole
                         <flux:dropdown>
                             <flux:button icon="ellipsis-horizontal"/>
                             <flux:menu>
-                                <flux:menu.item :href="route('letter.edit', [$publicRelationId])" icon="pencil-square">Force edit</flux:menu.item>
+                                {{-- <flux:menu.item :href="route('letter.edit', [$publicRelationId])" icon="pencil-square">Force edit</flux:menu.item> --}}
                                 <flux:menu.item :href="route('letter.rollback', [$publicRelationId])" icon="backward">Rollback</flux:menu.item>
                                 <flux:menu.item icon="trash" variant="danger">Delete</flux:menu.item>
                             </flux:menu>
