@@ -1,3 +1,19 @@
+<?php
+
+$completed = $siStatusCounts['approvedKapusdatin'] ?? 0;
+$totalPending = $siStatusCounts['pending'] ?? 0;
+
+// Hitung total layanan yang relevan untuk persentase (Selesai + Masuk)
+$totalRelevantServices = $completed + $totalPending;
+
+$widthPercentage = 0;
+if ($totalRelevantServices > 0) {
+    $widthPercentage = ($completed / $totalRelevantServices) * 100;
+}
+
+$widthPercentage = round($widthPercentage);
+
+?>
 <x-layouts.app :title="__('Dashboard')">
 
     <div x-data="{ greeting: '' }" x-init="const hour = new Date().getHours();
@@ -29,37 +45,135 @@
                 </div>
                 <div class="mt-auto">
                     <div class="bg-neutral-100 dark:bg-neutral-800 rounded-full h-2 mb-2">
-                        <div class="bg-zinc-700 h-2 rounded-full" style="width: 75%"></div>
+                        <div class="bg-zinc-700 h-2 rounded-full" style="width: {{ $widthPercentage }}%"></div>
                     </div>
                     <div class="flex justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                        <span>245 Completed</span>
-                        <span>82 Pending</span>
+                        <span>{{ $siStatusCounts['approvedKapusdatin'] }} Selesai</span>
+                        <span>{{ $siStatusCounts['pending'] }} Permohonan Masuk</span>
                     </div>
                 </div>
             </div>
 
             <!-- Request Categories Distribution -->
+            @hasanyrole('head_verifier')
             <div
                 class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
                 <h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200 mb-3">Categories</h3>
                 <div class="flex-1 flex flex-col justify-center space-y-3">
                     <div class="flex items-center">
-                        <div class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></div>
-                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Application</div>
-                        <div class="font-medium text-neutral-800 dark:text-white">42%</div>
+                        <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Sistem Informasi</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['si'] }}%
+                        </div>
                     </div>
                     <div class="flex items-center">
                         <div class="w-2 h-2 rounded-full bg-teal-700 mr-2"></div>
                         <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Data</div>
-                        <div class="font-medium text-neutral-800 dark:text-white">27%</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['data'] }}%
+                        </div>
                     </div>
                     <div class="flex items-center">
                         <div class="w-2 h-2 rounded-full bg-orange-700 mr-2"></div>
-                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Humas</div>
-                        <div class="font-medium text-neutral-800 dark:text-white">18%</div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Kehumasan</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['pr'] }}%
+                        </div>
                     </div>
                 </div>
             </div>
+            @endhasanyrole
+
+            @hasanyrole('si_verifier|data_verifier')
+            <div
+                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
+                <h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200 mb-3">Status</h3>
+                <div class="flex-1 flex flex-col justify-center space-y-3">
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Permohonan Masuk</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $siStatusCounts['pending'] }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Disposisi</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $siStatusCounts['disposition'] }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-teal-700 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Proses</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $siStatusCounts['process'] }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-teal-700 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Revisi</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $siStatusCounts['replied'] }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-orange-700 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Disetujui Kasatpel</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">
+                            {{  $siStatusCounts['approvedKasatpel'] }}
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-orange-700 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Disetujui Kapusdatin</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">
+                            {{ $siStatusCounts['approvedKapusdatin'] }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endhasanyrole
+
+            @hasanyrole('pr_verifier')
+            <div
+                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
+                <h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200 mb-3">Status</h3>
+                <div class="flex-1 flex flex-col justify-center space-y-3">
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Permohonan Masuk</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $siStatusCounts['pending'] }}%
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Antrean Promkes</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['si'] }}%
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-teal-700 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Kurasi Promkes</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['data'] }}%
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-orange-700 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Antrean Pusdatin</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['pr'] }}%
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-orange-700 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Proses Pusdatin</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['pr'] }}%
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full bg-orange-700 mr-2"></div>
+                        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Selesai</div>
+                        <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['pr'] }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endhasanyrole
+
 
             <!-- Response Time Metrics -->
             <div
