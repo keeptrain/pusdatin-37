@@ -26,14 +26,15 @@
                 revisionPart: [],
             }">
                 <flux:checkbox.group wire:model="revisionParts" label="Part" class="space-y-4">
-                    @forelse ($part as $availablePart)
+                    @forelse ($availablePart as $part)
                         @php
-                            $label = match ($availablePart) {
+                            $label = match ($part) {
                                 1 => 'Nota dinas',
                                 2 => 'Sop',
-                            }
+                                3 => 'Pendukung',
+                            };
                         @endphp
-                        <flux:checkbox :value="$availablePart" label="{{ $label }}" x-model="revisionPart" />
+                        <flux:checkbox :value="$part" label="{{ $label }}" x-model="revisionPart" />
                     @empty
 
                     @endforelse

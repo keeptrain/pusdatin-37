@@ -123,7 +123,7 @@ class UploadForm extends Component
         foreach ($uploads as $upload) {
             $documentUpload = $letter->documentUploads()->create([
                 'part_number' => $upload['part_number']
-            ]);  
+            ]);
 
             $version = $documentUpload->versions()->create([
                 'document_upload_id' => $documentUpload->id,

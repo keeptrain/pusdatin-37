@@ -7,17 +7,23 @@ $label = strtolower($status->label());
 // Default width
 $width = 0;
 
-$step1ActiveStatuses = ['pending', 'disposition', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
+$step1ActiveStatuses = ['permohonan masuk', 'disposition', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
 $step2ActiveStatuses = ['disposition', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
 $step3ActiveStatuses = ['proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
+$step4ActiveStatuses = ['replied', 'approved by kasatpel', 'approved by kapusdatin'];
+$step5ActiveStatuses = ['approved by kasatpel', 'approved by kapusdatin'];
+$step6ActiveStatuses = ['approved by kapusdatin'];
 
 
 $step1IsActive = in_array($label, $step1ActiveStatuses);
 $step2IsActive = in_array($label, $step2ActiveStatuses);
 $step3IsActive = in_array($label, $step3ActiveStatuses);
+$step4IsActive = in_array($label, $step4ActiveStatuses);
+$step5IsActive = in_array($label, $step5ActiveStatuses);
+$step6IsActive = in_array($label, $step6ActiveStatuses);
 
 switch ($label) {
-case 'pending':
+case 'permohonan masuk':
 $width = 5;
 break;
 case 'disposition':
@@ -102,36 +108,36 @@ break;
                     <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Di Proses</p>
                 </div>
 
-                @if ($status === 'replied')
+
                 <!-- Step 4: Dokumen Revisi -->
-                <div class="flex flex-col items-center">
+                <div class=" {{ $step4IsActive ? 'flex' : 'hidden' }} flex-col items-center">
                     <!-- Icon Circle -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-orange-600">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2  {{ $step4IsActive ? 'bg-orange-600' : 'bg-gray-400' }}">
                         <!-- Code2 Icon from Lucide -->
                         <x-lucide-folder-cog class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->
                     <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-orange-600"></div>
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white  {{ $step4IsActive ? 'bg-orange-600' : 'bg-gray-400' }}"></div>
                     </div>
 
                     <!-- Step Name -->
                     <p class="text-center text-sm font-medium mt-2 w-24">Dokumen Revisi</p>
                 </div>
-                @endif
+
 
                 <!-- Step 5: Finish -->
                 <div class="flex flex-col items-center">
                     <!-- Icon Circle -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-400">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step5IsActive ? 'bg-green-500' : 'bg-gray-400' }}">
                         <!-- CheckCircle Icon from Lucide -->
                         <x-lucide-check-circle class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->
                     <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white"></div>
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white  {{ $step5IsActive ? 'bg-green-500' : 'bg-gray-400' }}"></div>
                     </div>
 
                     <!-- Step Name -->
@@ -141,14 +147,14 @@ break;
                 <!-- Step 5: Finish -->
                 <div class="flex flex-col items-center">
                     <!-- Icon Circle -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-green-500">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step6IsActive ? 'bg-green-500' : 'bg-gray-400' }}">
                         <!-- CheckCircle Icon from Lucide -->
                         <x-lucide-check-circle class="w-6 text-white" />
                     </div>
 
                     <!-- Step Indicator -->
                     <div class="flex items-center justify-center">
-                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white"></div>
+                        <div class="w-3 h-3 rounded-full z-20 border-2 border-white {{ $step6IsActive ? 'bg-green-500' : 'bg-gray-400' }}"></div>
                     </div>
 
                     <!-- Step Name -->
