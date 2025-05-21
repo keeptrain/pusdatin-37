@@ -20,7 +20,7 @@ class Show extends Component
     public function mount(int $id)
     {
         $this->publicRelationId = $id;
-        $this->publicRelations = PublicRelationRequest::with(['documentUploads'])->findOrFail($this->publicRelationId);
+        $this->publicRelations = PublicRelationRequest::with(['documentUploads.activeVersion'])->findOrFail($this->publicRelationId);
     }
 
     // #[Computed]

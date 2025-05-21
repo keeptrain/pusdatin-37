@@ -22,7 +22,7 @@ class Detail extends Component
     {
         $this->letterId = $id;
         $this->letter = Letter::with([
-            'documentUploads'
+            'documentUploads.activeVersion:id,file_path'
         ])->findOrFail($id);
     }
 
