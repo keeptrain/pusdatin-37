@@ -8,7 +8,7 @@ class Disposition extends LetterStatus
 {
     public function label(): string
     {
-        return 'Disposition';
+        return 'Disposisi';
     }
 
     public function color(): string

@@ -55,8 +55,6 @@ class UploadForm extends Component
         ];
     }
 
-    public function mount() {}
-
     public function save()
     {
         $this->validate();
@@ -66,11 +64,10 @@ class UploadForm extends Component
             $uploads = $this->storeFiles();
             $uploadIds = $this->insertDocumentUploads($uploads, $letter);
             $this->createLetterMappings($letter->id, $uploadIds);
-            $this->createStatusTrack($letter);
+            $letter->logStatus();
 
             // Notifikasi kirim ke kapusdatin
-            $user = User::role('head_verifier')->get();
-            Notification::sendNow($user, new NewServiceRequestNotification($letter));
+            $letter->sendNewServiceRequestNotification('head_verifier');
 
             return redirect()->to('history')
                 ->with('status', [
@@ -154,14 +151,6 @@ class UploadForm extends Component
         })->toArray();
 
         LettersMapping::insert($mappings);
-    }
-
-    protected function createStatusTrack(Letter $letter): void
-    {
-        $letter->requestStatusTrack()->create([
-            'action' => $letter->status->trackingMessage(null),
-            'created_by' => auth()->user()->name
-        ]);
     }
 
     public function downloadTemplate($typeNumber)

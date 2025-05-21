@@ -81,9 +81,9 @@
                             <flux:button icon:trailing="ellipsis-vertical" variant="ghost"></flux:button>
 
                             <flux:menu>
-                                <flux:menu.item :href="route('letter.activity', [$item->id])" icon="list-bullet"
+                                {{-- <flux:menu.item :href="route('letter.activity', [$item->id])" icon="list-bullet"
                                     wire:navigate>Activity
-                                </flux:menu.item>
+                                </flux:menu.item> --}}
                                 <flux:menu.item :href="route('letter.chat', [$item->id])" icon="chat-bubble-left-right"
                                     wire:navigate>Chat</flux:menu.item>
                                 <flux:menu.item :href="route('letter.rollback', [$item->id])" icon="backward" wire:navigate>

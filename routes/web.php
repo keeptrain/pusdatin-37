@@ -1,6 +1,8 @@
 <?php
 
 use App\Livewire\Letters\Chat;
+use App\Models\Letters\Letter;
+use App\Livewire\Documents\Review;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Letters\Data\Edit;
@@ -15,14 +17,13 @@ use App\Livewire\Letters\Data\Activity;
 use App\Livewire\Letters\Data\Rollback;
 use App\Livewire\Letters\DetailHistory;
 use App\Livewire\Letters\HistoryLetter;
-use App\Http\Controllers\DashboardController;
-use App\Livewire\Letters\Data\ApplicationTable;
-use App\Http\Controllers\Admin\TemplateController;
-use App\Livewire\Documents\Review;
-use App\Livewire\Documents\RevisionComparision;
 use App\Livewire\Forms\PublicRelationForm;
-use App\Livewire\Requests\PublicRelation\Index;
+use App\Http\Controllers\DashboardController;
 use App\Livewire\Requests\PublicRelation\Show;
+use App\Livewire\Documents\RevisionComparision;
+use App\Livewire\Letters\Data\ApplicationTable;
+use App\Livewire\Requests\PublicRelation\Index;
+use App\Http\Controllers\Admin\TemplateController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -38,14 +39,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('letter/form', DirectForm::class)->name('letter.form');
     Route::get('letter/table', ApplicationTable::class)->name('letter.table');
 
-     // Public relation form
+    // Public Relation
     Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form');
     Route::get('public-relation', Index::class)->name('pr.index');
     Route::get('public-relation/{id}', Show::class)->name('pr.show');
+    Route::get('public-relation/{id}/activity', \App\Livewire\Requests\PublicRelation\Activity::class)->name('pr.activity');
 
     Route::get('history', HistoryLetter::class)->name('history');
     Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
 
+    // Information System & Data
     Route::get('letter/{id}', Detail::class)->name('letter.detail');
     Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
     Route::get('letter/{id}/review', Review::class)->name('letter.review');
@@ -54,6 +57,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
     Route::get('letter/{id}/version', RevisionComparision::class)->name('letter.version');
 
+      // Route::get('/letter/{letter}/activity', function (Letter $letter) {
+    //     // Controller atau Closure ini akan memuat view yang me-render komponen Livewire
+    //     return view('components.user.tracking-list', [
+    //         'model' => $letter,
+    //         'modelType' => $letter->getMorphClass(),
+    //         'modelId' => $letter->id,
+    //         'pageTitle' => 'Aktivitas Layanan SI'
+    //     ]);
+    // })->name('letter.activity');
 
     // Route::prefix('letter/{id}')->group(function() {
     //     Route::get('detail', [Detail::class])->name('letter.detail');

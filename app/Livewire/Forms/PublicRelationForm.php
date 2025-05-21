@@ -2,26 +2,26 @@
 
 namespace App\Livewire\Forms;
 
-use App\Models\User;
 use Livewire\Component;
+use App\Models\Template;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
-use App\Models\Letters\RequestStatusTrack;
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewServiceRequestNotification;
+use Illuminate\Support\Facades\Storage;
 
 class PublicRelationForm extends Component
 {
     use WithFileUploads;
 
-    public $month = '';
+    public $monthPublication = '';
 
     public $spesificDate = '';
 
     public $theme = '';
 
     public $target = '';
+
+    public $otherTarget = '';
 
     public $mediaType = [];
 
@@ -30,10 +30,11 @@ class PublicRelationForm extends Component
     public function rules()
     {
         $rules = [
-            'month' => 'required',
+            'monthPublication' => 'required|lt:12',
+            'spesificDate' => 'required|date',
             'theme' => 'required|string',
             'target' => 'required|min:1',
-            'mediaType' => 'nullable|min:1',
+            'mediaType' => 'required|min:1',
         ];
 
         if ($this->mediaType) {
@@ -42,12 +43,22 @@ class PublicRelationForm extends Component
             }
         }
 
+        if ($this->target === 'other') {
+            $rules['otherTarget'] = ['required'];
+        }
+
         return $rules;
     }
 
     public function messages()
     {
-        return [];
+        return [
+            'otherTarget.required' => 'Harus mengisi sasaran other',
+            'uploadFile.1' => 'Membutuhkan file untuk materi audio',
+            'uploadFile.2' => 'Membutuhkan file untuk materi infografis',
+            'uploadFile.3' => 'Membutuhkan file untuk materi poster',
+            'uploadFile.4' => 'Membutuhkan file untuk materi video'
+        ];
     }
 
     public function save()
@@ -56,32 +67,50 @@ class PublicRelationForm extends Component
 
         DB::transaction(function () {
             $prData = $this->createPublicRelationForm();
-            $this->createRequestStatusTrack($prData);
+            $prData->logStatus();
             $this->createDocumentUpload($prData);
-            $this->handleNotification($prData);
+            $prData->sendNewServiceRequestNotification('promkes_verifier');
+
+            return $this->redirect("/history/public-relation/$prData->id", true);
         });
+    }
+
+    public function updatedOtherTarget($value)
+    {
+        if ($value && $this->target !== 'other') {
+            $this->target = 'other';
+        }
     }
 
     public function createPublicRelationForm()
     {
+        $target = $this->target === 'other' ? $this->otherTarget : $this->target;
+
         return PublicRelationRequest::create([
             'user_id' => auth()->user()->id,
-            'month_publication' => now(),
-            'spesific_date' => now(),
+            'month_publication' => $this->monthPublication,
+            'spesific_date' => $this->spesificDate,
             'theme' => $this->theme,
-            'target' => $this->target,
+            'target' => $target,
             'active_review' => true
         ]);
     }
 
-    public function createRequestStatusTrack(PublicRelationRequest $prData)
+    public function updatedMediaType($value)
     {
-        RequestStatusTrack::create([
-            'statusable_id' => $prData->id,
-            'statusable_type' => PublicRelationRequest::class,
-            'action' => $prData->status->trackingActivity(null),
-            'created_by' => auth()->user()->name
-        ]);
+        $allMediaTypes = ['1', '2', '3', '4'];
+        foreach ($allMediaTypes as $type) {
+            if (!in_array($type, $this->mediaType)) {
+                $this->removeUploadedFile($type);
+            }
+        }
+    }
+
+    private function removeUploadedFile($type)
+    {
+        if (isset($this->uploadFile[$type])) {
+            unset($this->uploadFile[$type]);
+        }
     }
 
     public function collectUploadFile()
@@ -101,8 +130,6 @@ class PublicRelationForm extends Component
 
         foreach ($uploadedFilesData as $fileData) {
             $documentUpload = $prData->documentUploads()->create([
-                'documentable_id' => $prData->id,
-                'documentable_type' => get_class($prData),
                 'part_number' => $fileData['part_number'],
             ]);
 
@@ -117,9 +144,18 @@ class PublicRelationForm extends Component
         }
     }
 
-    public function handleNotification($prData)
+    public function downloadTemplate()
     {
-        $user = User::role('promkes_verifier')->get();
-        Notification::send($user, new NewServiceRequestNotification($prData));
+        $template = Template::select('part_number', 'is_active', 'file_path')->where('part_number', 6)->where('is_active', '1')->first();
+
+        if ($template) {
+            $filePath = $template->file_path;
+
+            $fileDownload = Storage::disk('public')->path($filePath);
+
+            return response()->download($fileDownload);
+        }
+
+        abort(404, 'Template not found.');
     }
 }

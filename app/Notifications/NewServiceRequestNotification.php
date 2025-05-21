@@ -2,14 +2,10 @@
 
 namespace App\Notifications;
 
-use App\States\ApprovedKasatpel;
-use App\States\Pending;
-use App\States\Process;
-use App\States\Replied;
-use App\States\Rejected;
-use App\States\Disposition;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use App\States\ApprovedKapusdatin;
+use App\Models\Letters\Letter;
+use App\Models\PublicRelationRequest;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -17,15 +13,15 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $letter;
+    public $request;
     public $verifikator;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($letter, $verifikator = null)
+    public function __construct($request, $verifikator = null)
     {
-        $this->letter = $letter;
+        $this->request = $request;
         $this->verifikator = $verifikator;
     }
 
@@ -46,31 +42,46 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        $status = $this->letter->status;
+        // Bisa id Letter atau PublicRelationRequest
+        $id = $this->request->id; 
+        $requestObject = get_class($this->request);
+        $statusObject = null;
+        $messageContext = []; 
 
-        $context = match (true) {
-            $status instanceof Pending => [
-                'responsible_person' => $this->letter->responsible_person,
-            ],
-            $status instanceof Disposition => [
-                'responsible_person' => $this->letter->responsible_person,
-            ],
-            $status instanceof Process => [
-                'verifikator' => $this->verifikator
-            ],
-            $status instanceof Replied => [
-                'verifikator_role' => $this->verifikator,
-            ],
-            $status instanceof ApprovedKasatpel,
-            $status instanceof ApprovedKapusdatin,
-            $status instanceof Rejected => [],
-            default => []
-        };
+        $userName = User::findOrFail($this->request->user_id);
+
+        // Logika spesifik berdasarkan tipe instance request
+        if ($this->request instanceof Letter) {
+            $statusObject = $this->request->status;
+            $messageContext = [
+                'responsible_person' => $userName->name
+            ];
+        } elseif ($this->request instanceof PublicRelationRequest) {
+            $statusObject = $this->request->status;
+            $messageContext = [
+                'responsible_person' => $userName->name
+            ];
+        } else {
+            return [
+                'id' => null,
+                'status' => 'unknown_type',
+                'message' => 'Tipe request tidak dikenal.'
+            ];
+        }
+
+        if (is_null($statusObject)) {
+            return [
+                'id' => $id,
+                'status' => 'invalid_status_object',
+                'message' => 'Objek status tidak valid untuk request ini.'
+            ];
+        }
 
         return [
-            'id' => $this->letter->id,
-            'status' => $status,
-            'message' => $status->userNotificationMessage($context)
+            'requestable' => $requestObject,
+            'requestable_id' => $id,
+            'status' => $statusObject, 
+            'message' => $statusObject->userNotificationMessage($messageContext)
         ];
     }
 }

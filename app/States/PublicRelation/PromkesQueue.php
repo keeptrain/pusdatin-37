@@ -12,9 +12,13 @@ class PromkesQueue extends PublicRelationStatus
         return "Antrean Promkes";
     }
 
-    public function trackingActivity(): String
+    public function trackingMessage(): String
     {
         return "Sedang dalam antrian Promkes";
+    }
+
+    public function userNotificationMessage(array $context): string {
+        return "Permohonan baru di usulkan dari " . $context['responsible_person'];
     }
 
     public function color(): string

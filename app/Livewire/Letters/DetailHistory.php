@@ -42,23 +42,18 @@ class DetailHistory extends Component
 
     public function letters()
     {
-        return Letter::with('requestStatusTrack', 'documentUploads', 'mapping')->findOrFail($this->id);
+        return Letter::with('documentUploads.activeVersion:id,file_path')->findOrFail($this->id);
     }
 
     public function prRequests()
     {
-        return PublicRelationRequest::with('requestStatusTrack', 'documentUploads')->findOrFail($this->id);
+        return PublicRelationRequest::with('documentUploads.activeVersion:id,file_path')->findOrFail($this->id);
     }
 
     #[Computed]
     public function activities()
     {
-        return collect($this->content->requestStatusTrack)
-            ->sortByDesc('created_at')
-            ->groupBy([
-                fn($item) => $item->created_at->format('Y-m-d'),
-                fn($item) => $item->created_at->format('H:i:s')
-            ]);
+        return $this->content->getGroupedRequestStatusTracks();
     }
 
     #[Computed]
@@ -87,12 +82,6 @@ class DetailHistory extends Component
             });
 
             if (!$hasPartNumber3) {
-                // if (!$this->content->mapping) {
-                //     $this->content->mapping()->create([
-                //         'letter' => $this->content->id
-                //     ]);
-                // }
-
                 $documentUpload = $this->content->documentUploads()->create([
                     'part_number' => 3,
                     'need_revision' => false,
@@ -123,7 +112,7 @@ class DetailHistory extends Component
 
     public function downloadFile($typeNumber)
     {
-        $template = $this->content->documentUploads->where('part_number', $typeNumber)->first();
+        $template = $this->content->documentUploads()->where('part_number', $typeNumber)->with('activeVersion')->first();
 
         if ($template) {
             $filePath = $template->activeVersion->file_path;

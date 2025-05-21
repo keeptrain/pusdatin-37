@@ -11,9 +11,13 @@ class Pending extends PublicRelationStatus {
         return "Permohonan Masuk";
     }
 
-    public function trackingActivity(): String
+    public function trackingMessage(): String
     {
         return "Permohonan layanan sudah kami terima, mohon tunggu konfirmasi selanjutnya.";
+    }
+
+    public function userNotificationMessage(array $context): string {
+        return "Permohonan baru telah di usulkan dari " . $context['responsible_person'];
     }
 
     public function color(): string

@@ -18,7 +18,9 @@ abstract class PublicRelationStatus extends State {
 
     abstract public function label(): String;
 
-    abstract public function trackingActivity(): String;
+    abstract public function trackingMessage(): String;
+
+    abstract public function userNotificationMessage(array $context): string;
 
     abstract public function icon(): string;
 
