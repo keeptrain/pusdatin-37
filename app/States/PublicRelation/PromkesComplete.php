@@ -12,9 +12,13 @@ class PromkesComplete extends PublicRelationStatus
         return "Kurasi Promkes";
     }
 
-    public function trackingActivity(): String
+    public function trackingMessage(): String
     {
         return "Permohonan layanan telah di kurasi oleh promkes";
+    }
+
+    public function userNotificationMessage(array $context): string {
+        return "Permohonan baru di usulkan dari " . $context['responsible_person'];
     }
 
     public function color(): string

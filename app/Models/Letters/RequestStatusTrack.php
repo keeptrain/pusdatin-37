@@ -32,6 +32,11 @@ class RequestStatusTrack extends Model
         return $this->belongsTo(PublicRelationRequest::class);
     }
 
+    public function statusable()
+    {
+        return $this->morphTo();
+    }
+
     public function scopeFilterByUser(Builder $query, $userName)
     {
         return $query->where('created_by', $userName);

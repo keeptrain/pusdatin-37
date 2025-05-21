@@ -9,13 +9,14 @@ use Spatie\ModelStates\HasStates;
 use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\DocumentUpload;
+use App\Trait\HasActivities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Letter extends Model
 {
-    use HasFactory, HasStates, SoftDeletes;
+    use HasActivities, HasFactory, HasStates, SoftDeletes;
 
     protected $table = "letters";
 
@@ -47,11 +48,6 @@ class Letter extends Model
     public function mapping()
     {
         return $this->morphMany(LettersMapping::class, 'letterable');
-    }
-
-    public function requestStatusTrack()
-    {
-        return $this->morphMany(RequestStatusTrack::class, 'statusable');
     }
 
     public static function resolveStatusClassFromString($statusString)

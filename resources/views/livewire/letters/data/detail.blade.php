@@ -6,7 +6,7 @@
     <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
     <div x-data="{ partTab: '{{ $letter->documentUploads->first()->part_number ?? '' }}' }">
-        <x-letters.detail-layout :letterId="$letterId">
+        <x-letters.detail-layout overViewRoute="letter.detail" activityRoute="letter.activity" :id="$letterId">
             <div class="mt-3 mr-3">
 
                 @foreach ($letter->documentUploads as $fileData)

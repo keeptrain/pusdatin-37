@@ -14,15 +14,26 @@
                     <div class="space-y-6">
                         <flux:input label="Penanggung Jawab" placeholder="{{ auth()->user()->name }}" disabled />
 
-                        <flux:input label="Kontak Penanggung Jawab" placeholder="{{ auth()->user()->contact }}" disabled />
+                        <flux:input label="Kontak Penanggung Jawab" placeholder="{{ auth()->user()->contact }}"
+                            disabled />
 
-                        <flux:input label="Seksi/Subbag/Subkel Pengusul" placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
+                        <flux:input label="Seksi/Subbag/Subkel Pengusul"
+                            placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
 
-                        <flux:select wire:model="month" label="Bulan usulan publikasi" placeholder="Pilih bulan...">
+                        <flux:select wire:model="monthPublication" label="Bulan usulan publikasi"
+                            placeholder="Pilih bulan...">
                             <flux:select.option value="1">Januari</flux:select.option>
                             <flux:select.option value="2">Februari</flux:select.option>
                             <flux:select.option value="3">Maret</flux:select.option>
                             <flux:select.option value="4">April</flux:select.option>
+                            <flux:select.option value="5">Mei</flux:select.option>
+                            <flux:select.option value="6">Juni</flux:select.option>
+                            <flux:select.option value="7">Juli</flux:select.option>
+                            <flux:select.option value="8">Agustus</flux:select.option>
+                            <flux:select.option value="9">September</flux:select.option>
+                            <flux:select.option value="10">Oktober</flux:select.option>
+                            <flux:select.option value="11">November</flux:select.option>
+                            <flux:select.option value="12">Desember</flux:select.option>
                         </flux:select>
 
                         <flux:input wire:model="spesificDate" label="Tanggal Spesifik Publikasi Media"
@@ -38,8 +49,10 @@
 
             <!-- Section 2: Document Upload -->
             <div x-data="{
-                selectedMediaType:  @entangle('mediaType'),
-                uploadedFiles: {},
+                activeUploads: null,
+                selectedMediaType: $wire.mediaType,
+                uploadedFiles: { },
+                otherValue: false,
                 progress: 0,
                     get uploading() {
                         return this.activeUploads > 0;
@@ -53,7 +66,15 @@
                     <flux:radio label="Masyarakat Umum" value="masyarakat_umum" />
                     <flux:radio label="Tenaga Kesehatan" value="tenaga_kesehatan" />
                     <flux:radio label="Anak Sekolah" value="anak_sekolah" />
-                    <flux:radio label="Other:" value="video" />
+                    <div class="flex items-center">
+                        <flux:radio label="Other:" value="other" />
+                        <!-- Input Field for "Other" -->
+                        <input type="text"
+                            class="ml-2 border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-1 w-60" />
+                    </div>
+                    @error('otherTarget')
+                        <flux:text class="text-md text-red-500">{{ $message }}</flux:text>
+                    @enderror
                 </flux:radio.group>
 
                 <flux:checkbox.group wire:model="mediaType" label="Jenis Media yang Diusulkan"
@@ -69,14 +90,15 @@
                         class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
                     Upload document
                 </h3>
-                <div class="p-2 bg-amber-100 flex justify-between items-center rounded-lg">
+                <div class="p-2 bg-amber-100  items-center rounded-lg">
                     <div class="flex items-center">
                         <flux:icon.arrow-down-circle class="text-amber-600 dark:text-amber-300" />
-                        <flux:heading class="ml-2 text-amber-800 underline cursor-pointer">Download template
+                        <flux:heading wire:click="downloadTemplate"
+                            class="ml-2 text-amber-800 underline cursor-pointer">Download template
                         </flux:heading>
-                        
                     </div>
-                    <flux:subheading>Semua materi templatenya sama</flux:subheading>
+                    <flux:subheading size="sm" class="ml-8">Setiap materi menggunakan template yang sama.
+                    </flux:subheading>
                 </div>
 
                 <section>

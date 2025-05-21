@@ -1,7 +1,7 @@
 <section>
     <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
-    <x-letters.detail-layout :letterId="$letterId">
+    <x-letters.detail-layout overViewRoute="letter.detail" activityRoute="letter.activity" :id="$letterId">
         {{-- Comparison Container --}}
         @php
             $mapping = $letter->documentUploads;

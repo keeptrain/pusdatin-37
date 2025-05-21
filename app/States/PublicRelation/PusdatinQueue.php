@@ -12,9 +12,13 @@ class PusdatinQueue extends PublicRelationStatus
         return "Antrean Pusdatin";
     }
 
-    public function trackingActivity(): String
+    public function trackingMessage(): String
     {
         return "Permohonan layanan sedang dalam antrean di Pusat Data Teknologi dan Dinas Kesehatan";
+    }
+
+    public function userNotificationMessage(array $context): string {
+        return "Permohonan baru di usulkan dari " . $context['responsible_person'];
     }
 
     public function color(): string

@@ -8,16 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\DocumentUpload;
 use App\States\PublicRelation\Completed;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\Letters\RequestStatusTrack;
 use App\States\PublicRelation\PromkesQueue;
 use App\States\PublicRelation\PusdatinQueue;
 use App\States\PublicRelation\PromkesComplete;
 use App\States\PublicRelation\PusdatinProcess;
 use App\States\PublicRelation\PublicRelationStatus;
+use App\Trait\HasActivities;
 
 class PublicRelationRequest extends Model
 {
-    use HasStates;
+    use HasActivities, HasStates;
 
     protected $table = "public_relation_requests";
 
@@ -44,11 +44,6 @@ class PublicRelationRequest extends Model
     public function documentUploads()
     {
         return $this->morphMany(DocumentUpload::class, 'documentable');
-    }
-
-    public function requestStatusTrack()
-    {
-        return $this->morphMany(RequestStatusTrack::class, 'statusable');
     }
 
     private static function resolveStatusClassFromString($statusString)

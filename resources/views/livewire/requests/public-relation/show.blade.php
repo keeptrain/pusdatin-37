@@ -5,7 +5,7 @@
                 class="overflow-x-auto">
         <flux:button :href="route('pr.index')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
-        <x-letters.detail-layout :letterId="$publicRelationId">
+        <x-letters.detail-layout overViewRoute='pr.show' activityRoute="pr.activity" :id="$publicRelationId">
             @forelse ($publicRelations->documentUploads as $documentUpload)
             <div x-show="partTab === '{{ $documentUpload->part_number }}'" class="p-6">
                 <iframe loading="lazy" src="{{ asset($documentUpload->activeVersion->file_path) }}" width="100%"

@@ -1,32 +1,32 @@
 <?php
 
-namespace App\Livewire\Letters\Data;
+namespace App\Livewire\Requests\PublicRelation;
 
-use App\Models\Letters\Letter;
 use Livewire\Component;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
+use App\Models\PublicRelationRequest;
 
 class Activity extends Component
 {
     #[Locked]
-    public $siRequestId;
+    public $prRequestId;
 
     public $status;
 
-    private Letter $siRequestInstance;
+    private PublicRelationRequest $prRequestInstance;
 
     public function mount($id)
     {
-        $this->siRequestId = $id;
+        $this->prRequestId = $id;
         $this->loadPrRequest();
-        $this->status = $this->siRequestInstance->status->label();
+        $this->status = $this->prRequestInstance->status->label();
     }
 
     private function loadPrRequest()
     {
         try {
-            $this->siRequestInstance = Letter::findOrFail($this->siRequestId);
+            $this->prRequestInstance = PublicRelationRequest::findOrFail($this->prRequestId);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             abort(404, 'Public Relation Request not found.');
         }
@@ -35,7 +35,7 @@ class Activity extends Component
     #[Computed]
     public function groupedActivities()
     {
-        return $this->siRequestInstance->getGroupedRequestStatusTracks();
+        return $this->prRequestInstance->getGroupedRequestStatusTracks();
     }
- 
+    
 }

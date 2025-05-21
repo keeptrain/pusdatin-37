@@ -11,9 +11,13 @@ class Completed extends PublicRelationStatus {
         return "Permohonan Selesai";
     }
 
-    public function trackingActivity(): String
+    public function trackingMessage(): String
     {
         return "Permohonan layanan telah selesai dan link media yang di usulkan telah disisipkan.";
+    }
+
+    public function userNotificationMessage(array $context): string {
+        return "Permohonan ini telah selesai, link sudah disisipkan";
     }
 
     public function color(): string
