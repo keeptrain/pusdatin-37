@@ -13,6 +13,7 @@ $step3ActiveStatuses = ['proses', 'replied', 'approved by kasatpel', 'approved b
 $step4ActiveStatuses = ['replied', 'approved by kasatpel', 'approved by kapusdatin'];
 $step5ActiveStatuses = ['approved by kasatpel', 'approved by kapusdatin'];
 $step6ActiveStatuses = ['approved by kapusdatin'];
+$stepFail = ['rejected'];
 
 
 $step1IsActive = in_array($label, $step1ActiveStatuses);
@@ -21,6 +22,7 @@ $step3IsActive = in_array($label, $step3ActiveStatuses);
 $step4IsActive = in_array($label, $step4ActiveStatuses);
 $step5IsActive = in_array($label, $step5ActiveStatuses);
 $step6IsActive = in_array($label, $step6ActiveStatuses);
+$stepFailActive = in_array($label, $stepFail);
 
 switch ($label) {
 case 'permohonan masuk':
@@ -41,6 +43,9 @@ break;
 case 'approved by kapusdatin':
 $width = 100;
 break;
+case 'rejected':
+$width = 100;
+break;
 }
 @endphp
 <div class="max-w-screen-xl px-4 lg:px-0 mx-auto">
@@ -52,7 +57,7 @@ break;
             <!-- Progress Line -->
             <div class="absolute top-6 left-0 w-full h-0.5 bg-gray-300">
                 <!-- ubah persenan di width nya untuk progres yang selesai -->
-                <div class="absolute top-0 left-0 h-full bg-[#364872] progres-bar" style="width: {{ $width }}%;"></div>
+                <div class="absolute top-0 left-0 h-full {{ $stepFailActive ? 'bg-red-500' : 'bg-[#364872] ' }} progres-bar" style="width: {{ $width }}%;"></div>
             </div>
 
             <!-- Steps -->
@@ -61,7 +66,7 @@ break;
                 <div class="flex flex-col items-center">
 
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 circle-bg  {{ $step1IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
-                        <!-- FileEdit Icon from Lucide -->
+                        <!-- Icon from Lucide -->
                         <x-lucide-file class="w-6 text-white" />
                     </div>
 
@@ -78,7 +83,7 @@ break;
                 <div class="flex flex-col items-center">
                     <!-- Icon Circle -->
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2  {{ $step2IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
-                        <!-- Search Icon from Lucide -->
+                        <!--  Icon from Lucide -->
                         <x-lucide-search class="w-6 text-white" />
                     </div>
 
@@ -95,7 +100,7 @@ break;
                 <div class="flex flex-col items-center">
                     <!-- Icon Circle -->
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2  {{ $step3IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
-                        <!-- Code2 Icon from Lucide -->
+                        <!-- Icon from Lucide -->
                         <x-lucide-file-clock class="w-6 text-white" />
                     </div>
 
@@ -113,7 +118,7 @@ break;
                 <div class=" {{ $step4IsActive ? 'flex' : 'hidden' }} flex-col items-center">
                     <!-- Icon Circle -->
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2  {{ $step4IsActive ? 'bg-orange-600' : 'bg-gray-400' }}">
-                        <!-- Code2 Icon from Lucide -->
+                        <!-- Icon from Lucide -->
                         <x-lucide-folder-cog class="w-6 text-white" />
                     </div>
 
@@ -128,10 +133,10 @@ break;
 
 
                 <!-- Step 5: Finish -->
-                <div class="flex flex-col items-center">
+                <div class="{{ $stepFailActive ? 'hidden' : 'flex' }} flex-col items-center">
                     <!-- Icon Circle -->
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step5IsActive ? 'bg-green-500' : 'bg-gray-400' }}">
-                        <!-- CheckCircle Icon from Lucide -->
+                        <!-- Icon from Lucide -->
                         <x-lucide-check-circle class="w-6 text-white" />
                     </div>
 
@@ -145,10 +150,10 @@ break;
                 </div>
 
                 <!-- Step 5: Finish -->
-                <div class="flex flex-col items-center">
+                <div class="{{ $stepFailActive ? 'hidden' : 'flex' }} flex-col items-center">
                     <!-- Icon Circle -->
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step6IsActive ? 'bg-green-500' : 'bg-gray-400' }}">
-                        <!-- CheckCircle Icon from Lucide -->
+                        <!-- Icon from Lucide -->
                         <x-lucide-check-circle class="w-6 text-white" />
                     </div>
 
@@ -162,10 +167,10 @@ break;
                 </div>
 
                 <!-- Step 5.1: Reject -->
-                <div class=" flex-col items-center hidden ">
+                <div class="{{ $stepFailActive ? 'flex' : 'hidden' }} flex-col items-center">
                     <!-- Icon Circle -->
                     <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-red-500">
-                        <!-- CheckCircle Icon from Lucide -->
+                        <!-- Icon from Lucide -->
                         <x-lucide-circle-x class="w-6 text-white" />
                     </div>
 
@@ -184,55 +189,156 @@ break;
         <div class="md:hidden">
             <div class="relative">
                 <!-- Vertical Progress Line -->
-                <div class="absolute top-0 bottom-0 left-6 w-0.5 h-full bg-gray-300">
+                <div class="absolute top-0 bottom-0 left-6 w-0.5 h-[95%] bg-gray-300">
                     <!-- Change the height percentage based on current step (0%, 33%, 66%, 100%) -->
                     <div class="absolute top-0 left-0 w-full bg-red-500" style="height: 33%;"></div>
                 </div>
 
                 <!-- Vertical Steps -->
                 <div class="flex flex-col">
-                    <!-- Step 1: Document Received -->
+                    <!-- Step 1: Dokumen Diterima -->
                     <div class="flex items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
                             <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
                                 <!-- FileEdit Icon from Lucide -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="w-6 h-6 text-white">
-                                    <path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44z">
-                                    </path>
-                                </svg>
+                                <x-lucide-file class="w-6 h-6 text-white" />
                             </div>
 
                             <!-- Step Indicator -->
                             <div class="absolute left-6 top-6">
                                 <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-red-500 transform -translate-x-1/2">
+                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800 transform -translate-x-1/2">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Step Name -->
                         <div class="pt-3">
-                            <p class="font-medium">Document Received</p>
+                            <p class="font-medium">Dokumen Diterima</p>
                         </div>
                     </div>
 
-                    <!-- Step 2: Document Verification -->
+                    <!-- Step 2: Dokumen Disposisi -->
                     <div class="flex items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
                             <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
                                 <!-- Search Icon from Lucide -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="w-6 h-6 text-white">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.3-4.3"></path>
-                                </svg>
+                                <x-lucide-search class="w-6 text-white" />
+                            </div>
+
+                            <!-- Step Indicator -->
+                            <div class="absolute left-6 top-6">
+                                <div
+                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800 transform -translate-x-1/2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step Name -->
+                        <div class="pt-3">
+                            <p class="font-medium">Dokumen Disposisi</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Dokumen Diproses -->
+                    <div class="flex items-start mb-8 relative">
+                        <div class="flex flex-col items-center mr-4">
+                            <!-- Icon Circle -->
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
+                                <x-lucide-file-clock class="w-6 text-white" />
+                            </div>
+
+                            <!-- Step Indicator -->
+                            <div class="absolute left-6 top-6">
+                                <div
+                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800 transform -translate-x-1/2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step Name -->
+                        <div class="pt-3">
+                            <p class="font-medium">Dokumen Diproses</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Dokumen Revisi -->
+                    <div class="flex items-start mb-8 relative">
+                        <div class="flex flex-col items-center mr-4">
+                            <!-- Icon Circle -->
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-orange-600">
+                                <x-lucide-folder-cog class="w-6 text-white" />
+                            </div>
+
+                            <!-- Step Indicator -->
+                            <div class="absolute left-6 top-6">
+                                <div
+                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-orange-600 transform -translate-x-1/2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step Name -->
+                        <div class="pt-3">
+                            <p class="font-medium">Dokumen Revisi</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Finish -->
+                    <div class="flex items-start mb-8 relative">
+                        <div class="flex flex-col items-center mr-4">
+                            <!-- Icon Circle -->
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-green-500">
+                                <!-- CheckCircle Icon from Lucide -->
+                                <x-lucide-check-circle class="w-6 text-white" />
+                            </div>
+
+                            <!-- Step Indicator -->
+                            <div class="absolute left-6 top-6">
+                                <div
+                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white transform -translate-x-1/2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step Name -->
+                        <div class="pt-3">
+                            <p class="font-medium">Disetujui Kasatpel</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Finish -->
+                    <div class="flex items-start mb-8 relative">
+                        <div class="flex flex-col items-center mr-4">
+                            <!-- Icon Circle -->
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-green-500">
+                                <!-- CheckCircle Icon from Lucide -->
+                                <x-lucide-check-circle class="w-6 text-white" />
+                            </div>
+
+                            <!-- Step Indicator -->
+                            <div class="absolute left-6 top-6">
+                                <div
+                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white transform -translate-x-1/2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step Name -->
+                        <div class="pt-3">
+                            <p class="font-medium">Disetujui KaPusdatin</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 5.1: reject -->
+                    <div class="flex items-start  relative">
+                        <div class="flex flex-col items-center mr-4">
+                            <!-- Icon Circle -->
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-red-500">
+                                <!-- CheckCircle Icon from Lucide -->
+                                <x-lucide-circle-x class="w-6 text-white" />
                             </div>
 
                             <!-- Step Indicator -->
@@ -245,64 +351,7 @@ break;
 
                         <!-- Step Name -->
                         <div class="pt-3">
-                            <p class="font-medium">Document Verification</p>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Development Process -->
-                    <div class="flex items-start mb-8 relative">
-                        <div class="flex flex-col items-center mr-4">
-                            <!-- Icon Circle -->
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
-                                <!-- Code2 Icon from Lucide -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="w-6 h-6 text-white">
-                                    <path d="m18 16 4-4-4-4"></path>
-                                    <path d="m6 8-4 4 4 4"></path>
-                                    <path d="m14.5 4-5 16"></path>
-                                </svg>
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="absolute left-6 top-6">
-                                <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white transform -translate-x-1/2">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step Name -->
-                        <div class="pt-3">
-                            <p class="font-medium">Development Process</p>
-                        </div>
-                    </div>
-
-                    <!-- Step 4: Finish Project -->
-                    <div class="flex items-start relative">
-                        <div class="flex flex-col items-center mr-4">
-                            <!-- Icon Circle -->
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-400">
-                                <!-- CheckCircle Icon from Lucide -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="w-6 h-6 text-white">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                </svg>
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="absolute left-6 top-6">
-                                <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white transform -translate-x-1/2">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step Name -->
-                        <div class="pt-3">
-                            <p class="font-medium">Finish Project</p>
+                            <p class="font-medium">Dokumen Ditolak</p>
                         </div>
                     </div>
                 </div>
