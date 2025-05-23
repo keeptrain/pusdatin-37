@@ -27,24 +27,31 @@ $stepFailActive = in_array($label, $stepFail);
 switch ($label) {
 case 'permohonan masuk':
 $width = 5;
+$height = 3;
 break;
 case 'disposition':
 $width = 25;
+$height = 23;
 break;
 case 'process':
 $width = 50;
+$height = 43;
 break;
 case 'replied':
 $width = 60;
+$height = 50;
 break;
 case 'approved by kasatpel':
 $width = 75;
+$height = 60;
 break;
 case 'approved by kapusdatin':
 $width = 100;
+$height = 100;
 break;
 case 'rejected':
 $width = 100;
+$height = 100;
 break;
 }
 @endphp
@@ -191,7 +198,7 @@ break;
                 <!-- Vertical Progress Line -->
                 <div class="absolute top-0 bottom-0 left-6 w-0.5 h-[95%] bg-gray-300">
                     <!-- Change the height percentage based on current step (0%, 33%, 66%, 100%) -->
-                    <div class="absolute top-0 left-0 w-full bg-red-500" style="height: 33%;"></div>
+                    <div class="absolute top-0 left-0 w-full bg-gray-800" style="height: {{ $height }}%;"></div>
                 </div>
 
                 <!-- Vertical Steps -->
@@ -265,7 +272,7 @@ break;
                     </div>
 
                     <!-- Step 4: Dokumen Revisi -->
-                    <div class="flex items-start mb-8 relative">
+                    <div class="hidden items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
                             <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-orange-600">
