@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
+
+
 use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+
         $user = auth()->user()->load('roles');
         $userRoles = $user->roles()->pluck('id');
 
-        if ($user->hasRole('user')){
+        if ($user->hasRole('user')) {
             return view('dashboard-user');
         }
 
@@ -34,14 +38,46 @@ class DashboardController extends Controller
         $categoryPercentages = $this->calculateCategoryPercentages($totalPr);
         $siStatusCounts = $this->getSiDataStatusCounts($userRoles);
 
-        if ($user->hasRole('head_verifier')){
+        if ($user->hasRole('head_verifier')) {
             $siStatusCounts = $this->getSiDataStatusCounts();
         }
+
+        // untuk bar chart
+        $year = now()->year;
+
+        // Query: hitung jumlah Letter per bulan (1–12) di SQLite
+        $counts = Letter::selectRaw("
+                CAST(strftime('%m', created_at) AS integer) AS month,
+                COUNT(*) AS total
+            ")
+            ->whereRaw("strftime('%Y', created_at) = ?", [$year])
+            ->groupBy('month')
+            ->pluck('total', 'month')    // menghasilkan [ month => total, … ]
+            ->toArray();
+
+        // Siapkan array bulan 1–12
+        $months = range(1, 12);
+
+        // Labels: nama bulan dalam format 'January', 'February', …
+        $labels = array_map(
+            fn($m) => Carbon::create()->month($m)->format('F'),
+            $months
+        );
+
+        // Data: jika bulan tidak ada di $counts, isi 0
+        $data = array_map(
+            fn($m) => $counts[$m] ?? 0,
+            $months
+        );
+
+        // untuk bar chart
 
         return view('dashboard', [
             'totalServices' => $totalServices,
             'categoryPercentages' => $categoryPercentages,
             'siStatusCounts' => $siStatusCounts,
+            'labels'     => $labels,
+            'data'     => $data,
         ]);
     }
 

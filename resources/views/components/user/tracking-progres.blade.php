@@ -39,7 +39,7 @@ $height = 43;
 break;
 case 'replied':
 $width = 60;
-$height = 50;
+$height = 55;
 break;
 case 'approved by kasatpel':
 $width = 75;
@@ -197,8 +197,8 @@ break;
             <div class="relative">
                 <!-- Vertical Progress Line -->
                 <div class="absolute top-0 bottom-0 left-6 w-0.5 h-[95%] bg-gray-300">
-                    <!-- Change the height percentage based on current step (0%, 33%, 66%, 100%) -->
-                    <div class="absolute top-0 left-0 w-full bg-gray-800" style="height: {{ $height }}%;"></div>
+                    <!-- buat fi mobile ubah height nya berdasarkan konisi aktif) -->
+                    <div class="absolute top-0 left-0 w-full {{ $stepFailActive ? 'bg-red-500' : 'bg-[#364872] ' }}" style="height: {{ $height }}%;"></div>
                 </div>
 
                 <!-- Vertical Steps -->
@@ -207,16 +207,9 @@ break;
                     <div class="flex items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step1IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
                                 <!-- FileEdit Icon from Lucide -->
                                 <x-lucide-file class="w-6 h-6 text-white" />
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="absolute left-6 top-6">
-                                <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800 transform -translate-x-1/2">
-                                </div>
                             </div>
                         </div>
 
@@ -230,16 +223,9 @@ break;
                     <div class="flex items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step2IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
                                 <!-- Search Icon from Lucide -->
                                 <x-lucide-search class="w-6 text-white" />
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="absolute left-6 top-6">
-                                <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800 transform -translate-x-1/2">
-                                </div>
                             </div>
                         </div>
 
@@ -253,15 +239,8 @@ break;
                     <div class="flex items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-gray-800">
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step3IsActive ? 'bg-gray-800' : 'bg-gray-400' }}">
                                 <x-lucide-file-clock class="w-6 text-white" />
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="absolute left-6 top-6">
-                                <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-gray-800 transform -translate-x-1/2">
-                                </div>
                             </div>
                         </div>
 
@@ -272,18 +251,11 @@ break;
                     </div>
 
                     <!-- Step 4: Dokumen Revisi -->
-                    <div class="hidden items-start mb-8 relative">
+                    <div class="{{ $step4IsActive ? 'flex' : 'hidden' }} items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-orange-600">
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step4IsActive ? 'bg-orange-600' : 'bg-gray-400' }}">
                                 <x-lucide-folder-cog class="w-6 text-white" />
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="absolute left-6 top-6">
-                                <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-orange-600 transform -translate-x-1/2">
-                                </div>
                             </div>
                         </div>
 
@@ -294,19 +266,12 @@ break;
                     </div>
 
                     <!-- Step 5: Finish -->
-                    <div class="flex items-start mb-8 relative">
+                    <div class="{{ $stepFailActive ? 'hidden' : 'flex' }} items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-green-500">
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step6IsActive ? 'bg-green-500' : 'bg-gray-400' }}">
                                 <!-- CheckCircle Icon from Lucide -->
                                 <x-lucide-check-circle class="w-6 text-white" />
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="absolute left-6 top-6">
-                                <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white transform -translate-x-1/2">
-                                </div>
                             </div>
                         </div>
 
@@ -320,16 +285,9 @@ break;
                     <div class="flex items-start mb-8 relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
-                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-green-500">
+                            <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 {{ $step6IsActive ? 'bg-green-500' : 'bg-gray-400' }}">
                                 <!-- CheckCircle Icon from Lucide -->
                                 <x-lucide-check-circle class="w-6 text-white" />
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="absolute left-6 top-6">
-                                <div
-                                    class="w-3 h-3 rounded-full z-20 border-2 border-white bg-white transform -translate-x-1/2">
-                                </div>
                             </div>
                         </div>
 
@@ -340,7 +298,7 @@ break;
                     </div>
 
                     <!-- Step 5.1: reject -->
-                    <div class="flex items-start  relative">
+                    <div class="{{ $stepFailActive ? 'flex' : 'hidden' }}  items-start  relative">
                         <div class="flex flex-col items-center mr-4">
                             <!-- Icon Circle -->
                             <div class="w-12 h-12 flex items-center justify-center rounded-full z-10 mb-2 bg-red-500">
