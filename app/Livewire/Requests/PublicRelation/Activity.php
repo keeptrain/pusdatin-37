@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use App\Models\PublicRelationRequest;
+use App\Services\TrackingStepped;
 
 class Activity extends Component
 {
@@ -37,5 +38,17 @@ class Activity extends Component
     {
         return $this->prRequestInstance->getGroupedRequestStatusTracks();
     }
-    
+
+    #[Computed]
+    public function statuses()
+    {
+        return TrackingStepped::PublicRelationRequest($this->prRequestInstance);
+    }
+
+    #[Computed]
+    public function currentIndex()
+    {
+        $statuses = $this->statuses();
+        return TrackingStepped::currentIndex($this->prRequestInstance, $statuses);
+    }
 }

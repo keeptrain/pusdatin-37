@@ -18,7 +18,7 @@ class PusdatinQueue extends PublicRelationStatus
     }
 
     public function userNotificationMessage(array $context): string {
-        return "Permohonan baru di usulkan dari " . $context['responsible_person'];
+        return "Permohonan ini membutuhkan disposisi kehumasan";
     }
 
     public function color(): string

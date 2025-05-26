@@ -3,13 +3,14 @@
 namespace App\Livewire\Letters;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
-use App\Models\PublicRelationRequest;
 use Livewire\Attributes\Locked;
+use App\Services\TrackingStepped;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
+use App\Models\PublicRelationRequest;
 use Illuminate\Support\Facades\Storage;
-use Livewire\WithFileUploads;
 
 class DetailHistory extends Component
 {
@@ -48,6 +49,19 @@ class DetailHistory extends Component
     public function prRequests()
     {
         return PublicRelationRequest::with('documentUploads.activeVersion:id,file_path')->findOrFail($this->id);
+    }
+
+    #[Computed]
+    public function statuses()
+    {
+        return TrackingStepped::PublicRelationRequest($this->prRequests());
+    }
+
+    #[Computed]
+    public function currentIndex()
+    {
+        $statuses = $this->statuses();
+        return TrackingStepped::currentIndex($this->prRequests(), $statuses);
     }
 
     #[Computed]

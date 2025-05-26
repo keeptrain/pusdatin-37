@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Letters\Data;
 
-
+use App\States\Pending;
+use App\States\Process;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
-
 
 class Detail extends Component
 {
@@ -46,5 +46,21 @@ class Detail extends Component
     public function currentStatusLabel()
     {
         return $this->letter->status->label();
+    }
+
+    public function backPending()
+    {
+        $letter = Letter::findOrFail($this->letterId);
+        $letter->status->transitionTo(Pending::class);
+        return $this->redirect("/letter/$this->letterId", true);
+    }
+
+    public function backProcess()
+    {
+        $letter = Letter::findOrFail($this->letterId);
+        $letter->status->transitionTo(Process::class);
+        $letter->active_revision = false;
+        $letter->save();
+        return $this->redirect("/letter/$this->letterId", true);
     }
 }

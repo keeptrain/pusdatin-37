@@ -1,8 +1,10 @@
 <section>
-    <x-modal.curation :documentUploads="$documentUploads"/>
+    <x-modal.queue-promkes />
+
+    <x-modal.curation :publicRelationRequest="$publicRelationRequest"/>
 
     <x-modal.process />
 
-    <x-modal.completed :documentUploads="$documentUploads"/>
+    <x-modal.completed :publicRelationRequest="$publicRelationRequest"/>
 
 </section>

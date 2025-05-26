@@ -17,8 +17,9 @@ class PromkesComplete extends PublicRelationStatus
         return "Permohonan layanan telah di kurasi oleh promkes";
     }
 
-    public function userNotificationMessage(array $context): string {
-        return "Permohonan baru di usulkan dari " . $context['responsible_person'];
+    public function userNotificationMessage(array $context): string
+    {
+        return "Permohonan dari " . $context['responsible_person'] . " membutuhkan disposisi kehumasan";
     }
 
     public function color(): string

@@ -3,14 +3,14 @@
     }" name="disposition-modal" focusable class="md:w-120" size="lg">
     <form wire:submit="saveDisposition" class="space-y-6">
         <flux:heading size="lg">
-            {{ __('Disposisi permohonan layanan') }} {{ $letterId }}
+            {{ __('Disposisi permohonan layanan') }}
         </flux:heading>
 
         <!-- Radio Group -->
         <flux:radio.group wire:model="status" name="status" label="Status" badge="Required">
             <flux:radio value="disposition" name="status" label="Disposisi" x-on:click="status = 'approved'" />
             <flux:radio value="rejected" name="status" label="Rejected" x-on:click="status = 'rejected'" />
-            <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" />
+            {{-- <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
         </flux:radio.group>
 
         <template x-if="status === 'approved'">

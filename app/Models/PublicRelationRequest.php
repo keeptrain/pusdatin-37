@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use App\Trait\HasActivities;
 use Spatie\ModelStates\HasStates;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\DocumentUpload;
@@ -13,7 +15,6 @@ use App\States\PublicRelation\PusdatinQueue;
 use App\States\PublicRelation\PromkesComplete;
 use App\States\PublicRelation\PusdatinProcess;
 use App\States\PublicRelation\PublicRelationStatus;
-use App\Trait\HasActivities;
 
 class PublicRelationRequest extends Model
 {
@@ -32,8 +33,8 @@ class PublicRelationRequest extends Model
         'spesific_date',
         'theme',
         'target',
-        'active_review',
         'links',
+        'active_checking'
     ];
 
     public function user()
@@ -73,7 +74,12 @@ class PublicRelationRequest extends Model
         return Carbon::parse($this->create_at)->format('F');
     }
 
-    public function getPublicationMonthAttribute($value)
+    public function getTargetAttribute($value)
+    {
+        return Str::headline($value);
+    }
+
+    public function getMonthPublicationAttribute($value)
     {
         $monthNames = [
             1 => 'Januari',
@@ -93,6 +99,11 @@ class PublicRelationRequest extends Model
         return $monthNames[$value] ?? 'Bulan Tidak Diketahui';
     }
 
+    public function createdAtDMY()
+    {
+        return Carbon::parse($this->created_at)->format('d F Y');
+    }
+
     public function spesificDate()
     {
         return Carbon::parse($this->spesific_Date)->format('d F');
@@ -107,5 +118,34 @@ class PublicRelationRequest extends Model
         }
 
         return $query;
+    }
+
+    public function transitionStatusToPromkesComplete()
+    {
+        $this->update([
+            'status' => $this->status->transitionTo(PromkesComplete::class),
+            'active_checking' => 2
+        ]);
+    }
+
+    public function transitionStatusToPusdatinQueue()
+    {
+        $this->update(['status' => $this->status->transitionTo(PusdatinQueue::class)]);
+    }
+
+    public function transitionStatusToPusdatinProcess()
+    {
+        $this->update([
+            'status' => $this->status->transitionTo(PusdatinProcess::class),
+            'active_checking' => 5
+        ]);
+    }
+
+    public function transitionStatusToCompleted($links)
+    {
+        $this->update([
+            'status' => $this->status->transitionTo(Completed::class),
+            'links' => $this->mediaLinks
+        ]);
     }
 }

@@ -21,7 +21,7 @@
             <x-user.public-relation.card-basic-info :prRequest="$content" />
         </div>
 
-        <x-user.tracking-progres :status="$content->status" />
+        <x-user.public-relation.card-progress-info :status="$content->status" :currentIndex="$this->currentIndex"
+            :statuses="$this->statuses" :activity="$this->activities" />
     @endif
-
 </section>

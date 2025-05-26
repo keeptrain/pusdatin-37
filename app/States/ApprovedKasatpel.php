@@ -28,7 +28,7 @@ class ApprovedKasatpel extends LetterStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan layanan anda diterima";
+        return "Permohonan ini telah mendapatkan persetujuan kasatpel";
     }
 
     public function icon(): string
@@ -45,7 +45,7 @@ class ApprovedKasatpel extends LetterStatus
     {
         return '75%';
     }
-    
+
     public function percentageBar(): string
     {
         return 'w-[75%]';

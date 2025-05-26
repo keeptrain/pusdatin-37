@@ -1,6 +1,6 @@
 <div class="lg:p-3">
-
-    <flux:heading size="xl" level="1" class="mb-6">{{ __('List Service Request') }}</flux:heading>
+    <flux:heading size="xl" level="1">{{ __('List') }}</flux:heading>
+    <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan Sistem Informasi & Data') }}</flux:heading>
     <flux:menu.tabs :statuses="$statuses" :filterStatus="$filterStatus" />
 
     <div class="flex flex-1 justify-between items-center mb-4 h-10">
@@ -75,8 +75,7 @@
                     <flux:table.row>{{ $item->user->name }}</flux:table.row>
                     <flux:table.row>{{ $item->title }}</flux:table.row>
                     <flux:table.row>
-                        <flux:notification.status-badge :status="$item->status->label()">
-                            {{ $item->status->label() }}</flux:notification.status-badge>
+                        <flux:notification.status-badge :status="$item->status"/>
                     </flux:table.row>
                     <flux:table.row>{{ $item->kasatpelName($item->current_division) }}</flux:table.row>
                     <flux:table.row>{{ $item->createdAtDMY() }}</flux:table.row>

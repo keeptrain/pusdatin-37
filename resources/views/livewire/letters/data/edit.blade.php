@@ -65,7 +65,7 @@
                                 <section>
                                     <x-letters.input-file-adapter :title="$documentUpload->part_number_label"
                                         model="revisedFiles.{{ $documentUpload->part_number }}" required />
-                                    @foreach ($documentUpload->versions->where('is_resolved', false) as $revision)
+                                    @foreach ($documentUpload->load('versions')->versions->where('is_resolved', false) as $revision)
                                         <x-letters.warning-note :note="$revision->revision_note" />
                                     @endforeach
                                 </section>

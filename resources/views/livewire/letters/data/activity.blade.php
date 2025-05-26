@@ -3,7 +3,8 @@
 
     <x-letters.detail-layout overViewRoute="letter.detail" activityRoute="letter.activity" :id="$siRequestId">
         <div class="p-12">
-            <flux:notification.status-stepped :status="$status" />
+            <flux:notification.status-stepped :status="$status" :isRejected="$this->isRejected"
+                :currentIndex="$this->currentIndex" :statuses="$this->statuses" />
 
             <x-user.tracking-list :activity="$this->groupedActivities" />
         </div>

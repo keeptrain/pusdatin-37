@@ -3,7 +3,6 @@
 namespace App\Livewire\Letters;
 
 use Carbon\Carbon;
-use App\Models\User;
 use Livewire\Component;
 use App\Models\Template;
 use Illuminate\Support\Str;
@@ -15,8 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Documents\DocumentUpload;
 use App\Models\letters\LettersMapping;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewServiceRequestNotification;
 
 class UploadForm extends Component
 {
@@ -64,7 +61,7 @@ class UploadForm extends Component
             $uploads = $this->storeFiles();
             $uploadIds = $this->insertDocumentUploads($uploads, $letter);
             $this->createLetterMappings($letter->id, $uploadIds);
-            $letter->logStatus();
+            $letter->logStatus(null);
 
             // Notifikasi kirim ke kapusdatin
             $letter->sendNewServiceRequestNotification('head_verifier');

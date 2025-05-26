@@ -2,14 +2,11 @@
 
 namespace App\Livewire\Letters\Data;
 
-use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewServiceRequestNotification;
 use Livewire\Attributes\Computed;
 
 class Edit extends Component
@@ -60,7 +57,7 @@ class Edit extends Component
     {
         $this->letterId = $id;
         $this->letter = Letter::with([
-            'documentUploads',
+            'documentUploads.versions',
         ])->findOrFail($id);
 
         $this->fill(
@@ -71,7 +68,7 @@ class Edit extends Component
     public function save()
     {
         $this->validate();
-
+        
         DB::transaction(function () {
             $letter = $this->letter;
 
@@ -129,29 +126,27 @@ class Edit extends Component
                 $letter->save();
             }
 
-            if (!empty($this->revisedFiles)) {
-                $userName = auth()->user()->name;
-                $statusTrack = $this->letter->requestStatusTrack()->create([
-                    'letter_id' => $letter->id,
-                    'action' => $userName . ' telah melakukan revisi di bagian: ' . implode(' ,', $revisedParts),
-                    'created_by' => $userName,
-                ]);
+            $letter->refresh();
 
-                if (!empty($this->notes)) {
-                    $statusTrack->notes = $this->notes;
-                    $statusTrack->save();
-                }
+            $letter->logStatusRevision($this->notes, $revisedParts);
 
-                $user = User::role(['administrator', 'si_verifier'])->get();
-                Notification::send($user, new NewServiceRequestNotification($letter, auth()->user()));
-            }
+            DB::afterCommit(function () use ($letter) {
+                $letter->sendProcessServiceRequestNotification();
+            });
 
-            return redirect()->to("history/information-system/$this->letterId")
-                ->with('status', [
-                    'variant' => 'success',
-                    'message' => 'Create direct Letter successfully!'
-                ]);
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $letter->status->toastMessage(),
+            ]);
+
+            return $this->redirect("/history/information-system/$this->letterId", true);
         });
+    }
+
+    #[Computed]
+    public function checkNotResolvedDocuments()
+    {
+        return $this->letter->documentUploads->versions->where('is_resolved', false);
     }
 
     #[Computed]

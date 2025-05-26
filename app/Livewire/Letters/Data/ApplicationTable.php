@@ -40,6 +40,7 @@ class ApplicationTable extends Component
 
         if ($letter->status == Disposition::class) {
             $letter->transitionStatusToProcess($letter->current_division);
+            $letter->logStatus(null);
         }
         return $this->redirect("{$id}", true);
     }

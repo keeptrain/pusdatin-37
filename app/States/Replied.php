@@ -25,12 +25,16 @@ class Replied extends LetterStatus
     {
         $resolveDivision = $this->getDivisionName($division);
 
-        return "Permohonan anda mendapatkan balasan dari Kepala Satuan Pelaksana {$resolveDivision} , harap di periksa.";
+        if ($resolveDivision === 'Kepala Pusat Dinas Kesehatan') {
+            return "Permohonan layanan mendapatkan balasan dari {$resolveDivision}, harap di periksa.";
+        }
+        
+        return "Permohonan layanan mendapatkan balasan dari Kepala Satuan Pelaksana {$resolveDivision} , harap di periksa.";
     }
 
     public function userNotificationMessage(array $context): string
     {
-        if (isset($context['verifikator_role']) && in_array($context['verifikator_role'], ['administrator', 'verifikator'])) {
+        if (isset($context['verifikator_role'])) {
             return 'Permohonan layanan anda mendapatkan balasan';
         }
 
@@ -51,7 +55,7 @@ class Replied extends LetterStatus
     {
         return '50%';
     }
-    
+
     public function percentageBar(): string
     {
         return 'w-[50%]';

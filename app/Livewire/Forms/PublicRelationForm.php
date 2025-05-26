@@ -67,7 +67,7 @@ class PublicRelationForm extends Component
 
         DB::transaction(function () {
             $prData = $this->createPublicRelationForm();
-            $prData->logStatus();
+            $prData->logStatus(null);
             $this->createDocumentUpload($prData);
             $prData->sendNewServiceRequestNotification('promkes_verifier');
 
@@ -92,7 +92,7 @@ class PublicRelationForm extends Component
             'spesific_date' => $this->spesificDate,
             'theme' => $this->theme,
             'target' => $target,
-            'active_review' => true
+            'active_checking' => 6
         ]);
     }
 

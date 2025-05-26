@@ -23,12 +23,16 @@ class Rejected extends LetterStatus
 
     public function trackingMessage(?int $division): string
     {
-        return "Permohonan layanan anda ditolak";
+        $resolvedDivisonName = $this->getDivisionName($division);
+        if ($division == 2 ) {
+            return "Permohonan layanan anda ditolak oleh " . $resolvedDivisonName;
+        }
+        return "Permohonan layanan anda ditolak oleh Kasatpel " . $resolvedDivisonName;
     }
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan layanan anda ditolak";
+        return "Permohonan layanan anda ditolak" ;
     }
 
     public function icon(): string

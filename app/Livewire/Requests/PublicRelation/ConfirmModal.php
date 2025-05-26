@@ -2,123 +2,157 @@
 
 namespace App\Livewire\Requests\PublicRelation;
 
-use App\Models\User;
-use App\States\PublicRelation\Completed;
 use Livewire\Component;
-use Illuminate\Support\Facades\DB;
-use App\States\PublicRelation\PromkesComplete;
-use App\States\PublicRelation\PusdatinProcess;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Locked;
+use Illuminate\Support\Facades\DB;
+use App\Models\PublicRelationRequest;
+use App\States\PublicRelation\PromkesQueue;
 
 class ConfirmModal extends Component
 {
     use WithFileUploads;
 
+    #[Locked]
+    public $publicRelationId;
+
     public array $curationFileUpload = [];
 
     public array $mediaLinks = [];
 
-    public $documentUploads;
+    public $publicRelationRequest;
+
+    public function queuePromkes()
+    {
+        $prRequest = $this->publicRelationRequest;
+
+        $this->authorize('queuePromkes', $prRequest);
+
+        DB::transaction(function () use ($prRequest) {
+            $prRequest->status->transitionTo(PromkesQueue::class);
+
+            $prRequest->logStatus(null);
+
+            $this->redirect("$prRequest->id", true);
+        });
+    }
 
     public function curation()
     {
-        $prRequest = $this->documentUploads;
-
-        $user = User::role('head_verifier')->first();
+        $prRequest = PublicRelationRequest::findOrFail($this->publicRelationId);
 
         $dynamicRules = [];
 
-        foreach ($prRequest->documentUploads as $documentUploadItem) {
+        foreach ($this->publicRelationRequest->documentUploads as $documentUploadItem) {
             $dynamicRules["curationFileUpload.{$documentUploadItem->part_number}"] = ['required', 'file', 'mimes:pdf,doc,docx,ppt,pptx'];
         }
 
-        $this->validate($dynamicRules);
+        $this->validate(
+            $dynamicRules,
+            ['curationFileUpload.required' => 'File kurasi di perlukan']
+        );
 
-        DB::transaction(function () use ($prRequest, $user) { 
-            $prRequest->update([
-                'status' => $prRequest->status->transitionTo(PromkesComplete::class),
-                'active_review' => $user->id,
-            ]);
-          
-            foreach ($this->curationFileUpload as $partNumber => $uploadedFile) {
+        $this->authorize('curationPromkes', $prRequest);
 
-                if ($uploadedFile) {
-                    $filePath = $uploadedFile->store('documents', 'public');
-                   
-                    $targetDocumentUpload = $prRequest->documentUploads->firstWhere('part_number', $partNumber);
+        DB::transaction(function () use ($prRequest) {
+            $this->checkCurationFileUpload($prRequest);
 
-                    if (!$targetDocumentUpload) {
-                        session()->flash('error', "Gagal mengunggah beberapa file. Tidak ada dokumen untuk: {$partNumber}");
-                        continue; 
-                    }
+            $prRequest->transitionStatusToPromkesComplete();
 
-                    $targetDocumentUpload->load('versions');
+            $prRequest->refresh();
 
-                    $currentMaxVersionNumber = $targetDocumentUpload->versions->max('version') ?? 0;
-                    $nextVersionNumber = $currentMaxVersionNumber + 1;
+            $prRequest->logStatus(null);
 
-                    $newVersion = $targetDocumentUpload->versions()->create([
-                        'file_path'      => $filePath,
-                        'version'        => $nextVersionNumber,
-                        'is_resolved'    => true,
-                        'revision_note'  => 'Versi terbaru setelah di kurasi oleh Promkes. Versi Pemohon adalah ' . $currentMaxVersionNumber,
-                    ]);
+            DB::afterCommit(function () use ($prRequest) {
+                $prRequest->sendPrRequestNotification();
+            });
 
-                    $targetDocumentUpload->update([
-                        'document_upload_version_id' => $newVersion->id,
-                    ]);
-                }
-            }
+            $this->redirect("$prRequest->id", true);
         });
     }
 
     public function process()
     {
-        $prRequest = $this->documentUploads;
-        $user = User::role('pr_verifier')->first();
+        $prRequest = PublicRelationRequest::findOrFail($this->publicRelationId);
 
-        DB::transaction(function () use ($prRequest, $user) {
-            $prRequest->update([
-                'status' => $prRequest->status->transitionTo(PusdatinProcess::class),
-                'active_review' => $user->id,
-            ]);
+        $this->authorize('dispositionToPr', $prRequest);
 
-            $prRequest->requestStatusTrack()->create([
-                'action' => $prRequest->status->trackingActivity(null),
-                'created_by' => auth()->user()->name,
-            ]);
+        DB::transaction(function () use ($prRequest) {
+            $prRequest->transitionStatusToPusdatinProcess();
 
-            // Notification::send($user, new NewServiceRequestNotification());
+            $prRequest->refresh();
 
+            $prRequest->logStatus(null);
+
+            DB::afterCommit(function () use ($prRequest) {
+                $prRequest->sendPrRequestNotification();
+            });
+
+            $this->redirect("$prRequest->id", true);
         });
     }
 
     public function completed()
     {
-        $prRequest = $this->documentUploads;
+        $prRequest = PublicRelationRequest::findOrFail($this->publicRelationId);
 
         $dynamicRules = [];
 
-        foreach ($this->documentUploads->documentUploads as $documentUpload) {
+        foreach ($this->publicRelationRequest->documentUploads as $documentUpload) {
             $dynamicRules["mediaLinks.{$documentUpload->part_number}"] = ['required', 'url'];
         }
 
-        $this->validate($dynamicRules);
+        $this->validate($dynamicRules, [
+            'mediaLinks.1.required' => 'Diperlukan'
+        ]);
+
+        $this->authorize('completedPrProcess', $prRequest);
 
         DB::transaction(function () use ($prRequest) {
-            $prRequest->update([
-                'status' => $prRequest->status->transitionTo(Completed::class),
-                'links' => $this->mediaLinks
-            ]);
+            $prRequest->transitionStatusToCompleted($this->mediaLinks);
 
-            $prRequest->requestStatusTrack()->create([
-                'action' => $prRequest->status->trackingActivity(null),
-                'created_by' => auth()->user()->name,
-            ]);
+            $prRequest->refresh();
 
-            // Notification::send($user, new NewServiceRequestNotification());
+            $prRequest->logStatus(null);
 
+            DB::afterCommit(function () use ($prRequest) {
+                $prRequest->sendPrRequestNotification();
+            });
+
+            $this->redirect("$prRequest->id", true);
         });
+    }
+
+    private function checkCurationFileUpload($prRequest)
+    {
+        foreach ($this->curationFileUpload as $partNumber => $uploadedFile) {
+            if ($uploadedFile) {
+                $filePath = $uploadedFile->store('documents', 'public');
+
+                $targetDocumentUpload = $prRequest->documentUploads->firstWhere('part_number', $partNumber);
+
+                if (!$targetDocumentUpload) {
+                    session()->flash('error', "Gagal mengunggah beberapa file. Tidak ada dokumen untuk: {$partNumber}");
+                    continue;
+                }
+
+                $targetDocumentUpload->load('versions');
+
+                $currentMaxVersionNumber = $targetDocumentUpload->versions->max('version') ?? 0;
+                $nextVersionNumber = $currentMaxVersionNumber + 1;
+
+                $newVersion = $targetDocumentUpload->versions()->create([
+                    'file_path'      => $filePath,
+                    'version'        => $nextVersionNumber,
+                    'is_resolved'    => true,
+                    'revision_note'  => 'Versi terbaru setelah di kurasi oleh Promkes. Versi Pemohon adalah ' . $currentMaxVersionNumber,
+                ]);
+
+                $targetDocumentUpload->update([
+                    'document_upload_version_id' => $newVersion->id,
+                ]);
+            }
+        }
     }
 
     public function linksToArray()

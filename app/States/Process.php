@@ -8,7 +8,7 @@ class Process extends LetterStatus
 {
     public function label(): string
     {
-        return 'Process';
+        return 'Proses';
     }
 
     public function color(): string

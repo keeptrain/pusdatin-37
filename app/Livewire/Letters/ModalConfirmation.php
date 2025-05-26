@@ -2,14 +2,11 @@
 
 namespace App\Livewire\Letters;
 
-use App\Models\User;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewServiceRequestNotification;
 
 class ModalConfirmation extends Component
 {
@@ -88,24 +85,41 @@ class ModalConfirmation extends Component
         $this->availablePart = $availablePart;
     }
 
+    private function getSiDataRequests()
+    {
+        return Letter::with('documentUploads')->findOrFail($this->letterId);
+    }
+
     public function saveDisposition()
     {
         $this->validate();
 
+        $this->authorize('can disposition', $this->letterId);
+
         DB::transaction(function () {
+            // Mencari object letter yang sesuai
             $letter = Letter::findOrFail($this->letterId);
 
-            $letter->transitionStatusFromDisposition(
+            // Transisi status
+            $letter->transitionStatusFromPending(
                 $this->status,
-                $this->handleDivision($letter),
-                ($this->notes) ? $this->notes : null
+                $this->handleDivision(),
             );
 
-            return redirect()->to("/letter/$this->letterId")
-                ->with('status', [
-                    'variant' => 'success',
-                    'message' => $letter->status->toastMessage(),
-                ]);
+            $letter->refresh();
+
+            $letter->logStatus($this->notes);
+
+            DB::afterCommit(function () use ($letter) {
+                $letter->sendDispositionServiceRequestNotification();
+            });
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $letter->status->toastMessage(),
+            ]);
+
+            return $this->redirect("/letter/$this->letterId", true);
         });
     }
 
@@ -113,76 +127,46 @@ class ModalConfirmation extends Component
     {
         $this->validate();
 
-        try {
-            DB::transaction(function () {
-                $siRequest = Letter::with('documentUploads')->findOrFail($this->letterId);
-
-                $this->checkRevisionInputForRepliedStatus($siRequest);
-
-                $siRequest->transitionStatusFromProcess($this->status, $siRequest->current_division, ($this->notes) ? $this->notes : null);
-
-                $this->reset(['status', 'notes']);
-
-                return redirect()->to("/letter/$this->letterId")
-                    ->with('status', [
-                        'variant' => 'success',
-                        'message' => $siRequest->status->toastMessage(),
-                    ]);
-            });
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-        }
-    }
-
-    public function saveApproved()
-    {
-        $this->validate();
+        // $this->authorize('canPerformStep1Verification', $this->getSiDataRequests());
 
         DB::transaction(function () {
-            $letter = Letter::findOrFail($this->letterId);
+            $siRequest = $this->getSiDataRequests();
 
-            $letter->transitionStatusFromApprovedKasatpel(
-                $this->status,
-                division: $letter->current_division
-            );
+            $this->checkRevisionInputForRepliedStatus($siRequest);
 
-            return redirect()->to("/letter/$this->letterId")
-                ->with('status', [
-                    'variant' => 'success',
-                    'message' => $letter->status->toastMessage(),
-                ]);
+            $siRequest->transitionStatusFromProcess($this->status);
+
+            $siRequest->refresh();
+
+            $siRequest->logStatus($this->notes);
+
+            DB::afterCommit(function () use ($siRequest) {
+                $siRequest->sendProcessServiceRequestNotification();
+            });
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $siRequest->status->toastMessage(),
+            ]);
+
+            return $this->redirect("/letter/$this->letterId", true);
         });
     }
 
-    public function handleDivision($letter)
+    public function handleDivision()
     {
-        if ($this->status == 'rejected') {
-            return $this->handleNotification($letter->user_id, $letter);
-        }
-
         $role = match ($this->selectedDivision) {
             'si' => 3,
             'data' => 4,
             default => null,
         };
 
-        $user = User::role($role)->pluck('id')->first();
-
-        $this->handleNotification($user, $letter);
-
-        return $user;
-    }
-
-    public function handleNotification($recipientId, $letter)
-    {
-        $user = User::findOrFail($recipientId);
-
-        Notification::send($user, new NewServiceRequestNotification($letter));
+        return $role;
     }
 
     public function checkRevisionInputForRepliedStatus($siRequest)
     {
-        if (in_array($this->status, ['replied', 'rejected'])) {
+        if (in_array($this->status, ['replied'])) {
             $documentUploadsByPartNumber = $siRequest->documentUploads->keyBy('part_number');
 
             foreach ($this->revisionParts as $partNumber) {
@@ -202,11 +186,9 @@ class ModalConfirmation extends Component
                         ]);
 
                         $documentUpload->update(['need_revision' => true]);
-                    } 
-                } 
+                    }
+                }
             }
         }
     }
-
- 
 }

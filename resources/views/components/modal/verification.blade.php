@@ -5,15 +5,15 @@
     <form wire:submit="save" class="space-y-6">
         <div>
             <flux:heading size="lg">
-                {{ __('Verifikasi permohonan layanan') }} {{ $letterId }}
+                {{ __('Verifikasi permohonan layanan') }}
             </flux:heading>
         </div>
 
         <flux:radio.group wire:model="status" name="status" label="Status" badge="Required" data-checked>
-            <flux:radio value="approved_kasatpel" name="status" label="Approved" x-on:click="status = 'approved'" />
-            <flux:radio value="replied" name="status" label="Replied" x-on:click="status = 'replied'" />
-            <flux:radio value="rejected" name="status" label="Rejected" x-on:click="status = 'rejected'" />
-            <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" />
+            <flux:radio value="approved_kasatpel" name="status" label="Disetujui Kasatpel" x-on:click="status = 'approved'" />
+            <flux:radio value="replied" name="status" label="Revisi" x-on:click="status = 'replied'" />
+            <flux:radio value="rejected" name="status" label="Ditolak Kasatpel" x-on:click="status = 'rejected'" />
+            {{-- <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
         </flux:radio.group>
 
         <template x-if="status === 'approved'">
@@ -25,7 +25,7 @@
             <div x-data="{
                 revisionPart: [],
             }">
-                <flux:checkbox.group wire:model="revisionParts" label="Part" class="space-y-4">
+                <flux:checkbox.group wire:model="revisionParts" label="Bagian" class="space-y-4">
                     @forelse ($availablePart as $part)
                         @php
                             $label = match ($part) {

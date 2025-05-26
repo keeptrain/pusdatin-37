@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Documents;
 
-
-use App\Models\User;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
@@ -12,8 +10,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Documents\DocumentUpload;
 use App\Models\Documents\UploadVersion;
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewServiceRequestNotification;
 
 class Review extends Component
 {
@@ -55,13 +51,13 @@ class Review extends Component
     {
         $this->letterId = $id;
         $this->letter = $this->getLetterWithMappedData();
-        $this->processVersions();
+        $this->processVersions(); 
     }
 
     public function getLetterWithMappedData()
     {
         return Letter::select('id')->with([
-            'documentUploads'
+            'documentUploads.activeVersion', 'documentUploads.versions'
         ])->findOrFail($this->letterId);
     }
 
@@ -75,8 +71,6 @@ class Review extends Component
             } elseif ($this->changesChoice === 'no') {
                 $this->changesChoiceNo();
             }
-
-            $this->handleNotification($this->letter->user_id, $this->letter);
 
             // Redirect dengan pesan sukses
             return redirect()->to("/letter/$this->letterId")
@@ -206,12 +200,5 @@ class Review extends Component
 
         $this->currentVersions = $currentVersionsData->sortBy('part_number');
         $this->latestRevisions = $latestUnapprovedRevisionsData->sortBy('part_number');
-    }
-
-    public function handleNotification($recipientId, $letter)
-    {
-        $user = User::findOrFail($recipientId);
-
-        Notification::sendNow($user, new NewServiceRequestNotification($letter));
     }
 }

@@ -17,16 +17,55 @@ class PermissionRoleSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions
-        $permissions = [
-            'create',
-            'read',
-            'update',
-            'delete',
-            'create revision',
-            'update approved kasatpel',
-            'update approved kapusdatin'
+        $permissions = [];
+
+        $headPermissions = [
+            'can disposition',
+            'verification request si-data step2',
+            'review request si-data step2',
+            'queue pr pusdatin',
+            'disposition pr pusdatin',
         ];
-        
+
+        $siPermissions = [
+            'view si request',
+            'can process si',
+            'verification request si step1',
+            'review revision si'
+        ];
+
+        $dataPermissions = [
+            'view data request',
+            'can process data',
+            'verification request data step1',
+            'review revision data',
+        ];
+
+        $prPermisions = [
+            'view pr request',
+            'completing pr request',
+        ];
+
+        $promkesPermissions = [
+            'can queue pr request',
+            'curation',
+        ];
+
+        $userPermissions = [
+            'create request',
+            'view requests',
+            'revision si-data request',
+        ];
+
+        $permissions = array_unique([
+            ...$headPermissions,
+            ...$siPermissions,
+            ...$dataPermissions,
+            ...$prPermisions,
+            ...$promkesPermissions,
+            ...$userPermissions,
+        ]);
+
         foreach ($permissions as $permission) {
             Permission::create([
                 'name' => $permission,
@@ -57,19 +96,21 @@ class PermissionRoleSeeder extends Seeder
         $role->givePermissionTo($permissions);
 
         $role = \Spatie\Permission\Models\Role::findByName('head_verifier');
-        $role->givePermissionTo(['create revision','read', 'update']);
+        $role->givePermissionTo($headPermissions, 'view pr request', 'view si request', 'view data request');
 
         $role = \Spatie\Permission\Models\Role::findByName('si_verifier');
-        $role->givePermissionTo(['read', 'update']);
+        $role->givePermissionTo([$siPermissions]);
+
+        $role = \Spatie\Permission\Models\Role::findByName('data_verifier');
+        $role->givePermissionTo([$dataPermissions]);
 
         $role = \Spatie\Permission\Models\Role::findByName('pr_verifier');
-        $role->givePermissionTo(['read', 'update']);
+        $role->givePermissionTo([$prPermisions]);
 
         $role = \Spatie\Permission\Models\Role::findByName('promkes_verifier');
-        $role->givePermissionTo(['read', 'update']);
+        $role->givePermissionTo($promkesPermissions, 'view pr request',);
 
         $role = \Spatie\Permission\Models\Role::findByName('user');
-        $role->givePermissionTo(['create','read','update','delete']);
-
+        $role->givePermissionTo($userPermissions);
     }
 }

@@ -4,9 +4,11 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
+use App\States\Disposition;
 use App\Models\Letters\Letter;
-use App\Models\PublicRelationRequest;
 use Livewire\Attributes\Computed;
+use App\Models\PublicRelationRequest;
+use App\States\PublicRelation\PromkesComplete;
 
 class Notifications extends Component
 {
@@ -63,14 +65,14 @@ class Notifications extends Component
         // Ambil notifikasi berdasarkan ID
         $notification = auth()->user()
             ->unreadNotifications()
-            ->find($notificationId);
+            ->findOrFail($notificationId);
 
-        if (!$notification || !isset($notification->data['requestable'], $notification->data['requestable_id'])) {
+        if (!$notification || !isset($notification->data['requestable_type'], $notification->data['requestable_id'])) {
             return redirect()->route('dashboard')->with('error', 'Notifikasi tidak valid.');
         }
 
         try {
-            $modelClass = $notification->data['requestable'];
+            $modelClass = $notification->data['requestable_type'];
             $modelId = $notification->data['requestable_id'];
 
             // Validasi model class untuk mencegah injection
@@ -78,14 +80,25 @@ class Notifications extends Component
                 throw new \InvalidArgumentException("Model class tidak valid.");
             }
 
-            // Ambil data requestable dengan query efisien
+            // Ambil data requestable dengan query
             $requestable = app($modelClass)->findOrFail($modelId);
 
             if ($modelClass === Letter::class) {
-                $notification->markAsRead();
+                // $notification->markAsRead();
+                if ($requestable->status instanceof Disposition) {
+                    $this->authorize('processSiData', $requestable);
+
+                    $requestable->transitionStatusToProcess($requestable->current_division);
+                    $requestable->logStatus(null);
+                }
+
                 return $this->redirect("/letter/$requestable->id", true);
             } elseif ($modelClass === PublicRelationRequest::class) {
-                $notification->markAsRead();
+                // $notification->markAsRead();
+                if (auth()->user()->can('queue pr pusdatin') && $requestable->status instanceof PromkesComplete) {
+                    $requestable->transitionStatusToPusdatinQueue();
+                    $requestable->logStatus(null);
+                }
                 return $this->redirect("/public-relation/$requestable->id", true);
             }
         } catch (\Exception $e) {

@@ -43,10 +43,10 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         // Bisa id Letter atau PublicRelationRequest
-        $id = $this->request->id; 
+        $id = $this->request->id;
         $requestObject = get_class($this->request);
         $statusObject = null;
-        $messageContext = []; 
+        $messageContext = [];
 
         $userName = User::findOrFail($this->request->user_id);
 
@@ -78,9 +78,9 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
         }
 
         return [
-            'requestable' => $requestObject,
+            'requestable_type' => $requestObject,
             'requestable_id' => $id,
-            'status' => $statusObject, 
+            'status' => $statusObject,
             'message' => $statusObject->userNotificationMessage($messageContext)
         ];
     }

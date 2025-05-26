@@ -11,6 +11,7 @@ use Spatie\ModelStates\StateConfig;
 abstract class LetterStatus extends State
 {
     const DIVISION_MAP = [
+        2 => 'Kepala Pusat Dinas Kesehatan',
         3 => 'Sistem Informasi',
         4 => 'Pengelolaan Data',
         5 => 'Hubungan Masyarakat',

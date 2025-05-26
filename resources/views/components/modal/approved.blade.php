@@ -1,16 +1,16 @@
 <flux:modal x-data="{
     status: '',
 }" name="approved-modal" focusable class="md:w-120" size="lg">
-<form wire:submit="saveApproved" class="space-y-6">
+<form wire:submit="save" class="space-y-6">
     <flux:heading size="lg">
         {{ __('Persetujuan permohonan layanan') }} {{ $letterId }}
     </flux:heading>
 
     <!-- Radio Group -->
     <flux:radio.group wire:model="status" name="status" label="Status" badge="Required">
-        <flux:radio value="approved_kapusdatin" name="status" label="Approved" x-on:click="status = 'approved'" />
+        <flux:radio value="approved_kapusdatin" name="status" label="Disetujui Kapusdatin" x-on:click="status = 'approved'" />
         <flux:radio value="replied" name="status" label="Revisi" x-on:click="status = 'replied'" />
-        <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" />
+        {{-- <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
     </flux:radio.group>
 
     <template x-if="status === 'approved'">

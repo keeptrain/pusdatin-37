@@ -3,9 +3,7 @@
 namespace App\Livewire\Requests\PublicRelation;
 
 use App\Models\PublicRelationRequest;
-use App\States\PublicRelation\Pending;
 use App\States\PublicRelation\PromkesComplete;
-use App\States\PublicRelation\PromkesQueue;
 use App\States\PublicRelation\PusdatinQueue;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -36,7 +34,7 @@ class Index extends Component
     {
         [$column, $direction] = $this->getSortCriteria();
 
-        $query = PublicRelationRequest::select('id','user_id','month_publication','theme','status')->with('user:id,name');
+        $query = PublicRelationRequest::select('id', 'user_id', 'month_publication', 'theme', 'status')->with('user:id,name');
 
         if ($this->filterStatus !== 'all') {
             $query->filterByStatus($this->filterStatus);
@@ -51,31 +49,19 @@ class Index extends Component
                     });
             });
         }
-
         $query->orderBy($column, $direction);
 
         return $query->paginate($this->perPage);
     }
 
-    public function show(int $id) {
+    public function show(int $id)
+    {
         $prRequest = PublicRelationRequest::findOrFail($id);
-        if (auth()->user()->hasRole('promkes_verifier') && $prRequest->status == Pending::class) {
-            $prRequest->update([
-                'status' => $prRequest->status->transitionTo(PromkesQueue::class),
-            ]);
-            $prRequest->requestStatusTrack()->create([
-                'action' => $prRequest->status->trackingActivity(null),
-                'created_by' => auth()->user()->name,
-            ]);
-        } elseif (auth()->user()->hasRole('head_verifier') && $prRequest->status == PromkesComplete::class){
-            $prRequest->update([
-                'status' => $prRequest->status->transitionTo(PusdatinQueue::class),
-            ]);
-            $prRequest->requestStatusTrack()->create([
-                'action' => $prRequest->status->trackingActivity(null),
-                'created_by' => auth()->user()->name,
-            ]);
+        if (auth()->user()->can('queue pr pusdatin') && $prRequest->status instanceof PromkesComplete) {
+            $prRequest->status->transitionTo(PusdatinQueue::class);
+            $prRequest->logStatus(null);
         }
+
         return $this->redirect("public-relation/{$id}", true);
     }
 

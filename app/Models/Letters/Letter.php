@@ -123,15 +123,9 @@ class Letter extends Model
     public function transitionStatusToProcess($division)
     {
         $this->status->transitionTo(\App\States\Process::class);
-
-        $this->requestStatusTrack()->create([
-            'letter_id'    => $this->id,
-            'action'       => $this->status->trackingMessage($division),
-            'created_by'   => auth()->user()->name
-        ]);
     }
 
-    public function transitionStatusFromDisposition($newStatus, $division, ?string $notes)
+    public function transitionStatusFromPending($newStatus, $division)
     {
         $newStatus = self::resolveStatusClassFromString($newStatus);
 
@@ -143,52 +137,25 @@ class Letter extends Model
                 'current_division' => $division,
             ]);
         }
-
-        $this->requestStatusTrack()->create([
-            'letter_id'    => $this->id,
-            'action'       => $this->status->trackingMessage($division),
-            'notes' => $notes,
-            'created_by'   => auth()->user()->name
-        ]);
     }
 
-    public function transitionStatusFromProcess($newStatus, $division, ?string $notes): void
+    public function transitionStatusFromProcess($newStatus)
     {
         $resolveNewStatus = self::resolveStatusClassFromString($newStatus);
 
         $this->status->transitionTo($resolveNewStatus);
 
         match ($newStatus) {
+            'approved_kapusdatin' => [],
             'approved_kasatpel' => $this->update(['active_checking' => 2]),
             'replied' => $this->update([
                 'active_revision' => true
+            ]),
+            'rejected' => $this->update([
+                'active_revision' => false,
+                'need_review' => false,
             ])
         };
-
-        $this->requestStatusTrack()->create([
-            'letter_id'    => $this->id,
-            'action'       => $this->status->trackingMessage($division),
-            'notes'        => $notes,
-            'created_by'   => auth()->user()->name,
-        ]);
-    }
-
-    public function transitionStatusFromApprovedKasatpel($newStatus, $division): void
-    {
-        $resolveNewStatus = self::resolveStatusClassFromString($newStatus);
-
-        $resolveNewStatus = match ($newStatus) {
-            'approved_kapusdatin' => $this->status->transitionTo($resolveNewStatus),
-            'replied' => $this->update([
-                'active_revision' => true
-            ])
-        };
-
-        $this->requestStatusTrack()->create([
-            'letter_id'    => $this->id,
-            'action'       => $this->status->trackingMessage($division),
-            'created_by'   => auth()->user()->name
-        ]);
     }
 
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder

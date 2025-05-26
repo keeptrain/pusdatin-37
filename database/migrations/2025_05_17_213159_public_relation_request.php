@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('theme');
             $table->string('target');
             $table->text('links')->nullable();
-            $table->boolean('active_review')->default(true);
+            $table->tinyInteger('active_checking');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');

@@ -9,16 +9,16 @@ class PusdatinProcess extends PublicRelationStatus
 
     public function label(): String
     {
-        return "Proses pusdatin";
+        return "Proses Pusdatin";
     }
 
     public function trackingMessage(): String
     {
-        return "Permohonan layanan sedang dalam proses Pusat Data Teknologi dan Dinas Kesehatan";
+        return "Permohonan layanan sedang di proses oleh Kehumasan";
     }
 
     public function userNotificationMessage(array $context): string {
-        return "Permohonan baru di usulkan dari " . $context['responsible_person'];
+        return "Permohonan telah di usulkan oleh " . $context['responsible_person'];
     }
 
     public function color(): string
