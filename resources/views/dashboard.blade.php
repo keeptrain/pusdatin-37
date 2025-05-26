@@ -13,6 +13,8 @@ if ($totalRelevantServices > 0) {
 
 $widthPercentage = round($widthPercentage);
 
+
+
 ?>
 <x-layouts.app :title="__('Dashboard')">
 
@@ -115,7 +117,7 @@ $widthPercentage = round($widthPercentage);
                         <div class="w-2 h-2 rounded-full bg-orange-700 mr-2"></div>
                         <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Disetujui Kasatpel</div>
                         <div class="font-medium text-neutral-800 dark:text-white">
-                            {{  $siStatusCounts['approvedKasatpel'] }}
+                            {{ $siStatusCounts['approvedKasatpel'] }}
                         </div>
                     </div>
                     <div class="flex items-center">
@@ -330,6 +332,59 @@ $widthPercentage = round($widthPercentage);
                 </div>
             </div>
         </div>
+        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4">
+            <canvas id="lettersBarChart"></canvas>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const ctx = document.getElementById('lettersBarChart').getContext('2d');
+
+                    const labels = @json($labels);
+                    const data = @json($data);
+
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Total Letters per Bulan',
+                                data: [0, 0, 0, 0, 5, 0, 2],
+                                backgroundColor: '#1F2937' // Tailwind bg-gray-800
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Bulan'
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Jumlah Letter'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: `Total Letters (${new Date().getFullYear()})`
+                                }
+                            }
+                        }
+                    });
+                });
+            </script>
+        </div>
+
+
     </div>
 
 </x-layouts.app>

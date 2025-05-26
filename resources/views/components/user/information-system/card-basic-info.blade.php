@@ -4,7 +4,7 @@
         <div class="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
                 <h3 class="text-lg font-semibold text-gray-900">Judul: {{ $title }}</h3>
-                    <p class="text-gray-500 text-sm mb-1">Nomor Surat: 1234/xxx/xxx</p>
+                <p class="text-gray-500 text-sm mb-1">Nomor Surat: {{$referenceNumber}}</p>
             </div>
             <div class="mt-4 md:mt-0">
                 <span
@@ -39,16 +39,16 @@
                         hasPartNumber3: {{ $this->uploadedFile->contains(fn($file) => $file['part_number'] == 3) ? 'true' : 'false' }}
                     }">
                         @foreach ($this->uploadedFile as $file)
-                            <div class="flex flex-row gap-2">
-                                @if ($file['file_path'])
-                                    <x-lucide-circle-check-big class="w-4 text-green-500" />
-                                @else
-                                    <x-lucide-circle class="w-4" />
-                                @endif
+                        <div class="flex flex-row gap-2">
+                            @if ($file['file_path'])
+                            <x-lucide-circle-check-big class="w-4 text-green-500" />
+                            @else
+                            <x-lucide-circle class="w-4" />
+                            @endif
 
-                                <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
-                                    class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label'] ?? $file['part_number'] }}</a>
-                            </div>
+                            <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
+                                class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label'] ?? $file['part_number'] }}</a>
+                        </div>
                         @endforeach
 
                         <template x-if="!hasPartNumber3">
