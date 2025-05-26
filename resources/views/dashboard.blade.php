@@ -333,55 +333,110 @@ $widthPercentage = round($widthPercentage);
             </div>
         </div>
         <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4">
-            <canvas id="lettersBarChart"></canvas>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const ctx = document.getElementById('lettersBarChart').getContext('2d');
-
-                    const labels = @json($labels);
-                    const data = @json($data);
-
-
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Total Letters per Bulan',
-                                data: [0, 0, 0, 0, 5, 0, 2],
-                                backgroundColor: '#1F2937' // Tailwind bg-gray-800
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Bulan'
-                                    }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Jumlah Letter'
-                                    }
-                                }
+            <canvas id="monthlyLettersChart"></canvas>
+                <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Data dari Laravel controller
+        const monthlyData = @json($monthlyLetterData);
+        
+        // Chart configuration
+        const ctx = document.getElementById('monthlyLettersChart').getContext('2d');
+        
+        // Create gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(31, 41, 55, 0.8)'); // bg-gray-800 dengan opacity
+        gradient.addColorStop(1, 'rgba(31, 41, 55, 0.2)');
+        
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthlyData.months,
+                datasets: [{
+                    label: 'Number of Letters',
+                    data: monthlyData.data,
+                    backgroundColor: gradient,
+                    borderColor: '#1f2937', // bg-gray-800
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#1f2937',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label + ' {{ date("Y") }}';
                             },
-                            plugins: {
-                                legend: {
-                                    display: false
-                                },
-                                title: {
-                                    display: true,
-                                    text: `Total Letters (${new Date().getFullYear()})`
-                                }
+                            label: function(context) {
+                                return context.parsed.y + ' letters';
                             }
                         }
-                    });
-                });
-            </script>
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(156, 163, 175, 0.2)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return value;
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+        
+        // Add hover effects
+        chart.canvas.addEventListener('mousemove', function(e) {
+            chart.canvas.style.cursor = 'pointer';
+        });
+        
+        chart.canvas.addEventListener('mouseleave', function(e) {
+            chart.canvas.style.cursor = 'default';
+        });
+    });
+</script>
         </div>
 
 

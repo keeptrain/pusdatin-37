@@ -43,41 +43,15 @@ class DashboardController extends Controller
         }
 
         // untuk bar chart
-        $year = now()->year;
-
-        // Query: hitung jumlah Letter per bulan (1–12) di SQLite
-        $counts = Letter::selectRaw("
-                CAST(strftime('%m', created_at) AS integer) AS month,
-                COUNT(*) AS total
-            ")
-            ->whereRaw("strftime('%Y', created_at) = ?", [$year])
-            ->groupBy('month')
-            ->pluck('total', 'month')    // menghasilkan [ month => total, … ]
-            ->toArray();
-
-        // Siapkan array bulan 1–12
-        $months = range(1, 12);
-
-        // Labels: nama bulan dalam format 'January', 'February', …
-        $labels = array_map(
-            fn($m) => Carbon::create()->month($m)->format('F'),
-            $months
-        );
-
-        // Data: jika bulan tidak ada di $counts, isi 0
-        $data = array_map(
-            fn($m) => $counts[$m] ?? 0,
-            $months
-        );
-
+        // Data untuk bar chart
+        $monthlyLetterData = $this->getMonthlyLetterData($userRoles);
         // untuk bar chart
 
         return view('dashboard', [
             'totalServices' => $totalServices,
             'categoryPercentages' => $categoryPercentages,
             'siStatusCounts' => $siStatusCounts,
-            'labels'     => $labels,
-            'data'     => $data,
+            'monthlyLetterData' => $monthlyLetterData,
         ]);
     }
 
@@ -158,5 +132,36 @@ class DashboardController extends Controller
         ];
 
         return $percentages;
+    }
+
+      private function getMonthlyLetterData($userRoles = null)
+    {
+        $user = auth()->user();
+        
+        $query = Letter::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('COUNT(*) as total')
+        )
+        ->whereYear('created_at', Carbon::now()->year)
+        ->groupBy(DB::raw('MONTH(created_at)'))
+        ->orderBy('month');
+
+        // Filter berdasarkan role user seperti di scopeFilterByCurrentUser
+        if (!$user->hasRole('head_verifier') && $userRoles !== null) {
+            $query->whereIn('current_division', $userRoles);
+        }
+
+        $monthlyData = $query->pluck('total', 'month');
+
+        // Buat array untuk 12 bulan dengan nilai default 0
+        $monthlyLetterCounts = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $monthlyLetterCounts[] = $monthlyData[$i] ?? 0;
+        }
+
+        return [
+            'months' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            'data' => $monthlyLetterCounts
+        ];
     }
 }
