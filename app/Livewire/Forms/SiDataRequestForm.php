@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Letters;
+namespace App\Livewire\Forms;
 
 use Carbon\Carbon;
 use Livewire\Component;
@@ -15,7 +15,7 @@ use App\Models\Documents\DocumentUpload;
 use App\Models\letters\LettersMapping;
 use Illuminate\Support\Facades\Storage;
 
-class UploadForm extends Component
+class SiDataRequestForm extends Component
 {
     use WithFileUploads;
 

@@ -176,7 +176,6 @@ $widthPercentage = round($widthPercentage);
             </div>
             @endhasanyrole
 
-
             <!-- Response Time Metrics -->
             <div
                 class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
@@ -225,8 +224,8 @@ $widthPercentage = round($widthPercentage);
                 </div> --}}
             </div>
         </div>
-        <div
-            class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5">
+
+        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4">
             <!-- Chart Header -->
             <div class="flex justify-between items-center mb-4">
                 <div>
@@ -438,8 +437,6 @@ $widthPercentage = round($widthPercentage);
     });
 </script>
         </div>
-
-
     </div>
 
 </x-layouts.app>

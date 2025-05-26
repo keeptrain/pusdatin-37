@@ -24,8 +24,6 @@
     }
 }" class="min-h-screen" x-init="init()">
 
-    <flux:heading size="xl" class="p-4">Application Request Service</flux:heading>
-
     <!-- Main Content -->
     <div class="flex flex-col h-full">
         <!-- Tabs -->

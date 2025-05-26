@@ -6,6 +6,8 @@
         class="overflow-x-auto">
         <flux:button :href="route('pr.index')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
+        <flux:heading size="xl" class="p-4">Detail Permohonan Layanan</flux:heading>
+
         <x-letters.detail-layout overViewRoute='pr.show' activityRoute="pr.activity" :id="$publicRelationId">
             @forelse ($publicRelation->documentUploads as $documentUpload)
             <div x-show="partTab === '{{ $documentUpload->part_number }}'" class="p-6">
