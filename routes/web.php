@@ -1,14 +1,13 @@
 <?php
 
+use App\Livewire\Forms\SiDataRequestForm;
 use App\Livewire\Letters\Chat;
-use App\Models\Letters\Letter;
 use App\Livewire\Documents\Review;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Letters\Data\Edit;
 use App\Livewire\Settings\Password;
 use App\Livewire\Letters\DirectForm;
-use App\Livewire\Letters\UploadForm;
 use App\Livewire\Letters\Data\Detail;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
@@ -35,9 +34,11 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 
 Route::middleware(['auth'])->group(function () {
     Route::get('letter', CreateLetter::class)->name('letter');
-    Route::get('letter/upload', UploadForm::class)->name('letter.upload');
     Route::get('letter/form', DirectForm::class)->name('letter.form');
     Route::get('letter/table', ApplicationTable::class)->name('letter.table');
+
+    // Information System & Data
+    Route::get('form/si-data', SiDataRequestForm::class)->name('si-data.form');
 
     // Public Relation
     Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form');
