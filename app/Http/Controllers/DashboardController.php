@@ -43,7 +43,6 @@ class DashboardController extends Controller
         }
 
         // untuk bar chart
-        // Data untuk bar chart
         $monthlyLetterData = $this->getMonthlyLetterData($userRoles);
         // untuk bar chart
 
@@ -134,11 +133,12 @@ class DashboardController extends Controller
         return $percentages;
     }
 
-      private function getMonthlyLetterData($userRoles = null)
+     private function getMonthlyLetterData($userRoles = null)
     {
         $user = auth()->user();
         
-        $query = Letter::select(
+        // Query untuk data Letter
+        $letterQuery = Letter::select(
             DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as total')
         )
@@ -146,22 +146,37 @@ class DashboardController extends Controller
         ->groupBy(DB::raw('MONTH(created_at)'))
         ->orderBy('month');
 
-        // Filter berdasarkan role user seperti di scopeFilterByCurrentUser
+        // Filter berdasarkan role user
         if (!$user->hasRole('head_verifier') && $userRoles !== null) {
-            $query->whereIn('current_division', $userRoles);
+            $letterQuery->whereIn('current_division', $userRoles);
         }
 
-        $monthlyData = $query->pluck('total', 'month');
+        $monthlyLetterData = $letterQuery->pluck('total', 'month');
+
+        // Query untuk data PublicRelationRequest
+        $prQuery = PublicRelationRequest::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('COUNT(*) as total')
+        )
+        ->whereYear('created_at', Carbon::now()->year)
+        ->groupBy(DB::raw('MONTH(created_at)'))
+        ->orderBy('month');
+
+        $monthlyPrData = $prQuery->pluck('total', 'month');
 
         // Buat array untuk 12 bulan dengan nilai default 0
         $monthlyLetterCounts = [];
+        $monthlyPrCounts = [];
+        
         for ($i = 1; $i <= 12; $i++) {
-            $monthlyLetterCounts[] = $monthlyData[$i] ?? 0;
+            $monthlyLetterCounts[] = $monthlyLetterData[$i] ?? 0;
+            $monthlyPrCounts[] = $monthlyPrData[$i] ?? 0;
         }
 
         return [
             'months' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            'data' => $monthlyLetterCounts
+            'letterData' => $monthlyLetterCounts,
+            'prData' => $monthlyPrCounts
         ];
     }
 }

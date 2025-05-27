@@ -224,219 +224,167 @@ $widthPercentage = round($widthPercentage);
                 </div> --}}
             </div>
         </div>
-
-        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4">
-            <!-- Chart Header -->
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200">Service Request Timeline</h3>
-                    <p class="text-sm text-neutral-500 dark:text-neutral-400">Last 30 days activity</p>
-                </div>
-                <div class="flex space-x-2">
-                    <button
-                        class="px-3 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-sm font-medium">Week</button>
-                    <button
-                        class="px-3 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 text-sm font-medium">Month</button>
-                    <button
-                        class="px-3 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-sm font-medium">Quarter</button>
-                </div>
-            </div>
-
-            <!-- Chart Area -->
-            <div class="h-64 relative">
-                <!-- Chart SVG -->
-                <svg class="w-full h-full" viewBox="0 0 800 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Grid Lines -->
-                    <line x1="0" y1="0" x2="800" y2="0" stroke="#E5E7EB" stroke-dasharray="4 4" />
-                    <line x1="0" y1="60" x2="800" y2="60" stroke="#E5E7EB" stroke-dasharray="4 4" />
-                    <line x1="0" y1="120" x2="800" y2="120" stroke="#E5E7EB" stroke-dasharray="4 4" />
-                    <line x1="0" y1="180" x2="800" y2="180" stroke="#E5E7EB" stroke-dasharray="4 4" />
-                    <line x1="0" y1="240" x2="800" y2="240" stroke="#E5E7EB" stroke-dasharray="4 4" />
-
-                    <!-- Completed Requests Area -->
-                    <path
-                        d="M0,240 L0,180 L27,170 L54,160 L81,165 L108,155 L135,140 L162,130 L189,120 L216,100 L243,105 L270,95 L297,85 L324,90 L351,80 L378,75 L405,85 L432,80 L459,75 L486,65 L513,60 L540,55 L567,65 L594,60 L621,50 L648,55 L675,45 L702,50 L729,40 L756,35 L783,30 L800,25 L800,240 Z"
-                        fill="url(#blue-gradient)" fill-opacity="0.5" />
-                    <path
-                        d="M0,180 L27,170 L54,160 L81,165 L108,155 L135,140 L162,130 L189,120 L216,100 L243,105 L270,95 L297,85 L324,90 L351,80 L378,75 L405,85 L432,80 L459,75 L486,65 L513,60 L540,55 L567,65 L594,60 L621,50 L648,55 L675,45 L702,50 L729,40 L756,35 L783,30 L800,25"
-                        stroke="#3B82F6" stroke-width="2" fill="none" />
-
-                    <!-- Pending Requests Line -->
-                    <path
-                        d="M0,200 L27,195 L54,190 L81,195 L108,185 L135,190 L162,180 L189,185 L216,180 L243,175 L270,170 L297,165 L324,160 L351,155 L378,150 L405,155 L432,150 L459,145 L486,140 L513,135 L540,130 L567,125 L594,120 L621,115 L648,110 L675,105 L702,100 L729,95 L756,90 L783,85 L800,80"
-                        stroke="#F59E0B" stroke-width="2" fill="none" />
-
-                    <!-- Data Points for Completed -->
-                    <circle cx="0" cy="180" r="4" fill="#3B82F6" />
-                    <circle cx="108" cy="155" r="4" fill="#3B82F6" />
-                    <circle cx="216" cy="100" r="4" fill="#3B82F6" />
-                    <circle cx="324" cy="90" r="4" fill="#3B82F6" />
-                    <circle cx="432" cy="80" r="4" fill="#3B82F6" />
-                    <circle cx="540" cy="55" r="4" fill="#3B82F6" />
-                    <circle cx="648" cy="55" r="4" fill="#3B82F6" />
-                    <circle cx="756" cy="35" r="4" fill="#3B82F6" />
-
-                    <!-- Data Points for Pending -->
-                    <circle cx="0" cy="200" r="4" fill="#F59E0B" />
-                    <circle cx="108" cy="185" r="4" fill="#F59E0B" />
-                    <circle cx="216" cy="180" r="4" fill="#F59E0B" />
-                    <circle cx="324" cy="160" r="4" fill="#F59E0B" />
-                    <circle cx="432" cy="150" r="4" fill="#F59E0B" />
-                    <circle cx="540" cy="130" r="4" fill="#F59E0B" />
-                    <circle cx="648" cy="110" r="4" fill="#F59E0B" />
-                    <circle cx="756" cy="90" r="4" fill="#F59E0B" />
-
-                    <!-- Gradients -->
-                    <defs>
-                        <linearGradient id="blue-gradient" x1="400" y1="0" x2="400" y2="240"
-                            gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.2" />
-                            <stop offset="100%" stop-color="#3B82F6" stop-opacity="0" />
-                        </linearGradient>
-                    </defs>
-                </svg>
-
-                <!-- Y-axis Labels -->
-                <div
-                    class="absolute top-0 left-0 h-full flex flex-col justify-between text-xs text-neutral-500 dark:text-neutral-400 py-1">
-                    <div>50</div>
-                    <div>40</div>
-                    <div>30</div>
-                    <div>20</div>
-                    <div>10</div>
-                    <div>0</div>
-                </div>
-            </div>
-
-            <!-- X-axis Labels -->
-            <div class="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-6 mt-2">
-                <div>May 1</div>
-                <div>May 5</div>
-                <div>May 10</div>
-                <div>May 15</div>
-                <div>May 20</div>
-                <div>May 25</div>
-                <div>May 30</div>
-            </div>
-
-            <!-- Legend -->
-            <div class="flex items-center justify-center space-x-6 mt-4">
-                <div class="flex items-center">
-                    <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                    <span class="text-sm text-neutral-600 dark:text-neutral-300">Completed Requests</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
-                    <span class="text-sm text-neutral-600 dark:text-neutral-300">Pending Requests</span>
-                </div>
-            </div>
-        </div>
-        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4">
+        <!-- bar chart area -->
+         @push('scripts')
+         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+         @endpush
+         @hasanyrole('head_verifier')
+        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4" wire:ignore>
             <canvas id="monthlyLettersChart"></canvas>
-                <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Data dari Laravel controller
-        const monthlyData = @json($monthlyLetterData);
-        
-        // Chart configuration
-        const ctx = document.getElementById('monthlyLettersChart').getContext('2d');
-        
-        // Create gradient background
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(31, 41, 55, 0.8)'); // bg-gray-800 dengan opacity
-        gradient.addColorStop(1, 'rgba(31, 41, 55, 0.2)');
-        
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: monthlyData.months,
-                datasets: [{
-                    label: 'Number of Letters',
-                    data: monthlyData.data,
-                    backgroundColor: gradient,
-                    borderColor: '#1f2937', // bg-gray-800
+            @push('scripts')
+<script>
+// Global variable untuk chart
+let monthlyChart = null;
+
+function initMonthlyChart() {
+    // Data dari DashboardController
+    const monthlyData = @json($monthlyLetterData ?? ['months' => [], 'letterData' => [], 'prData' => []]);
+    
+    // Cek apakah element ada
+    const chartElement = document.getElementById('monthlyLettersChart');
+    if (!chartElement) return;
+    
+    // Destroy chart yang sudah ada
+    if (monthlyChart instanceof Chart) {
+        monthlyChart.destroy();
+    }
+    
+    // Dapatkan context
+    const ctx = chartElement.getContext('2d');
+    
+    // Dataset untuk chart
+    const letterGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    letterGradient.addColorStop(0, 'rgba(31, 41, 55, 0.8)');
+    letterGradient.addColorStop(1, 'rgba(31, 41, 55, 0.2)');
+    
+    const prGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    prGradient.addColorStop(0, 'rgba(249, 115, 22, 0.8)');
+    prGradient.addColorStop(1, 'rgba(249, 115, 22, 0.2)');
+    
+    monthlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: monthlyData.months,
+            datasets: [
+                {
+                    label: 'Sistem Informasi Dan Data',
+                    data: monthlyData.letterData,
+                    backgroundColor: letterGradient,
+                    borderColor: '#1f2937',
                     borderWidth: 2,
                     borderRadius: 8,
                     borderSkipped: false,
-                }]
+                },
+                {
+                    label: 'Humas',
+                    data: monthlyData.prData,
+                    backgroundColor: prGradient,
+                    borderColor: '#f97316',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#374151',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label + ' {{ date("Y") }}';
+                        },
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y;
+                        }
+                    }
+                }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(156, 163, 175, 0.2)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                x: {
+                    grid: {
                         display: false
                     },
-                    tooltip: {
-                        backgroundColor: 'rgba(31, 41, 55, 0.9)',
-                        titleColor: '#ffffff',
-                        bodyColor: '#ffffff',
-                        borderColor: '#1f2937',
-                        borderWidth: 1,
-                        cornerRadius: 8,
-                        displayColors: false,
-                        callbacks: {
-                            title: function(context) {
-                                return context[0].label + ' {{ date("Y") }}';
-                            },
-                            label: function(context) {
-                                return context.parsed.y + ' letters';
-                            }
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            size: 12,
+                            weight: '500'
                         }
                     }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(156, 163, 175, 0.2)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: '#6b7280',
-                            font: {
-                                size: 12
-                            },
-                            callback: function(value) {
-                                return value;
-                            }
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#6b7280',
-                            font: {
-                                size: 12,
-                                weight: '500'
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    duration: 2000,
-                    easing: 'easeOutQuart'
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
                 }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeOutQuart'
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
             }
-        });
-        
-        // Add hover effects
-        chart.canvas.addEventListener('mousemove', function(e) {
-            chart.canvas.style.cursor = 'pointer';
-        });
-        
-        chart.canvas.addEventListener('mouseleave', function(e) {
-            chart.canvas.style.cursor = 'default';
-        });
+        }
     });
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    initMonthlyChart();
+});
+
+
+document.addEventListener('livewire:navigated', function() {
+    setTimeout(initMonthlyChart, 100);
+});
+
+
+document.addEventListener('livewire:updated', function() {
+    setTimeout(initMonthlyChart, 100);
+});
+
+// Backup untuk window load
+window.addEventListener('load', function() {
+    if (!monthlyChart) {
+        initMonthlyChart();
+    }
+});
 </script>
+@endpush
         </div>
+        @endhasanyrole
+        <!-- bar chart area -->
     </div>
 
 </x-layouts.app>
