@@ -21,13 +21,19 @@ class HistoryLetter extends Component
     #[Computed]
     public function letters()
     {
-        return Letter::select('id', 'title', 'status', 'reference_number', 'active_revision','meeting', 'created_at', )->where('user_id', auth()->user()->id)->paginate($this->perPage);
+        return Letter::select('id', 'title', 'status', 'reference_number', 'active_revision', 'meeting', 'created_at',)
+            ->where('user_id', auth()->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate($this->perPage);
     }
 
     #[Computed]
     public function publicRelationRequests()
     {
-        return PublicRelationRequest::select('id', 'theme', 'target', 'status', 'links', 'created_at')->where('user_id', auth()->user()->id)->paginate($this->perPage);
+        return PublicRelationRequest::select('id', 'theme', 'target', 'status', 'links', 'created_at')
+            ->orderBy('created_at','desc')
+            ->where('user_id', auth()->user()->id)
+            ->paginate($this->perPage);
     }
 
     // Reset pagination saat search berubah
