@@ -33,7 +33,7 @@ case 'disposition':
 $width = 25;
 $height = 23;
 break;
-case 'process':
+case 'proses':
 $width = 50;
 $height = 43;
 break;

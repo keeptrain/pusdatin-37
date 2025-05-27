@@ -1,58 +1,77 @@
 <!-- card-history.blade.php -->
-<div class="w-full max-w-4xl md:ml-5 2xl:ml-5 ">
-    <div class="bg-white rounded-xl  p-6 mb-4 border-2 border-gray-100">
-        <div class="flex justify-between items-center mb-3 ">
-            <div class="flex items-center md:w-1/2 w-[70%] ">
-                <h2 class="text-xl font-bold text-gray-800">{{$title}}</h2>
+<div class="w-full max-w-4xl md:ml-5 2xl:ml-5 mb-3">
+    <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow cursor-pointer">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <h2 class="font-medium text-gray-900">{{ $letter->title }}</h2>
+                <p class="text-xs text-gray-500">{{ $letter->reference_number }}</p>
             </div>
-            <div class="flex items-center {{ $status->badgeBg() }} text-white px-3 py-1 rounded-full ">
-                <x-dynamic-component :component=" 'lucide-' . $status->icon() " class="w-4 mr-1" />
-                <span class="md:text-sm text-[10px] font-medium">{{ $status->label() }}</span>
+            <div class="flex items-center space-x-2 text-xs">
+                <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Replied</span>
+                <span class="text-gray-500"> {{ $letter->created_at }}</span>
             </div>
         </div>
 
-        <div class="flex items-center gap-1 text-gray-500 mb-6">
-            <x-lucide-clock class="w-[18px]" />
-            <span class="text-sm">Diajukan {{$createdAt}}</span>
-        </div>
-
-        <div class="flex justify-between flex-wrap flex-col sm:flex-row mb-8 gap-5">
-            <div>
-                <p class="text-gray-500 text-sm mb-1">Nomor Surat</p>
-                <p class="font-semibold text-gray-800">{{$referenceNumber}}</p>
+        <!-- Progress -->
+        <div class="mb-3">
+            <div class="flex items-center text-sm mb-1">
+                <span class="text-gray-600">Progress</span>
+                <span class="font-medium text-blue-800 ml-30">{{ $letter->status->percentage() }}</span>
             </div>
-            <div>
-                <p class="text-gray-500 text-sm mb-1">Jenis Layanan</p>
-                <p class="font-semibold text-gray-800">Sistem Informasi & data</p>
-            </div>
-            <div>
-                <p class="text-gray-500 text-sm mb-1">Estimasi Waktu Selesai</p>
-                <p class="font-semibold text-gray-800">-</p>
+            <div class="w-50 bg-gray-200 rounded-full h-1">
+                <div class="bg-blue-800 h-1 rounded-full" style="width: {{ $letter->status->percentage() }}"></div>
             </div>
         </div>
 
-        <p class="text-gray-500 text-sm">Progress Layanan</p>
-        <div class="flex flex-col items-baseline-last sm:items-center justify-between md:flex-row">
-            <div class="flex gap-1 items-center  w-[70%] ">
-                <div class="w-[80%] sm:w-[30%] bg-gray-200 rounded-full h-2 progres-bar ">
-                    <div class="bg-[#364872] h-2 rounded-full {{ $status->percentageBar() }}"></div>
+        <!-- Meeting -->
+        @if ($letter->meeting)
+            <div class="bg-gray-50 rounded p-3 mb-3">
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center">
+                        @if (isset($letter->meeting['location']))
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 mr-2" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span class="text-gray-700">Meeting di {{ $letter->meeting['location'] }}</span>
+                        @elseif (isset($letter->meeting['link']))
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 mr-2" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                            </svg>
+                            <span class="text-gray-700">Online meeting: <a href="{{ $letter->meeting['link'] }}" target="_blank"
+                                    rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">
+                                    Link
+                                </a></span>
+                        @endif
+                    </div>
+                    <span class="text-gray-600">{{ $letter->getFormattedMeetingDate()}} • {{ $letter->meeting['start'] }} -
+                        {{ $letter->meeting['end'] }}</span>
                 </div>
-                <span class="text-gray-600 font-medium">{{ $status->percentage() }}</span>
             </div>
-            <div class="flex gap-3 self-end md:mt-0 mt-5">
-                <template x-if="{{ $activeRevision }}">
-                    <a href="{{ route('letter.edit', [$id]) }}"
-                        class="ml-0 sm:ml-4 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition duration-300 w-fit self-end">
-                        Revisi
-                        <x-lucide-edit class="text-white w-5 ml-2" />
-                    </a>
-                </template>
-                <a href="{{ route('history.detail', ['type' => 'information-system' ,$id]) }}"
-                    class="ml-0bg-zinc-50 hover:bg-zinc-100 text-black border font-medium py-2 px-4 rounded-lg flex items-center transition duration-300 w-fit self-end">
-                    Detail
-                </a>
-            </div>
+        @endif
 
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-2">
+            <button href="{{ route('history.detail', ['type' => 'information-system', $letter->id]) }}"
+                class="bg-white hover:bg-zinc-100 text-black border-1 px-4 py-1.5 rounded text-sm font-medium cursor-pointer"
+                wire:navigate>
+                Details
+            </button>
+
+            <template x-if="{{ $letter->activeRevision }}">
+                <button href="{{ route('letter.edit', [$letter->id]) }}"
+                    class="bg-orange-100 hover:bg-zinc-100 text-orange-700 border-1 px-4 py-1.5 rounded text-sm font-medium"
+                    wire:navigate>
+                    Revisi
+                </button>
+            </template>
         </div>
     </div>
+
 </div>

@@ -23,9 +23,9 @@ return new class extends Migration
             $table->string('reference_number', 255);
             $table->integer('active_checking');
             $table->integer('current_division')->nullable();
-            // $table->int('previous_division')->nullable();
             $table->boolean('active_revision')->default(false);
             $table->boolean('need_review')->default(false);
+            $table->text('meeting')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

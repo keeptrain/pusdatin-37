@@ -39,16 +39,16 @@
                         hasPartNumber3: {{ $this->uploadedFile->contains(fn($file) => $file['part_number'] == 3) ? 'true' : 'false' }}
                     }">
                         @foreach ($this->uploadedFile as $file)
-                        <div class="flex flex-row gap-2">
-                            @if ($file['file_path'])
-                            <x-lucide-circle-check-big class="w-4 text-green-500" />
-                            @else
-                            <x-lucide-circle class="w-4" />
-                            @endif
+                            <div class="flex flex-row gap-2">
+                                @if ($file['file_path'])
+                                    <x-lucide-circle-check-big class="w-4 text-green-500" />
+                                @else
+                                    <x-lucide-circle class="w-4" />
+                                @endif
 
-                            <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
-                                class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label'] ?? $file['part_number'] }}</a>
-                        </div>
+                                <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
+                                    class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label'] ?? $file['part_number'] }}</a>
+                            </div>
                         @endforeach
 
                         <template x-if="!hasPartNumber3">
@@ -63,18 +63,18 @@
                     </div>
                 </div>
 
+                <!-- Meeting Information -->
                 <div>
-                    <p class="text-xs font-medium text-gray-500 uppercase"></p>
-                    <p class="mt-1 text-gray-900">-</p>
+                    @if ($meeting)
+                        <x-user.information-system.meeting-details-in-card :meeting="$meeting" />
+                    @endif
                 </div>
-
-                <div>
-                </div>
-
+            </div>
+            <div>
                 <div class="flex justify-end">
                     <template x-if="{{ $activerevision }}">
                         <a href="{{ route('letter.edit', [$id]) }}"
-                            class="ml-0 sm:ml-4 bg-orange-600 hover:bg-orange-700 text-white font-medium py-1 px-2 rounded-lg flex items-center transition duration-300 w-fit self-end">
+                            class="ml-0 sm:ml-4 bg-orange-600 hover:bg-orange-700 text-white font-small py-1 px-2 rounded-lg flex items-center transition duration-300 w-fit self-end">
                             Lakukan Revisi
                             <x-lucide-edit class="text-white w-5 ml-2" />
                     </template>

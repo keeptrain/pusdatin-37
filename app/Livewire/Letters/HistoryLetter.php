@@ -21,7 +21,7 @@ class HistoryLetter extends Component
     #[Computed]
     public function letters()
     {
-        return Letter::select('id', 'title', 'status', 'reference_number', 'active_revision', 'created_at')->where('user_id', auth()->user()->id)->paginate($this->perPage);
+        return Letter::select('id', 'title', 'status', 'reference_number', 'active_revision','meeting', 'created_at', )->where('user_id', auth()->user()->id)->paginate($this->perPage);
     }
 
     #[Computed]

@@ -22,6 +22,7 @@ class Letter extends Model
 
     protected $casts = [
         'status' => LetterStatus::class,
+        'meeting' => 'array'
     ];
 
     public $fillable = [
@@ -32,7 +33,8 @@ class Letter extends Model
         'active_checking',
         'current_division',
         'active_revision',
-        'need_review'
+        'need_review',
+        'meeting'
     ];
 
     public function user()
@@ -102,6 +104,15 @@ class Letter extends Model
     public function getUpdatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d F Y, H:i');
+    }
+
+    public function getFormattedMeetingDate(): string
+    {
+        $details = $this->meeting; // Array
+        if (isset($details['date']) && !empty($details['date'])) {
+            return Carbon::parse($details['date'])->isoFormat('dddd, D MMMM YYYY');
+        }
+        return 'Invalid date';
     }
 
     public function scopeFilterByCurrentUser($query)

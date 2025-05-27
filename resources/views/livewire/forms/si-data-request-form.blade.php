@@ -33,7 +33,7 @@
             <!-- Section 2: Document Upload -->
             <section>
                 <div x-data="{
-                    activeUploads: 0,
+                activeUploads: 0,
                     progress: 0,
                     get uploading() {
                         return this.activeUploads > 0;

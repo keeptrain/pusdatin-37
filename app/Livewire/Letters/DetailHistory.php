@@ -120,6 +120,11 @@ class DetailHistory extends Component
                 }
             }
 
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => 'Dokumen pendukung berhasil disisipkan.',
+            ]);
+
             return $this->redirect("$this->id", true);
         });
     }

@@ -59,6 +59,16 @@
                     <p class="text-gray-800">{{ $letter->updated_at }}</p>
                 </div>
 
+                @if ($letter->meeting)
+                <div class="mb-6">
+                    <h4 class="  text-gray-500 mb-1 flex items-center">
+                        Meeting
+                    </h4>
+                    <x-menu.information-system.meeting-details-on-show :meeting="$letter->meeting" :date="$letter->getFormattedMeetingDate()" />
+                </div>
+                    
+                @endif
+
                 <div class="mb-6">
                     <h4 class="text-gray-500 mb-1">Status</h4>
                     <flux:notification.status-badge :status="$letter->status"/>

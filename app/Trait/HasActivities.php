@@ -71,6 +71,15 @@ trait HasActivities
         ]);
     }
 
+    public function logStatusCustom(?string $action)
+    {
+        return $this->requestStatusTrack()->create([
+            'action' => $action,
+            'notes' => null,
+            'created_by' => auth()->user()->name
+        ]);
+    }
+
     public function sendNewServiceRequestNotification($recipients, ?User $verifikator = null)
     {
         $requestData = $this;

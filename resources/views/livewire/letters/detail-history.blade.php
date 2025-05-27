@@ -12,7 +12,7 @@
     <div class="py-6">
         <x-user.information-system.card-basic-info :id="$content->id" :created-at="$content->createdAtDMY()"
             :status="$content->status" :title="$content->title" :person="$content->user->name"
-            :activerevision="$content->active_revision" :uploadedFile="$this->uploadedFile"
+            :activerevision="$content->active_revision" :uploadedFile="$this->uploadedFile" :meeting="$content->meeting"
             :referenceNumber="$content->reference_number" />
     </div>
 
