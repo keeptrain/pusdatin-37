@@ -64,13 +64,13 @@
                 Details
             </button>
 
-            <template x-if="{{ $letter->activeRevision }}">
+            @if ($letter->active_revision)
                 <button href="{{ route('letter.edit', [$letter->id]) }}"
                     class="bg-orange-100 hover:bg-zinc-100 text-orange-700 border-1 px-4 py-1.5 rounded text-sm font-medium"
                     wire:navigate>
                     Revisi
                 </button>
-            </template>
+            @endif
         </div>
     </div>
 
