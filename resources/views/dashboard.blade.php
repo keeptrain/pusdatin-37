@@ -224,74 +224,167 @@ $widthPercentage = round($widthPercentage);
                 </div> --}}
             </div>
         </div>
+        <!-- bar chart area -->
+         @push('scripts')
+         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+         @endpush
+         @hasanyrole('head_verifier')
+        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4" wire:ignore>
+            <canvas id="monthlyLettersChart"></canvas>
+            @push('scripts')
+<script>
+// Global variable untuk chart
+let monthlyChart = null;
 
-        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4">
-            <!-- Chart Header -->
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200">Service Request Timeline</h3>
-                    <p class="text-sm text-neutral-500 dark:text-neutral-400">Last 30 days activity</p>
-                </div>
-                <div class="flex space-x-2">
-                    <button
-                        class="px-3 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-sm font-medium">Week</button>
-                    <button
-                        class="px-3 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 text-sm font-medium">Month</button>
-                    <button
-                        class="px-3 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-sm font-medium">Quarter</button>
-                </div>
-            </div>
-
-            <canvas id="lettersBarChart"></canvas>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const ctx = document.getElementById('lettersBarChart').getContext('2d');
-
-                    const labels = @json($labels);
-                    const data = @json($data);
-
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Total Letters per Bulan',
-                                data: [0, 0, 0, 0, 5, 0, 2],
-                                backgroundColor: '#1F2937' // Tailwind bg-gray-800
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Bulan'
-                                    }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Jumlah Letter'
-                                    }
-                                }
-                            },
-                            plugins: {
-                                legend: {
-                                    display: false
-                                },
-                                title: {
-                                    display: true,
-                                    text: `Total Letters (${new Date().getFullYear()})`
-                                }
-                            }
+function initMonthlyChart() {
+    // Data dari DashboardController
+    const monthlyData = @json($monthlyLetterData ?? ['months' => [], 'letterData' => [], 'prData' => []]);
+    
+    // Cek apakah element ada
+    const chartElement = document.getElementById('monthlyLettersChart');
+    if (!chartElement) return;
+    
+    // Destroy chart yang sudah ada
+    if (monthlyChart instanceof Chart) {
+        monthlyChart.destroy();
+    }
+    
+    // Dapatkan context
+    const ctx = chartElement.getContext('2d');
+    
+    // Dataset untuk chart
+    const letterGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    letterGradient.addColorStop(0, 'rgba(31, 41, 55, 0.8)');
+    letterGradient.addColorStop(1, 'rgba(31, 41, 55, 0.2)');
+    
+    const prGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    prGradient.addColorStop(0, 'rgba(249, 115, 22, 0.8)');
+    prGradient.addColorStop(1, 'rgba(249, 115, 22, 0.2)');
+    
+    monthlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: monthlyData.months,
+            datasets: [
+                {
+                    label: 'Sistem Informasi Dan Data',
+                    data: monthlyData.letterData,
+                    backgroundColor: letterGradient,
+                    borderColor: '#1f2937',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                },
+                {
+                    label: 'Humas',
+                    data: monthlyData.prData,
+                    backgroundColor: prGradient,
+                    borderColor: '#f97316',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 12,
+                            weight: '500'
                         }
-                    });
-                });
-            </script>
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#374151',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label + ' {{ date("Y") }}';
+                        },
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(156, 163, 175, 0.2)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeOutQuart'
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    initMonthlyChart();
+});
+
+
+document.addEventListener('livewire:navigated', function() {
+    setTimeout(initMonthlyChart, 100);
+});
+
+
+document.addEventListener('livewire:updated', function() {
+    setTimeout(initMonthlyChart, 100);
+});
+
+// Backup untuk window load
+window.addEventListener('load', function() {
+    if (!monthlyChart) {
+        initMonthlyChart();
+    }
+});
+</script>
+@endpush
         </div>
+        @endhasanyrole
+        <!-- bar chart area -->
     </div>
 
 </x-layouts.app>
