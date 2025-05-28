@@ -46,6 +46,8 @@ class LetterServiceRequestNotification extends Notification implements ShouldQue
         $siRequest = $this->letter;
         $context = [];
 
+        $userName = User::findOrFail($siRequest->user_id)->name;
+
         $context = match (get_class($siRequest->status)) {
             Disposition::class => $this->getContextForDisposition($siRequest),
             Rejected::class => $this->getContextForRejected($siRequest),
@@ -57,7 +59,8 @@ class LetterServiceRequestNotification extends Notification implements ShouldQue
         return [
             'requestable_type' => get_class($siRequest),
             'requestable_id' => $siRequest->id,
-            'status' => $siRequest->status,
+            'username' => $userName,
+            'status' => $siRequest->status->label(),
             'message' => $siRequest->status->userNotificationMessage($context)
         ];
     }

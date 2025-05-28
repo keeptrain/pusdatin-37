@@ -52,7 +52,7 @@ class PublicRelationRequestNotification extends Notification implements ShouldQu
         return [
             'requestable_type' => get_class($prRequest),
             'requestable_id' => $prRequest->id,
-            'status' => $prRequest->status,
+            'status' => $prRequest->status->label(),
             'message' => $prRequest->status->userNotificationMessage($context)
         ];
     }

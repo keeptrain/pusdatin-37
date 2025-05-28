@@ -48,18 +48,18 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
         $statusObject = null;
         $messageContext = [];
 
-        $userName = User::findOrFail($this->request->user_id);
+        $userName = User::findOrFail($this->request->user_id)->name;
 
         // Logika spesifik berdasarkan tipe instance request
         if ($this->request instanceof Letter) {
             $statusObject = $this->request->status;
             $messageContext = [
-                'responsible_person' => $userName->name
+                'responsible_person' => $userName
             ];
         } elseif ($this->request instanceof PublicRelationRequest) {
             $statusObject = $this->request->status;
             $messageContext = [
-                'responsible_person' => $userName->name
+                'responsible_person' => $userName
             ];
         } else {
             return [
@@ -80,7 +80,8 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
         return [
             'requestable_type' => $requestObject,
             'requestable_id' => $id,
-            'status' => $statusObject,
+            'username' => $userName,
+            'status' => $statusObject->label(),
             'message' => $statusObject->userNotificationMessage($messageContext)
         ];
     }
