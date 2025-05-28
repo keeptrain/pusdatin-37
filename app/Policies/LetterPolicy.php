@@ -8,6 +8,7 @@ use App\States\Pending;
 use App\Models\Letters\Letter;
 use App\States\Process;
 use App\States\Replied;
+use App\States\RepliedKapusdatin;
 
 class LetterPolicy
 {
@@ -169,9 +170,14 @@ class LetterPolicy
         return false;
     }
 
+    private function commonStatusCheckingStep2(Letter $letter): bool
+    {
+        return $letter->status instanceof ApprovedKasatpel || $letter->status instanceof RepliedKapusdatin;
+    }
+
     public function viewVerificationStep2(User $user, Letter $letter): bool
     {
-        if ($user->can('verification request si-data step2') && $this->headDivisionLetter($letter) && $this->conditionLetterForVerification($letter) && $letter->status instanceof ApprovedKasatpel) {
+        if ($user->can('verification request si-data step2') && $this->headDivisionLetter($letter) && $this->conditionLetterForVerification($letter) && $this->commonStatusCheckingStep2($letter)) {
             return true;
         }
 
@@ -180,7 +186,7 @@ class LetterPolicy
 
     public function viewReviewStep2(User $user, Letter $letter): bool
     {
-        if ($user->can('review request si-data step2') && $this->headDivisionLetter($letter) && $this->conditionLetterForReview($letter) && $letter->status instanceof Replied) {
+        if ($user->can('review request si-data step2') && $this->headDivisionLetter($letter) && $this->conditionLetterForReview($letter) && $letter->status instanceof RepliedKapusdatin) {
             return true;
         }
 

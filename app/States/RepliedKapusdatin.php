@@ -51,11 +51,11 @@ class RepliedKapusdatin extends LetterStatus
 
     public function percentage(): string
     {
-        return '50%';
+        return '80%';
     }
 
     public function percentageBar(): string
     {
-        return 'w-[50%]';
+        return 'w-[80%]';
     }
 }

@@ -57,7 +57,23 @@ class ModalConfirmation extends Component
 
         if ($this->status === 'replied') {
             $rules['status'] = [
-                Rule::in('approved', 'replied', 'rejected')
+                Rule::in('approved_kasatpel', 'replied', 'rejected')
+            ];
+
+            $rules['revisionParts'] = [
+                'required',
+                'array',
+                'min:1'
+            ];
+
+            foreach ($this->revisionParts as $index => $partName) {
+                $rules["revisionNotes.$partName"] = ['required', 'string'];
+            }
+        }
+
+        if ($this->status === 'replied_kapusdatin') {
+            $rules['status'] = [
+                Rule::in('approved_kapusdatin', 'replied_kapusdatin')
             ];
 
             $rules['revisionParts'] = [
@@ -209,7 +225,7 @@ class ModalConfirmation extends Component
 
     public function checkRevisionInputForRepliedStatus($siRequest)
     {
-        if (in_array($this->status, ['replied'])) {
+        if (in_array($this->status, ['replied', 'replied_kapusdatin'])) {
             $documentUploadsByPartNumber = $siRequest->documentUploads->keyBy('part_number');
 
             foreach ($this->revisionParts as $partNumber) {

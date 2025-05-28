@@ -59,6 +59,7 @@ class Letter extends Model
             'process'  => \App\States\Process::class,
             'replied' => \App\States\Replied::class,
             'approved_kasatpel' => \App\States\ApprovedKasatpel::class,
+            'replied_kapusdatin' => \App\States\RepliedKapusdatin::class,
             'approved_kapusdatin' => \App\States\ApprovedKapusdatin::class,
             'rejected' => \App\States\Rejected::class
         };
@@ -158,6 +159,9 @@ class Letter extends Model
 
         match ($newStatus) {
             'approved_kapusdatin' => [],
+            'replied_kapusdatin' => $this->update([
+                'active_revision' => true
+            ]),
             'approved_kasatpel' => $this->update(['active_checking' => 2]),
             'replied' => $this->update([
                 'active_revision' => true
