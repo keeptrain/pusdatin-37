@@ -29,7 +29,7 @@ case 'permohonan masuk':
 $width = 5;
 $height = 3;
 break;
-case 'disposition':
+case 'disposisi':
 $width = 25;
 $height = 23;
 break;

@@ -8,7 +8,7 @@
                 <p class="text-xs text-gray-500">{{ $letter->reference_number }}</p>
             </div>
             <div class="flex items-center space-x-2 text-xs">
-                <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Replied</span>
+                <flux:notification.status-badge :status="$letter->status" />
                 <span class="text-gray-500"> {{ $letter->created_at }}</span>
             </div>
         </div>

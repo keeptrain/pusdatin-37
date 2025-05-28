@@ -13,7 +13,7 @@ class Rejected extends LetterStatus
 
     public function color(): string
     {
-        return 'red';
+        return 'red-800';
     }
 
     public function toastMessage(): string
@@ -42,7 +42,7 @@ class Rejected extends LetterStatus
 
     public function badgeBg(): string
     {
-        return 'bg-red-500';
+        return 'red-50';
     }
     
     public function percentage(): string

@@ -13,7 +13,7 @@ class Disposition extends LetterStatus
 
     public function color(): string
     {
-        return 'yellow';
+        return 'purple-800';
     }
 
     public function toastMessage(): string
@@ -42,7 +42,7 @@ class Disposition extends LetterStatus
 
     public function badgeBg(): string
     {
-        return 'bg-zinc-500';
+        return 'purple-100';
     }
 
     public function percentage(): string

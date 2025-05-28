@@ -13,7 +13,7 @@ class Pending extends LetterStatus
 
     public function color(): string
     {
-        return 'amber';
+        return 'yellow-800';
     }
 
     public function toastMessage(): string
@@ -38,7 +38,7 @@ class Pending extends LetterStatus
 
     public function badgeBg(): string
     {
-        return 'bg-gray-500';
+        return 'yellow-100';
     }
 
     public function percentage(): string

@@ -5,7 +5,7 @@
   <div class="py-6">
       <div x-show="activeTab === 'tab1'">
         @forelse ($this->letters as $letter)
-          <x-user.information-system.history-card :letter="$letter"/>
+          <x-user.information-system.history-card :letter="$letter" />
         @empty
           <p class="text-center text-gray-500">No requests found.</p>
         @endforelse

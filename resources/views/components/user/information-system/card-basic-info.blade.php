@@ -7,10 +7,7 @@
                 <p class="text-gray-500 text-sm mb-1">Nomor Surat: {{$referenceNumber}}</p>
             </div>
             <div class="mt-4 md:mt-0">
-                <span
-                    class="inline-flex items-center px-3 py-1 rounded-full {{ $status->badgeBg() }} text-white text-sm font-medium">
-                    {{$status->label()}}
-                </span>
+                <flux:notification.status-badge :status="$status" />
             </div>
         </div>
 
