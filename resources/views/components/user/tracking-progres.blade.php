@@ -7,8 +7,8 @@ $label = strtolower($status->label());
 // Default width
 $width = 0;
 
-$step1ActiveStatuses = ['permohonan masuk', 'disposition', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
-$step2ActiveStatuses = ['disposition', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
+$step1ActiveStatuses = ['permohonan masuk', 'disposisi', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
+$step2ActiveStatuses = ['disposisi', 'proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
 $step3ActiveStatuses = ['proses', 'replied', 'approved by kasatpel', 'approved by kapusdatin'];
 $step4ActiveStatuses = ['replied', 'approved by kasatpel', 'approved by kapusdatin'];
 $step5ActiveStatuses = ['approved by kasatpel', 'approved by kapusdatin'];
@@ -44,6 +44,10 @@ break;
 case 'approved by kasatpel':
 $width = 75;
 $height = 60;
+break;
+case 'balasan kapusdatin':
+$width = 80;
+$height = 75;
 break;
 case 'approved by kapusdatin':
 $width = 100;
