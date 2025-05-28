@@ -23,19 +23,21 @@
         window.location.href = routes[tab];
     }
 }" class="min-h-screen" x-init="init()">
-
     <!-- Main Content -->
     <div class="flex flex-col h-full">
         <!-- Tabs -->
-        <div class="border-b border-gray-200 overflow-x-auto">
+        <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <div class="flex space-x-4 md:space-x-8 px-2 md:px-2">
                 <template x-for="tab in ['Overview', 'Activity', 'Version']" :key="tab">
                     <button @click="goTo(tab)"
                         :class="{
-                            'text-blue-600 border-b-2 border-blue-600': activeTab === tab,
-                            'text-gray-500 hover:text-gray-700': activeTab !== tab
+                            'text-blue-600 border-blue-600 dark:border-blue-600': activeTab === tab,
+                            'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600': activeTab !== tab
                         }"
-                        class="py-4 px-2 text-sm font-medium whitespace-nowrap cursor-pointer" x-text="tab" wire:navigate>
+                        class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none"
+                        x-text="tab"
+                        wire:navigate
+                        >
                     </button>
                 </template>
             </div>
