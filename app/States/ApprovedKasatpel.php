@@ -23,7 +23,7 @@ class ApprovedKasatpel extends LetterStatus
 
     public function trackingMessage($division): string
     {
-        return 'Permohonan layanan anda disetujui oleh Kepala Satuan Pelaksana ' . $this->getDivisionName($division) . ', selanjutnya menunggu persetujuan dari Kepala Pusat Data dan Teknologi Dinas Kesehatan';
+        return 'Permohonan layanan disetujui oleh Kepala Satuan Pelaksana ' . $this->getDivisionName($division) . ', selanjutnya menunggu persetujuan dari Kepala Pusat Data dan Teknologi Dinas Kesehatan';
     }
 
     public function userNotificationMessage(array $context): string

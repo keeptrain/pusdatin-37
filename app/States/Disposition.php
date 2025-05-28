@@ -32,7 +32,7 @@ class Disposition extends LetterStatus
     public function userNotificationMessage(array $context): string
     {
 
-        return "Permohonan layanan telah diajukan oleh " . $context['responsible_person'];
+        return "Permohonan layanan didisposisikan dari Kapusdatin";
     }
 
     public function icon(): string

@@ -28,7 +28,7 @@ class Pending extends LetterStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan layanan dari " . $context['responsible_person'] . " perlu disposisi" ;
+        return "Permohonan layanan ini perlu disposisi" ;
     }
 
     public function icon(): string
