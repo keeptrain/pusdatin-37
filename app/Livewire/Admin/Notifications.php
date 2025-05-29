@@ -43,6 +43,7 @@ class Notifications extends Component
     }
 
     private function prepareNotifications($rawNotifications)
+    private function prepareNotifications($rawNotifications)
     {
         return collect($rawNotifications)->map(function ($notification) {
             return [
@@ -54,6 +55,7 @@ class Notifications extends Component
             ];
         })->groupBy(function ($notification) {
             $createdAt = Carbon::parse($notification['created_at']);
+
 
             return match (true) {
                 $createdAt->isToday() => 'Today',
