@@ -1,5 +1,5 @@
 <flux:modal x-data="{
- status: '',
+    status: '',
 }" name="verification-modal" focusable class="md:w-120" size="lg">
 
     <form wire:submit="save" class="space-y-6">
@@ -10,10 +10,12 @@
         </div>
 
         <flux:radio.group wire:model="status" name="status" label="Status" badge="Required" data-checked>
-            <flux:radio value="approved_kasatpel" name="status" label="Disetujui Kasatpel" x-on:click="status = 'approved'" />
+            <flux:radio value="approved_kasatpel" name="status" label="Disetujui Kasatpel"
+                x-on:click="status = 'approved'" />
             <flux:radio value="replied" name="status" label="Revisi" x-on:click="status = 'replied'" />
             <flux:radio value="rejected" name="status" label="Ditolak Kasatpel" x-on:click="status = 'rejected'" />
-            {{-- <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
+            {{--
+            <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
         </flux:radio.group>
 
         <template x-if="status === 'approved'">
@@ -27,30 +29,11 @@
             }">
                 <flux:checkbox.group wire:model="revisionParts" label="Bagian" class="space-y-4">
                     @foreach ($availablePart as $part)
-                        @php
-                            $label = match ($part) {
-                                1 => 'Nota dinas',
-                                2 => 'Sop',
-                                3 => 'Pendukung',
-                            };
-                        @endphp
-                        <flux:checkbox :value="$part" label="{{ $label }}" x-model="revisionPart" />
+                        <flux:checkbox :value="$part['part_number']" :label="$part['part_number_label']"
+                            x-model="revisionPart" />
                     @endforeach
 
-                    <template x-if="revisionPart.includes('1')">
-                        <flux:textarea wire:model.defer="revisionNotes.1" cols="66" rows="2"
-                            placeholder="Catatan untuk nota dinas" resize="vertical" />
-                    </template>
-
-                    <template x-if="revisionPart.includes('2')">
-                        <flux:textarea wire:model.defer="revisionNotes.2" cols="66" rows="2"
-                            placeholder="Catatan untuk sop" resize="vertical" />
-                    </template>
-
-                    <template x-if="revisionPart.includes('3')">
-                        <flux:textarea wire:model.defer="revisionNotes.3" cols="66" rows="2"
-                            placeholder="Catatan untuk pendukung" resize="vertical" />
-                    </template>
+                    <x-modal.partials.revision-notes />
 
                     <flux:checkbox value="otherPart" label="Other" x-model="revisionPart" />
 
@@ -59,7 +42,6 @@
                             placeholder="Catatan untuk bagian lain" resize="vertical" />
                     </template>
                 </flux:checkbox.group>
-
             </div>
         </template>
 

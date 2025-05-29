@@ -27,25 +27,17 @@ class Detail extends Component
     }
 
     #[Computed]
-    public function detailItem()
-    {
-        return $this->letter->documentUploads->need_revision;
-    }
-
-    #[Computed]
     public function availablePart()
     {
         return $this->letter->documentUploads
-            ->filter(fn($part) => !empty($part->part_number))
-            ->pluck('part_number')
+            ->map(function ($upload) {
+                return [
+                    'part_number' => $upload->part_number,
+                    'part_number_label' => $upload->part_number_label,
+                ];
+            })
             ->values()
             ->toArray();
-    }
-
-    #[Computed]
-    public function currentStatusLabel()
-    {
-        return $this->letter->status->label();
     }
 
     public function backPending()

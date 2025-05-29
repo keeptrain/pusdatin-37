@@ -26,29 +26,10 @@
                 }">
                 <flux:checkbox.group wire:model="revisionParts" label="Part" class="space-y-4">
                     @foreach ($availablePart as $part)
-                        @php
-                            $label = match ($part) {
-                                1 => 'Nota dinas',
-                                2 => 'Sop',
-                                3 => 'Pendukung',
-                            };
-                        @endphp
-                        <flux:checkbox :value="$part" label="{{ $label }}" x-model="revisionPart" />
+                        <flux:checkbox :value="$part['part_number']" :label="$part['part_number_label']" x-model="revisionPart" />
                     @endforeach
-                    <template x-if="revisionPart.includes('1')">
-                        <flux:textarea wire:model.defer="revisionNotes.1" cols="66" rows="2"
-                            placeholder="Catatan untuk nota dinas" resize="vertical" />
-                    </template>
-
-                    <template x-if="revisionPart.includes('2')">
-                        <flux:textarea wire:model.defer="revisionNotes.2" cols="66" rows="2"
-                            placeholder="Catatan untuk sop" resize="vertical" />
-                    </template>
-
-                    <template x-if="revisionPart.includes('3')">
-                        <flux:textarea wire:model.defer="revisionNotes.3" cols="66" rows="2"
-                            placeholder="Catatan untuk pendukung" resize="vertical" />
-                    </template>
+                    
+                    <x-modal.partials.revision-notes />
 
                     <flux:checkbox value="otherPart" label="Other" x-model="revisionPart" />
 

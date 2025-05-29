@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Letters;
 
+use App\Enums\Division;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
@@ -66,8 +67,8 @@ class ModalConfirmation extends Component
                 'min:1'
             ];
 
-            foreach ($this->revisionParts as $index => $partName) {
-                $rules["revisionNotes.$partName"] = ['required', 'string'];
+            foreach ($this->revisionParts as $index => $partNumber) {
+                $rules["revisionNotes.$partNumber"] = ['required', 'string'];
             }
         }
 
@@ -123,7 +124,7 @@ class ModalConfirmation extends Component
             // Transisi status
             $letter->transitionStatusFromPending(
                 $this->status,
-                $this->handleDivision(),
+                $this->getSelectedDivisionId(),
             );
 
             $letter->refresh();
@@ -212,15 +213,9 @@ class ModalConfirmation extends Component
         });
     }
 
-    public function handleDivision()
+    public function getSelectedDivisionId()
     {
-        $role = match ($this->selectedDivision) {
-            'si' => 3,
-            'data' => 4,
-            default => null,
-        };
-
-        return $role;
+        return Division::getIdFromString($this->selectedDivision);
     }
 
     public function checkRevisionInputForRepliedStatus($siRequest)
