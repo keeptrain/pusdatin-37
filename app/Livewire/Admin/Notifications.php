@@ -42,7 +42,7 @@ class Notifications extends Component
         return $this->prepareNotifications($notifications);
     }
 
-    protected function prepareNotifications($rawNotifications)
+    private function prepareNotifications($rawNotifications)
     {
         return collect($rawNotifications)->map(function ($notification) {
             return [
@@ -54,7 +54,7 @@ class Notifications extends Component
             ];
         })->groupBy(function ($notification) {
             $createdAt = Carbon::parse($notification['created_at']);
-    
+
             return match (true) {
                 $createdAt->isToday() => 'Today',
                 $createdAt->isYesterday() => 'Yesterday',
@@ -67,6 +67,29 @@ class Notifications extends Component
                 }),
             ];
         });
+    }
+
+    private function getFilteredNotifications(array $allowedStatuses)
+    {
+        return collect($this->notifications)->mapWithKeys(function ($statuses, $dateLabel) use ($allowedStatuses) {
+            $filteredStatuses = collect($statuses)->filter(function ($items, $status) use ($allowedStatuses) {
+                return in_array($status, $allowedStatuses);
+            });
+
+            return [$dateLabel => $filteredStatuses];
+        })->filter(fn($statuses) => $statuses->isNotEmpty())->toArray();
+    }
+
+    #[Computed]
+    public function getFilteredRepliedNotifications()
+    {
+        return $this->getFilteredNotifications(['Replied', 'Balasan Kapusdatin']);
+    }
+
+    #[Computed]
+    public function getFilteredApprovedNotifications()
+    {
+        return $this->getFilteredNotifications(['Approved by Kasatpel', 'Approved by Kapusdatin']);
     }
 
     public function refreshNotifications()

@@ -57,65 +57,44 @@
 
         <!-- Panel untuk "Disposisi" -->
         <div x-show="activeTab === 'disposisi'">
-            @forelse ($this->notifications as $dateLabel => $statuses)
+            @foreach ($this->getFilteredDispositionNotifications as $dateLabel => $statuses)
                 @foreach ($statuses as $status => $items)
-                    @if ($status === 'Permohonan Masuk')
-                        <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
-                            <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
-                        </div>
-                        @foreach ($items as $item)
-                            <x-notifications.notificaition-adapter :item="$item" />
-                        @endforeach
-                    @endif
+                    <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
+                        <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
+                    </div>
+                    @foreach ($items as $item)
+                        <x-notifications.notificaition-adapter :item="$item" />
+                    @endforeach
                 @endforeach
-            @empty
-                <div class="flex flex-col items-center justify-center p-8">
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No disposisi notifications</h3>
-                    <p class="text-center text-gray-500">No disposisi notifications available.</p>
-                </div>
-            @endforelse
+            @endforeach
         </div>
 
-        <!-- Panel untuk "Revisi" -->
+        <!-- Panel untuk "Balasan" -->
         <div x-show="activeTab === 'revisi'">
-            @forelse ($this->notifications as $dateLabel => $statuses)
+            @foreach ($this->getFilteredRepliedNotifications as $dateLabel => $statuses)
                 @foreach ($statuses as $status => $items)
-                    @if ($status === 'App\States\Replied')
-                        <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
-                            <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
-                        </div>
-                        @foreach ($items as $item)
-                            <x-notifications.notificaition-adapter :item="$item" />
-                        @endforeach
-                    @endif
+                    <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
+                        <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
+                    </div>
+                    @foreach ($items as $item)
+                        <x-notifications.notificaition-adapter :item="$item" />
+                    @endforeach
                 @endforeach
-            @empty
-                <div class="flex flex-col items-center justify-center p-8">
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No revisi notifications</h3>
-                    <p class="text-center text-gray-500">No revisi notifications available.</p>
-                </div>
-            @endforelse
+            @endforeach
         </div>
 
-        <!-- Panel untuk "Revisi" -->
+        <!-- Panel untuk "Disetujui" -->
         <div x-show="activeTab === 'disetujui'">
-            @forelse ($this->notifications as $dateLabel => $statuses)
+            @foreach ($this->getFilteredApprovedNotifications as $dateLabel => $statuses)
                 @foreach ($statuses as $status => $items)
-                    @if ($status === 'Approved by Kasatpel')
-                        <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
-                            <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
-                        </div>
-                        @foreach ($items as $item)
-                            <x-notifications.notificaition-adapter :item="$item" />
-                        @endforeach
-                    @endif
+                    <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
+                        <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
+                    </div>
+                    @foreach ($items as $item)
+                        <x-notifications.notificaition-adapter :item="$item" />
+                    @endforeach
                 @endforeach
-            @empty
-                <div class="flex flex-col items-center justify-center p-8">
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No revisi notifications</h3>
-                    <p class="text-center text-gray-500">No revisi notifications available.</p>
-                </div>
-            @endforelse
+            @endforeach
         </div>
     </div>
 </div>
