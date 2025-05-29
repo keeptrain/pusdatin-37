@@ -13,7 +13,7 @@ class Process extends LetterStatus
 
     public function color(): string
     {
-        return 'blue-800';
+        return 'text-blue-800';
     }
 
     public function toastMessage(): string
@@ -40,7 +40,7 @@ class Process extends LetterStatus
 
     public function badgeBg(): string
     {
-        return 'blue-100';
+        return 'bg-blue-100';
     }
 
     public function percentage(): string

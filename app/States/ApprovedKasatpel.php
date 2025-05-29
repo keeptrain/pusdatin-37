@@ -13,7 +13,7 @@ class ApprovedKasatpel extends LetterStatus
 
     public function color(): string
     {
-        return 'green-800';
+        return 'text-green-800';
     }
 
     public function toastMessage(): string
@@ -38,7 +38,7 @@ class ApprovedKasatpel extends LetterStatus
 
     public function badgeBg(): string
     {
-        return 'green-100';
+        return 'bg-green-100';
     }
 
     public function percentage(): string

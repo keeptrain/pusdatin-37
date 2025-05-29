@@ -13,7 +13,7 @@ class ApprovedKapusdatin extends LetterStatus
 
     public function color(): string
     {
-        return 'emerald-800';
+        return 'text-emerald-800';
     }
 
     public function toastMessage(): string
@@ -38,7 +38,7 @@ class ApprovedKapusdatin extends LetterStatus
 
     public function badgeBg(): string
     {
-        return 'emerald-100';
+        return 'bg-emerald-100';
     }
 
     public function percentage(): string

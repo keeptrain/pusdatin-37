@@ -11,7 +11,7 @@ class RepliedKapusdatin extends LetterStatus
 
     public function color(): string
     {
-        return 'orange-800';
+        return 'text-orange-800';
     }
 
     public function toastMessage(): string
@@ -33,7 +33,7 @@ class RepliedKapusdatin extends LetterStatus
     public function userNotificationMessage(array $context): string
     {
         if (isset($context['verifikator_role'])) {
-            return 'Permohonan layanan anda mendapatkan balasan';
+            return 'Permohonan layanan anda mendapatkan balasan dari Kapusdatin';
         }
 
         return 'Permohonan layanan ini direvisi oleh pemohon';
@@ -46,7 +46,7 @@ class RepliedKapusdatin extends LetterStatus
 
     public function badgeBg(): string
     {
-        return 'orange-100';
+        return 'bg-orange-100';
     }
 
     public function percentage(): string

@@ -13,7 +13,7 @@ class Replied extends LetterStatus
 
     public function color(): string
     {
-        return 'amber-800';
+        return 'text-amber-800';
     }
 
     public function toastMessage(): string
@@ -48,7 +48,7 @@ class Replied extends LetterStatus
 
     public function badgeBg(): string
     {
-        return 'amber-100';
+        return 'bg-amber-100';
     }
 
     public function percentage(): string
