@@ -20,6 +20,7 @@ use App\Notifications\NewServiceRequestNotification;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Notifications\LetterServiceRequestNotification;
 use App\Notifications\PublicRelationRequestNotification;
+use App\States\RepliedKapusdatin;
 
 trait HasActivities
 {
@@ -58,7 +59,6 @@ trait HasActivities
         return $this->requestStatusTrack()->create([
             'action' => $this->status->trackingMessage($divisionParamForTrackingMessage),
             'notes' => $notes ?? null,
-            'created_by' => auth()->user()->name
         ]);
     }
 
@@ -67,7 +67,6 @@ trait HasActivities
         return $this->requestStatusTrack()->create([
             'action' => auth()->user()->name . " telah melakukan revisi di bagian " . implode(' ,', $partName),
             'notes' => $notes ?? null,
-            'created_by' => auth()->user()->name
         ]);
     }
 
@@ -75,8 +74,6 @@ trait HasActivities
     {
         return $this->requestStatusTrack()->create([
             'action' => $action,
-            'notes' => null,
-            'created_by' => auth()->user()->name
         ]);
     }
 
@@ -131,6 +128,17 @@ trait HasActivities
             ApprovedKapusdatin::class => function (): void {
                 $recipient = User::findOrFail($this->user_id);
                 $recipient->notify(new LetterServiceRequestNotification($this));
+            },
+            RepliedKapusdatin::class => function () {
+                if ($this->need_review) {
+                    $recipients = User::role($this->active_checking)->get();
+                    if ($recipients->isNotEmpty()) {
+                        Notification::send($recipients, new LetterServiceRequestNotification($this));
+                    }
+                } else {
+                    $recipient = User::findOrFail($this->user_id);
+                    $recipient->notify(new LetterServiceRequestNotification($this));
+                }
             },
             ApprovedKasatpel::class => function () {
                 $recipients = User::role($this->active_checking)->get();

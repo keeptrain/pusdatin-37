@@ -19,8 +19,15 @@ class RequestStatusTrack extends Model
         'statusable_type',
         'action',
         'notes',
-        'created_by'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->created_by = auth()->user()->name;
+        });
+    }
 
     public function letter()
     {
