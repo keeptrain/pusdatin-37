@@ -1,6 +1,6 @@
 <div class="lg:p-3">
     <flux:heading size="xl" level="1">{{ __('List') }}</flux:heading>
-    <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan Sistem Informasi & Data') }}</flux:heading>
+    <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan') }}</flux:heading>
     <flux:menu.tabs :statuses="$statuses" :filterStatus="$filterStatus" />
 
     <div class="flex flex-1 justify-between items-center mb-4 h-10">
@@ -25,7 +25,7 @@
 
             <!-- Sort Dropdown -->
             <flux:dropdown>
-                <flux:button class="bg-zinc-100 dark:bg-zinc-900" icon:trailing="chevron-down">
+                <flux:button icon:trailing="chevron-down" variant="outline">
                     Sort by
                 </flux:button>
 
