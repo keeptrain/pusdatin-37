@@ -9,6 +9,7 @@ use App\States\Disposition;
 use Illuminate\Bus\Queueable;
 use App\Models\Letters\Letter;
 use App\States\ApprovedKasatpel;
+use App\States\RepliedKapusdatin;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -53,6 +54,7 @@ class LetterServiceRequestNotification extends Notification implements ShouldQue
             Rejected::class => $this->getContextForRejected($siRequest),
             ApprovedKasatpel::class => $this->getContextForApprovedKasatpel($siRequest),
             Replied::class => $this->getContextForReplied($siRequest),
+            RepliedKapusdatin::class => $this->getContextForReplied($siRequest),
             default => [],
         };
 
