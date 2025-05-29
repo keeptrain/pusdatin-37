@@ -43,7 +43,6 @@ class Notifications extends Component
     }
 
     private function prepareNotifications($rawNotifications)
-    private function prepareNotifications($rawNotifications)
     {
         return collect($rawNotifications)->map(function ($notification) {
             return [
