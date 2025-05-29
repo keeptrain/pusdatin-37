@@ -11,7 +11,7 @@ class TrackingStepped
     protected const HEAD_DIVISION_ID = 2;
     protected const DIVISION_SI_ID = 3;
     protected const DIVISION_DATA_ID = 4;
-    
+
     public static function SiDataRequest(Letter $letter)
     {
         $orderedStates = [
@@ -40,27 +40,28 @@ class TrackingStepped
             });
         }
 
+        // Menambahkan "Rejected"
+        if ($letter->status instanceof \App\States\Rejected) {
+            $statuses[4] = [
+                'label' => (new \App\States\Rejected($letter))->label(),
+                'icon' => (new \App\States\Rejected($letter))->icon(),
+            ];
+        }
+
         $activeChecking = $letter->active_checking;
 
-        // Logika untuk "Replied"
-        if ($letter->status instanceof \App\States\Replied && $activeChecking == static::DIVISION_SI_ID || $activeChecking == static::DIVISION_DATA_ID) {
-            array_splice($statuses, 3, 0, [
-                ['label' => (new \App\States\Replied($letter))->label(), 'icon' => (new \App\States\Replied($letter))->icon()]
-            ]);
+        if ($letter->status instanceof \App\States\Replied) {
+            if ($activeChecking == static::DIVISION_SI_ID || $activeChecking == static::DIVISION_DATA_ID) {
+                array_splice($statuses, 3, 0, [
+                    ['label' => (new \App\States\Replied($letter))->label(), 'icon' => (new \App\States\Replied($letter))->icon()]
+                ]);
+            }
         }
 
         if ($letter->status instanceof \App\States\RepliedKapusdatin && $activeChecking == static::HEAD_DIVISION_ID) {
             array_splice($statuses, 4, 0, [
                 ['label' => (new \App\States\RepliedKapusdatin($letter))->label(), 'icon' => (new \App\States\RepliedKapusdatin($letter))->icon()]
             ]);
-        }
-
-        // Logika untuk menambahkan "Rejected"
-        if ($letter->status instanceof \App\States\Rejected) {
-            $statuses[4] = [
-                'label' => (new \App\States\Rejected($letter))->label(),
-                'icon' => (new \App\States\Rejected($letter))->icon(),
-            ];
         }
 
         return array_values($statuses);
