@@ -2,6 +2,7 @@
 
 namespace App\Models\Letters;
 
+use App\Enums\Division;
 use Carbon\Carbon;
 use App\Models\User;
 use App\States\LetterStatus;
@@ -88,12 +89,7 @@ class Letter extends Model
 
     public function kasatpelName($value)
     {
-        return match ($value) {
-            3 => 'Sistem Informasi',
-            4 => 'Pengelolaan Data',
-            5 => 'Hubungan Masyarakat',
-            default => 'Perlu disposisi', // Default case for other numbers
-        };
+        return Division::tryFrom($value)?->label() ?? 'Perlu disposisi';
     }
 
     /**
@@ -162,7 +158,7 @@ class Letter extends Model
             'replied_kapusdatin' => $this->update([
                 'active_revision' => true
             ]),
-            'approved_kasatpel' => $this->update(['active_checking' => 2]),
+            'approved_kasatpel' => $this->update(['active_checking' => Division::HEAD_ID->value]),
             'replied' => $this->update([
                 'active_revision' => true
             ]),
@@ -171,6 +167,22 @@ class Letter extends Model
                 'need_review' => false,
             ])
         };
+    }
+
+    public function updatedForNeedReview()
+    {
+        $this->update([
+            'active_revision' => false,
+            'need_review' => true,
+        ]);
+    }
+
+    public function updatedForCompletedReview()
+    {
+        $this->update([
+            'active_revision' => false,
+            'need_review' => false,
+        ]);
     }
 
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder

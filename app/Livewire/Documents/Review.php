@@ -51,13 +51,14 @@ class Review extends Component
     {
         $this->letterId = $id;
         $this->letter = $this->getLetterWithMappedData();
-        $this->processVersions(); 
+        $this->processVersions();
     }
 
     public function getLetterWithMappedData()
     {
         return Letter::select('id')->with([
-            'documentUploads.activeVersion', 'documentUploads.versions'
+            'documentUploads.activeVersion',
+            'documentUploads.versions'
         ])->findOrFail($this->letterId);
     }
 
@@ -66,13 +67,18 @@ class Review extends Component
         $this->validate();
 
         DB::transaction(function () {
+            $letter = $this->letter;
+
+            $documentUploadsIds = $letter->documentUploads()->pluck('id');
+
             if ($this->changesChoice === 'yes') {
-                $this->changesChoiceYes();
+                $this->changesChoiceYes($letter, $documentUploadsIds);
             } elseif ($this->changesChoice === 'no') {
-                $this->changesChoiceNo();
+                $this->changesChoiceNo($documentUploadsIds);
             }
 
-            // Redirect dengan pesan sukses
+            $letter->updatedForCompletedReview();
+
             return redirect()->to("/letter/$this->letterId")
                 ->with('status', [
                     'variant' => 'success',
@@ -81,14 +87,11 @@ class Review extends Component
         });
     }
 
-    private function changesChoiceYes()
+    private function changesChoiceYes(Letter $letter, $documentUploadIds)
     {
-        // Ambil semua document uploads dari letter
-        $documentUploadIds = $this->letter->documentUploads()->pluck('id');
-
         // Proses file yang dipilih ($this->partAccepted)
         $selectedDocumentUploads = DocumentUpload::whereIn('part_number', $this->partAccepted)
-            ->where('documentable_id', $this->letter->id)
+            ->where('documentable_id', $letter->id)
             ->get();
 
         // Update versi terbaru yang belum disetujui (is_resolved = false) untuk file yang dipilih
@@ -96,17 +99,15 @@ class Review extends Component
             // Ambil revisi terbaru yang belum disetujui untuk dokumen ini
             $latestUnapprovedRevision = UploadVersion::where('document_upload_id', $documentUpload->id)
                 ->where('is_resolved', false)
-                ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at
-                ->first(); // Ambil satu revisi terbaru
+                ->orderBy('created_at', 'desc')
+                ->first();
 
             if ($latestUnapprovedRevision) {
-                // Update document upload dengan revisi terbaru
                 $documentUpload->update([
                     'document_upload_version_id' => $latestUnapprovedRevision->id,
-                    'need_revision' => false, // Tidak memerlukan revisi lagi karena sudah dipilih
+                    'need_revision' => false,
                 ]);
 
-                // Setel versi ini menjadi resolved
                 UploadVersion::where('id', $latestUnapprovedRevision->id)
                     ->update([
                         'is_resolved' => true,
@@ -117,17 +118,10 @@ class Review extends Component
         // Proses file yang tidak dipilih
         $unselectedDocumentUploadIds = $documentUploadIds->diff($selectedDocumentUploads->pluck('id'));
 
-        // Setel semua versi menjadi resolved untuk file yang tidak dipilih
         UploadVersion::whereIn('document_upload_id', $unselectedDocumentUploadIds)
             ->update([
                 'is_resolved' => true,
             ]);
-
-        // Update status letter
-        $this->letter->update([
-            'active_revision' => false,
-            'need_review' => false,
-        ]);
 
         // Perbarui file_path untuk bagian yang dipilih
         $selectedDocumentUploads->each(function ($documentUpload) {
@@ -137,28 +131,16 @@ class Review extends Component
         });
     }
 
-    public function changesChoiceNo()
+    private function changesChoiceNo($documentUploadIds)
     {
-        // Ambil ID dari semua document uploads milik letter ini
-        $documentUploadIds = $this->letter->documentUploads()->pluck('id');
-
-        // Update semua document uploads: set need_revision menjadi false
         DocumentUpload::whereIn('id', $documentUploadIds)->update([
             'need_revision' => false,
         ]);
 
-        // Update semua versi dari document uploads: set is_resolved menjadi true
-        DB::table('document_upload_versions')
-            ->whereIn('document_upload_id', $documentUploadIds)
+        UploadVersion::whereIn('document_upload_id', $documentUploadIds)
             ->update([
                 'is_resolved' => true,
             ]);
-
-        // Update status letter
-        $this->letter->update([
-            'active_revision' => false,
-            'need_review' => false,
-        ]);
     }
 
     private function processVersions()
@@ -167,37 +149,16 @@ class Review extends Component
         $latestUnapprovedRevisionsData = new Collection();
 
         if ($this->letter && $this->letter->documentUploads->isNotEmpty()) {
-            foreach ($this->letter->documentUploads as $map) {
-                if ($map) {
-                    $documentUpload = $map;
+            foreach ($this->letter->documentUploads as $documentUpload) {
+                if ($documentUpload->hasUnapprovedRevision()) {
+                    $latestUnapprovedRevisionsData->push($documentUpload->formatForLatestUnapprovedRevision());
 
-                    $activeVersion = $documentUpload->activeVersion;
-                    $allVersions = $documentUpload->versions;
-
-                    $currentVersionsData->push([
-                        'part_number' => $documentUpload->part_number,
-                        'part_number_label' => $documentUpload->part_number_label,
-                        'file_path' => $activeVersion->file_path,
-                        'revision_note' => $allVersions->first()->revision_note,
-                    ]);
-
-                    $latestUnapprovedRevision = $allVersions
-                        ->where('is_resolved', false)
-                        ->sortByDesc('version')
-                        ->first();
-
-                    if ($latestUnapprovedRevision) {
-                        $latestUnapprovedRevisionsData->push([
-                            'part_number' => $documentUpload->part_number,
-                            'part_number_label' => $documentUpload->part_number_label,
-                            'file_path' => $latestUnapprovedRevision->file_path,
-                            'revision_note' => $latestUnapprovedRevision->revision_note
-                        ]);
-                    };
+                    $currentVersionsData->push($documentUpload->formatForCurrentVersion());
                 }
             }
         }
 
+        // Urutkan data berdasarkan part_number
         $this->currentVersions = $currentVersionsData->sortBy('part_number');
         $this->latestRevisions = $latestUnapprovedRevisionsData->sortBy('part_number');
     }
