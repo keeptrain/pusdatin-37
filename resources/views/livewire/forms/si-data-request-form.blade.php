@@ -14,18 +14,20 @@
                     <div class="space-y-6">
                         <flux:input wire:model="title" label="Judul" placeholder="Judul permohonan layanan" clearable />
 
-                        <flux:input label="Penanggung jawab" placeholder="{{ auth()->user()->name }}" disabled />
-
-                        <flux:input label="Kontak penanggung jawab" placeholder="{{ auth()->user()->contact }}" disabled />
-
-                        <flux:input label="Seksi/Subbag/Subkel Pengusul" placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
-
                         <div class="grid grid-cols-2 gap-x-6">
                             <div>
                                 <flux:input wire:model="reference_number" label="Nomor surat"
                                     placeholder="No./xx/xx/2025" clearable />
                             </div>
                         </div>
+
+                        <flux:input label="Penanggung jawab" placeholder="{{ auth()->user()->name }}" disabled />
+
+                        <flux:input label="Kontak penanggung jawab" placeholder="{{ auth()->user()->contact }}"
+                            disabled />
+
+                        <flux:input label="Seksi/Subbag/Subkel Pengusul"
+                            placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
                     </div>
                 </div>
             </section>
@@ -49,14 +51,20 @@
                         </h3>
 
                         <!-- File Upload -->
-                        <x-letters.input-file-adapter title="Dokumen Identifikasi Aplikasi SPBE" model="files.0" required template
-                            filePath="downloadTemplate('1')" />
+                        <x-letters.input-file-adapter title="Dokumen Identifikasi Aplikasi SPBE" model="files.0"
+                            required template filePath="downloadTemplate('1')" />
 
-                        <x-letters.input-file-adapter title="SOP Aplikasi SPBE"  model="files.1"
-                            required template filePath="downloadTemplate('2')" />
+                        <x-letters.input-file-adapter title="SOP Aplikasi SPBE" model="files.1" required template
+                            filePath="downloadTemplate('2')" />
 
-                        <x-letters.input-file-adapter title="RFC Pusdatinkes" model="files.2" optional template
+                        <x-letters.input-file-adapter title="Pakta Integritas Pemanfaatan Aplikasi" model="files.2" required template
                             filePath="downloadTemplate('3')" />
+
+                        <x-letters.input-file-adapter title="Form RFC Pusdatinkes" model="files.3" required template
+                            filePath="downloadTemplate('4')" />
+
+                        <x-letters.input-file-adapter title="NDA Pusdatin Dinkes" model="files.4" optional template
+                            filePath="downloadTemplate('5')" />
 
                         <div x-data="{ open: false }" class="border-l-2 border-gray-400 bg-gray-50 ">
                             <div class="p-2 flex justify-between items-center cursor-pointer" @click="open = !open">
