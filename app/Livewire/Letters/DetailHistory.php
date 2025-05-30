@@ -77,7 +77,6 @@ class DetailHistory extends Component
             return [
                 'part_number' => $documentUpload->part_number,
                 'part_number_label' => $documentUpload->part_number_label,
-                'file_path' => $documentUpload->file_path,
             ];
         });
     }
@@ -131,10 +130,10 @@ class DetailHistory extends Component
 
     public function downloadFile($typeNumber)
     {
-        $template = $this->content->documentUploads()->where('part_number', $typeNumber)->with('activeVersion')->first();
+        $document = $this->content->documentUploads()->where('part_number', $typeNumber)->with('activeVersion')->first();
 
-        if ($template) {
-            $filePath = $template->activeVersion->file_path;
+        if ($document) {
+            $filePath = $document->activeVersion->file_path;
 
             $fileDownload = Storage::disk('public')->path($filePath);
 

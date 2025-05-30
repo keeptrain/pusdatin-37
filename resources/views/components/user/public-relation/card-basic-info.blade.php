@@ -46,12 +46,7 @@
                         }">
                         @foreach ($this->uploadedFile as $file)
                             <div class="flex flex-row gap-2">
-                                @if ($file['file_path'])
-                                    <x-lucide-circle-check-big class="w-4 text-green-500" />
-                                @else
-                                    <x-lucide-circle class="w-4" />
-                                @endif
-
+                                <x-lucide-circle-check-big class="w-4 text-green-500" />
                                 <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
                                     class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
                                     ?? $file['part_number'] }}</a>
