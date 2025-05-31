@@ -22,7 +22,7 @@ class Pending extends PublicRelationStatus {
 
     public function color(): string
     {
-        return "amber";
+        return "text-yellow-800";
     }
 
     public function icon(): string
@@ -32,7 +32,7 @@ class Pending extends PublicRelationStatus {
 
     public function badgeBg(): string
     {
-        return 'bg-gray-500';
+        return 'bg-yellow-100';
     }
 
     public function percentage(): string
