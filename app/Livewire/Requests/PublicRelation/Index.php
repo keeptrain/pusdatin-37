@@ -16,9 +16,9 @@ class Index extends Component
 
     public array $statuses = [
         'all' => 'All',
-        'antrian_promkes' => 'Antrian Promkes',
+        'antrian_promkes' => 'Antrean Promkes',
         'kurasi_promkes' => 'Kurasi Promkes',
-        'antrian_pusdatin' => 'Antrian Pusdatin',
+        'antrian_pusdatin' => 'Antrean Pusdatin',
         'proses_pusdatin' => 'Proses Pusdatin',
         'completed' => 'Selesai',
     ];
