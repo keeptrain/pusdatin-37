@@ -1,4 +1,4 @@
-<x-letters.layout legend="Form Permohonan layanan">
+<x-layouts.form.request legend="Form Permohonan layanan" nameForm="Sistem Informasi & Data">
 
     <!-- Section 1: Basic information -->
     <form wire:submit="save" class="space-y-6 mt-6">
@@ -76,7 +76,7 @@
                                         <line x1="12" y1="16" x2="12" y2="12"></line>
                                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                                     </svg>
-                                    <span class="ml-2 text-sm font-medium text-gray-600">When is this required?</span>
+                                    <span class="ml-2 text-sm font-medium text-gray-600">Kapan ini dibutuhkan?</span>
                                 </div>
                                 <svg x-show="!open" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -113,4 +113,4 @@
         </div>
     </form>
 
-</x-letters.layout>
+</x-layouts.form.request>

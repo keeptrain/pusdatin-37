@@ -1,4 +1,4 @@
-<x-letters.layout legend="Form Permohonan layanan">
+<x-layouts.form.request legend="Form Permohonan layanan" nameForm="Kehumasan">
 
     <!-- Section 1: Basic information -->
     <form wire:submit="save" class="space-y-6 mt-6">
@@ -79,11 +79,27 @@
 
                 <flux:checkbox.group wire:model="mediaType" label="Jenis Media yang Diusulkan"
                     x-model="selectedMediaType">
-                    <flux:checkbox label="Audio" value="1" />
-                    <flux:checkbox label="Infografis" value="2" />
-                    <flux:checkbox label="Poster" value="3" />
-                    <flux:checkbox label="Video" value="4" />
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="flex flex-col space-y-2">
+                            <flux:checkbox label="Audio" value="1" />
+                            <flux:checkbox label="Infografis" value="2" />
+                            <flux:checkbox label="Poster" value="3" />
+                            <flux:checkbox label="Video" value="4" />
+                            <flux:checkbox label="Bumper" value="5" />
+                            <flux:checkbox label="Backdrop Kegiatan" value="6" />
+                        </div>
+                    
+                        <div class="flex flex-col space-y-2">
+                            <flux:checkbox label="Spanduk" value="7" />
+                            <flux:checkbox label="Roll Banner" value="8" />
+                            <flux:checkbox label="Sertifikat" value="9" />
+                            <flux:checkbox label="Press Release" value="10" />
+                            <flux:checkbox label="Artikel" value="11" />
+                        </div>
+                    </div>
                 </flux:checkbox.group>
+
+
 
                 <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                     <span
@@ -127,7 +143,7 @@
                             role="alert">
                             <div>
                                 <h4 class="font-bold text-lg mb-1">Perhatian!</h4>
-                                <p class="text-base">
+                                <p class=" text-base">
                                     Sepertinya Anda belum memilih **jenis media yang diusulkan** di bagian atas.
                                     Silakan pilih setidaknya satu jenis media untuk dapat mengunggah dokumen terkait.
                                 </p>
@@ -149,4 +165,4 @@
         </div>
     </form>
 
-</x-letters.layout>
+</x-layouts.form.request>
