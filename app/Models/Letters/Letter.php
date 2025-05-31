@@ -195,4 +195,15 @@ class Letter extends Model
 
         return $query;
     }
+
+    public static function getTotalRequestsByRole($rolesId = null)
+    {
+        $query = Letter::select('id');
+        if ($rolesId !== null) {
+            $query->whereIn('current_division', $rolesId);
+        }
+
+        return $query->count('id');
+    }
+
 }

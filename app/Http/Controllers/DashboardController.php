@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
-
 use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
@@ -14,62 +12,156 @@ class DashboardController extends Controller
 {
     public function index()
     {
-
+        // Load user roles
         $user = auth()->user()->load('roles');
         $userRoles = $user->roles()->pluck('id');
 
+        // Redirect user dashboard if the role is 'user'
         if ($user->hasRole('user')) {
             return view('dashboard-user');
         }
 
-        $totalServices = 0;
-        $totalPr = 0;
+        // Fetch data based on user roles
+        $data = $this->fetchDashboardData($user, $userRoles);
 
-        if ($user->hasRole(['administrator', 'head_verifier'])) {
-            $totalServices = $this->totalSiRequestServices() + $this->totalPrRequestServices();
-            $totalPr = $this->totalPrRequestServices();
-        } elseif ($user->hasRole(['si_verifier', 'data_verifier'])) {
-            $totalServices = $this->totalSiRequestServices($userRoles);
-        } elseif ($user->hasRole(['pr_verifier', 'promkes_verifier'])) {
-            $totalServices = $this->totalPrRequestServices();
-            $totalPr = $this->totalPrRequestServices();
-        }
-
-        $categoryPercentages = $this->calculateCategoryPercentages($totalPr);
-        $siStatusCounts = $this->getSiDataStatusCounts($userRoles);
-
-        if ($user->hasRole('head_verifier')) {
-            $siStatusCounts = $this->getSiDataStatusCounts();
-        }
-
-        // untuk bar chart
-        $monthlyLetterData = $this->getMonthlyLetterData($userRoles);
-        // untuk bar chart
-
+        // Pass data to the view
         return view('dashboard', [
-            'totalServices' => $totalServices,
-            'categoryPercentages' => $categoryPercentages,
-            'siStatusCounts' => $siStatusCounts,
-            'monthlyLetterData' => $monthlyLetterData,
+            'label' => $data['label'],
+            'totalServices' => $data['totalServices'],
+            'totalPr' => $data['totalPr'],
+            'widthPercentage' => $this->calculateWidthPercentage($data['totalServices'], $data['totalPr']),
+            'categoryPercentages' => $this->calculateCategoryPercentages($data['totalPr']),
+            'statusCounts' => $data['statusCounts'],
+            'monthlyLetterData' => $this->getMonthlyLetterData($userRoles),
         ]);
     }
 
-    public function totalSiRequestServices($rolesId = null)
+    /**
+     * Fetch dashboard data based on user roles.
+     *
+     * @param \App\Models\User $user
+     * @param \Illuminate\Support\Collection $userRoles
+     * @return array
+     */
+    private function fetchDashboardData($user, $userRoles)
     {
-        $query = Letter::select('id');
-
-        if ($rolesId !== null) {
-            $query->whereIn('current_division', $rolesId);
+        if ($user->hasRole(['administrator', 'head_verifier'])) {
+            return $this->getDataForHeadVerifier();
+        } elseif ($user->hasRole(['si_verifier', 'data_verifier'])) {
+            return $this->getDataForSiVerifierOrDataVerifier($user,$userRoles);
+        } elseif ($user->hasRole(['pr_verifier', 'promkes_verifier'])) {
+            return $this->getDataForPrVerifierOrPromkesVerifier();
+        } else if ($user->hasRole('promkes_verifier')) {
+            return $this->getDataForPromkesVerifier();
         }
 
-        return $query->count('id');
+        // Default fallback
+        return [
+            'totalServices' => 0,
+            'totalPr' => 0,
+            'statusCounts' => [],
+        ];
     }
 
-    public function totalPrRequestServices()
+    /**
+     * Get data for administrator or head verifier.
+     *
+     * @return array
+     */
+    private function getDataForHeadVerifier()
+    {
+        $totalPrRequest = $this->totalPrRequestServices();
+
+        return [
+            'label' => 'Sistem Informasi & Data serta Kehumasan',
+            'totalServices' => $this->totalRequestServices(
+                $this->totalSiRequestServices(),
+                $totalPrRequest
+            ),
+            'totalPr' => $totalPrRequest,
+            'statusCounts' => $this->getCombinedStatusCounts(),
+        ];
+    }
+
+    /**
+     * Get data for SI verifier or data verifier.
+     *
+     * @param \Illuminate\Support\Collection $userRoles
+     * @return array
+     */
+    private function getDataForSiVerifierOrDataVerifier($user, $userRoles)
+    {
+        if ($user->hasRole('si_verifier')) {
+            $label = 'Sistem Informasi';
+        } elseif ($user->hasRole('data_verifier')) {
+            $label = 'Pengelolaan Data';
+        }
+
+        return [
+            'label' => $label,
+            'totalServices' => $this->totalSiRequestServices($userRoles),
+            'totalPr' => 0,
+            'needVerification' => 'asd',
+            'statusCounts' => $this->getSiDataStatusCounts($userRoles),
+        ];
+    }
+
+    /**
+     * Get data for PR verifier or promkes verifier.
+     *
+     * @return array
+     */
+    private function getDataForPrVerifierOrPromkesVerifier()
+    {
+        $totalPr = $this->totalPrRequestServices();
+
+        return [
+            'label' => 'Kehumasan',
+            'totalServices' => $totalPr,
+            'totalPr' => $totalPr,
+            'statusCounts' => $this->getPrStatusCounts('pr'),
+        ];
+    }
+
+    private function getDataForPromkesVerifier()
+    {
+        $totalPr = $this->totalPrRequestServices();
+
+        return [
+            'label' => 'Perlu Kurasi',
+            'totalServices' => $totalPr,
+            'totalPr' => $totalPr,
+            'statusCounts' => $this->getPrStatusCounts('pr'),
+        ];
+    }
+
+    /**
+     * Calculate width percentage.
+     *
+     * @param int $totalServices
+     * @param int $totalPr
+     * @return float
+     */
+    private function calculateWidthPercentage($totalServices, $totalPr)
+    {
+        return $totalServices > 0 ? ($totalPr / $totalServices) * 100 : 0;
+    }
+
+    private function totalSiRequestServices($rolesId = null)
+    {
+        return Letter::getTotalRequestsByRole($rolesId);
+    }
+
+    private function totalPrRequestServices()
     {
         return Cache::remember('total_pr_requests', now()->addMinutes(10), function () {
             return PublicRelationRequest::count('id');
         });
+    }
+
+    private function totalRequestServices($siRequest, $prRequest)
+    {
+        return $siRequest + $prRequest;
     }
 
     private function getSiDataStatusCounts($currentDivision = null)
@@ -80,6 +172,7 @@ class DashboardController extends Controller
             'process' =>  'App\States\Process',
             'replied' =>  'App\States\Replied',
             'approvedKasatpel' => 'App\States\ApprovedKasatpel',
+            'repliedKapusdatin' =>  'App\States\RepliedKapusdatin',
             'approvedKapusdatin' => 'App\States\ApprovedKapusdatin',
         ];
 
@@ -99,15 +192,60 @@ class DashboardController extends Controller
             'process' => $statusCounts[$statusStates['process']] ?? 0,
             'replied' => $statusCounts[$statusStates['replied']] ?? 0,
             'approvedKasatpel' => $statusCounts[$statusStates['approvedKasatpel']] ?? 0,
-            'approvedKapusdatin' => $statusCounts[$statusStates['approvedKapusdatin']] ?? 0,
+            'repliedKapusdatin' => $statusCounts[$statusStates['repliedKapusdatin']] ?? 0,
+            'completed' => $statusCounts[$statusStates['approvedKapusdatin']] ?? 0,
         ];
     }
 
-    private function getPrStatusCounts()
+    private function getPrStatusCounts(?String $user = null)
     {
+        $statusStates = [
+            'pending' => 'App\States\PublicRelation\Pending',
+            'promkesQueue' =>  'App\States\PublicRelation\PromkesQueue',
+            'promkesCompleted' =>  'App\States\PublicRelation\PromkesComplete',
+            'pusdatinQueue' => 'App\States\PublicRelation\PusdatinQueue',
+            'pusdatinProcess' =>  'App\States\PublicRelation\PusdatinProcess',
+            'completed' => 'App\States\PublicRelation\Completed',
+        ];
+
+        $query = PublicRelationRequest::select('status', DB::raw('COUNT(*) as total'))
+            ->whereIn('status', array_values($statusStates))
+            ->groupBy('status');
+
+        $statusCounts = $query->pluck('total', 'status');
+
+        if ($user == 'pr') {
+            return [
+                'pending' => $statusCounts[$statusStates['pending']] ?? 0,
+                'promkesQueue' => $statusCounts[$statusStates['promkesQueue']] ?? 0,
+                'promkesCompleted' => $statusCounts[$statusStates['promkesCompleted']] ?? 0,
+                'pusdatinQueue' => $statusCounts[$statusStates['pusdatinQueue']] ?? 0,
+                'pusdatinProcess' => $statusCounts[$statusStates['pusdatinProcess']] ?? 0,
+                'completed' => $statusCounts[$statusStates['completed']] ?? 0,
+            ];
+        } else {
+            return [
+                'promkesCompleted' => $statusCounts[$statusStates['promkesCompleted']] ?? 0,
+                'completed' => $statusCounts[$statusStates['completed']] ?? 0,
+            ];
+        }
+    }
+
+    /**
+     * Combine status counts from SI and PR.
+     *
+     * @return array
+     */
+    private function getCombinedStatusCounts()
+    {
+        $siStatusCounts = $this->getSiDataStatusCounts();
+
+        $prStatusCounts = $this->getPrStatusCounts();
+
+        // Gabungkan status counts dari SI dan PR
         return [
-            'pending' => PublicRelationRequest::query()->where('status', 'pending')->count(),
-            'completed' => PublicRelationRequest::query()->where('status', 'completed')->count(),
+            'pending' => ($siStatusCounts['pending'] ?? 0) + ($prStatusCounts['promkesCompleted'] ?? 0),
+            'completed' => ($siStatusCounts['completed'] ?? 0) + ($prStatusCounts['completed'] ?? 0),
         ];
     }
 
@@ -125,26 +263,26 @@ class DashboardController extends Controller
         $total = $totalSi + $totalData + $totalPr;
 
         $percentages = [
-            'si' => $total > 0 ? round(($totalSi / $total) * 100, 2) : 0,
-            'data' => $total > 0 ? round(($totalData / $total) * 100, 2) : 0,
-            'pr' => $total > 0 ? round(($totalPr / $total) * 100, 2) : 0,
+            'si' => $total > 0 ? round(($totalSi / $total) * 100, 0) : 0,
+            'data' => $total > 0 ? round(($totalData / $total) * 100, 0) : 0,
+            'pr' => $total > 0 ? round(($totalPr / $total) * 100, 0) : 0,
         ];
 
         return $percentages;
     }
 
-     private function getMonthlyLetterData($userRoles = null)
+    private function getMonthlyLetterData($userRoles = null)
     {
         $user = auth()->user();
-        
+
         // Query untuk data Letter
         $letterQuery = Letter::select(
             DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as total')
         )
-        ->whereYear('created_at', Carbon::now()->year)
-        ->groupBy(DB::raw('MONTH(created_at)'))
-        ->orderBy('month');
+            ->whereYear('created_at', Carbon::now()->year)
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->orderBy('month');
 
         // Filter berdasarkan role user
         if (!$user->hasRole('head_verifier') && $userRoles !== null) {
@@ -158,16 +296,16 @@ class DashboardController extends Controller
             DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as total')
         )
-        ->whereYear('created_at', Carbon::now()->year)
-        ->groupBy(DB::raw('MONTH(created_at)'))
-        ->orderBy('month');
+            ->whereYear('created_at', Carbon::now()->year)
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->orderBy('month');
 
         $monthlyPrData = $prQuery->pluck('total', 'month');
 
         // Buat array untuk 12 bulan dengan nilai default 0
         $monthlyLetterCounts = [];
         $monthlyPrCounts = [];
-        
+
         for ($i = 1; $i <= 12; $i++) {
             $monthlyLetterCounts[] = $monthlyLetterData[$i] ?? 0;
             $monthlyPrCounts[] = $monthlyPrData[$i] ?? 0;
