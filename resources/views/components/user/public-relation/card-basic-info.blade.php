@@ -8,10 +8,7 @@
                         <p class="text-gray-500 text-sm mb-1">Sasaran: {{ ucfirst($prRequest->target) }}</p>
             </div>
             <div class="mt-4 md:mt-0">
-                <span
-                    class="inline-flex items-center px-3 py-1 rounded-full {{ $prRequest->status->badgeBg() }} text-white text-sm font-medium">
-                    {{ $prRequest->status->label() }}
-                </span>
+                <flux:notification.status-badge :status="$prRequest->status" />
             </div>
         </div>
 
@@ -45,16 +42,16 @@
                         hasPartNumber3: {{ $this->uploadedFile->contains(fn($file) => $file['part_number'] == 3) ? 'true' : 'false' }}
                         }">
                         @foreach ($this->uploadedFile as $file)
-                            <div class="flex flex-row gap-2">
-                                <x-lucide-circle-check-big class="w-4 text-green-500" />
-                                <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
-                                    class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
-                                    ?? $file['part_number'] }}</a>
-                            </div>
+                                            <div class="flex flex-row gap-2">
+                                                <x-lucide-circle-check-big class="w-4 text-green-500" />
+                                                <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
+                                                    class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
+                            ?? $file['part_number'] }}</a>
+                                            </div>
                         @endforeach
                     </div>
                 </div>
-                
+
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Bulan publikasi</p>
                     <p class="mt-1 text-gray-900">{{ ucfirst($prRequest->month_publication) }}</p>
@@ -68,7 +65,14 @@
                                     1 => 'Audio',
                                     2 => 'Infografis',
                                     3 => 'Poster',
-                                    4 => 'Video'
+                                    4 => 'Media',
+                                    5 => 'Bumper',
+                                    6 => 'Backdrop Kegiatan',
+                                    7 => 'Spanduk',
+                                    8 => 'Roll Banner',
+                                    9 => 'Sertifikat',
+                                    10 => 'Press Release',
+                                    11 => 'Artikel',
                                 }
                             @endphp
                             <li>
