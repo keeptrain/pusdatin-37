@@ -62,7 +62,7 @@ class ExportController extends Controller
 
 
         return Excel::download(
-            new DataVerifierExport($start, $end, $status),
+            new PrExport($start, $end, $status),
             'Data Filter Public Relation.xlsx'
         );
     }

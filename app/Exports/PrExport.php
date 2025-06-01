@@ -22,7 +22,7 @@ class PrExport implements FromCollection, WithHeadings
     public function collection()
     {
 
-        $query = PublicRelationRequest::with('user')->query();
+        $query = PublicRelationRequest::query()->with('user');
 
         if ($this->startDate) {
             $query->whereDate('created_at', '>=', $this->startDate);

@@ -9,7 +9,8 @@
 <div
     x-data="{ open: true }"
     x-show="open"
-    class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5);">
+    class="fixed inset-0 z-50 flex items-center justify-center"
+    style="background-color: rgba(0, 0, 0, 0.5);">
     <div
         x-show="open"
         x-transition.opacity
@@ -27,21 +28,21 @@
                 </svg>
             </button>
         </div>
+
         {{-- Isi Modal --}}
         <div class="px-6 py-4">
             <p class="text-sm text-gray-700 mb-4">
                 Data akan diekspor sesuai dengan pilihan berikut:
             </p>
-            <ul class="text-gray-800 mb-4">
+            <ul class="text-gray-800 mb-4 space-y-1">
                 <li><strong>Start Date:</strong> {{ $startDate ?? '—' }}</li>
-                <li><strong>End Date:</strong> {{ $endDate ?? '—' }}</li>
+                <li><strong>End Date:</strong> {{ $endDate   ?? '—' }}</li>
                 <li><strong>Status:</strong>
                     @if(!$status || $status === 'all')
                     All Status
                     @else
-                    {{-- Karena kita tidak memiliki array $statusOptions di sini, 
-                                 Anda bisa men-map key ke label manual, misalnya: --}}
                     @switch($status)
+                    {{-- Status “Letter” --}}
                     @case('disposition') Disposition @break
                     @case('process') Process @break
                     @case('replied') Replied @break
@@ -49,59 +50,74 @@
                     @case('replied_kapusdatin') Replied Kapusdatin @break
                     @case('approved_kapusdatin') Approved Kapusdatin @break
                     @case('rejected') Rejected @break
+
+                    {{-- Status “PublicRelationRequest” --}}
+                    @case('antrian_promkes') Antrian Promkes @break
+                    @case('kurasi_promkes') Kurasi Promkes @break
+                    @case('antrian_pusdatin') Antrian Pusdatin @break
+                    @case('proses_pusdatin') Proses Pusdatin @break
+                    @case('completed') Completed @break
+
                     @default Unknown
                     @endswitch
                     @endif
                 </li>
             </ul>
+
             <div class="flex justify-end space-x-2">
                 <button
                     @click="open = false; $wire.resetFilters()"
                     class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm">
                     Cancel
                 </button>
+
                 @hasanyrole('si_verifier')
                 <a
                     href="{{ route('export.si_verifier.filtered', [
-                            'start_date' => $startDate,
-                            'end_date'   => $endDate,
-                            'status'     => $status,
-                        ]) }}"
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
                     target="_blank"
-                    @click.prevent="                                                                
-                            $wire.resetFilters(); // reset properti di Livewire
-                            open = false;          // tutup modal di Alpine
-                            setTimeout(() => {
-                                window.open('{{ route('export.si_verifier.filtered', [
+                    @click.prevent="
+                        $wire.resetFilters();
+                        open = false;
+                        setTimeout(() => {
+                            window.open(
+                                '{{ route('export.si_verifier.filtered', [
                                     'start_date' => $startDate,
                                     'end_date'   => $endDate,
                                     'status'     => $status,
-                                ]) }}', '_blank');
-                            }, 100);
-                        "
+                                ]) }}',
+                                '_blank'
+                            );
+                        }, 100);
+                    "
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
                 </a>
                 @endhasanyrole
+
                 @hasanyrole('data_verifier')
                 <a
                     href="{{ route('export.data_verifier.filtered', [
-                            'start_date' => $startDate,
-                            'end_date'   => $endDate,
-                            'status'     => $status,
-                        ]) }}"
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
                     target="_blank"
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
                 </a>
                 @endhasanyrole
+
                 @hasanyrole('pr_verifier|promkes_verifier')
                 <a
                     href="{{ route('export.pr_verifier.filtered', [
-                            'start_date' => $startDate,
-                            'end_date'   => $endDate,
-                            'status'     => $status,
-                        ]) }}"
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
                     target="_blank"
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
