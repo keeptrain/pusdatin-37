@@ -43,6 +43,8 @@ class PublicRelationRequestNotification extends Notification implements ShouldQu
         $prRequest = $this->publicRelationRequest;
         $context = [];
 
+        $userName = User::findOrFail($prRequest->user_id)->name;
+
         $context = match (get_class($prRequest->status)) {
             PromkesComplete::class => $this->getContextResponsiblePerson($prRequest),
             PusdatinProcess::class =>  $this->getContextResponsiblePerson($prRequest),
@@ -52,6 +54,7 @@ class PublicRelationRequestNotification extends Notification implements ShouldQu
         return [
             'requestable_type' => get_class($prRequest),
             'requestable_id' => $prRequest->id,
+            'username' => $userName,
             'status' => $prRequest->status->label(),
             'message' => $prRequest->status->userNotificationMessage($context)
         ];
