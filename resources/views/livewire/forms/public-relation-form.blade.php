@@ -99,8 +99,6 @@
                     </div>
                 </flux:checkbox.group>
 
-
-
                 <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                     <span
                         class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
@@ -138,6 +136,42 @@
                             <x-letters.input-file-adapter title="Materi Video" model="uploadFile.4" required />
                         </div>
                     </template>
+                    <template x-if="selectedMediaType.includes('5')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Bumper" model="uploadFile.5" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('6')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Backdrop Kegiatan" model="uploadFile.6" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('7')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Spanduk" model="uploadFile.7" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('8')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Roll banner" model="uploadFile.8" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('9')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Sertifikat" model="uploadFile.9" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('10')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Press Release" model="uploadFile.10" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('11')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Artikel" model="uploadFile.11" required />
+                        </div>
+                    </template>
+                    
                     <template x-if="selectedMediaType === null || selectedMediaType.length === 0">
                         <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3"
                             role="alert">

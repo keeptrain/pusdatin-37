@@ -15,6 +15,7 @@ class PublicRelationRequestNotification extends Notification implements ShouldQu
     use Queueable;
 
     public PublicRelationRequest $publicRelationRequest;
+
     /**
      * Create a new notification instance.
      */

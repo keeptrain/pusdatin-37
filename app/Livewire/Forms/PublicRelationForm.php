@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Template;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
+use App\Services\FileUploadServices;
 use App\Models\PublicRelationRequest;
 use Illuminate\Support\Facades\Storage;
 
@@ -38,8 +39,8 @@ class PublicRelationForm extends Component
         ];
 
         if ($this->mediaType) {
-            foreach ($this->mediaType as $index => $number) {
-                $rules["uploadFile.$number"] = ['required'];
+            foreach ($this->mediaType as $index => $partNumber) {
+                $rules["uploadFile.$partNumber"] = ['required'];
             }
         }
 
@@ -57,18 +58,29 @@ class PublicRelationForm extends Component
             'uploadFile.1' => 'Membutuhkan file untuk materi audio',
             'uploadFile.2' => 'Membutuhkan file untuk materi infografis',
             'uploadFile.3' => 'Membutuhkan file untuk materi poster',
-            'uploadFile.4' => 'Membutuhkan file untuk materi video'
+            'uploadFile.4' => 'Membutuhkan file untuk materi video',
+            'uploadFile.5' => 'Membutuhkan file untuk materi bumper',
+            'uploadFile.6' => 'Membutuhkan file untuk materi backdrop Kegiata',
+            'uploadFile.7' => 'Membutuhkan file untuk materi spanduk',
+            'uploadFile.8' => 'Membutuhkan file untuk materi roll Banner',
+            'uploadFile.9' => 'Membutuhkan file untuk materi sertifikat',
+            'uploadFile.10' => 'Membutuhkan file untuk materi press Release',
+            'uploadFile.11' => 'Membutuhkan file untuk materi artikel',
+
         ];
     }
 
-    public function save()
+    public function save(FileUploadServices $fileUploadServices)
     {
         $this->validate();
 
-        DB::transaction(function () {
+        DB::transaction(function () use ($fileUploadServices) {
+            $validFiles = array_filter($this->uploadFile);
+
             $prData = $this->createPublicRelationForm();
             $prData->logStatus(null);
-            $this->createDocumentUpload($prData);
+            $uploads = $fileUploadServices->storeMultiplesFilesPr($validFiles, $this->mediaType);
+            $this->insertDocumentUploads($uploads, $prData);
             $prData->sendNewServiceRequestNotification('promkes_verifier');
 
             return $this->redirect("/history/public-relation/$prData->id", true);
@@ -98,7 +110,7 @@ class PublicRelationForm extends Component
 
     public function updatedMediaType($value)
     {
-        $allMediaTypes = ['1', '2', '3', '4'];
+        $allMediaTypes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
         foreach ($allMediaTypes as $type) {
             if (!in_array($type, $this->mediaType)) {
                 $this->removeUploadedFile($type);
@@ -113,35 +125,29 @@ class PublicRelationForm extends Component
         }
     }
 
-    public function collectUploadFile()
+    protected function insertDocumentUploads(array $uploads, $prRequest)
     {
-        return collect($this->uploadFile)
-            ->map(function ($file, $mediaType) {
-                return [
-                    'part_number' => $mediaType,
-                    'file_path' => $file->store('documents', 'public'),
-                ];
-            })->toArray();
-    }
+        $documentVersionId = collect();
 
-    public function createDocumentUpload($prData)
-    {
-        $uploadedFilesData = $this->collectUploadFile();
-
-        foreach ($uploadedFilesData as $fileData) {
-            $documentUpload = $prData->documentUploads()->create([
-                'part_number' => $fileData['part_number'],
+        foreach ($uploads as $upload) {
+            $documentUpload = $prRequest->documentUploads()->create([
+                'part_number' => $upload['part_number']
             ]);
 
             $version = $documentUpload->versions()->create([
-                'file_path' => $fileData['file_path'],
+                'document_upload_id' => $documentUpload->id,
+                'file_path' => $upload['file_path'],
                 'is_resolved' => true,
             ]);
 
             $documentUpload->update([
                 'document_upload_version_id' => $version->id,
             ]);
+
+            $documentVersionId->push($documentUpload->id);
         }
+
+        return $documentVersionId;
     }
 
     public function downloadTemplate()
