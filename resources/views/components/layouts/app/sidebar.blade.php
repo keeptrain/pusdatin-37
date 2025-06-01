@@ -75,7 +75,7 @@
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Systems')" class="grid">
                 @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier')
-                <flux:navlist.item :href="route('manage.templates')" icon="chart-pie" wire:navigate>Analytics
+                <flux:navlist.item :href="route('analytic.index')" icon="chart-pie" wire:navigate>Analytics
                 </flux:navlist.item>
                 @endhasanyrole
 

@@ -23,6 +23,8 @@ use App\Livewire\Documents\RevisionComparision;
 use App\Livewire\Letters\Data\ApplicationTable;
 use App\Livewire\Requests\PublicRelation\Index;
 use App\Http\Controllers\Admin\TemplateController;
+use App\Http\Controllers\ExportController;
+use App\Livewire\Admin\Analytic;
 
 Route::get('/', function () {
     return view('welcome');
@@ -58,7 +60,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
     Route::get('letter/{id}/version', RevisionComparision::class)->name('letter.version');
 
-      // Route::get('/letter/{letter}/activity', function (Letter $letter) {
+
+    // analytic
+
+    // Route::get('/letter/{letter}/activity', function (Letter $letter) {
     //     // Controller atau Closure ini akan memuat view yang me-render komponen Livewire
     //     return view('components.user.tracking-list', [
     //         'model' => $letter,
@@ -76,13 +81,26 @@ Route::middleware(['auth'])->group(function () {
     // });
 });
 
-Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_verifier|pr_verifier']], function () {
+Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_verifier|pr_verifier|head_verifier']], function () {
     Route::prefix('system')->group(function () {
         Route::get('users', ManageUsers::class)->name('manage.users');
         Route::get('templates', [TemplateController::class, 'index'])->name('manage.templates');
         Route::get('template/create', [TemplateController::class, 'create'])->name('create.template');
         Route::post('template/store', [TemplateController::class, 'store'])->name('store.template');
         // Route::get('templates/create', ManageTemplates::class)->name('template.create');
+
+
+        Route::get('analytic', Analytic::class, 'index')->name('analytic.index');
+        Route::get('/export/head-verifier', [ExportController::class, 'exportHeadVerifier'])->name('export.head_verifier');
+        Route::get('/export/si-verifier', [ExportController::class, 'exportSiVerifier'])->name('export.si_verifier');
+        Route::get('/export/si-verifier-filtered', [ExportController::class, 'exportSiVerifierWithFilter'])
+            ->name('export.si_verifier.filtered');
+        Route::get('/export/data-verifier', [ExportController::class, 'exportDataVerifier'])->name('export.data_verifier');
+        Route::get('/export/data-verifier-filtered', [ExportController::class, 'exportDataVerifierWithFilter'])
+            ->name('export.data_verifier.filtered');
+        Route::get('/export/pr-verifier', [ExportController::class, 'exportPrVerifier'])->name('export.pr_verifier');
+        Route::get('/export/pr-verifier-filtered', [ExportController::class, 'exportPrVerifierWithFilter'])
+            ->name('export.pr_verifier.filtered');
     });
 });
 
