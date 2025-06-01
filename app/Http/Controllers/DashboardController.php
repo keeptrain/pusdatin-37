@@ -22,6 +22,8 @@ class DashboardController extends Controller
 
         // Fetch data based on user roles
         $data = $this->fetchDashboardData($user, $userRoles);
+        $monthlySiData = $this->getMonthlySiVerifierData(now()->year);
+        $monthlyDataDiv = $this->getMonthlyDataDiv(now()->year);
 
         // Pass data to the view
         return view('dashboard', [
@@ -32,6 +34,9 @@ class DashboardController extends Controller
             'categoryPercentages' => $this->calculateCategoryPercentages($data['totalPr']),
             'statusCounts' => $data['statusCounts'],
             'monthlyLetterData' => $this->getMonthlyLetterData($userRoles),
+            'monthlySiData'     => $monthlySiData,
+            'monthlyDataDiv'    => $monthlyDataDiv,
+            
         ]);
     }
 
@@ -314,6 +319,64 @@ class DashboardController extends Controller
             'months' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             'letterData' => $monthlyLetterCounts,
             'prData' => $monthlyPrCounts
+        ];
+    }
+
+    private function getMonthlySiVerifierData(int $year): array
+    {
+        // Query data sistem informasi
+        $letterCounts = Letter::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('COUNT(*) as total')
+        )
+            ->whereYear('created_at', $year)
+            ->where('current_division', 3)
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        // Labels 12 bulan
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        // Isi array data dengan default 0 untuk bulan tanpa record
+        $data = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $data[] = $letterCounts[$m] ?? 0;
+        }
+
+        return [
+            'months'     => $months,
+            'letterData' => $data,
+        ];
+    }
+
+    private function getMonthlyDataDiv(int $year): array
+    {
+        // Query data permohonan data
+        $letterCounts = Letter::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('COUNT(*) as total')
+        )
+            ->whereYear('created_at', $year)
+            ->where('current_division', 4)
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+
+        // Labels 12 bulan
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        // Isi array data dengan default 0 untuk bulan tanpa record
+        $data = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $data[] = $letterCounts[$m] ?? 0;
+        }
+
+        return [
+            'months'     => $months,
+            'letterData' => $data,
         ];
     }
 }
