@@ -43,6 +43,6 @@ class PromkesComplete extends PublicRelationStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan dari " . $context['responsible_person'] . " membutuhkan disposisi kehumasan";
+        return "Permohonan ini membutuhkan disposisi kehumasan";
     }
 }
