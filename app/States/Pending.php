@@ -16,6 +16,26 @@ class Pending extends LetterStatus
         return 'text-yellow-800';
     }
 
+    public function badgeBg(): string
+    {
+        return 'bg-yellow-100';
+    }
+
+    public function icon(): string
+    {
+        return 'folder-check';
+    }
+
+    public function percentage(): string
+    {
+        return '10%';
+    }
+
+    public function percentageBar(): string
+    {
+        return 'w-[10%]';
+    }
+
     public function toastMessage(): string
     {
         return 'Berhasil mengajukan permohonan layanan';
@@ -28,26 +48,6 @@ class Pending extends LetterStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan layanan ini perlu disposisi" ;
-    }
-
-    public function icon(): string
-    {
-        return 'folder-check';
-    }
-
-    public function badgeBg(): string
-    {
-        return 'bg-yellow-100';
-    }
-
-    public function percentage(): string
-    {
-        return '10%';
-    }
-
-    public function percentageBar(): string
-    {
-        return 'w-[10%]';
+        return "Permohonan layanan ini perlu disposisi";
     }
 }

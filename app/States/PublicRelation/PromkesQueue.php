@@ -12,28 +12,19 @@ class PromkesQueue extends PublicRelationStatus
         return "Antrean Promkes";
     }
 
-    public function trackingMessage(): String
-    {
-        return "Sedang dalam antrian Promkes";
-    }
-
-    public function userNotificationMessage(array $context): string {
-        return "Permohonan baru di usulkan dari " . $context['responsible_person'];
-    }
-
     public function color(): string
     {
-        return "blue";
+        return "text-purpler-800";
+    }
+
+    public function badgeBg(): string
+    {
+        return 'bg-purple-100';
     }
 
     public function icon(): string
     {
         return 'ticket';
-    }
-
-    public function badgeBg(): string
-    {
-        return 'bg-blue-400';
     }
 
     public function percentage(): string
@@ -44,5 +35,15 @@ class PromkesQueue extends PublicRelationStatus
     public function percentageBar(): string
     {
         return 'w-[15%]';
+    }
+
+    public function trackingMessage(): String
+    {
+        return "Sedang dalam antrian Promkes";
+    }
+
+    public function userNotificationMessage(array $context): string
+    {
+        return "Permohonan baru di usulkan dari " . $context['responsible_person'];
     }
 }

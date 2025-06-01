@@ -8,7 +8,7 @@ class Replied extends LetterStatus
 {
     public function label(): string
     {
-        return 'Replied';
+        return 'Revisi Kasatpel';
     }
 
     public function color(): string

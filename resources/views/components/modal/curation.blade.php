@@ -9,13 +9,16 @@
         </template> --}}
 
         @foreach ($publicRelationRequest->documentUploads as $documentUpload)
-            <p class="mt-2">{{ $documentUpload->part_number_label}}</p>
-            <flux:input.file wire:model="curationFileUpload.{{ $documentUpload->part_number }}" />
-        @endforeach
+            <p class="mt-2">{{ $documentUpload->part_number_label }}</p>
+            @php
+                $fieldName = 'curationFileUpload.' . $documentUpload->part_number;
+            @endphp
 
-        @error('curationFileUpload')
-            <flux:text class="text-md text-red-500">{{ $message }}</flux:text>
-        @enderror
+            <flux:input.file wire:model="{{ $fieldName }}" />
+            @error($fieldName)
+                <flux:text class="text-md text-red-500 mt-3">{{ $message }}</flux:text>
+            @enderror
+        @endforeach
 
         <div class="flex justify-end space-x-2">
             <flux:modal.close>

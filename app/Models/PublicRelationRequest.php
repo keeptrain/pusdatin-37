@@ -145,7 +145,7 @@ class PublicRelationRequest extends Model
     {
         $this->update([
             'status' => $this->status->transitionTo(Completed::class),
-            'links' => $this->mediaLinks
+            'links' => $links
         ]);
     }
 }

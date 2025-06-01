@@ -53,23 +53,24 @@
         <template x-if="!fileName">
             <div class="flex items-center justify-center w-full px-4 py-3 text-center transition bg-white cursor-pointer focus:outline-none"
                 x-on:dragover.prevent x-on:drop="handleDrop" x-on:click="$refs.fileInput.click()">
-                <div class="p-3 space-y-2">
-                    <flux:button variant="outline">Click to upload</flux:button>
+                <div class="p-w space-y-2">
+                    <flux:button variant="outline" size="sm">Click to upload</flux:button>
                     <p class="text-sm text-gray-500">or drag and drop</p>
                     <p class="text-xs text-gray-400 mt-1">PDF only, max 1MB</p>
                 </div>
             </div>
         </template>
 
-        <!-- File Preview -->
         <template x-if="fileName">
-            <div class="flex pl-2 pt-4 pb-4 pr-2 items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <!-- Replace with your icon -->
-                    <x-flux::icon.document />
-
-                    <span class="text-sm text-gray-700 truncate" x-text="fileName"></span>
+            <div class="flex items-start justify-between pl-2 pt-4 pb-4 pr-2">
+                <div class="flex items-start gap-2 flex-1 min-w-0 mr-2">
+                    <div class="flex-shrink-0">
+                        <x-flux::icon.document />
+                    </div>
+                    
+                    <span class="text-sm text-gray-700 break-words" x-text="fileName"></span>
                 </div>
+        
                 <button type="button" x-on:click="
                         $wire.cancelUpload('{{ $model }}');
                         $wire.set('{{ $model }}', null);
@@ -78,10 +79,9 @@
                         progress = 0;
                         uploading = false;
                         $refs.fileInput.value = null;
-                " class="text-red-500 hover:text-red-700">
+                    " class="text-red-500 hover:text-red-700 flex-shrink-0 ml-auto">
                     <flux:icon.trash />
                 </button>
-
             </div>
         </template>
 

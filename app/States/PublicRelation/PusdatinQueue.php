@@ -12,28 +12,19 @@ class PusdatinQueue extends PublicRelationStatus
         return "Antrean Pusdatin";
     }
 
-    public function trackingMessage(): String
-    {
-        return "Permohonan layanan sedang dalam antrean di Pusat Data Teknologi dan Dinas Kesehatan";
-    }
-
-    public function userNotificationMessage(array $context): string {
-        return "Permohonan ini membutuhkan disposisi kehumasan";
-    }
-
     public function color(): string
     {
-        return "blue";
+        return "text-amber-800";
+    }
+
+    public function badgeBg(): string
+    {
+        return 'bg-amber-100';
     }
 
     public function icon(): string
     {
         return 'ticket-check';
-    }
-
-    public function badgeBg(): string
-    {
-        return 'bg-indigo-500';
     }
 
     public function percentage(): string
@@ -44,5 +35,15 @@ class PusdatinQueue extends PublicRelationStatus
     public function percentageBar(): string
     {
         return 'w-[60%]';
+    }
+
+    public function trackingMessage(): String
+    {
+        return "Permohonan layanan sedang dalam antrean di Pusat Data Teknologi dan Dinas Kesehatan";
+    }
+
+    public function userNotificationMessage(array $context): string
+    {
+        return "Permohonan ini membutuhkan disposisi kehumasan";
     }
 }

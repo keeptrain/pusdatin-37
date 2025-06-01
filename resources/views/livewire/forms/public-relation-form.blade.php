@@ -1,4 +1,4 @@
-<x-letters.layout legend="Form Permohonan layanan">
+<x-layouts.form.request legend="Form Permohonan layanan" nameForm="Kehumasan">
 
     <!-- Section 1: Basic information -->
     <form wire:submit="save" class="space-y-6 mt-6">
@@ -79,10 +79,24 @@
 
                 <flux:checkbox.group wire:model="mediaType" label="Jenis Media yang Diusulkan"
                     x-model="selectedMediaType">
-                    <flux:checkbox label="Audio" value="1" />
-                    <flux:checkbox label="Infografis" value="2" />
-                    <flux:checkbox label="Poster" value="3" />
-                    <flux:checkbox label="Video" value="4" />
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="flex flex-col space-y-2">
+                            <flux:checkbox label="Audio" value="1" />
+                            <flux:checkbox label="Infografis" value="2" />
+                            <flux:checkbox label="Poster" value="3" />
+                            <flux:checkbox label="Video" value="4" />
+                            <flux:checkbox label="Bumper" value="5" />
+                            <flux:checkbox label="Backdrop Kegiatan" value="6" />
+                        </div>
+                    
+                        <div class="flex flex-col space-y-2">
+                            <flux:checkbox label="Spanduk" value="7" />
+                            <flux:checkbox label="Roll Banner" value="8" />
+                            <flux:checkbox label="Sertifikat" value="9" />
+                            <flux:checkbox label="Press Release" value="10" />
+                            <flux:checkbox label="Artikel" value="11" />
+                        </div>
+                    </div>
                 </flux:checkbox.group>
 
                 <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
@@ -122,12 +136,48 @@
                             <x-letters.input-file-adapter title="Materi Video" model="uploadFile.4" required />
                         </div>
                     </template>
+                    <template x-if="selectedMediaType.includes('5')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Bumper" model="uploadFile.5" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('6')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Backdrop Kegiatan" model="uploadFile.6" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('7')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Spanduk" model="uploadFile.7" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('8')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Roll banner" model="uploadFile.8" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('9')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Sertifikat" model="uploadFile.9" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('10')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Press Release" model="uploadFile.10" required />
+                        </div>
+                    </template>
+                    <template x-if="selectedMediaType.includes('11')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Artikel" model="uploadFile.11" required />
+                        </div>
+                    </template>
+                    
                     <template x-if="selectedMediaType === null || selectedMediaType.length === 0">
                         <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3"
                             role="alert">
                             <div>
                                 <h4 class="font-bold text-lg mb-1">Perhatian!</h4>
-                                <p class="text-base">
+                                <p class=" text-base">
                                     Sepertinya Anda belum memilih **jenis media yang diusulkan** di bagian atas.
                                     Silakan pilih setidaknya satu jenis media untuk dapat mengunggah dokumen terkait.
                                 </p>
@@ -149,4 +199,4 @@
         </div>
     </form>
 
-</x-letters.layout>
+</x-layouts.form.request>

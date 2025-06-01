@@ -6,7 +6,7 @@ class RepliedKapusdatin extends LetterStatus
 {
     public function label(): string
     {
-        return 'Balasan Kapusdatin';
+        return 'Revisi Kapusdatin';
     }
 
     public function color(): string

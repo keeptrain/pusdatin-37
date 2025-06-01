@@ -14,9 +14,12 @@ class Notifications extends Component
 {
     public $notificationCount = 0;
 
+    public array $userTabs = [];
+
     public function mount()
     {
         $this->notificationCount = $this->emitCount();
+        $this->userTabs =  $this->tabBaseRoles();
     }
 
     public function placeholder()
@@ -42,6 +45,24 @@ class Notifications extends Component
         return $this->prepareNotifications($notifications);
     }
 
+    private function tabBaseRoles()
+    {
+        $user = auth()->user();
+        $userTabs = [];
+       
+        if ($user->hasRole('head_verifier|si_verifier|data_verifier')) {
+            $userTabs = ['all', 'disposisi', 'revisi', 'disetujui' ];
+        } else if ($user->hasRole('pr_verifier')){
+            $userTabs = ['all', 'disposisi' ];
+        } else if ($user->hasRole('promkes_verifier')) {
+            $userTabs = ['all', 'revisi', 'disetujui' ];
+        } else {
+            $userTabs = ['all', 'revisi', 'disetujui' ];
+        }
+
+        return $userTabs;
+    }
+
     private function prepareNotifications($rawNotifications)
     {
         return collect($rawNotifications)->map(function ($notification) {
@@ -55,11 +76,10 @@ class Notifications extends Component
         })->groupBy(function ($notification) {
             $createdAt = Carbon::parse($notification['created_at']);
 
-
             return match (true) {
-                $createdAt->isToday() => 'Today',
-                $createdAt->isYesterday() => 'Yesterday',
-                default => 'Earlier',
+                $createdAt->isToday() => 'Hari ini',
+                $createdAt->isYesterday() => 'Kemarin',
+                default => 'Terdahulu',
             };
         })->mapWithKeys(function ($items, $dateLabel) {
             return [
@@ -84,7 +104,7 @@ class Notifications extends Component
     #[Computed]
     public function getFilteredDispositionNotifications()
     {
-        return $this->getFilteredNotifications(['Permohonan Masuk', 'Disposisi']);
+        return $this->getFilteredNotifications(['Permohonan Masuk', 'Disposisi', 'Selesai Kurasi']);
     }
 
     #[Computed]

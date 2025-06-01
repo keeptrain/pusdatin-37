@@ -6,8 +6,10 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\DB;
+use App\Models\Documents\DocumentUpload;
+use App\Models\Documents\UploadVersion;
 
 class Edit extends Component
 {
@@ -20,7 +22,6 @@ class Edit extends Component
 
     public $title;
     public $reference_number;
-    public $body;
 
     public $revisedFiles = [];
 
@@ -35,8 +36,8 @@ class Edit extends Component
 
         $revisedParts = $this->letterNeedRevision();
 
-        foreach ($revisedParts as $partName) {
-            $rules["revisedFiles.$partName"] = 'required|file|mimes:pdf|max:1048';
+        foreach ($revisedParts as $partNumber) {
+            $rules["revisedFiles.$partNumber"] = 'required|file|mimes:pdf|max:1048';
         }
 
         return $rules;
@@ -47,9 +48,11 @@ class Edit extends Component
         return [
             'title.required' => 'Title is required',
             'reference_number.required' => 'Reference number is required',
-            'revisedFiles.1.required' => 'Nota dinas harus ada',
-            'revisedFiles.2.required' => 'SOP harus ada',
-            'revisedFiles.3.required' => 'Pendukung harus ada',
+            'revisedFiles.1.required' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus ada',
+            'revisedFiles.2.required' => 'SOP Aplikasi SPBE harus ada',
+            'revisedFiles.3.required' => 'Pakta Integritas Pemanfaatan Aplikasi harus ada',
+            'revisedFiles.4.required' => 'Form RFC Pusdatinkes harus ada',
+            'revisedFiles.5.required' => 'NDA Pusdatin Dinkes harus ada',
         ];
     }
 
@@ -61,70 +64,63 @@ class Edit extends Component
         ])->findOrFail($id);
 
         $this->fill(
-            $this->letter->only('title', 'responsible_person', 'reference_number')
+            $this->letter->only('title', 'reference_number')
         );
     }
 
     public function save()
     {
         $this->validate();
-        
+
         DB::transaction(function () {
             $letter = $this->letter;
 
-            $letter->update([
-                'title' => $this->title,
-                'reference_number' => $this->reference_number,
-            ]);
-
             $revisedParts = [];
+            $pathsToUpdateInRevisions = [];
+            $documentUploadIdsToMarkNotNeedingRevision = [];
 
             foreach ($this->revisedFiles as $partNumber => $file) {
-                // Cari DocumentUpload yang sesuai dengan part_number
-                $documentUpload = $this->getDocumentUploadNeedRevisions($partNumber);
+                $documentUpload = $letter->documentUploads->first(function ($doc) use ($partNumber) {
+                    return $doc->part_number == $partNumber && $doc->need_revision;
+                });
 
-                // Throw error untuk documentupload yang tidak ada part_number    
                 if (!$documentUpload) {
-                    throw new \Exception("DocumentUpload not found for part_number: $partNumber");
+                    continue;
                 }
 
-                // Simpan file ke storage
                 $path = $file->store('documents', 'public');
 
-                // Meload versions secara eager
-                $documentUpload = $documentUpload->load('versions');
+                $documentUpload->load('versions');
 
-                $revision = $documentUpload->versions()
+                $revision = $documentUpload->versions
                     ->where('is_resolved', false)
-                    // ->whereNull('file_path')
-                    ->orderBy('id', 'desc')
+                    ->whereNull('file_path')
+                    ->sortByDesc('id')
                     ->first();
 
                 if (!$revision) {
-                    throw new \Exception("No valid revision found for part_number: $partNumber");
+                    continue;
                 }
 
-                // Update data
-                $letter->update([
-                    'active_revision' => false,
-                    'need_review' => true,
-                ]);
+                // Kumpulkan untuk update
+                $pathsToUpdateInRevisions[$revision->id] = $path;
+                $documentUploadIdsToMarkNotNeedingRevision[] = $documentUpload->id;
 
-                $documentUpload->update([
-                    'need_revision' => false,
-                ]);
-
-                $revision->update([
-                    'file_path' => $path,
-                ]);
-
-                $partName = $documentUpload->part_number_label;
-                $revisedParts[] = $partName;
+                $revisedParts[] = $documentUpload->part_number_label;
             }
 
-            if ($letter->isDirty()) {
-                $letter->save();
+            if (!empty($documentUploadIdsToMarkNotNeedingRevision)) {
+                DocumentUpload::whereIn('id', array_unique($documentUploadIdsToMarkNotNeedingRevision))
+                    ->update(['need_revision' => false]);
             }
+
+            if (!empty($pathsToUpdateInRevisions)) {
+                foreach ($pathsToUpdateInRevisions as $revisionId => $filePath) {
+                    UploadVersion::where('id', $revisionId)->update(['file_path' => $filePath]);
+                }
+            }
+
+            $letter->updatedForNeedReview();
 
             $letter->refresh();
 
@@ -139,7 +135,7 @@ class Edit extends Component
                 'message' => $letter->status->toastMessage(),
             ]);
 
-            return $this->redirect("/history/information-system/$this->letterId", true);
+            return $this->redirect("/history/information-system/{$this->letterId}", true);
         });
     }
 
@@ -155,14 +151,6 @@ class Edit extends Component
         return $this->letter->documentUploads->contains(function ($documentUpload) {
             return $documentUpload->need_revision;
         });
-    }
-
-    public function getDocumentUploadNeedRevisions(int $partNumber)
-    {
-        return $this->letter->documentUploads
-            ->where('part_number', $partNumber)
-            ->where('need_revision', true)
-            ->first();
     }
 
     public function letterNeedRevision()

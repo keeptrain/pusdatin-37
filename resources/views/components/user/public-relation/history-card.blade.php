@@ -5,10 +5,7 @@
             <div class="flex items-center w-1/2 ">
                 <h2 class="text-xl font-bold text-gray-800">Tema: {{ $prRequest->theme }} </h2>
             </div>
-            <div class="flex items-center {{ $prRequest->status->badgeBg() }} text-white px-3 py-1 rounded-full ">
-                <x-dynamic-component :component=" 'lucide-' . $prRequest->status->icon() " class="w-4 h-4 mr-1" />
-                <span class="text-sm font-medium">{{ $prRequest->status->label() }}</span>
-            </div>
+            <flux:notification.status-badge :status="$prRequest->status" />
         </div>
 
         <div class="flex items-center gap-1 text-gray-500 mb-6">

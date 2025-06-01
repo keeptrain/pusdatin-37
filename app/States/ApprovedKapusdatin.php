@@ -8,7 +8,7 @@ class ApprovedKapusdatin extends LetterStatus
 {
     public function label(): string
     {
-        return 'Approved by Kapusdatin';
+        return 'Disetujui Kapusdatin';
     }
 
     public function color(): string

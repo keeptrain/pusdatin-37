@@ -49,9 +49,9 @@
 
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Manage')" class="grid">
-                @hasanyrole('administrator|head_verifier')
+                {{-- @hasanyrole('administrator|head_verifier')
                 <flux:navlist.item href="#" icon="arrow-right-circle">Disposisi</flux:navlist.item>
-                @endrole
+                @endrole --}}
                 @hasanyrole('head_verifier')
                 <flux:navlist.item :href="route('letter.table')" icon="folder-open"
                     :current="request()->routeIs('letter.table')" wire:navigate>Layanan SI & Data</flux:navlist.item>

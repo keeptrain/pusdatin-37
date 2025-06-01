@@ -2,18 +2,14 @@
 
 namespace App\Livewire\Forms;
 
-use Carbon\Carbon;
+use App\Enums\Division;
 use Livewire\Component;
 use App\Models\Template;
-use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Documents\DocumentUpload;
-use App\Models\letters\LettersMapping;
 use Illuminate\Support\Facades\Storage;
+use App\Services\FileUploadServices;
 
 class SiDataRequestForm extends Component
 {
@@ -29,15 +25,20 @@ class SiDataRequestForm extends Component
 
     public function rules()
     {
-        return [
+        $rules = [
             'title' => 'required|string|max:255',
             'reference_number' => 'required|string',
             'files.0' => 'required|file|mimes:pdf|max:1048',
             'files.1' => 'required|file|mimes:pdf|max:1048',
-            'files.2' => 'file|mimes:pdf|max:1048',
-            // 'files.3' => 'required|file|mimes:pdf|max:1048',
-            // 'files.4' => 'file|mimes:pdf|max:1048',
+            'files.2' => 'required|file|mimes:pdf|max:1048',
+            'files.3' => 'required|file|mimes:pdf|max:1048',
         ];
+
+        if (!empty($this->files[4])) {
+            $rules['files.4'] = 'file|mimes:pdf|max:1048';
+        }
+
+        return $rules;
     }
 
     public function messages()
@@ -47,20 +48,23 @@ class SiDataRequestForm extends Component
             'reference_number.required' => 'Nomor surat harus ada',
             'files.0.required' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus ada',
             'files.1.required' => 'SOP Aplikasi SPBE harus ada',
-            'files.2.required' => 'Pakta Integritas Pemanfaatan Aplikasi ada',
-            // 'files.3.required' => 'NDA Pusdatin Dinkes harus ada',
+            'files.2.required' => 'Pakta Integritas Pemanfaatan Aplikasi harus ada',
+            'files.3.required' => 'Form RFC Pusdatinkes harus ada',
+            // 'files.4.required' => 'NDA Pusdatin Dinkes harus ada',
         ];
     }
 
-    public function save()
+    public function save(FileUploadServices $fileUploadServices)
     {
         $this->validate();
 
-        DB::transaction(function () {
+        DB::transaction(function () use($fileUploadServices) {
+            $validFiles = array_filter($this->files);
+
             $letter = $this->createLetter();
-            $uploads = $this->storeFiles();
-            $uploadIds = $this->insertDocumentUploads($uploads, $letter);
-            $this->createLetterMappings($letter->id, $uploadIds);
+            $uploads = $fileUploadServices->storeMultiplesFiles($validFiles);
+            $this->insertDocumentUploads($uploads, $letter);
+            // $this->createLetterMappings($letter->id, $uploadIds);
             $letter->logStatus(null);
 
             // Notifikasi kirim ke kapusdatin
@@ -74,40 +78,14 @@ class SiDataRequestForm extends Component
         });
     }
 
-    public function nameFile(): string
-    {
-        $user = Auth::user();
-
-        $dateTime = Carbon::now()->format(format: 'YmdHis');
-
-        $nameWithoutExtension = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
-
-        $fileName = $nameWithoutExtension . '-' . Str::slug($user->name) . '-' . $dateTime . '.pdf';
-
-        return $fileName;
-    }
-
     public function createLetter()
     {
         return Letter::create([
             'user_id' => auth()->user()->id,
             'title' => $this->title,
             'reference_number' => $this->reference_number,
-            'active_checking' => 2,
+            'active_checking' => Division::HEAD_ID->value,
         ]);
-    }
-
-    public function storeFiles(): array
-    {
-        return collect($this->files)
-            ->sortKeys()
-            ->values()
-            ->map(function ($file, $index) {
-                return [
-                    'part_number' => $index + 1,
-                    'file_path' => $file->store('documents', 'public'),
-                ];
-            })->toArray();
     }
 
     protected function insertDocumentUploads(array $uploads, $letter)
@@ -125,8 +103,6 @@ class SiDataRequestForm extends Component
                 'is_resolved' => true,
             ]);
 
-            // $this->createDocumentUploadVersion($documentUpload,$upload['file_path']);
-
             $documentUpload->update([
                 'document_upload_version_id' => $version->id,
             ]);
@@ -137,18 +113,18 @@ class SiDataRequestForm extends Component
         return $documentVersionId;
     }
 
-    protected function createLetterMappings(int $letterId, Collection $uploadIds): void
-    {
-        $mappings = $uploadIds->map(function ($uploadId) use ($letterId) {
-            return [
-                'letter_id' => $letterId,
-                'letterable_type' => DocumentUpload::class,
-                'letterable_id' => $uploadId,
-            ];
-        })->toArray();
+    // protected function createLetterMappings(int $letterId, Collection $uploadIds): void
+    // {
+    //     $mappings = $uploadIds->map(function ($uploadId) use ($letterId) {
+    //         return [
+    //             'letter_id' => $letterId,
+    //             'letterable_type' => DocumentUpload::class,
+    //             'letterable_id' => $uploadId,
+    //         ];
+    //     })->toArray();
 
-        LettersMapping::insert($mappings);
-    }
+    //     LettersMapping::insert($mappings);
+    // }
 
     public function downloadTemplate($typeNumber)
     {

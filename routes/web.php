@@ -87,6 +87,7 @@ Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_veri
         Route::get('templates', [TemplateController::class, 'index'])->name('manage.templates');
         Route::get('template/create', [TemplateController::class, 'create'])->name('create.template');
         Route::post('template/store', [TemplateController::class, 'store'])->name('store.template');
+        Route::post('template/{typeNumber}', [TemplateController::class, 'download'])->name('download.template');
         // Route::get('templates/create', ManageTemplates::class)->name('template.create');
 
 
