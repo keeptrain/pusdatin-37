@@ -11,11 +11,11 @@
         </div>
     </div>
 
-    <div x-data="{ activeTab: 'all' }" class="w-full max-w-3xl mx-auto">
+    <div x-data="{ activeTab: 'all', tabBasedRole: {{ json_encode($userTabs) }} }" class="w-full max-w-3xl mx-auto">
         {{-- Navigasi Tab --}}
         <div class="mb-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <ul class="flex -mb-px text-sm font-medium text-center" id="notificationTabs" role="tablist">
-                <template x-for="tab in ['all', 'disposisi', 'revisi', 'disetujui']" :key="tab">
+                <template x-for="tab in tabBasedRole" :key="tab">
                     <li class="mr-2" role="presentation">
                         <button @click="activeTab = tab" :class="{
                                     'text-blue-600 border-blue-600 active dark:text-blue-500 dark:border-blue-500': activeTab === tab,
@@ -55,23 +55,10 @@
             @endforelse
         </div>
 
+        @hasrole('head_verifier|si_verifier|data_verifier')
         <!-- Panel untuk "Disposisi" -->
         <div x-show="activeTab === 'disposisi'">
             @foreach ($this->getFilteredDispositionNotifications as $dateLabel => $statuses)
-                @foreach ($statuses as $status => $items)
-                    <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
-                        <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
-                    </div>
-                    @foreach ($items as $item)
-                        <x-notifications.notificaition-adapter :item="$item" />
-                    @endforeach
-                @endforeach
-            @endforeach
-        </div>
-
-        <!-- Panel untuk "Balasan" -->
-        <div x-show="activeTab === 'revisi'">
-            @foreach ($this->getFilteredRepliedNotifications as $dateLabel => $statuses)
                 @foreach ($statuses as $status => $items)
                     <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
                         <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
@@ -96,5 +83,22 @@
                 @endforeach
             @endforeach
         </div>
+        @endhasrole
+
+        <!-- Panel untuk "Balasan" -->
+        <div x-show="activeTab === 'revisi'">
+            @foreach ($this->getFilteredRepliedNotifications as $dateLabel => $statuses)
+                @foreach ($statuses as $status => $items)
+                    <div class="px-4 py-2 bg-zinc-50 border-b border-gray-200 mt-4">
+                        <h3 class="text-sm font-medium text-gray-500">{{ $dateLabel }}</h3>
+                    </div>
+                    @foreach ($items as $item)
+                        <x-notifications.notificaition-adapter :item="$item" />
+                    @endforeach
+                @endforeach
+            @endforeach
+        </div>
+
+
     </div>
 </div>
