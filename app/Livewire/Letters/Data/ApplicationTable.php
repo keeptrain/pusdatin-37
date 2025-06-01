@@ -18,12 +18,13 @@ class ApplicationTable extends Component
 
     public array $statuses = [
         'all' => 'All',
-        'disposition' => 'Disposition',
-        'process' => 'Process',
-        'replied' => 'Replied',
-        'approved_kasatpel' => 'Approved by Kasatpel',
-        'approved_kapusdatin' => 'Approved by Kaspudatin',
-        'rejected' => 'Rejected',
+        'disposition' => 'Disposisi',
+        'process' => 'Proses',
+        'replied' => 'Revisi Kasatpel',
+        'approved_kasatpel' => 'Disetujui Kasatpel',
+        'replied_kapusdatin' => 'Revisi Kapusdatin',
+        'approved_kapusdatin' => 'Disetujui Kapusdatin',
+        'rejected' => 'Ditolak',
     ];
 
     public $sortBy = 'date_created';
@@ -70,7 +71,7 @@ class ApplicationTable extends Component
         if ($this->searchQuery) {
             $query->where(function ($q) {
                 $q->where('title', 'like', '%' . $this->searchQuery . '%')
-                    ->orWhere('responsible_person', 'like', '%' . $this->searchQuery . '%')
+                    ->orWhere('current_division', '%' . $this->searchQuery . '%')
                     ->orWhereHas('user', function ($q) {
                         $q->where('name', 'like', '%' . $this->searchQuery . '%');
                     });
@@ -89,15 +90,6 @@ class ApplicationTable extends Component
             'latest_activity' => ['updated_at', 'desc'],
             default => ['updated_at', 'desc'],
         };
-    }
-
-    public function toggleSelectAll()
-    {
-        if ($this->filterStatus != 'all' && count($this->selectedLetters) === $this->letters->count()) {
-            $this->selectedLetters = [];
-        } else {
-            $this->selectedLetters = $this->letters->pluck('id')->toArray();
-        }
     }
 
     public function deleteSelected()
