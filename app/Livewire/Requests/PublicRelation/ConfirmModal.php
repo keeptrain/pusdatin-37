@@ -44,12 +44,25 @@ class ConfirmModal extends Component
         $dynamicRules = [];
 
         foreach ($this->publicRelationRequest->documentUploads as $documentUploadItem) {
-            $dynamicRules["curationFileUpload.{$documentUploadItem->part_number}"] = ['required', 'file', 'mimes:pdf,doc,docx,ppt,pptx'];
+            $dynamicRules["curationFileUpload.{$documentUploadItem->part_number}"] = ['required'];
         }
 
         $this->validate(
             $dynamicRules,
-            ['curationFileUpload.required' => 'File kurasi di perlukan']
+            [
+                'curationFileUpload.required' => 'File kurasi di perlukans',
+                'curationFileUpload.1' => 'File kurasi audio di perlukan',
+                'curationFileUpload.2' => 'File kurasi infografis di perlukan',
+                'curationFileUpload.3' => 'File kurasi poster di perlukan',
+                'curationFileUpload.4' => 'File kurasi media di perlukan',
+                'curationFileUpload.5' => 'File kurasi bumper di perlukan',
+                'curationFileUpload.6' => 'File kurasi backdrop kegiatan di perlukan',
+                'curationFileUpload.7' => 'File kurasi spanduk di perlukan',
+                'curationFileUpload.8' => 'File kurasi roll banner di perlukan',
+                'curationFileUpload.9' => 'File kurasi sertifikat di perlukan',
+                'curationFileUpload.10' => 'File kurasi press release di perlukan',
+                'curationFileUpload.11' => 'File kurasi artikel di perlukan',
+            ]
         );
 
         $this->authorize('curationPromkes', $prRequest);
