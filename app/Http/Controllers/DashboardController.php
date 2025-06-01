@@ -12,8 +12,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Load user roles
-        $user = auth()->user()->load('roles');
+        $user = auth()->user();
         $userRoles = $user->roles()->pluck('id');
 
         // Redirect user dashboard if the role is 'user'
@@ -48,7 +47,7 @@ class DashboardController extends Controller
         if ($user->hasRole(['administrator', 'head_verifier'])) {
             return $this->getDataForHeadVerifier();
         } elseif ($user->hasRole(['si_verifier', 'data_verifier'])) {
-            return $this->getDataForSiVerifierOrDataVerifier($user,$userRoles);
+            return $this->getDataForSiVerifierOrDataVerifier($user, $userRoles);
         } elseif ($user->hasRole(['pr_verifier', 'promkes_verifier'])) {
             return $this->getDataForPrVerifierOrPromkesVerifier();
         } else if ($user->hasRole('promkes_verifier')) {
