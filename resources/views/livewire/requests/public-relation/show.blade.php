@@ -57,7 +57,7 @@
 
                     <h4 class="text-gray-500 mb-1">Tanggal Spesifik Publikasi Media</h4>
                     <p class="text-gray-800">
-                        {{ $this->publicRelation->spesific_date }}
+                        {{ $this->publicRelation->spesificDate() }}
                     </p>
 
                     <h4 class="text-gray-500 mb-1">Tanggal Usulan Masuk</h4>
@@ -65,15 +65,40 @@
                         {{ $this->publicRelation->createdAtDMY() }}
                     </p>
                     
-                    <h4 class="text-gray-500 mb-1">Jenis media</h4>
-                    <template x-for="part in {{ json_encode($this->publicRelation->documentUploads->toArray()) }}">
-                        <section>
-                            <li x-text="part.part_number_label"></li>
-                        </section>
-                    </template>
+                    <section>
+                        <h4 class="text-gray-500 mb-1">Jenis media</h4>
+                        <div x-data="{ 
+                            parts: {{ json_encode($this->publicRelation->documentUploads) }},
+                            links: {{ json_encode($this->publicRelation->links) }}
+                        }">
+                            <template x-for="part in parts" :key="part.id">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <!-- Jika ada link -->
+                                    <template x-if="links[part.part_number]">
+                                        <div class="flex flex-1">
+                                            <x-lucide-circle-check-big class="w-4 mr-3 text-green-500" />
+                                            <a :href="links[part.part_number]" target="_blank" class="hover:underline">
+                                                <span x-text="part.part_number_label"></span>
+                                            </a>
+                                        </div>
+                                    </template>
 
-                    <h4 class="text-gray-500 mb-1">Status</h4>
-                    <flux:notification.status-badge :status="$this->publicRelation->status" />
+                                    <!-- Jika link null -->
+                                    <template x-if="links === null">
+                                        <div class="flex flex-1">
+                                            <x-lucide-circle class="w-4 mr-3 text-gray-400" />
+                                        <span x-text="part.part_number_label"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h4 class="text-gray-500 mb-1">Status</h4>
+                        <flux:notification.status-badge :status="$this->publicRelation->status" />
+                    </section>
         
                     <div class="border-1 rounded-lg p-3">
                         <h4 class="text-gray-500 mb-3">Materi</h4>
