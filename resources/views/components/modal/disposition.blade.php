@@ -9,7 +9,7 @@
         <!-- Radio Group -->
         <flux:radio.group wire:model="status" name="status" label="Status" badge="Required">
             <flux:radio value="disposition" name="status" label="Disposisi" x-on:click="status = 'approved'" />
-            <flux:radio value="rejected" name="status" label="Rejected" x-on:click="status = 'rejected'" />
+            <flux:radio value="rejected" name="status" label="Ditolak" x-on:click="status = 'rejected'" />
             {{-- <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
         </flux:radio.group>
 
