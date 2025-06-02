@@ -13,7 +13,7 @@
                 <a href="#layanan" class="text-gray-700 hover:text-[#364872] transition-colors">Layanan</a>
                 <a href="#cara-kerja" class="text-gray-700 hover:text-[#364872] transition-colors">Cara Kerja</a>
                 @auth
-                    <a href="{{ route('home') }}"
+                    <a href="{{ route('dashboard') }}"
                         class="bg-[#364872] hover:bg-[#25262a] text-white px-4 py-1 rounded-md">Dashboard</a>
                 @else
                     <a href="{{ route('login') }}"
