@@ -4,20 +4,11 @@ namespace App\States\PublicRelation;
 
 use App\States\PublicRelation\PublicRelationStatus;
 
-class Pending extends PublicRelationStatus {
-
+class Pending extends PublicRelationStatus
+{
     public function label(): String
     {
         return "Permohonan Masuk";
-    }
-
-    public function trackingMessage(): String
-    {
-        return "Permohonan layanan sudah kami terima, mohon tunggu konfirmasi selanjutnya.";
-    }
-
-    public function userNotificationMessage(array $context): string {
-        return "Permohonan baru telah di usulkan dari " . $context['responsible_person'];
     }
 
     public function color(): string
@@ -43,5 +34,15 @@ class Pending extends PublicRelationStatus {
     public function percentageBar(): string
     {
         return 'w-[10%]';
+    }
+
+    public function trackingMessage(): String
+    {
+        return "Permohonan layanan sudah kami terima, mohon tunggu konfirmasi selanjutnya.";
+    }
+
+    public function userNotificationMessage(array $context): string
+    {
+        return "Permohonan baru telah di usulkan";
     }
 }
