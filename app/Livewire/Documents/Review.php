@@ -79,11 +79,12 @@ class Review extends Component
 
             $letter->updatedForCompletedReview();
 
-            return redirect()->to("/letter/$this->letterId")
-                ->with('status', [
-                    'variant' => 'success',
-                    'message' => $this->letter->status->toastMessage(),
-                ]);
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => 'Berhasil melakukan review'
+            ]);
+
+            return $this->redirect("/letter/$this->letterId", true);
         });
     }
 
