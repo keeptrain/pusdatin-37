@@ -148,4 +148,20 @@ class PublicRelationRequest extends Model
             'links' => $links
         ]);
     }
+
+    public function handleRedirectNotification($user)
+    {
+        if ($user->can('queue pr pusdatin') && $this->status instanceof PromkesComplete) {
+            $this->transitionStatusToPusdatinQueue();
+            $this->logStatus(null);
+        }
+
+        if ($user->hasRole('user')) {
+            return route('history.detail', [
+                'type' => 'public-relation',
+                'id' => $this->id
+            ]);
+        }
+        return route('pr.show', ['id' => $this->id]);
+    }
 }
