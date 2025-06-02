@@ -54,20 +54,40 @@ class DetailHistory extends Component
     #[Computed]
     public function statuses()
     {
-        return TrackingStepped::PublicRelationRequest($this->prRequests());
+        return match ($this->type) {
+            'information-system' => TrackingStepped::SiDataRequest($this->content),
+            'public-relation' => TrackingStepped::PublicRelationRequest($this->content),
+            default => abort(404, 'Invalid content type.'),
+        };
     }
 
     #[Computed]
     public function currentIndex()
     {
-        $statuses = $this->statuses();
-        return TrackingStepped::currentIndex($this->prRequests(), $statuses);
+        $statuses = $this->statuses;
+        return TrackingStepped::currentIndex($this->content, $statuses);
     }
 
     #[Computed]
     public function activities()
     {
         return $this->content->getGroupedRequestStatusTracks();
+    }
+
+    #[Computed]
+    public function isRejected()
+    {
+        return $this->currentStatus() === (new \App\States\Rejected($this->content))->label();
+    }
+
+    #[Computed]
+    public function currentStatus()
+    {
+        if ($this->content) {
+            return $this->content->status->label();
+        }
+
+        return (new \App\States\Pending($this->siRequestInstance))->label();
     }
 
     #[Computed]
@@ -91,12 +111,12 @@ class DetailHistory extends Component
 
         DB::transaction(function () {
             $hasPartNumber3 = $this->content->documentUploads->contains(function ($documentUpload) {
-                return $documentUpload->part_number == 3;
+                return $documentUpload->part_number == 5;
             });
 
             if (!$hasPartNumber3) {
                 $documentUpload = $this->content->documentUploads()->create([
-                    'part_number' => 3,
+                    'part_number' => 5,
                     'need_revision' => false,
                 ]);
 
