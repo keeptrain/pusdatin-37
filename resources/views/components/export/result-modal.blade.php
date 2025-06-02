@@ -1,10 +1,3 @@
-@props([
-'showModal' => false,
-'startDate' => null,
-'endDate' => null,
-'status' => 'all',
-])
-
 @if($showModal)
 <div
     x-data="{ open: true }"
@@ -35,6 +28,7 @@
                 Data akan diekspor sesuai dengan pilihan berikut:
             </p>
             <ul class="text-gray-800 mb-4 space-y-1">
+
                 <li><strong>Start Date:</strong> {{ $startDate ?? '—' }}</li>
                 <li><strong>End Date:</strong> {{ $endDate   ?? '—' }}</li>
                 <li><strong>Status:</strong>
@@ -70,6 +64,17 @@
                     class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm">
                     Cancel
                 </button>
+                @hasanyrole('head_verifier')
+                <a
+                    href="{{ route('export.head_verifier.filtered', [
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                    ]) }}"
+                    target="_blank"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
+                    Download Excel
+                </a>
+                @endhasanyrole
 
                 @hasanyrole('si_verifier')
                 <a

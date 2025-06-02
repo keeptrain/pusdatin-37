@@ -15,6 +15,37 @@ class ExportController extends Controller
     {
         return Excel::download(new HeadVerifierExport, 'head_verifier_data.xlsx');
     }
+    public function exportHeadVerifierWithFilter(Request $request)
+    {
+        $start  = $request->query('start_date');
+        $end    = $request->query('end_date');
+        // $status = $request->query('status');
+        // $source = $request->query('source');
+
+
+        return Excel::download(
+            new HeadVerifierExport($start, $end),
+            'Data Filter Sistem Informasi data dan kehumasan.xlsx'
+        );
+
+        // if ($source === 'letter') {
+        //     // Panggil export yang mem‐filter Letter
+        //     return Excel::download(
+        //         new \App\Exports\LetterExport($start, $end, $status),
+        //         'head_verifier_letters_' . now()->format('Ymd_His') . '.xlsx'
+        //     );
+        // }
+
+        // if ($source === 'pr') {
+        //     // Panggil export yang mem‐filter PublicRelationRequest
+        //     return Excel::download(
+        //         new \App\Exports\PrExport($start, $end, $status),
+        //         'head_verifier_pr_' . now()->format('Ymd_His') . '.xlsx'
+        //     );
+        // }
+
+        // abort(404);
+    }
     public function exportSiVerifier()
     {
         return Excel::download(new SiVerifierExport, 'si_verifier_data.xlsx');

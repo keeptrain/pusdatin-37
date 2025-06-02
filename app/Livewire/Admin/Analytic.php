@@ -9,6 +9,12 @@ class Analytic extends Component
     public $start_date;
     public $end_date;
     public $status;
+    // public $source;
+
+    // public $sourceOptions = [
+    //     'letter' => 'Letters',
+    //     'pr'     => 'Public Relation',
+    // ];
     public $statusOptions = [
         'all'                => 'All Status',
         'disposition'        => 'Disposition',
@@ -42,6 +48,10 @@ class Analytic extends Component
         //     'end_date'   => 'nullable|date|after_or_equal:start_date',
         // 'status'     => 'nullable|string|in:disposition,process,replied,approved_kasatpel,replied_kapusdatin,approved_kapusdatin,rejected,all',
         // ]);
+        // if (auth()->user()->hasRole('head_verifier') && !$this->source) {
+        //     $this->addError('source', 'Silakan pilih data source terlebih dahulu.');
+        //     return;
+        // }
 
         $this->showModal = true;
     }
@@ -53,6 +63,7 @@ class Analytic extends Component
     {
         $this->start_date = null;
         $this->end_date   = null;
+        // $this->source     = null;
         $this->status     = null;
         $this->showModal  = false;
     }
