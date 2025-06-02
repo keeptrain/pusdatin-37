@@ -18,7 +18,7 @@
             <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
         </flux:radio.group>
 
-        <template x-if="status === 'approved'">
+        <template x-if="status === 'rejected'">
             <flux:textarea wire:model="notes" label="Notes" cols="66" rows="4" placeholder="Catatan (opsional)..."
                 resize="horizontal" />
         </template>
@@ -35,7 +35,7 @@
 
                     <x-modal.partials.revision-notes />
 
-                    <flux:checkbox value="otherPart" label="Other" x-model="revisionPart" />
+                    {{-- <flux:checkbox value="otherPart" label="Other" x-model="revisionPart" /> --}}
 
                     <template x-if="revisionPart.includes('otherPart')">
                         <flux:textarea wire:model.defer="revisionNotes.otherPart" cols="66" rows="2"
