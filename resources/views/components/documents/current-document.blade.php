@@ -1,5 +1,3 @@
-{{-- resources/views/components/document-viewer.blade.php --}}
-
 <div x-data="{ selectedPart: '{{ $mapping->first()['part_number'] ?? null }}' }" class="p-4">
     <div class="items-center mb-4">
         <h2 class="text-md font-semibold text-gray-700">{{ $title }}</h2>
