@@ -43,8 +43,6 @@ class PusdatinProcess extends PublicRelationStatus
     }
 
     public function userNotificationMessage(array $context): string {
-        return "Permohonan telah di usulkan oleh " . $context['responsible_person'];
+        return "Permohonan ini telah di kurasi dan didisposisikan";
     }
-
- 
 }
