@@ -9,6 +9,6 @@
                 icon="video-camera" class="w-full">Meeting</flux:menu.item>
         </flux:modal.trigger>
         <flux:menu.item :href="route('letter.rollback', [$letterId])" icon="backward">Rollback</flux:menu.item>
-        <flux:menu.item icon="trash" variant="danger">Delete</flux:menu.item>
+        {{-- <flux:menu.item icon="trash" variant="danger">Delete</flux:menu.item> --}}
     </flux:menu>
 </flux:dropdown>
