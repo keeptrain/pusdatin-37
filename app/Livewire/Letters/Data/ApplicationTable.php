@@ -19,7 +19,6 @@ class ApplicationTable extends Component
     public array $statuses = [
         'all' => 'All',
         'disposition' => 'Disposisi',
-        'process' => 'Proses',
         'replied' => 'Revisi Kasatpel',
         'approved_kasatpel' => 'Disetujui Kasatpel',
         'replied_kapusdatin' => 'Revisi Kapusdatin',

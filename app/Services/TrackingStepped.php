@@ -17,7 +17,7 @@ class TrackingStepped
         $orderedStates = [
             \App\States\Pending::class,
             \App\States\Disposition::class,
-            \App\States\Process::class,
+            // \App\States\Process::class,
             \App\States\ApprovedKasatpel::class,
             \App\States\ApprovedKapusdatin::class,
         ];
@@ -52,14 +52,14 @@ class TrackingStepped
 
         if ($letter->status instanceof \App\States\Replied) {
             if ($activeChecking == static::DIVISION_SI_ID || $activeChecking == static::DIVISION_DATA_ID) {
-                array_splice($statuses, 3, 0, [
+                array_splice($statuses, 2, 0, [
                     ['label' => (new \App\States\Replied($letter))->label(), 'icon' => (new \App\States\Replied($letter))->icon()]
                 ]);
             }
         }
 
         if ($letter->status instanceof \App\States\RepliedKapusdatin && $activeChecking == static::HEAD_DIVISION_ID) {
-            array_splice($statuses, 4, 0, [
+            array_splice($statuses, 3, 0, [
                 ['label' => (new \App\States\RepliedKapusdatin($letter))->label(), 'icon' => (new \App\States\RepliedKapusdatin($letter))->icon()]
             ]);
         }
