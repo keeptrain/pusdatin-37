@@ -28,7 +28,14 @@
                                 1 => 'Audio',
                                 2 => 'Infografis',
                                 3 => 'Poster',
-                                4 => 'Video'
+                                4 => 'Video',
+                                5 => 'Bumper',
+                                6 => 'Backdrop Kegiatan',
+                                7 => 'Spanduk',
+                                8 => 'Roll Banner',
+                                9 => 'Sertifikat',
+                                10 => 'Press Release',
+                                11 => 'Artikel',
                             }
                         @endphp
                         <li>
