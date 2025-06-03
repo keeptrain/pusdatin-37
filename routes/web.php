@@ -106,14 +106,18 @@ Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_veri
         Route::get('/export/si-verifier-filtered', [ExportController::class, 'exportSiVerifierWithFilter'])
             ->name('export.si_verifier.filtered');
         Route::get('/export/si-verifier-pdf', [SiVerifierPdfExportController::class, 'export'])->name('export.si_verifier.pdf');
+        Route::get('/export/si-verifier-filtered-pdf', [SiVerifierPdfExportController::class, 'exportFiltered'])->name('export.si_verifier.filtered.pdf');
         Route::get('/export/data-verifier', [ExportController::class, 'exportDataVerifier'])->name('export.data_verifier');
         Route::get('/export/data-verifier-filtered', [ExportController::class, 'exportDataVerifierWithFilter'])
             ->name('export.data_verifier.filtered');
         Route::get('/export/data-verifier-pdf', [DataVerifierPdfExportController::class, 'export'])->name('export.data_verifier.pdf');
+        Route::get('/export/si-verifier-filtered-pdf', [DataVerifierPdfExportController::class, 'exportFiltered'])->name('export.data_verifier.filtered.pdf');
         Route::get('/export/pr-verifier', [ExportController::class, 'exportPrVerifier'])->name('export.pr_verifier');
         Route::get('/export/pr-verifier-filtered', [ExportController::class, 'exportPrVerifierWithFilter'])
             ->name('export.pr_verifier.filtered');
         Route::get('/export/pr-verifier-pdf', [PrVerifierPdfExportController::class, 'export'])->name('export.pr_verifier.pdf');
+        Route::get('/export/pr-verifier-filtered-pdf', [PrVerifierPdfExportController::class, 'exportFiltered'])
+            ->name('export.pr_verifier.filtered.pdf');
     });
 });
 

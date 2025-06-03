@@ -59,11 +59,6 @@
             </ul>
 
             <div class="flex justify-end space-x-2">
-                <button
-                    @click="open = false; $wire.resetFilters()"
-                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm">
-                    Cancel
-                </button>
                 @hasanyrole('head_verifier')
                 <a
                     href="{{ route('export.head_verifier.filtered', [
@@ -101,6 +96,16 @@
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
                 </a>
+                <a
+                    href="{{ route('export.si_verifier.filtered.pdf', [
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
+                    target="_blank"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    Download PDF
+                </a>
                 @endhasanyrole
 
                 @hasanyrole('data_verifier')
@@ -113,6 +118,16 @@
                     target="_blank"
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
+                </a>
+                <a
+                    href="{{ route('export.data_verifier.filtered.pdf', [
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
+                    target="_blank"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    Download PDF
                 </a>
                 @endhasanyrole
 
@@ -127,7 +142,22 @@
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
                 </a>
+                <a
+                    href="{{ route('export.pr_verifier.filtered.pdf', [
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
+                    target="_blank"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    Download PDF
+                </a>
                 @endhasanyrole
+                <button
+                    @click="open = false; $wire.resetFilters()"
+                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
