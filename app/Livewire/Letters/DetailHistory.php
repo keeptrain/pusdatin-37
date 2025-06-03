@@ -106,7 +106,7 @@ class DetailHistory extends Component
         $this->validate([
             'additionalFile' => ['required', 'mimes:pdf']
         ], [
-            'additionalFile.required' => 'File harus disisipkan!'
+            'additionalFile.required' => 'Dokumen NDA harus disisipkan!'
         ]);
 
         DB::transaction(function () {
