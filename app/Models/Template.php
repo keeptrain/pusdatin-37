@@ -51,6 +51,6 @@ class Template extends Model
             return $query->where('part_number', 6);
         }
 
-        return $query;
+        return $query->whereIn('part_number', [1, 2, 3, 4, 5]);
     }
 }

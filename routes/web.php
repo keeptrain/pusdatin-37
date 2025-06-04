@@ -22,9 +22,9 @@ use App\Livewire\Requests\PublicRelation\Show;
 use App\Livewire\Documents\RevisionComparision;
 use App\Livewire\Letters\Data\ApplicationTable;
 use App\Livewire\Requests\PublicRelation\Index;
-use App\Http\Controllers\Admin\TemplateController;
 use App\Http\Controllers\ExportController;
 use App\Livewire\Admin\Analytic;
+use App\Livewire\Documents\Template;
 
 Route::get('/', function () {
     return view('welcome');
@@ -60,7 +60,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
     Route::get('letter/{id}/version', RevisionComparision::class)->name('letter.version');
 
-
     // analytic
 
     // Route::get('/letter/{letter}/activity', function (Letter $letter) {
@@ -84,10 +83,11 @@ Route::middleware(['auth'])->group(function () {
 Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_verifier|pr_verifier|head_verifier']], function () {
     Route::prefix('system')->group(function () {
         Route::get('users', ManageUsers::class)->name('manage.users');
-        Route::get('templates', [TemplateController::class, 'index'])->name('manage.templates');
-        Route::get('template/create', [TemplateController::class, 'create'])->name('create.template');
-        Route::post('template/store', [TemplateController::class, 'store'])->name('store.template');
-        Route::post('template/{typeNumber}', [TemplateController::class, 'download'])->name('download.template');
+        Route::get('templates', Template::class)->name('manage.templates');
+        // Route::get('template/create', [TemplateController::class, 'create'])->name('create.template');
+        // Route::post('template/store', [TemplateController::class, 'store'])->name('store.template');
+        // Route::put('template/update/{id}', [TemplateController::class, 'update'])->name('update.template');
+        // Route::post('template/{typeNumber}', [TemplateController::class, 'download'])->name('download.template');
         // Route::get('templates/create', ManageTemplates::class)->name('template.create');
 
 
