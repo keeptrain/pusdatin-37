@@ -3,7 +3,7 @@
 }" name="approved-modal" focusable class="md:w-120" size="lg">
     <form wire:submit="save" class="space-y-6">
         <flux:heading size="lg">
-            {{ __('Persetujuan permohonan layanan') }} {{ $letterId }}
+            {{ __('Verifikasi permohonan layanan tahap kapusdatin') }}
         </flux:heading>
 
         <!-- Radio Group -->

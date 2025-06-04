@@ -41,11 +41,25 @@
                         {{ $letter->user->name }}
                     </p>
                 </div>
-
+                
                 <div class="mb-6">
                     <h4 class="text-gray-500 mb-1">Nomor Surat</h4>
                     <p class="text-gray-800">
                         {{ $letter->reference_number }}
+                    </p>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="text-gray-500 mb-1">Kontak</h4>
+                    <p class="text-gray-800">
+                        {{ $letter->user->contact }}
+                    </p>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="text-gray-500 mb-1">Seksi</h4>
+                    <p class="text-gray-800">
+                        {{ $letter->user->section }}
                     </p>
                 </div>
 
