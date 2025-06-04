@@ -1,10 +1,3 @@
-@props([
-'showModal' => false,
-'startDate' => null,
-'endDate' => null,
-'status' => 'all',
-])
-
 @if($showModal)
 <div
     x-data="{ open: true }"
@@ -35,6 +28,7 @@
                 Data akan diekspor sesuai dengan pilihan berikut:
             </p>
             <ul class="text-gray-800 mb-4 space-y-1">
+
                 <li><strong>Start Date:</strong> {{ $startDate ?? '—' }}</li>
                 <li><strong>End Date:</strong> {{ $endDate   ?? '—' }}</li>
                 <li><strong>Status:</strong>
@@ -65,11 +59,17 @@
             </ul>
 
             <div class="flex justify-end space-x-2">
-                <button
-                    @click="open = false; $wire.resetFilters()"
-                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm">
-                    Cancel
-                </button>
+                @hasanyrole('head_verifier')
+                <a
+                    href="{{ route('export.head_verifier.filtered', [
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                    ]) }}"
+                    target="_blank"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
+                    Download Excel
+                </a>
+                @endhasanyrole
 
                 @hasanyrole('si_verifier')
                 <a
@@ -96,6 +96,16 @@
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
                 </a>
+                <a
+                    href="{{ route('export.si_verifier.filtered.pdf', [
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
+                    target="_blank"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    Download PDF
+                </a>
                 @endhasanyrole
 
                 @hasanyrole('data_verifier')
@@ -108,6 +118,16 @@
                     target="_blank"
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
+                </a>
+                <a
+                    href="{{ route('export.data_verifier.filtered.pdf', [
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
+                    target="_blank"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    Download PDF
                 </a>
                 @endhasanyrole
 
@@ -122,7 +142,22 @@
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
                 </a>
+                <a
+                    href="{{ route('export.pr_verifier.filtered.pdf', [
+                        'start_date' => $startDate,
+                        'end_date'   => $endDate,
+                        'status'     => $status,
+                    ]) }}"
+                    target="_blank"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+                    Download PDF
+                </a>
                 @endhasanyrole
+                <button
+                    @click="open = false; $wire.resetFilters()"
+                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md text-sm">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>

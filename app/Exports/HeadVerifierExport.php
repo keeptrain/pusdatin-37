@@ -2,8 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Letters\Letter;
-use App\Models\PublicRelationRequest;
+
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class HeadVerifierExport implements WithMultipleSheets
