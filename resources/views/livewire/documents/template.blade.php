@@ -3,29 +3,44 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4">
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Template Dokumen</h1>
-                <p class="mt-2 text-gray-600">Buat atau perbarui template dokumen yang akan di gunakan oleh pemohon
-                </p>
+                <flux:heading size="xl">Template Dokumen</flux:heading>
+                <flux:subheading>Buat atau perbarui template dokumen yang akan di gunakan oleh pemohon
+                </flux:subheading>
             </div>
             <flux:modal.trigger>
-                <flux:button variant="primary" x-on:click="$dispatch('modal-show', { name: 'create-template-modal' });"
-                    class="px-3 py-2">Template baru</flux:button>
+                <flux:button variant="primary" x-on:click="$dispatch('modal-show', { name: 'create-template' });"
+                    class="px-3 py-2 ">Template baru</flux:button>
             </flux:modal.trigger>
 
         </div>
     </div>
 
     <!-- Template Grid -->
-    <div x-data="{ selectedTemplate: null, name: $wire.name  }" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 py-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach ($templates as $template)
-                <div class="bg-white rounded-xl shadow-sm card-hover overflow-hidden">
+                <div class="shadow-sm overflow-hidden">
                     <!-- Template Preview -->
-                    <div class="template-preview h-48 p-6 flex items-center justify-center relative">
+                    <div class="template-preview h-40 p-6 flex items-center justify-center relative">
                         <div class="absolute top-4 right-4">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"></span>
+                            <flux:dropdown>
+                                <flux:button variant="ghost" icon="adjustments-horizontal" class="size-12"></flux:button>
+
+                                <flux:menu>
+                                    <flux:menu.item wire:click="download({{ $template->id }})" icon="arrow-down-tray">
+                                        Download</flux:menu.item>
+
+                                    <flux:modal.trigger name="edit-template">
+                                        <flux:menu.item wire:click="edit({{ $template->id }})" icon="pencil-square">Edit
+                                        </flux:menu.item>
+                                    </flux:modal.trigger>
+
+                                    <flux:menu.item wire:click="delete({{ $template->id }})" icon="trash" variant="danger">
+                                        Delete</flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
                         </div>
-                        <div class="text-center ">
+                        <div class="text-center mt-8">
                             <flux:icon.document class="size-12" />
                         </div>
 
@@ -33,7 +48,7 @@
                         <div class="absolute top-4 left-4">
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                                {{ $template->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ $template->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                 <span
                                     class="w-1.5 h-1.5 rounded-full mr-1.5 {{ $template->is_active ? 'bg-green-400' : 'bg-gray-400' }}"></span>
                                 {{ $template->is_active ? 'Aktif' : 'Tidak aktif' }}
@@ -44,7 +59,7 @@
                     <!-- Template Info -->
                     <div class="p-6">
                         <div class="flex items-start justify-between mb-3">
-                            <flux:heading size="lg">{{ $template->name }}</flux:heading>
+                            <flux:legend size="lg">{{ $template->name }}</flux:legend>
                         </div>
 
                         <!-- Template Stats -->
@@ -65,84 +80,14 @@
                                     </svg>
                                     <span>{{ $template->updated_at }}</span>
                                 </div>
+
                             </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex space-x-3">
-                            <flux:modal.trigger>
-                                <flux:button
-                                    x-on:click="$dispatch('modal-show', { name: 'edit-template-modal' }); selectedTemplate = {{ json_encode($template) }};"
-                                    class="w-full mr-3">Edit</flux:button>
-                            </flux:modal.trigger>
-
-                            <flux:button wire:click="download({{ $template->id }})" icon="arrow-down-tray" type="submit" />
                         </div>
                     </div>
                 </div>
             @endforeach
         </div>
-        <flux:modal name="create-template-modal" focusable class="md:w-120" size="lg">
-            <form wire:submit="save" class="space-y-6">
-                <div>
-                    <flux:heading size="lg">
-                        {{ __('Buat template') }}
-                    </flux:heading>
-                </div>
-                <flux:input wire:model="name" name="name" label="Nama template" />
-
-                {{-- <flux:radio.group wire:model="isActive" label="Kondisi template">
-                    <flux:radio name="is_active" value="1" label="Aktif"
-                        description="Bisa di download oleh pemohon pada form." checked />
-                    <flux:radio name="is_active" value="0" label="Tidak aktif"
-                        description="Tidak bisa di download oleh pemohon pada form." />
-                </flux:radio.group> --}}
-                <flux:select wire:model="partNumber" label="Bagian template" placeholder="Pilih bagian...">
-                    <flux:select.option value="1">SPBE</flux:select.option>
-                    <flux:select.option value="2">SOP</flux:select.option>
-                    <flux:select.option value="3">Pemanfaatan Aplikasi</flux:select.option>
-                    <flux:select.option value="4">RFC</flux:select.option>
-                    <flux:select.option value="5">NDA</flux:select.option>
-                </flux:select>
-                <flux:input wire:model="file" type="file" name="file" label="File template" />
-                <div class="flex justify-end space-x-2">
-                    <flux:modal.close>
-                        <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
-                    </flux:modal.close>
-
-                    <flux:button variant="primary" type="submit">{{ __('Buat') }}</flux:button>
-                </div>
-            </form>
-        </flux:modal>
-        <flux:modal name="edit-template-modal" focusable class="md:w-120" size="lg">
-            <template x-if="selectedTemplate">
-                <form wire:submit="update(selectedTemplate.id)" class="space-y-6">
-                    <div>
-                        <flux:heading size="lg">
-                            {{ __('Edit template') }}
-                        </flux:heading>
-                    </div>
-                    <flux:input x-model="selectedTemplate.name" wire:model="name" name="name" label="Nama" />
-                    <flux:radio.group x-model="selectedTemplate.is_active" label="Kondisi template">
-                        <flux:radio name="is_active" value="1" label="Aktif"
-                            description="Bisa di download oleh pemohon pada form." checked />
-                        <flux:radio name="is_active" value="0" label="Tidak aktif"
-                            description="Tidak bisa di download oleh pemohon pada form." />
-                    </flux:radio.group>
-                    {{--
-                    <flux:input x-model="selectedTemplate.part_number_label" label="Bagian part" /> --}}
-                    <flux:input wire:model="file" type="file" name="file" label="Ubah file template" />
-                    <div class="flex justify-end space-x-2">
-                        <flux:modal.close>
-                            <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
-                        </flux:modal.close>
-
-                        <flux:button variant="primary" type="submit">{{ __('Ubah') }}</flux:button>
-                    </div>
-                </form>
-            </template>
-        </flux:modal>
-
+        <x-modal.create-template />
+        <x-modal.edit-template />
     </div>
-
 </div>
