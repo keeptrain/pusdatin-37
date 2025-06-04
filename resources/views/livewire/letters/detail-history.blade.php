@@ -10,7 +10,7 @@
 
     @if ($type === 'information-system')
         <div class="py-6">
-            <x-user.information-system.card-basic-info :id="$content->id" :created-at="$content->createdAtDMY()"
+            <x-user.information-system.card-basic-info :id="$content->id" :created-at="$content->createdAtDMY()" :contact="$content->user->contact"
                 :status="$content->status" :title="$content->title" :person="$content->user->name"
                 :activerevision="$content->active_revision" :uploadedFile="$this->uploadedFile" :meeting="$content->meeting"
                 :referenceNumber="$content->reference_number" />

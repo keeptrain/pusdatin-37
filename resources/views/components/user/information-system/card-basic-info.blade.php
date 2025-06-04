@@ -31,6 +31,10 @@
                     <p class="mt-1 text-gray-900">{{ $createdAt }}</p>
                 </div>
                 <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Kontak</p>
+                    <p class="mt-1 text-gray-900">{{ $contact }}</p>
+                </div>
+                <div>
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1">File yang di upload</p>
                     <div x-data="{
                         hasPartNumber5: {{ $this->uploadedFile->contains(fn($file) => $file['part_number'] == 5) ? 'true' : 'false' }}
