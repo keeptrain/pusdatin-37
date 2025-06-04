@@ -34,7 +34,7 @@
     x-transition:leave-start="opacity-100 transform translate-y-0"
     x-transition:leave-end="opacity-0 transform translate-y-3"
     id="toast-container"
-    class="flex flex-col fixed p-3 top-6 right-6 rounded-xl border-1 border-gray-300 shadow-md bg-white dark:bg-gray-800 text-black dark:text-white w-auto max-w-md"
+    class="flex flex-col fixed p-3 top-6 right-6 z-10 rounded-xl border-1 border-gray-300 shadow-md bg-white dark:bg-gray-800 text-black dark:text-white w-auto max-w-md"
 >
     <div class="flex items-center justify-between space-x-4">
         <div class="flex items-center space-x-2 flex-grow min-w-0">
