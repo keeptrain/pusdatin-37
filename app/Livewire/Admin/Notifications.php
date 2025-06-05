@@ -4,11 +4,9 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use App\States\Disposition;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Computed;
 use App\Models\PublicRelationRequest;
-use App\States\PublicRelation\PromkesComplete;
 
 class Notifications extends Component
 {
@@ -49,15 +47,17 @@ class Notifications extends Component
     {
         $user = auth()->user();
         $userTabs = [];
-       
-        if ($user->hasRole('head_verifier|si_verifier|data_verifier')) {
-            $userTabs = ['all', 'disposisi', 'revisi', 'disetujui' ];
-        } else if ($user->hasRole('pr_verifier')){
-            $userTabs = ['all', 'disposisi' ];
+
+        if ($user->hasRole('head_verifier')) {
+            $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
+        } else if ($user->hasRole('si_verifier|data_verifier')) {
+            $userTabs = ['all', 'disposisi', 'revisi'];
+        } else if ($user->hasRole('pr_verifier')) {
+            $userTabs = ['all', 'disposisi'];
         } else if ($user->hasRole('promkes_verifier')) {
-            $userTabs = ['all', 'revisi', 'disetujui' ];
+            $userTabs = ['all'];
         } else {
-            $userTabs = ['all', 'revisi', 'disetujui' ];
+            $userTabs = ['all', 'revisi', 'disetujui'];
         }
 
         return $userTabs;
@@ -104,19 +104,19 @@ class Notifications extends Component
     #[Computed]
     public function getFilteredDispositionNotifications()
     {
-        return $this->getFilteredNotifications(['Permohonan Masuk', 'Disposisi', 'Selesai Kurasi']);
+        return $this->getFilteredNotifications(['Permohonan Masuk', 'Didisposisikan', 'Kurasi Promkes', 'Proses Pusdatin']);
     }
 
     #[Computed]
     public function getFilteredRepliedNotifications()
     {
-        return $this->getFilteredNotifications(['Replied', 'Balasan Kapusdatin']);
+        return $this->getFilteredNotifications(['Revisi Kasatpel', 'Revisi Kapusdatin']);
     }
 
     #[Computed]
     public function getFilteredApprovedNotifications()
     {
-        return $this->getFilteredNotifications(['Approved by Kasatpel', 'Approved by Kapusdatin']);
+        return $this->getFilteredNotifications(['Disetujui Kasatpel', 'Disetujui Kapusdatin', 'Permohonan Selesai']);
     }
 
     public function refreshNotifications()
@@ -155,24 +155,14 @@ class Notifications extends Component
                 throw new \InvalidArgumentException("Model class tidak valid.");
             }
 
-            // Ambil data requestable dengan query
+            // Ambil data requestable
             $requestable = app($modelClass)->findOrFail($modelId);
 
-            if ($modelClass === Letter::class) {
+            if ($modelClass === Letter::class || $modelClass === PublicRelationRequest::class) {
                 // $notification->markAsRead();
-                if ($requestable->status instanceof Disposition && auth()->user()->hasRole('si_verifier|data_verifier|pr_verifier')) {
-                    $requestable->transitionStatusToProcess($requestable->current_division);
-                    $requestable->logStatus(null);
-                }
-
-                return $this->redirect("/letter/$requestable->id", true);
-            } elseif ($modelClass === PublicRelationRequest::class) {
-                // $notification->markAsRead();
-                if (auth()->user()->can('queue pr pusdatin') && $requestable->status instanceof PromkesComplete) {
-                    $requestable->transitionStatusToPusdatinQueue();
-                    $requestable->logStatus(null);
-                }
-                return $this->redirect("/public-relation/$requestable->id", true);
+                return $this->redirect($requestable->handleRedirectNotification(auth()->user()), true);
+            } else {
+                abort(404, 'Invalid model class.');
             }
         } catch (\Exception $e) {
             return redirect()->route('dashboard')->with('error', 'Gagal memuat detail notifikasi: ' . $e->getMessage());

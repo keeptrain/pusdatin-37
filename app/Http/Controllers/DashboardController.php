@@ -36,7 +36,7 @@ class DashboardController extends Controller
             'monthlyLetterData' => $this->getMonthlyLetterData($userRoles),
             'monthlySiData'     => $monthlySiData,
             'monthlyDataDiv'    => $monthlyDataDiv,
-            
+
         ]);
     }
 
@@ -279,13 +279,15 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Query untuk data Letter
+        // Query untuk data Letter dengan pemisahan berdasarkan current_division
         $letterQuery = Letter::select(
             DB::raw('MONTH(created_at) as month'),
-            DB::raw('COUNT(*) as total')
+            DB::raw('COUNT(*) as total'),
+            'current_division'
         )
             ->whereYear('created_at', Carbon::now()->year)
-            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->whereIn('current_division', [3, 4]) // Filter hanya untuk current_division 3 dan 4
+            ->groupBy(DB::raw('MONTH(created_at)'), 'current_division')
             ->orderBy('month');
 
         // Filter berdasarkan role user
@@ -293,7 +295,20 @@ class DashboardController extends Controller
             $letterQuery->whereIn('current_division', $userRoles);
         }
 
-        $monthlyLetterData = $letterQuery->pluck('total', 'month');
+        $monthlyLetterData = $letterQuery->get();
+
+        // Pisahkan data berdasarkan current_division
+        $informationSystemDivisionData = [];
+        $dataDivisionData = [];
+
+        foreach ($monthlyLetterData as $record) {
+            $month = (int) $record->month;
+            if ($record->current_division === 3) {
+                $informationSystemDivisionData[$month] = $record->total;
+            } elseif ($record->current_division === 4) {
+                $dataDivisionData[$month] = $record->total;
+            }
+        }
 
         // Query untuk data PublicRelationRequest
         $prQuery = PublicRelationRequest::select(
@@ -307,18 +322,21 @@ class DashboardController extends Controller
         $monthlyPrData = $prQuery->pluck('total', 'month');
 
         // Buat array untuk 12 bulan dengan nilai default 0
-        $monthlyLetterCounts = [];
-        $monthlyPrCounts = [];
+        $informationSystemCounts = [];
+        $dataCounts = [];
+        $publicRelationCounts = [];
 
         for ($i = 1; $i <= 12; $i++) {
-            $monthlyLetterCounts[] = $monthlyLetterData[$i] ?? 0;
-            $monthlyPrCounts[] = $monthlyPrData[$i] ?? 0;
+            $informationSystemCounts[] = $informationSystemDivisionData[$i] ?? 0;
+            $dataCounts[] = $dataDivisionData[$i] ?? 0;
+            $publicRelationCounts[] = $monthlyPrData[$i] ?? 0;
         }
 
         return [
             'months' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            'letterData' => $monthlyLetterCounts,
-            'prData' => $monthlyPrCounts
+            'informationSystem' => $informationSystemCounts, // Data untuk current_division 3
+            'data' => $dataCounts,                          // Data untuk current_division 4
+            'publicRelation' => $publicRelationCounts      // Data untuk PublicRelationRequest
         ];
     }
 

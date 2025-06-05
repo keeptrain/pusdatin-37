@@ -31,9 +31,13 @@
                     <p class="mt-1 text-gray-900">{{ $createdAt }}</p>
                 </div>
                 <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Kontak</p>
+                    <p class="mt-1 text-gray-900">{{ $contact }}</p>
+                </div>
+                <div>
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1">File yang di upload</p>
                     <div x-data="{
-                        hasPartNumber3: {{ $this->uploadedFile->contains(fn($file) => $file['part_number'] == 5) ? 'true' : 'false' }}
+                        hasPartNumber5: {{ $this->uploadedFile->contains(fn($file) => $file['part_number'] == 5) ? 'true' : 'false' }}
                     }">
                         @foreach ($this->uploadedFile as $file)
                             <div class="flex flex-row gap-2">
@@ -43,7 +47,7 @@
                             </div>
                         @endforeach
 
-                        <template x-if="!hasPartNumber3">
+                        <template x-if="!hasPartNumber5">
                             <flux:modal.trigger name="upload-modal">
                                 <a x-on:click="$dispatch('modal-show', { name: 'upload-modal' })"
                                     class="flex gap-2 cursor-pointer mt-4" type="file">

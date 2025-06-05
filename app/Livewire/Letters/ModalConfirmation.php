@@ -144,6 +144,13 @@ class ModalConfirmation extends Component
         });
     }
 
+    public function updatedStatus($value)
+    {
+        if ($value !== 'rejected') {
+            $this->notes = '';
+        }
+    }
+
     public function save()
     {
         $this->validate();
@@ -206,7 +213,7 @@ class ModalConfirmation extends Component
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => 'Meeting created successfully!',
+                'message' => 'Meeting berhasil dibuat',
             ]);
 
             return $this->redirect("/letter/$this->letterId", true);

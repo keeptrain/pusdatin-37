@@ -10,11 +10,9 @@
                     Selamat datang di sistem informasi permohonan layanan. Ajukan permohonan Aplikasi, Data, dan Humas dengan lebih mudah dan cepat.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="#" class="bg-[#364872] hover:bg-[#262e42] text-white text-lg py-2 px-4 rounded-2xl inline-flex items-center">
+                    <a href="{{ route('dashboard') }}" class="bg-[#364872] hover:bg-[#262e42] text-white text-lg py-2 px-4 rounded-2xl inline-flex items-center">
                         Ajukan Permintaan
-
                     </a>
-
                 </div>
             </div>
             <div class="lg:w-1/2 relative">

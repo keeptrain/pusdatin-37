@@ -55,7 +55,7 @@
             @endforelse
         </div>
 
-        @hasrole('head_verifier|si_verifier|data_verifier')
+        @hasrole('head_verifier|si_verifier|data_verifier|pr_verifier')
         <!-- Panel untuk "Disposisi" -->
         <div x-show="activeTab === 'disposisi'">
             @foreach ($this->getFilteredDispositionNotifications as $dateLabel => $statuses)
@@ -98,7 +98,5 @@
                 @endforeach
             @endforeach
         </div>
-
-
     </div>
 </div>

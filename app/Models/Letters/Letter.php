@@ -206,4 +206,23 @@ class Letter extends Model
         return $query->count('id');
     }
 
+    public function handleRedirectNotification($user)
+    {
+        if ($user->hasRole('user')) {
+            return route('history.detail', [
+                'type' => 'information-system',
+                'id' => $this->id
+            ]);
+        }
+        return route('letter.detail', ['id' => $this->id]);
+    }
+
+    public function hasNonZeroPartNumber()
+    {
+        return $this->documentUploads()
+            ->whereHas('versions', function ($query) {
+                $query->where('version', '!=', 0);
+            })
+            ->exists();
+    }
 }

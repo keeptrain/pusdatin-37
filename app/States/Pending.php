@@ -48,6 +48,6 @@ class Pending extends LetterStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan layanan ini perlu disposisi";
+        return "Permohonan layanan ini perlu disposisi sistem informasi / data";
     }
 }

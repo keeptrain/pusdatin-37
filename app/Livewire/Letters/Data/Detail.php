@@ -15,9 +15,7 @@ class Detail extends Component
     public int $letterId;
 
     public ?Letter $letter;
-
-    public $processedUploads;
-
+    
     public function mount(int $id)
     {
         $this->letterId = $id;

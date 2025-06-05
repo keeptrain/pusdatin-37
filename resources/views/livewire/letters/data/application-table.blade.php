@@ -47,7 +47,6 @@
     <flux:table.base :perPage="$perPage" :paginate="$this->letters" emptyMessage="No data letter available.">
         <x-slot name="header">
             <flux:table.column class="w-1 border-l-2 border-white dark:border-l-zinc-800">
-                {{-- <flux:checkbox wire:click="toggleSelectAll" /> --}}
             </flux:table.column>
             <flux:table.column>Penanggung jawab</flux:table.column>
             <flux:table.column>Judul</flux:table.column>
@@ -59,15 +58,9 @@
 
         <x-slot name="body">
             @foreach ($this->letters as $item)
-                <tr @if(!in_array($item->id, $selectedLetters)) 
-                    @hasanyrole('si_verifier|data_verifier|pr_verifier')
-                        @click="$wire.detailPageForProcess({{ $item->id }})"
-                    @endrole
-                        @click="$wire.detailPage({{ $item->id }})"
-                    @endif 
-                    class="{{ in_array($item->id, $selectedLetters) ? 'relative bg-zinc-50 dark:bg-zinc-900 ' : 'dark:bg-zinc-800' }}
-                    border-b border-b-zinc-100 dark:border-b-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 cursor-pointer">
-
+                <tr @click="$wire.detailPage({{ $item->id }})" class="{{ in_array($item->id, $selectedLetters) ? 'relative bg-zinc-50 dark:bg-zinc-900 ' : 'dark:bg-zinc-800' }}
+                        border-b border-b-zinc-100 dark:border-b-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900
+                        cursor-pointer">
                     <flux:table.row @click.stop class="{{ in_array($item->id, $selectedLetters)}}">
                         <flux:checkbox wire:model.live="selectedLetters" value="{{ $item->id }}" />
                     </flux:table.row>
@@ -75,19 +68,22 @@
                     <flux:table.row>{{ $item->user->name }}</flux:table.row>
                     <flux:table.row>{{ $item->title }}</flux:table.row>
                     <flux:table.row>
-                        <flux:notification.status-badge :status="$item->status"/>
+                        <flux:notification.status-badge :status="$item->status" />
                     </flux:table.row>
                     <flux:table.row>{{ $item->kasatpelName($item->current_division) }}</flux:table.row>
                     <flux:table.row>{{ $item->createdAtDMY() }}</flux:table.row>
                     <flux:table.row>
-                        <flux:dropdown @click.stop >
+                        <flux:dropdown @click.stop>
                             <flux:button icon:trailing="ellipsis-vertical" variant="ghost"></flux:button>
 
                             <flux:menu>
-                                <flux:menu.item :href="route('letter.activity', [$item->id])" icon="list-bullet" wire:navigate>Activity
+                                <flux:menu.item :href="route('letter.activity', [$item->id])" icon="list-bullet"
+                                    wire:navigate>Activity
                                 </flux:menu.item>
-                                <flux:menu.item :href="route('letter.chat', [$item->id])" icon="chat-bubble-left-right" wire:navigate>Chat</flux:menu.item>
-                                <flux:menu.item :href="route('letter.rollback', [$item->id])" icon="backward" wire:navigate>Rollback</flux:menu.item>
+                                <flux:menu.item :href="route('letter.chat', [$item->id])" icon="chat-bubble-left-right"
+                                    wire:navigate>Chat</flux:menu.item>
+                                <flux:menu.item :href="route('letter.rollback', [$item->id])" icon="backward" wire:navigate>
+                                    Rollback</flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
                     </flux:table.row>

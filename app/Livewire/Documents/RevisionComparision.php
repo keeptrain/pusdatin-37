@@ -7,53 +7,88 @@ use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class RevisionComparision extends Component
 {
     #[Locked]
-    public int $letterId;
+    public int $siDataRequestId;
 
-    public bool $revision = false;
-
-    public $letter;
-
-    public Collection $documentVersionsForViewer;
+    private $siDataRequest;
 
     public function mount(int $id)
     {
-        $this->letterId = $id;
-        $this->letter = $this->letters();
+        $this->siDataRequestId = $id;
+        $this->siDataRequest = $this->letters();
     }
 
     public function letters()
     {
         return Letter::with([
-            'documentUploads'
+            'documentUploads.activeVersion',
+            'documentUploads.versions'
+        ])->findOrFail($this->siDataRequestId);
+    }
 
-        ])->findOrFail($this->letterId);
+    #[Computed]
+    public function checkAvailableAnyVersions()
+    {
+        return $this->siDataRequest->hasNonZeroPartNumber();
     }
 
     #[Computed]
     public function currentVersion()
     {
-        $latestRevisions = new Collection();
+        $currentVersionsData = new Collection();
 
-        if ($this->letter && $this->letter->documentUploads->isNotEmpty()) {
-            foreach ($this->letter->documentUploads as $map) {
-                $documentUpload = $map;
+        if ($this->siDataRequest && $this->siDataRequest->documentUploads->isNotEmpty()) {
+            foreach ($this->siDataRequest->documentUploads as $documentUpload) {
+                $currentVersionsData->push($documentUpload->formatForCurrentVersion());
+            }
+        }
 
-                $activeVersion = $documentUpload->versions->first();
+        return $currentVersionsData->sortBy('part_number');
+    }
 
-                if ($documentUpload) {
-                    $latestRevisions->push([
+    #[Computed]
+    public function anyVersions()
+    {
+        $groupedVersions = collect();
+
+        if ($this->siDataRequest && $this->siDataRequest->documentUploads->isNotEmpty()) {
+            foreach ($this->siDataRequest->documentUploads as $documentUpload) {
+                // Ambil ID versi aktif
+                $activeVersionId = $documentUpload->activeVersion?->id;
+
+                // Filter versi yang tidak aktif
+                $versions = $documentUpload->versions->filter(function ($version) use ($activeVersionId) {
+                    return $version->id !== $activeVersionId;
+                });
+
+                // Kelompokkan data berdasarkan version
+                foreach ($versions as $version) {
+                    $groupedVersions->push([
+                        'version' => $version->version ?? null,
                         'part_number' => $documentUpload->part_number,
                         'part_number_label' => $documentUpload->part_number_label,
-                        'file_path' => $activeVersion->file_path,
-                        'version' => $documentUpload->version,
+                        'file_path' => Storage::url($version->file_path),
                     ]);
                 }
             }
         }
-        return $latestRevisions->sortBy('part_number');
+
+        // Kelompokkan data berdasarkan version
+        return $groupedVersions->groupBy('version')->map(function ($group) {
+            return [
+                'version' => $group->first()['version'], // Pastikan mengakses array
+                'details' => $group->map(function ($item) {
+                    return [
+                        'part_number' => $item['part_number'],
+                        'part_number_label' => $item['part_number_label'],
+                        'file_path' => $item['file_path'],
+                    ];
+                })->values(),
+            ];
+        })->values();
     }
 }

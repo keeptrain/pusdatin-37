@@ -1,17 +1,20 @@
 @props([
     'id' => null,
     'overViewRoute' => null,
-    'activityRoute' => null
+    'activityRoute' => null,
 ])
 <section x-data="{
     activeTab: 'Overview',
     mobileDetailsOpen: false,
+    isInformationSystemRoute: window.location.pathname.includes('letter/'),
+    isPublicRelationRoute: window.location.pathname.includes('public-relation/'),
     init() {
         const path = window.location.pathname;
+
+        // Set active tab based on current route
         if (path.includes('overview')) this.activeTab = 'Overview';
         else if (path.includes('activity')) this.activeTab = 'Activity';
-        {{-- else if (path.includes('chat')) this.activeTab = 'Chat'; --}}
-        else if (path.includes('version')) this.activeTab = 'Version';
+        else if (this.isInformationSystemRoute && path.includes('version')) this.activeTab = 'Version';
     },
     goTo(tab) {
         const routes = {
@@ -28,16 +31,34 @@
         <!-- Tabs -->
         <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <div class="flex space-x-4 md:space-x-8 px-2 md:px-2">
-                <template x-for="tab in ['Overview', 'Activity', 'Version']" :key="tab">
-                    <button @click="goTo(tab)"
+                <button @click="goTo('Overview')"
+                    :class="{
+                        'text-blue-600 border-blue-600 dark:border-blue-600': activeTab === 'Overview',
+                        'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600': activeTab !== 'Overview'
+                    }"
+                    class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none">
+                    Overview
+                </button>
+
+                <!-- Activity Tab -->
+                <button @click="goTo('Activity')"
+                    :class="{
+                        'text-blue-600 border-blue-600 dark:border-blue-600': activeTab === 'Activity',
+                        'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600': activeTab !== 'Activity'
+                    }"
+                    class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none">
+                    Activity
+                </button>
+
+                <!-- Version Tab -->
+                <template x-if="isInformationSystemRoute">
+                    <button @click="goTo('Version')"
                         :class="{
-                            'text-blue-600 border-blue-600 dark:border-blue-600': activeTab === tab,
-                            'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600': activeTab !== tab
+                            'text-blue-600 border-blue-600 dark:border-blue-600': activeTab === 'Version',
+                            'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600': activeTab !== 'Version'
                         }"
-                        class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none"
-                        x-text="tab"
-                        wire:navigate
-                        >
+                        class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none">
+                        Version
                     </button>
                 </template>
             </div>

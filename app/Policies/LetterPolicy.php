@@ -6,7 +6,7 @@ use App\Models\User;
 use App\States\ApprovedKasatpel;
 use App\States\Pending;
 use App\Models\Letters\Letter;
-use App\States\Process;
+use App\States\Disposition;
 use App\States\Replied;
 use App\States\RepliedKapusdatin;
 
@@ -87,7 +87,7 @@ class LetterPolicy
 
     private function commonVerificationStatusChecking(Letter $letter)
     {
-        return $letter->status instanceof Process || $letter->status instanceof Replied;
+        return $letter->status instanceof Disposition || $letter->status instanceof Replied;
     }
 
     private function checkDivisionLetter(int $division, Letter $letter)
