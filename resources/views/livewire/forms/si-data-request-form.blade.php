@@ -91,10 +91,7 @@
                             </div>
 
                             <div x-show="open" class="p-3 text-gray-600 border-t border-gray-200">
-                                <p class="text-sm">This section is optional and only needed for special cases requiring
-                                    additional documentation. If your submission falls under standard procedures, you
-                                    can
-                                    skip this upload.</p>
+                                <p class="text-sm">Jika sudah mendapatkan tanda tangan beserta stempel</p>
                             </div>
                         </div>
                     </div>

@@ -56,7 +56,7 @@
                 <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
             </flux:modal.close>
 
-            <flux:button variant="primary" type="submit">{{ __('Verifikasi') }}</flux:button>
+            <flux:button variant="primary" type="submit">{{ __('Konfirmasi') }}</flux:button>
         </div>
     </form>
 </flux:modal>
