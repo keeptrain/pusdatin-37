@@ -2,8 +2,7 @@
 <div
     x-data="{ open: true }"
     x-show="open"
-    class="fixed inset-0 z-50 flex items-center justify-center"
-    style="background-color: rgba(0, 0, 0, 0.5);">
+    class="fixed inset-0  z-50  flex items-center justify-center p-4" style="background-color: rgba(0,0,0,.5);">
     <div
         x-show="open"
         x-transition.opacity
@@ -27,7 +26,7 @@
             <p class="text-sm text-gray-700 mb-4">
                 Data akan diekspor sesuai dengan pilihan berikut:
             </p>
-            <ul class="text-gray-800 mb-4 space-y-1">
+            <!-- <ul class="text-gray-800 mb-4 space-y-1">
 
                 <li><strong>Start Date:</strong> {{ $startDate ?? '—' }}</li>
                 <li><strong>End Date:</strong> {{ $endDate   ?? '—' }}</li>
@@ -56,7 +55,7 @@
                     @endswitch
                     @endif
                 </li>
-            </ul>
+            </ul> -->
 
             <div class="flex justify-end space-x-2">
                 @hasanyrole('head_verifier')
@@ -68,6 +67,14 @@
                     target="_blank"
                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm">
                     Download Excel
+                </a>
+                <a href="{{ route('export.head_verifier.filtered.pdf', [
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'status' => $status,
+                        'source' => $source,
+                    ]) }}" target="_blank" class="btn btn-primary">
+                    Download PDF
                 </a>
                 @endhasanyrole
 

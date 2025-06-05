@@ -18,6 +18,16 @@
             </span>
         </div>
     </div>
+    <div
+        wire:loading
+        wire:target="exportHeadVerifier"
+        class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="bg-white rounded-lg  mt-[48vh] mx-auto p-4 shadow-lg w-fit">
+            <span class="text-base font-medium text-gray-700">
+                Generate Process ....
+            </span>
+        </div>
+    </div>
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-7">
         <h2 class="text-lg font-semibold text-gray-900 mb-6">Export Reports</h2>
 
@@ -33,10 +43,12 @@
     <x-export.filter-form
         :statusOptions="$statusOptions"
         :status="$status"
-        :statusOptionsPr="$statusOptionsPr" />
+        :statusOptionsPr="$statusOptionsPr"
+        :source="$source" />
     <x-export.result-modal
         :show-modal=" $showModal"
         :start-date="$start_date"
         :end-date="$end_date"
-        :status="$status" />
+        :status="$status"
+        :source="$source" />
 </div>

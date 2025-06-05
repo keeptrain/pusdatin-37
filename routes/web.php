@@ -102,6 +102,8 @@ Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_veri
             ->name('export.head_verifier.filtered');
         Route::get('/export/head-verifier-pdf', [HeadVerifierPdfExportController::class, 'export'])
             ->name('export.head_verifier.pdf');
+        Route::get('/export/head-verifier-filtered-pdf', [HeadVerifierPdfExportController::class, 'exportFiltered'])
+            ->name('export.head_verifier.filtered.pdf');
         Route::get('/export/si-verifier', [ExportController::class, 'exportSiVerifier'])->name('export.si_verifier');
         Route::get('/export/si-verifier-filtered', [ExportController::class, 'exportSiVerifierWithFilter'])
             ->name('export.si_verifier.filtered');

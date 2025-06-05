@@ -119,10 +119,21 @@
 
 @hasanyrole('head_verifier')
 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-10">
-    <h2 class="text-lg font-semibold mb-4">Filter Data </h2>
-    <form wire:submit.prevent="applyFilters" class="grid grid-cols-12 gap-4 items-end">
+    <h2 class="text-lg font-semibold mb-4">Filter Data</h2>
+    <form wire:submit.prevent="exportHeadVerifier" class="grid grid-cols-12 gap-4 items-end">
 
-
+        {{-- Data Source --}}
+        <div class="col-span-3">
+            <label for="source" class="block text-sm font-medium text-gray-700 mb-1">Data Source</label>
+            <select
+                id="source"
+                wire:model="source"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                <option value="">Pilih Source</option>
+                <option value="letter">Letters</option>
+                <option value="pr">Public Relation</option>
+            </select>
+        </div>
 
         {{-- Start Date --}}
         <div class="col-span-3">
@@ -131,7 +142,7 @@
                 type="date"
                 id="start_date"
                 wire:model="start_date"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" />
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm" />
         </div>
 
         {{-- End Date --}}
@@ -141,12 +152,28 @@
                 type="date"
                 id="end_date"
                 wire:model="end_date"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" />
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm" />
         </div>
 
+        {{-- Status --}}
+        <div class="col-span-3">
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select wire:model="status" class="w-full px-3 py-2 border rounded-md text-sm">
+                @if($source == 'letter')
+                @foreach($statusOptions as $key => $label)
+                <option value="{{ $key }}">{{ $label }}</option>
+                @endforeach
+                @elseif($source == 'pr')
+                @foreach($statusOptionsPr as $key => $label)
+                <option value="{{ $key }}">{{ $label }}</option>
+                @endforeach
+                @else
+                <option value="">Pilih Source terlebih dahulu</option>
+                @endif
+            </select>
+        </div>
 
-
-        {{-- Tombol Apply Filters --}}
+        {{-- Apply Filters --}}
         <div class="col-span-2">
             <button
                 type="submit"
@@ -157,6 +184,5 @@
         </div>
 
     </form>
-
 </div>
 @endhasanyrole
