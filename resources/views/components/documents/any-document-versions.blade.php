@@ -1,16 +1,16 @@
 <div x-data="{
-        versions: {{ $this->anyVersions }},
-        selectedVersion: '',
-        selectedPart: '',
-        get availableParts() {
-            const versionData = this.versions.find(v => v.version === this.selectedVersion);
-            return versionData ? versionData.details : [];
-        },
-        get selectedFile() {
-            const selected = this.availableParts.find(d => d.part_number === this.selectedPart);
-            return selected ? selected.file_path : '';
-        }
-    }" class="p-4">
+    versions: {{ $anyVersions }},
+    selectedVersion: '',
+    selectedPart: '',
+    get availableParts() {
+        const versionData = this.versions.find(v => v.version === this.selectedVersion);
+        return versionData ? versionData.details : [];
+    },
+    get selectedFile() {
+        const selected = this.availableParts.find(d => d.part_number === this.selectedPart);
+        return selected ? selected.file_path : '';
+    }
+}" x-init="$watch('selectedVersion', () => { selectedPart = ''; })" class="p-4">
 
     <div class="items-center mb-4">
         <h2 class="text-md font-semibold text-gray-700">{{ $title }}</h2>
