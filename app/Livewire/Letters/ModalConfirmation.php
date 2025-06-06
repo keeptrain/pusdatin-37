@@ -41,6 +41,9 @@ class ModalConfirmation extends Component
         ];
 
         if ($this->status === 'disposition') {
+            $rules['notes'] = [
+                'required'
+            ];
             $rules['selectedDivision'] = [
                 'required',
             ];
@@ -96,7 +99,7 @@ class ModalConfirmation extends Component
         return [
             'status.required' => 'Status tidak boleh kosong',
             'selectedDivision.required' => 'Tujuan divisi tidak boleh kosong',
-            'revisionParts.required' => 'Butuh bagian yang harus di revisi'
+            'revisionParts.required' => 'Butuh bagian yang harus di revisi',
         ];
     }
 
@@ -118,18 +121,18 @@ class ModalConfirmation extends Component
         $this->authorize('can disposition', $this->letterId);
 
         DB::transaction(function () {
-            // Mencari object letter yang sesuai
             $letter = Letter::findOrFail($this->letterId);
 
             // Transisi status
             $letter->transitionStatusFromPending(
                 $this->status,
                 $this->getSelectedDivisionId(),
+                $this->notes
             );
 
             $letter->refresh();
 
-            $letter->logStatus($this->notes);
+            $letter->logStatus(null);
 
             DB::afterCommit(function () use ($letter) {
                 $letter->sendDispositionServiceRequestNotification();
@@ -147,7 +150,7 @@ class ModalConfirmation extends Component
     public function updatedStatus($value)
     {
         if ($value !== 'rejected') {
-            $this->notes = '';
+            // $this->notesHistorie = '';
         }
     }
 

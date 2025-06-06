@@ -1,7 +1,3 @@
-@php
-    $status = $letter->status->label();
-@endphp
-
 <div class="overflow-x-auto">
     <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
 
@@ -11,7 +7,6 @@
         
         <x-letters.detail-layout overViewRoute="letter.detail" activityRoute="letter.activity" :id="$letterId">
             <div class="mt-3 mr-3">
-
                 @foreach ($letter->documentUploads as $fileData)
                     <div x-show="partTab === '{{ $fileData['part_number'] }}'" x-cloak>
                         <iframe loading="lazy" src="{{ asset($fileData->activeVersion->file_path)}}" width="100%" height="800"
@@ -21,7 +16,6 @@
                         </iframe>
                     </div>
                  @endforeach
-                
                 <livewire:letters.modal-confirmation :letterId="$letterId" :availablePart="$this->availablePart" />
             </div>
 
@@ -73,28 +67,25 @@
                     <p class="text-gray-800">{{ $letter->updated_at }}</p>
                 </div>
 
-                @if ($letter->meeting)
-                <div class="mb-6">
-                    <h4 class="  text-gray-500 mb-1 flex items-center">
-                        Meeting
-                    </h4>
-                    <x-menu.information-system.meeting-details-on-show :meeting="$letter->meeting" :date="$letter->getFormattedMeetingDate()" />
-                </div>
-                    
-                @endif
-
                 <div class="mb-6">
                     <h4 class="text-gray-500 mb-1">Status</h4>
                     <flux:notification.status-badge :status="$letter->status"/>
                 </div>
 
+                @if (isset($letter->notes))
+                    <div class="mb-6">
+                        <h4 class="text-gray-500 mb-1">Catatan</h4>
+                        <p class="text-gray-800">{{ $letter->notes }}</p>
+                    </div>
+                @endif
+
                 <div class="border-1 rounded-lg p-3">
-                    <h4 class="text-gray-500 mb-3">Documents</h4>
+                    <h4 class="text-gray-500 mb-3">Kelengkapan dokumen</h4>
                     <div class="space-y-3">
                         @foreach ($letter->documentUploads as $file)
-                            <div class="flex items-center">
+                            <div class="flex">
                                 <flux:icon.document class="size-5 mr-3"/>
-                                <button @click="partTab = '{{ $file->part_number }}'" class="text-gray-800 cursor-pointer"
+                                <button @click="partTab = '{{ $file->part_number }}'" class="text-start text-gray-700 hover:text-gray-900 cursor-pointer"
                                     :class="{'border-b-2 border-blue-600 ': partTab === '{{ $file->part_number }}' }">{{ $file->part_number_label }}</button>
                             </div>
                         @endforeach
