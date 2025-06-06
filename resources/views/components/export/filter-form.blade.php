@@ -127,7 +127,7 @@
             <label for="source" class="block text-sm font-medium text-gray-700 mb-1">Data Source</label>
             <select
                 id="source"
-                wire:model="source"
+                wire:model.change="source"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                 <option value="">Pilih Source</option>
                 <option value="letter">Letters</option>
@@ -158,7 +158,7 @@
         {{-- Status --}}
         <div class="col-span-3">
             <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select wire:model="status" class="w-full px-3 py-2 border rounded-md text-sm">
+            <select wire:model="status" wire:loading.attr="disabled" class="w-full px-3 py-2 border rounded-md text-sm">
                 @if($source == 'letter')
                 @foreach($statusOptions as $key => $label)
                 <option value="{{ $key }}">{{ $label }}</option>
