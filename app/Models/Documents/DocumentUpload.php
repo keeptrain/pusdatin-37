@@ -2,6 +2,8 @@
 
 namespace App\Models\Documents;
 
+use App\Enums\InformationSystemRequestPart;
+use App\Enums\PublicRelationRequestPart;
 use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\UploadVersion;
@@ -56,29 +58,11 @@ class DocumentUpload extends Model
 
         switch ($baseClassName) {
             case 'PublicRelationRequest':
-                return match ($this->part_number) {
-                    1 => 'Audio',
-                    2 => 'Infografis',
-                    3 => 'Poster',
-                    4 => 'Media',
-                    5 => 'Bumper',
-                    6 => 'Backdrop Kegiatan',
-                    7 => 'Spanduk',
-                    8 => 'Roll Banner',
-                    9 => 'Sertifikat',
-                    10 => 'Press Release',
-                    11 => 'Artikel',
-                    default => 'PR_UNKNOWN_PART_' . $this->part_number,
-                };
+                $partEnumCase = PublicRelationRequestPart::tryFrom($this->part_number);
+                return $partEnumCase->label();
             case 'Letter':
-                return match ($this->part_number) {
-                    1 => 'SPBE',
-                    2 => 'SOP',
-                    3 => 'Pemanfaatan Aplikasi',
-                    4 => 'RFC',
-                    5 => 'NDA',
-                    default => "OTHER_UNKNOWN_PART_$this->part_number",
-                };
+                $partEnumCase = InformationSystemRequestPart::tryFrom($this->part_number);
+                return $partEnumCase->label();
             default:
                 return 'UNKNOWN_DOCUMENTABLE_TYPE_' . $this->part_number;
         }
