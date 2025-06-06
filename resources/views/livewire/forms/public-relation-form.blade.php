@@ -8,7 +8,7 @@
                     <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                         <span
                             class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>
-                        Basic information
+                        Informasi Dasar
                     </h3>
 
                     <div class="space-y-6">
@@ -95,6 +95,7 @@
                             <flux:checkbox label="Sertifikat" value="9" />
                             <flux:checkbox label="Press Release" value="10" />
                             <flux:checkbox label="Artikel" value="11" />
+                            <flux:checkbox label="Peliputan" value="12" />
                         </div>
                     </div>
                 </flux:checkbox.group>
@@ -102,7 +103,7 @@
                 <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                     <span
                         class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
-                    Upload document
+                    Kelengkapan Dokumen
                 </h3>
                 <div class="p-2 bg-amber-100  items-center rounded-lg">
                     <div class="flex items-center">
