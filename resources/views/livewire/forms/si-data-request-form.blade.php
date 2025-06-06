@@ -1,5 +1,4 @@
 <x-layouts.form.request legend="Form Permohonan layanan" nameForm="Sistem Informasi & Data">
-
     <!-- Section 1: Basic information -->
     <form wire:submit="save" class="space-y-6 mt-6">
         <div class="grid lg:grid-cols-2 gap-4">
@@ -28,7 +27,22 @@
 
                         <flux:input label="Seksi/Subbag/Subkel Pengusul"
                             placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
+
+                        <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3"
+                            role="alert">
+                            <div>
+                                <h4 class="font-bold text-lg mb-1">Penting!</h4>
+                                <p class=" text-base">
+                                    Anda harus membaca dan memahami Standar Operasional Prosedur (SOP) sebelum
+                                    mengajukan permohonan.
+                                    <a wire:click="downloadSOP"
+                                        class="underline font-bold hover:text-blue-900 cursor-pointer">Download
+                                        disini</a>
+                                </p>
+                            </div>
+                        </div>
                     </div>
+                    <x-letters.input-file-adapter title="Permohonan (nota dinas)" model="files.0" required />
                 </div>
             </section>
 
@@ -47,24 +61,24 @@
                         <h3 class="text-md font-medium text-gray-700 mb-4 flex items-center">
                             <span
                                 class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
-                            Upload Dokumen
+                            Kelengkapan Dokumen
                         </h3>
 
                         <!-- File Upload -->
-                        <x-letters.input-file-adapter title="Dokumen Identifikasi Aplikasi SPBE" model="files.0"
-                            required template filePath="downloadTemplate('1')" />
+                        <x-letters.input-file-adapter title="1. Dokumen Identifikasi Aplikasi" model="files.1" required
+                            template filePath="downloadTemplate('1')" />
 
-                        <x-letters.input-file-adapter title="SOP Aplikasi SPBE" model="files.1" required template
+                        <x-letters.input-file-adapter title="2. SOP Aplikasi" model="files.2" required template
                             filePath="downloadTemplate('2')" />
 
-                        <x-letters.input-file-adapter title="Pakta Integritas Pemanfaatan Aplikasi" model="files.2" required template
-                            filePath="downloadTemplate('3')" />
+                        <x-letters.input-file-adapter title="3. Pakta Integritas Implementasi" model="files.3" required
+                            template filePath="downloadTemplate('3')" />
 
-                        <x-letters.input-file-adapter title="Form RFC Pusdatinkes" model="files.3" required template
+                        <x-letters.input-file-adapter title="4. Form RFC Pusdatinkes" model="files.4" required template
                             filePath="downloadTemplate('4')" />
 
-                        <x-letters.input-file-adapter title="NDA Pusdatin Dinkes" model="files.4" optional template
-                            filePath="downloadTemplate('5')" />
+                        <x-letters.input-file-adapter title="5. Surat perjanjian kerahasiaan" model="files.5" optional
+                            template filePath="downloadTemplate('5')" />
 
                         <div x-data="{ open: false }" class="border-l-2 border-gray-400 bg-gray-50 ">
                             <div class="p-2 flex justify-between items-center cursor-pointer" @click="open = !open">
@@ -109,5 +123,4 @@
             </flux:button>
         </div>
     </form>
-
 </x-layouts.form.request>
