@@ -22,7 +22,7 @@ class HeadVerifierPdfExportController extends Controller
 
         $pdf = Pdf::loadView('pdf.head_verifier_report', $data);
 
-        return $pdf->download('head_verifier_report.pdf');
+        return $pdf->download('List Data Permohonan.pdf');
     }
     public function exportFiltered(Request $request)
     {
@@ -76,7 +76,7 @@ class HeadVerifierPdfExportController extends Controller
         $pdf = Pdf::loadView('pdf.head_verifier_filtered', $data);
 
 
-        $fileName = 'head_verifier_report_filtered.pdf';
+        $fileName = 'List Data Permohonan(Filter).pdf';
 
 
         return $pdf->download($fileName);

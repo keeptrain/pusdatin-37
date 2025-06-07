@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Data Verifier Report (Filtered)</title>
+    <title>List Data Permohonan Data (Filtered)</title>
     <style>
         body {
             font-family: sans-serif;
@@ -14,7 +14,7 @@
         h1,
         h2 {
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .meta {
@@ -48,7 +48,7 @@
 
 <body>
 
-    <h1>List Permintaan Data (Filter)</h1>
+    <h1>List Data Permohonan Data (Filtered)</h1>
 
     <div class="meta">
         <span><strong>Start Date:</strong> {{ $start ?? '—' }}</span>
@@ -74,16 +74,16 @@
     <table>
         <thead>
             <tr>
-                <th>#</th>
-                <th>User Name</th>
-                <th>Title</th>
-                <th>Reference Number</th>
+                <th>No</th>
+                <th>Nama Penanggung Jawab</th>
+                <th>Judul Permohonan</th>
+                <th>Nomor Surat</th>
                 <th>Status</th>
-                <!-- <th>Current Division</th>
-                <th>Active Revision</th>
+                <!-- <th>Divisi</th> -->
+                <!-- <th>Active Revision</th>
                 <th>Need Review</th> -->
-                <th>Meeting</th>
-                <th>Created At</th>
+                <th>Link Meeting</th>
+                <th>Tanggal Pengajuan</th>
             </tr>
         </thead>
         <tbody>

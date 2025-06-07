@@ -20,7 +20,7 @@ class PrVerifierPdfExportController extends Controller
 
         $pdf = Pdf::loadView('pdf.pr_verifier_report', $data);
 
-        return $pdf->download('pr_verifier_report.pdf');
+        return $pdf->download('Data Permohonan Kehumasan.pdf');
     }
     public function exportFiltered(Request $request)
     {
@@ -53,7 +53,7 @@ class PrVerifierPdfExportController extends Controller
 
         $pdf = Pdf::loadView('pdf.pr_verifier_filtered', $data);
 
-        $fileName = 'pr_verifier_report_filtered_' . now()->format('Ymd_His') . '.pdf';
+        $fileName = 'Data Permohonan Kehumasan (Filter).pdf';
 
         return $pdf->download($fileName);
     }

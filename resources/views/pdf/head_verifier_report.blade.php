@@ -47,31 +47,37 @@
     <table>
         <thead>
             <tr>
-                <th>User Name</th>
-                <th>Title</th>
-                <th>Reference Number</th>
+                <th>No</th>
+                <th>Nama Penanggung Jawab</th>
+                <th>Judul Permohonan</th>
+                <th>Nomor Surat</th>
                 <th>Status</th>
-                <th>Current Division</th>
-                <th>Active Revision</th>
-                <th>Need Review</th>
+                <th>Divisi</th>
+                <!-- <th>Active Revision</th>
+                <th>Need Review</th> -->
                 <th>Meeting</th>
-                <th>Created At</th>
+                <th>Tanggal Pengajuan</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($letters as $letter)
+            @forelse($letters as $index => $letter)
             <tr>
-                <td>{{ $letter->user ? $letter->user->name : '—' }}</td>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $letter->user?->name ?? '—' }}</td>
                 <td>{{ $letter->title }}</td>
                 <td>{{ $letter->reference_number }}</td>
                 <td>{{ $letter->status->label() }}</td>
-                <td>{{ $letter->current_division }}</td>
-                <td>{{ $letter->active_revision }}</td>
-                <td>{{ $letter->need_review }}</td>
+                <td>{{ $letter->division_label}}</td>
+                <!-- <td>{{ $letter->active_revision }}</td>
+                <td>{{ $letter->need_review }}</td> -->
                 <td>{{ $letter->meeting }}</td>
-                <td>{{ $letter->created_at }}</td>
+                <td>{{ $letter->createdAtDMY() }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="10" style="text-align: center; padding: 12px;">Tidak Ada Permohonan</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 
@@ -79,19 +85,21 @@
     <table>
         <thead>
             <tr>
-                <th>User Name</th>
-                <th>Theme</th>
-                <th>Month Publication</th>
-                <th>Specific Date</th>
+                <th>No</th>
+                <th>Nama Penanggung Jawab</th>
+                <th>Tema</th>
+                <th>Bulan Usulan Publikasi</th>
+                <th>Tanggal Spesifik Publikasi Media</th>
                 <th>Status</th>
-                <th>Target</th>
-                <th>Links</th>
-                <th>Created At</th>
+                <th>Sasaran</th>
+                <th>Link Publikasi</th>
+                <th>Tanggal Permohonan</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($prRequests as $request)
+            @forelse($prRequests as $index => $request)
             <tr>
+                <td>{{ $index + 1 }}</td>
                 <td>{{ $request->user ? $request->user->name : '—' }}</td>
                 <td>{{ $request->theme }}</td>
                 <td>{{ $request->month_publication }}</td>
@@ -109,7 +117,11 @@
                 </td>
                 <td>{{ $request->created_at }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 12px;">Tidak Ada Permohonan.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 

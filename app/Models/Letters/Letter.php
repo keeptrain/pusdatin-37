@@ -91,6 +91,10 @@ class Letter extends Model
     {
         return Division::tryFrom($value)?->label() ?? 'Perlu disposisi';
     }
+    public function getDivisionLabelAttribute(): string
+    {
+        return Division::tryFrom($this->current_division)->label();
+    }
 
     /**
      * Get the updated_at attribute in readable format.

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Si Verifier Report (Filtered)</title>
+    <title>List Data Permohonan Sistem Informasi (Filtered)</title>
     <style>
         body {
             font-family: sans-serif;
@@ -14,7 +14,7 @@
         h1,
         h2 {
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .meta {
@@ -74,16 +74,16 @@
     <table>
         <thead>
             <tr>
-                <th>#</th>
-                <th>User Name</th>
-                <th>Title</th>
-                <th>Reference Number</th>
+                <th>No</th>
+                <th>Nama Penanggung Jawab</th>
+                <th>Judul Permohonan</th>
+                <th>Nomor Surat</th>
                 <th>Status</th>
-                <th>Current Division</th>
-                <th>Active Revision</th>
-                <th>Need Review</th>
+                <!-- <th>Divisi</th> -->
+                <!-- <th>Active Revision</th>
+                <th>Need Review</th> -->
                 <th>Meeting</th>
-                <th>Created At</th>
+                <th>Tanggal Pengajuan</th>
             </tr>
         </thead>
         <tbody>
@@ -94,15 +94,15 @@
                 <td>{{ $letter->title }}</td>
                 <td>{{ $letter->reference_number }}</td>
                 <td>{{ $letter->status->label() }}</td>
-                <td>{{ $letter->current_division }}</td>
+                <!-- <td>{{ $letter->current_division }}</td>
                 <td>{{ $letter->active_revision }}</td>
-                <td>{{ $letter->need_review }}</td>
+                <td>{{ $letter->need_review }}</td> -->
                 <td>{{ $letter->meeting }}</td>
                 <td>{{ $letter->created_at }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="10" style="text-align: center; padding: 12px;">No records found.</td>
+                <td colspan="10" style="text-align: center; padding: 12px;">Tidak Ada Permohonan</td>
             </tr>
             @endforelse
         </tbody>
