@@ -26,10 +26,6 @@ class ModalConfirmation extends Component
 
     public $revisionNotes = [];
 
-    public $selectedOption = '';
-
-    public $meeting = [];
-
     public function rules()
     {
         $rules = [
@@ -178,45 +174,6 @@ class ModalConfirmation extends Component
             session()->flash('status', [
                 'variant' => 'success',
                 'message' => $siRequest->status->toastMessage(),
-            ]);
-
-            return $this->redirect("/letter/$this->letterId", true);
-        });
-    }
-
-    public function createMeeting()
-    {
-        $rules = [
-            'selectedOption' => 'required|in:in-person,online-meet',
-            'meeting.date' => 'required|date',
-            'meeting.start' => 'required|date_format:H:i',
-            'meeting.end' => 'required|date_format:H:i|after:meeting.start',
-        ];
-
-        if ($this->selectedOption === 'in-person') {
-            $rules['meeting.location'] = 'required|string|max:255';
-        } elseif ($this->selectedOption === 'online-meet') {
-            $rules['meeting.link'] = 'required|url|max:255';
-        }
-
-        $this->validate($rules);
-
-        $siRequest = $this->getSiDataRequests();
-
-        DB::transaction(function () use ($siRequest) {
-            $siRequest->update([
-                'meeting' => $this->meeting,
-            ]);
-
-            $siRequest->logStatusCustom('Rencana pertemuan telah dibuat, silahkan cek detailnya.');
-
-            // DB::afterCommit(function () use ($siRequest) {
-            //     $siRequest->sendMeetingServiceRequestNotification();
-            // });
-
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => 'Meeting berhasil dibuat',
             ]);
 
             return $this->redirect("/letter/$this->letterId", true);

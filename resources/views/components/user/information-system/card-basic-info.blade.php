@@ -33,7 +33,17 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Kontak</p>
                     <p class="mt-1 text-gray-900">{{ $contact }}</p>
+
+                    @if (isset($this->meeting) && count($this->meeting))
+                        <p class="text-xs font-medium text-gray-500 uppercase mt-4">Meeting</p>
+
+                        {{-- Tampilkan meeting terdekat --}}
+                        <x-user.information-system.meeting-info :meeting="$this->meeting[0]" />
+                    @else
+                        {{-- <p class="text-xs font-medium text-gray-500 uppercase mt-2">Belum ada meeting</p> --}}
+                    @endif
                 </div>
+
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1">File yang di upload</p>
                     <div x-data="{
@@ -50,7 +60,7 @@
                         <template x-if="!hasPartNumber5">
                             <flux:modal.trigger name="upload-modal">
                                 <a x-on:click="$dispatch('modal-show', { name: 'upload-modal' })"
-                                    class="flex gap-2 cursor-pointer mt-4" type="file">
+                                    class="flex gap-2 mt-4 text-blue-900 hover:underline cursor-pointer " type="file">
                                     <x-lucide-upload class="w-4" />
                                     Upload file pendukung
                                 </a>
@@ -58,14 +68,8 @@
                         </template>
                     </div>
                 </div>
-
-                <!-- Meeting Information -->
-                <div>
-                    @if ($meeting)
-                        <x-user.information-system.meeting-details-in-card :meeting="$meeting" />
-                    @endif
-                </div>
             </div>
+
             <div>
                 <div class="flex justify-end">
                     <template x-if="{{ $activerevision }}">

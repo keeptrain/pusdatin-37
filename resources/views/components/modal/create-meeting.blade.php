@@ -1,8 +1,5 @@
-<flux:modal x-data="{
-    selectedOption: '',
-}" name="create-meeting-modal" focusable class="md:w-200" size="lg">
+<flux:modal name="create-meeting-modal" focusable class="md:w-200" size="lg">
     <form wire:submit="createMeeting">
-
         <div class="p-6">
             <div class="mb-6">
                 <h2 class="text-lg font-medium text-gray-900 mb-1">Opsi Rapat</h2>
@@ -55,5 +52,4 @@
             </div>
         </div>
     </form>
-
 </flux:modal>

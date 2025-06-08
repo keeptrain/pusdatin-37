@@ -6,6 +6,7 @@
         <flux:heading size="xl" class="p-4">Detail Permohonan Layanan</flux:heading>
         
         <x-letters.detail-layout overViewRoute="letter.detail" activityRoute="letter.activity" :id="$letterId">
+            <div class="flex-1 p-4 md:p-3">
             <div class="mt-3 mr-3">
                 @foreach ($letter->documentUploads as $fileData)
                     <div x-show="partTab === '{{ $fileData['part_number'] }}'" x-cloak>
@@ -98,6 +99,7 @@
 
                 <x-menu.dropdown-menu-on-show :letterId="$letterId"/>
             </x-slot>
+            </div>
         </x-letters.detail-layout>
     </div>
 </div>

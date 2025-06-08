@@ -1,44 +1,80 @@
-<div class="inline-flex">
-    <section class="space-y-2">
-        <p class="text-xs font-medium text-gray-500 uppercase">Detail Meeting</p>
-        <div class="space-y-2">
-            <div class="flex items-center text-sm">
+<div class="bg-zinc-50 border rounded-lg p-4">
+    <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-medium text-gray-500 uppercase">{{ $meeting['status']}}</p>
+        <flux:dropdown>
+            <flux:button variant="ghost" icon="ellipsis-vertical" />
+            <flux:menu>
+                <flux:menu.item x-on:click="$dispatch('modal-show', { name: 'create-meeting-modal' })"
+                    icon="video-camera" class="w-full">Edit</flux:menu.item>
+                <flux:menu.item wire:click="delete({{ $key }})" icon="trash" variant="danger">Delete
+                </flux:menu.item>
+            </flux:menu>
+        </flux:dropdown>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-4">
+        <!-- Kolom Kiri -->
+        <div class="flex-1 space-y-3 min-h-[150px]">
+            <div class="flex items-start text-sm">
                 @if (isset($meeting['location']))
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 mr-2"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                    <span class="font-medium text-gray-700">Lokasi:</span>
-                    <span class="ml-2 text-gray-600">{{ $meeting['location'] }}</span>
+                    <section class="flex items-center space-x-2">
+                        <flux:icon.map-pin class="size-6 text-gray-400" />
+                        <flux:subheading size="lg" class="text-gray-800">
+                            <span class="text-gray-500">Lokasi:</span> {{ $meeting['location'] }}
+                        </flux:subheading>
+                    </section>
                 @elseif (isset($meeting['link']))
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 mr-2"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                    </svg>
-                    <span class="font-medium text-gray-700">
-                        Online meeting:
-                        <a href="{{ $meeting['link'] }}" target="_blank" rel="noopener noreferrer"
-                            class="text-blue-600 hover:text-blue-800 underline">
-                            Link
-                        </a>
-                    </span>
+                    <section class="flex items-center space-x-2">
+                        <flux:icon.video-camera class="size-5 text-gray-500" />
+                        <flux:subheading size="lg" class="text-gray-800">
+                            <span class="text-gray-500">Online meeting:</span>
+                            <a href="{{ $meeting['link'] }}" target="_blank" rel="noopener noreferrer"
+                                class="text-blue-600 hover:text-blue-800 underline break-words">
+                                Link
+                            </a>
+                        </flux:subheading>
+                    </section>
                 @endif
             </div>
-            <div class="flex items-center text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 mr-2"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12,6 12,12 16,14"></polyline>
-                </svg>
-                <span class="font-medium text-gray-700">Jadwal:</span>
-                <span class="ml-2 text-gray-600">{{ $meeting['date'] }} • {{ $meeting['start'] }} -
-                    {{ $meeting['end']}}</span>
+
+            <div class="flex items-center text-sm space-x-2">
+                <flux:icon.calendar class="size-5 text-gray-400" />
+                <flux:subheading size="lg" class="text-gray-800"><span class="text-gray-500">Tanggal:</span>
+                    {{ $meeting['date'] }}
+                </flux:subheading>
+            </div>
+
+            <div class="flex justify-between items-center text-sm">
+                <div class="flex items-center space-x-2">
+                    <flux:icon.clock class="size-5 text-gray-400" />
+                    <flux:subheading size="lg" class="text-gray-800"><span class="text-gray-500">Waktu:</span>
+                        {{ $meeting['start'] }} - {{ $meeting['end'] }}
+                    </flux:subheading>
+                </div>
             </div>
         </div>
-    </section>
+
+        <!-- Kolom Kanan -->
+        <div class="flex-1 flex items-start text-sm min-h-[150px]">
+            <div class="w-full">
+                <div class="flex items-center space-x-2">
+                    <flux:icon.chat-bubble-left-right class="size-5 text-gray-400" />
+                    <flux:heading size="lg" class="text-gray-500">Hasil meeting: </flux:heading>
+                </div>
+                @if ($meeting['result'] === null)
+                    <form wire:submit="updateResultMeeting({{ $key }})" class="space-y-4">
+                        <div class="flex justify-between items-end gap-2">
+                            <flux:textarea wire:model="result.{{ $key }}" placeholder="Input disini..." rows="2"
+                                class="w-3/4 mt-3" />
+                            <flux:button type="submit" size="sm" class="mr-4">Simpan</flux:button>
+                        </div>
+                    </form>
+                @else
+                    <flux:subheading size="lg" class="text-gray-800 break-words max-h-32 overflow-y-auto">
+                        {{ $meeting['result'] }}
+                    </flux:subheading>
+                @endif
+            </div>
+        </div>
+    </div>
 </div>

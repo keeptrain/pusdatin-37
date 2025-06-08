@@ -10,6 +10,7 @@ use App\Services\TrackingStepped;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class DetailHistory extends Component
@@ -49,6 +50,31 @@ class DetailHistory extends Component
     public function prRequests()
     {
         return PublicRelationRequest::with('documentUploads.activeVersion:id,file_path')->findOrFail($this->id);
+    }
+
+    #[Computed]
+    public function meeting()
+    {
+        $meeting = $this->content?->meeting ?? [];
+
+        uasort($meeting, function ($a, $b) {
+            $timeA = Carbon::parse("{$a['date']} {$a['end']}");
+            $timeB = Carbon::parse("{$b['date']} {$b['end']}");
+
+            if ($timeA->isFuture() && $timeB->isFuture()) {
+                return $timeA <=> $timeB;
+            }
+            if ($timeA->isFuture()) {
+                return -1;
+            }
+            if ($timeB->isFuture()) {
+                return 1;
+            }
+
+            return $timeA <=> $timeB;
+        });
+
+        return array_values($meeting);
     }
 
     #[Computed]
@@ -106,7 +132,7 @@ class DetailHistory extends Component
         $this->validate([
             'additionalFile' => ['required', 'mimes:pdf']
         ], [
-            'additionalFile.required' => 'Dokumen NDA harus disisipkan!'
+            'additionalFile.required' => 'Surat perjanjian kerahasiaan harus disisipkan!'
         ]);
 
         DB::transaction(function () {
