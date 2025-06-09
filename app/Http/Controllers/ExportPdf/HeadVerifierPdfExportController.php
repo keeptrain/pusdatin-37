@@ -24,6 +24,7 @@ class HeadVerifierPdfExportController extends Controller
 
         return $pdf->download('List Data Permohonan.pdf');
     }
+
     public function exportFiltered(Request $request)
     {
 

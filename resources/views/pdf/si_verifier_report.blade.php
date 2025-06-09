@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>List Data Permohonan Sistem Informasi</title>
+    <title>Permohonan Sistem Informasi</title>
     <style>
         body {
             font-family: sans-serif;
@@ -34,7 +34,7 @@
 </head>
 
 <body>
-    <h1>List Data Permohonan Sistem Informasi</h1>
+    <h1>Permohonan Sistem Informasi</h1>
 
     <table>
         <thead>
@@ -62,7 +62,7 @@
                 <!-- <td>{{ $letter->current_division }}</td> -->
                 <!-- <td>{{ $letter->active_revision }}</td>
                 <td>{{ $letter->need_review }}</td> -->
-                <td>{{ $letter->meeting }}</td>
+                <td>{!! nl2br(e($letter->formatted_meetings)) !!}</td>
                 <td>{{ $letter->created_at }}</td>
             </tr>
             @empty

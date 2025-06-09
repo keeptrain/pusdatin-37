@@ -21,10 +21,7 @@ class LetterExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-
         $query = Letter::query()->with('user');
-
-
 
         if ($this->startDate) {
             $query->whereDate('created_at', '>=', $this->startDate);
@@ -35,7 +32,6 @@ class LetterExport implements FromCollection, WithHeadings
         }
 
         if ($this->status && $this->status !== 'all') {
-
             $stateClass = Letter::resolveStatusClassFromString($this->status);
             $query->whereState('status', $stateClass);
         }
@@ -49,9 +45,7 @@ class LetterExport implements FromCollection, WithHeadings
                     'Reference Number' => $item->reference_number,
                     'Status'           => $item->status->label(),
                     'Current Division' => $item->division_label,
-                    // 'Active Revision'  => $item->active_revision,
-                    // 'Need Review'      => $item->need_review,
-                    'Link Meeting'          => $item->meeting,
+                    'Meeting'          => $item->formatted_meetings,
                     'Created At'       => $item->createdAtDMY(),
                 ];
             });
@@ -67,7 +61,7 @@ class LetterExport implements FromCollection, WithHeadings
             'Divisi',
             // 'Active Revision',
             // 'Need Review',
-            'Link Meeting',
+            'Meeting',
             'Tanggal Pengajuan',
         ];
     }

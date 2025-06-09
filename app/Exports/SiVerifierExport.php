@@ -51,7 +51,7 @@ class SiVerifierExport implements FromCollection, WithHeadings
                 // 'Current Division' => $item->current_division,
                 // 'Active Revision'  => $item->active_revision,
                 // 'Need Review'      => $item->need_review,
-                'Meeting'          => $item->meeting,
+                'Meeting'          => $item->formatted_meetings,
                 'Created At'       => $item->createdAtDMY(),
             ];
         });
@@ -66,7 +66,7 @@ class SiVerifierExport implements FromCollection, WithHeadings
             // 'Current Division',
             // 'Active Revision',
             // 'Need Review',
-            'Link Meeting',
+            'Meeting',
             'Tanggal Pengajuan',
         ];
     }

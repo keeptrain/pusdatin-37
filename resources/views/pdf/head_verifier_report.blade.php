@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Head Verifier Report</title>
+    <title>Laporan Kepala Kapusdatin</title>
     <style>
         body {
             font-family: sans-serif;
@@ -41,9 +41,8 @@
 
 <body>
 
-    <h1>Head Verifier Report</h1>
 
-    <h2 class="section-title">Letters</h2>
+    <h2 class="section-title">Permohonan Sistem Informasi & Data</h2>
     <table>
         <thead>
             <tr>
@@ -67,10 +66,10 @@
                 <td>{{ $letter->title }}</td>
                 <td>{{ $letter->reference_number }}</td>
                 <td>{{ $letter->status->label() }}</td>
-                <td>{{ $letter->division_label}}</td>
-                <!-- <td>{{ $letter->active_revision }}</td>
-                <td>{{ $letter->need_review }}</td> -->
-                <td>{{ $letter->meeting }}</td>
+                <td>{{ $letter->division_label }}</td>
+                {{-- <td>{{ $letter->active_revision }}</td> --}}
+                {{-- <td>{{ $letter->need_review }}</td> --}}
+                <td>{{ $letter->formatted_meetings }}</td>
                 <td>{{ $letter->createdAtDMY() }}</td>
             </tr>
             @empty
@@ -81,7 +80,7 @@
         </tbody>
     </table>
 
-    <h2 class="section-title">Public Relation Requests</h2>
+    <h2 class="section-title">Permohonan Kehumasan</h2>
     <table>
         <thead>
             <tr>

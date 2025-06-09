@@ -93,9 +93,10 @@ class Letter extends Model
     {
         return Division::tryFrom($value)?->label() ?? 'Perlu disposisi';
     }
+
     public function getDivisionLabelAttribute(): string
     {
-        return Division::tryFrom($this->current_division)->label();
+        return Division::tryFrom($this->current_division)?->label() ?? 'Perlu disposisi';
     }
 
     /**
@@ -235,5 +236,45 @@ class Letter extends Model
                 $query->where('version', '!=', 0);
             })
             ->exists();
+    }
+
+    protected function getFormattedMeetingsAttribute()
+    {
+        $meetings = $this->meeting;
+
+        if (empty($meetings)) {
+            return 'Tidak Ada Meeting';
+        }
+
+        // $meetings adalah array valid
+        $meetingsArray = is_string($meetings) ? json_decode($meetings, true) : $meetings;
+
+        // Jika decoding gagal atau hasilnya bukan array, kembalikan fallback
+        if (!is_array($meetingsArray)) {
+            return 'Tidak Ada Meeting';
+        }
+
+        // Format setiap meeting menjadi blok teks terstruktur
+        return collect($meetingsArray)->map(function ($meeting, $index) {
+            $details = [];
+            $details[] = "Meeting " . ($index + 1) . ":";
+            if (isset($meeting['date'])) {
+                $details[] = "- Tanggal: {$meeting['date']}";
+            }
+            if (isset($meeting['start']) && isset($meeting['end'])) {
+                $details[] = "- Waktu: {$meeting['start']} - {$meeting['end']}";
+            }
+            if (isset($meeting['location'])) {
+                $details[] = "- Lokasi: {$meeting['location']}";
+            }
+            if (isset($meeting['link'])) {
+                $details[] = "- Online Meet";
+            }
+            if (isset($meeting['result'])) {
+                $details[] = "- Hasil: {$meeting['result']}";
+            }
+
+            return implode("\n", $details); // Newline untuk memisahkan setiap detail
+        })->implode("\n\n"); // Dua newline untuk memisahkan setiap meeting
     }
 }

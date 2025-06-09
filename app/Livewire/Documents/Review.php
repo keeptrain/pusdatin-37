@@ -16,7 +16,7 @@ class Review extends Component
     #[Locked]
     public int $letterId;
 
-    public $letter;
+    public $systemRequest;
 
     public $currentVersions;
 
@@ -25,6 +25,8 @@ class Review extends Component
     public $changesChoice = '';
 
     public array $partAccepted = [];
+
+    public $note = '';
 
     public function rules()
     {
@@ -50,11 +52,11 @@ class Review extends Component
     public function mount(int $id)
     {
         $this->letterId = $id;
-        $this->letter = $this->getLetterWithMappedData();
+        $this->systemRequest = $this->getSystemRequests();
         $this->processVersions();
     }
 
-    public function getLetterWithMappedData()
+    public function getSystemRequests()
     {
         return Letter::select('id')->with([
             'documentUploads.activeVersion',
@@ -67,17 +69,23 @@ class Review extends Component
         $this->validate();
 
         DB::transaction(function () {
-            $letter = $this->letter;
+            $systemRequest = $this->systemRequest;
 
-            $documentUploadsIds = $letter->documentUploads()->pluck('id');
+            $documentUploadsIds = $systemRequest->documentUploads()->pluck('id');
 
             if ($this->changesChoice === 'yes') {
-                $this->changesChoiceYes($letter, $documentUploadsIds);
+                $this->changesChoiceYes($systemRequest, $documentUploadsIds);
             } elseif ($this->changesChoice === 'no') {
                 $this->changesChoiceNo($documentUploadsIds);
             }
 
-            $letter->updatedForCompletedReview();
+            if (!empty($this->note)) {
+                $systemRequest->logStatusReview("Kepala Satuan Pelaksana telah melakukan review dan memberikan", $this->note);
+            } else {
+                $systemRequest->logStatusCustom("Kepala Satuan Pelaksana telah melakukan review");
+            }
+
+            $systemRequest->updatedForCompletedReview();
 
             session()->flash('status', [
                 'variant' => 'success',
@@ -88,11 +96,11 @@ class Review extends Component
         });
     }
 
-    private function changesChoiceYes(Letter $letter, $documentUploadIds)
+    private function changesChoiceYes(Letter $systemRequest, $documentUploadIds)
     {
         // Proses file yang dipilih ($this->partAccepted)
         $selectedDocumentUploads = DocumentUpload::whereIn('part_number', $this->partAccepted)
-            ->where('documentable_id', $letter->id)
+            ->where('documentable_id', $systemRequest->id)
             ->get();
 
         // Update versi terbaru yang belum disetujui (is_resolved = false) untuk file yang dipilih
@@ -149,8 +157,8 @@ class Review extends Component
         $currentVersionsData = new Collection();
         $latestUnapprovedRevisionsData = new Collection();
 
-        if ($this->letter && $this->letter->documentUploads->isNotEmpty()) {
-            foreach ($this->letter->documentUploads as $documentUpload) {
+        if ($this->systemRequest && $this->systemRequest->documentUploads->isNotEmpty()) {
+            foreach ($this->systemRequest->documentUploads as $documentUpload) {
                 if ($documentUpload->hasUnapprovedRevision()) {
                     $latestUnapprovedRevisionsData->push($documentUpload->formatForLatestUnapprovedRevision());
 
