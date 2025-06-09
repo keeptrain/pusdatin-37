@@ -9,9 +9,7 @@ use Illuminate\Http\Request;
 
 class SiVerifierPdfExportController extends Controller
 {
-    /**
-     *
-     */
+
     public function export()
     {
 
@@ -23,7 +21,7 @@ class SiVerifierPdfExportController extends Controller
 
         $pdf = Pdf::loadView('pdf.si_verifier_report', $data);
 
-        return $pdf->download('si_verifier_report.pdf');
+        return $pdf->download('Data Permohonan Sistem Informasi.pdf');
     }
     public function exportFiltered(Request $request)
     {
@@ -51,7 +49,7 @@ class SiVerifierPdfExportController extends Controller
 
         $pdf = Pdf::loadView('pdf.si_verifier_filtered', $data);
 
-        $fileName = 'si_verifier_report_filtered.pdf';
+        $fileName = 'Data Permohonan Sistem Informasi Filter.pdf';
         return $pdf->download($fileName);
     }
 }

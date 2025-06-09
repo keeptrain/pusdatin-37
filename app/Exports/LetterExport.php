@@ -48,11 +48,11 @@ class LetterExport implements FromCollection, WithHeadings
                     'Title'            => $item->title,
                     'Reference Number' => $item->reference_number,
                     'Status'           => $item->status->label(),
-                    'Current Division' => $item->current_division,
-                    'Active Revision'  => $item->active_revision,
-                    'Need Review'      => $item->need_review,
-                    'Meeting'          => $item->meeting,
-                    'Created At'       => $item->created_at,
+                    'Current Division' => $item->division_label,
+                    // 'Active Revision'  => $item->active_revision,
+                    // 'Need Review'      => $item->need_review,
+                    'Link Meeting'          => $item->meeting,
+                    'Created At'       => $item->createdAtDMY(),
                 ];
             });
     }
@@ -60,15 +60,15 @@ class LetterExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'User Name',
-            'Title',
-            'Reference Number',
+            'Nama Penganggung Jawab',
+            'Judul Permohonan',
+            'Nomor Surat',
             'Status',
-            'Current Division',
-            'Active Revision',
-            'Need Review',
-            'Meeting',
-            'Created At',
+            'Divisi',
+            // 'Active Revision',
+            // 'Need Review',
+            'Link Meeting',
+            'Tanggal Pengajuan',
         ];
     }
 }

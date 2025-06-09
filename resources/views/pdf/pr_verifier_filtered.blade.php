@@ -14,7 +14,7 @@
         h1,
         h2 {
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .meta {
@@ -47,8 +47,7 @@
 </head>
 
 <body>
-    <h1>PR Verifier Report</h1>
-    <h2>Filtered</h2>
+    <h1>List Data Permohonan Kehumasan (Filter)</h1>
 
     <div class="meta">
         <span><strong>Start Date:</strong> {{ $start ?? '—' }}</span>
@@ -72,15 +71,15 @@
     <table>
         <thead>
             <tr>
-                <th>#</th>
-                <th>User Name</th>
-                <th>Theme</th>
-                <th>Month Publication</th>
-                <th>Specific Date</th>
+                <th>No</th>
+                <th>Nama Penanggung Jawab</th>
+                <th>Tema</th>
+                <th>Bulan Usulan Publikasi</th>
+                <th>Tanggal Spesifik Publikasi Media</th>
                 <th>Status</th>
-                <th>Target</th>
-                <th>Links</th>
-                <th>Created At</th>
+                <th>Sasaran</th>
+                <th>Link Publikasi</th>
+                <th>Tanggal Permohonan</th>
             </tr>
         </thead>
         <tbody>
@@ -106,7 +105,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="9" style="text-align: center; padding: 12px;">No records found.</td>
+                <td colspan="9" style="text-align: center; padding: 12px;">Tidak Ada Permohonan.</td>
             </tr>
             @endforelse
         </tbody>

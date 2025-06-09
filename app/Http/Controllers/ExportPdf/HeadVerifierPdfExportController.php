@@ -22,6 +22,63 @@ class HeadVerifierPdfExportController extends Controller
 
         $pdf = Pdf::loadView('pdf.head_verifier_report', $data);
 
-        return $pdf->download('head_verifier_report.pdf');
+        return $pdf->download('List Data Permohonan.pdf');
+    }
+    public function exportFiltered(Request $request)
+    {
+
+        $start = $request->query('start_date');
+        $end   = $request->query('end_date');
+        $status    = $request->query('status');
+        $source    = $request->query('source'); // 'letter' atau 'pr'
+
+
+        if ($source === 'letter') {
+            $query = Letter::with('user');
+        } else if ($source === 'pr') {
+            $query = PublicRelationRequest::with('user');
+        } else {
+            return abort(404);
+        }
+
+
+        if ($start) {
+            $query->whereDate('created_at', '>=', $start);
+        }
+
+        if ($end) {
+            $query->whereDate('created_at', '<=', $end);
+        }
+
+        // Filter berdasarkan status (jika ada)
+        if ($status && $status !== 'all') {
+            if ($source === 'letter') {
+                $stateClass = Letter::resolveStatusClassFromString($status);
+                $query->whereState('status', $stateClass);
+            } else if ($source === 'pr') {
+                $stateClassPr = PublicRelationRequest::resolveStatusClassFromString($status);
+                $query->whereState('status', $stateClassPr);
+            }
+        }
+
+
+        $data = $query->get();
+
+
+        $data = [
+            'data' => $data,
+            'start_date' => $start,
+            'end_date' => $end,
+            'status' => $status,
+        ];
+
+
+        $pdf = Pdf::loadView('pdf.head_verifier_filtered', $data);
+
+
+        $fileName = 'List Data Permohonan(Filter).pdf';
+
+
+        return $pdf->download($fileName);
     }
 }

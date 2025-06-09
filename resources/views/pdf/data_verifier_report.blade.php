@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Data Verifier Report</title>
+    <title>List Data Permohonan Data</title>
     <style>
         body {
             font-family: sans-serif;
@@ -34,36 +34,42 @@
 </head>
 
 <body>
-    <h1>Data Verifier Report</h1>
+    <h1>List Data Permohonan Data</h1>
 
     <table>
         <thead>
             <tr>
-                <th>User Name</th>
-                <th>Title</th>
-                <th>Reference Number</th>
+                <th>No</th>
+                <th>Nama Penanggung Jawab</th>
+                <th>Judul Permohonan</th>
+                <th>Nomor Surat</th>
                 <th>Status</th>
-                <th>Current Division</th>
-                <th>Active Revision</th>
-                <th>Need Review</th>
-                <th>Meeting</th>
-                <th>Created At</th>
+                <!-- <th>Divisi</th> -->
+                <!-- <th>Active Revision</th>
+                <th>Need Review</th> -->
+                <th>Link Meeting</th>
+                <th>Tanggal Pengajuan</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($letters as $letter)
+            @forelse($letters as $index => $letter)
             <tr>
-                <td>{{ $letter->user ? $letter->user->name : '—' }}</td>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $letter->user?->name ?: '—' }}</td>
                 <td>{{ $letter->title }}</td>
                 <td>{{ $letter->reference_number }}</td>
                 <td>{{ $letter->status->label() }}</td>
-                <td>{{ $letter->current_division }}</td>
+                <!-- <td>{{ $letter->current_division }}</td>
                 <td>{{ $letter->active_revision }}</td>
-                <td>{{ $letter->need_review }}</td>
+                <td>{{ $letter->need_review }}</td> -->
                 <td>{{ $letter->meeting }}</td>
                 <td>{{ $letter->created_at }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="10" style="text-align: center; padding: 12px;">Tidak Ada Permohonan</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </body>

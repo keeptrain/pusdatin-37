@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\DataVerifierExport;
 use App\Exports\HeadVerifierExport;
+use App\Exports\LetterExport;
 use App\Exports\PrExport;
 use App\Exports\SiVerifierExport;
 use Illuminate\Http\Request;
@@ -13,42 +14,30 @@ class ExportController extends Controller
 {
     public function exportHeadVerifier()
     {
-        return Excel::download(new HeadVerifierExport, 'head_verifier_data.xlsx');
+        return Excel::download(new HeadVerifierExport, 'List Data Permohonan.xlsx');
     }
-    public function exportHeadVerifierWithFilter(Request $request)
+    public function exportHeadVerifierFilteredExcel(Request $request)
     {
         $start  = $request->query('start_date');
         $end    = $request->query('end_date');
-        // $status = $request->query('status');
-        // $source = $request->query('source');
+        $status = $request->query('status');
+        $source = $request->query('source'); // 'letter' atau 'pr'
 
+        if ($source === 'letter') {
+            $export = new LetterExport($start, $end, $status);
+            $file   = 'List Data Permohonan Sistem Informasi dan Permintaan Data.xlsx';
+        } elseif ($source === 'pr') {
+            $export = new PrExport($start, $end, $status);
+            $file   = 'List Data Kehumasan.xlsx';
+        } else {
+            abort(404);
+        }
 
-        return Excel::download(
-            new HeadVerifierExport($start, $end),
-            'Data Filter Sistem Informasi data dan kehumasan.xlsx'
-        );
-
-        // if ($source === 'letter') {
-        //     // Panggil export yang mem‐filter Letter
-        //     return Excel::download(
-        //         new \App\Exports\LetterExport($start, $end, $status),
-        //         'head_verifier_letters_' . now()->format('Ymd_His') . '.xlsx'
-        //     );
-        // }
-
-        // if ($source === 'pr') {
-        //     // Panggil export yang mem‐filter PublicRelationRequest
-        //     return Excel::download(
-        //         new \App\Exports\PrExport($start, $end, $status),
-        //         'head_verifier_pr_' . now()->format('Ymd_His') . '.xlsx'
-        //     );
-        // }
-
-        // abort(404);
+        return Excel::download($export, $file);
     }
     public function exportSiVerifier()
     {
-        return Excel::download(new SiVerifierExport, 'si_verifier_data.xlsx');
+        return Excel::download(new SiVerifierExport, 'List Data Permohonan Sistem Informasi.xlsx');
     }
     public function exportSiVerifierWithFilter(Request $request)
     {
@@ -60,12 +49,12 @@ class ExportController extends Controller
 
         return Excel::download(
             new SiVerifierExport($start, $end, $status),
-            'Data Filter Sistem Informasi.xlsx'
+            'List Data Permohonan Sistem Informasi(Filtered).xlsx'
         );
     }
     public function exportDataVerifier()
     {
-        return Excel::download(new DataVerifierExport, 'data_verifier_data.xlsx');
+        return Excel::download(new DataVerifierExport, 'List Data Permohonan Data.xlsx');
     }
     public function exportDataVerifierWithFilter(Request $request)
     {
@@ -77,12 +66,12 @@ class ExportController extends Controller
 
         return Excel::download(
             new DataVerifierExport($start, $end, $status),
-            'Data Filter Divsi Data.xlsx'
+            'List Data Permohonan Data(Filtered).xlsx'
         );
     }
     public function exportPrVerifier()
     {
-        return Excel::download(new PrExport, 'pr_verifier_data.xlsx');
+        return Excel::download(new PrExport, 'List Data Kehumasan.xlsx');
     }
     public function exportPrVerifierWithFilter(Request $request)
     {
@@ -94,7 +83,7 @@ class ExportController extends Controller
 
         return Excel::download(
             new PrExport($start, $end, $status),
-            'Data Filter Public Relation.xlsx'
+            'List Data Kehumasan(Filter).xlsx'
         );
     }
 }

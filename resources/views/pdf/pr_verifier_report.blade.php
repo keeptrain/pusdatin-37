@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>PR Verifier Report</title>
+    <title>List Data Permohonan Kehumasan</title>
     <style>
         body {
             font-family: sans-serif;
@@ -34,24 +34,26 @@
 </head>
 
 <body>
-    <h1>PR Verifier Report</h1>
+    <h1>List Data Permohonan Kehumasan</h1>
 
     <table>
         <thead>
             <tr>
-                <th>User Name</th>
-                <th>Theme</th>
-                <th>Month Publication</th>
-                <th>Specific Date</th>
+                <th>No</th>
+                <th>Nama Penanggung Jawab</th>
+                <th>Tema</th>
+                <th>Bulan Usulan Publikasi</th>
+                <th>Tanggal Spesifik Publikasi Media</th>
                 <th>Status</th>
-                <th>Target</th>
-                <th>Links</th>
-                <th>Created At</th>
+                <th>Sasaran</th>
+                <th>Link Publikasi</th>
+                <th>Tanggal Permohonan</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($requests as $request)
+            @forelse($requests as $index => $request)
             <tr>
+                <td>{{ $index + 1 }}</td>
                 <td>{{ $request->user ? $request->user->name : '—' }}</td>
                 <td>{{ $request->theme }}</td>
                 <td>{{ $request->month_publication }}</td>
@@ -69,7 +71,11 @@
                 </td>
                 <td>{{ $request->created_at }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 12px;">Tidak Ada Permohonan.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </body>

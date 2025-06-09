@@ -58,14 +58,14 @@ class PrExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'User Name',
-            'Theme',
-            'Month Publication',
-            'Specific Date',
+            'Nama Penanggung Jawab',
+            'Tema',
+            'Bulan Usulan Publikasi',
+            'Tanggal Spesifik Publikasi Media',
             'Status',
-            'Target',
-            'Links',
-            'Created At',
+            'Sasaran',
+            'Link Publikasi',
+            'Tanggal Permohonan',
         ];
     }
 }
