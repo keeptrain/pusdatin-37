@@ -10,8 +10,19 @@
         <flux:radio.group wire:model="status" name="status" label="Status" badge="Required">
             <flux:radio value="disposition" name="status" label="Disposisi" x-on:click="status = 'approved'" />
             <flux:radio value="rejected" name="status" label="Ditolak" x-on:click="status = 'rejected'" />
-            {{-- <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
+            {{--
+            <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
         </flux:radio.group>
+
+        <template x-if="status === 'approved'">
+            <flux:textarea wire:model="notes" cols="66" rows="3" placeholder="Catatan disposisi ke kasatpel "
+                resize="vertical" />
+            @error('notes')
+                <flux:text variant="strong" class="text-red-500 flex items-center">
+                    <flux:icon.exclamation-circle />{{ $message }}
+                </flux:text>
+            @enderror
+        </template>
 
         <template x-if="status === 'approved'">
             <flux:fieldset class="space-y-2">
@@ -27,14 +38,12 @@
                 </flux:radio.group>
 
                 @error('selectedDivision')
-                    <flux:text variant="strong" class="text-red-500 flex items-center"><flux:icon.exclamation-circle/>{{ $message }}</flux:text>
+                    <flux:text variant="strong" class="text-red-500 flex items-center">
+                        <flux:icon.exclamation-circle />{{ $message }}
+                    </flux:text>
                 @enderror
             </flux:fieldset>
         </template>
-
-        {{-- <template x-if="status === 'approved'">
-            <flux:textarea wire:model="notes" cols="66" rows="2" placeholder="Catatan tambahan..." resize="vertical" />
-        </template> --}}
 
         <!-- Template untuk Replied -->
         <template x-if="status === 'replied'">
@@ -43,7 +52,8 @@
 
         <!-- Template untuk Rejected -->
         <template x-if="status === 'rejected'">
-            <flux:textarea wire:model="notes" cols="66" rows="2" placeholder="Catatan penolakan (opsional) " resize="vertical" />
+            <flux:textarea wire:model="notesHistorie" cols="66" rows="2" placeholder="Catatan penolakan (opsional) "
+                resize="vertical" />
         </template>
 
         <!-- Template untuk Test Failed -->
@@ -56,7 +66,7 @@
                 <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
             </flux:modal.close>
 
-            <flux:button variant="primary" type="submit">{{ __('Verifikasi') }}</flux:button>
+            <flux:button variant="primary" type="submit">{{ __('Konfirmasi') }}</flux:button>
         </div>
     </form>
 </flux:modal>

@@ -22,4 +22,4 @@
             <flux:button variant="primary" type="submit">{{ __(key: 'Ubah') }}</flux:button>
         </div>
     </form>
-</flux:modal>˝
+</flux:modal>

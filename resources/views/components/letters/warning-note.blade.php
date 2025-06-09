@@ -2,7 +2,7 @@
     <div class="p-2 bg-amber-100 flex justify-between items-center" x-on:click="open = !open">
         <div class="flex items-center">
             <flux:icon.exclamation-circle class="text-amber-600 dark:text-amber-300"/>
-            <flux:heading class="ml-2 text-amber-800">Notes</flux:heading>
+            <flux:heading class="ml-2 text-amber-800">Catatan</flux:heading>
         </div>
         <div>
             <template x-if="open">

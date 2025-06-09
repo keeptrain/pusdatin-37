@@ -26,10 +26,6 @@ class ModalConfirmation extends Component
 
     public $revisionNotes = [];
 
-    public $selectedOption = '';
-
-    public $meeting = [];
-
     public function rules()
     {
         $rules = [
@@ -41,6 +37,9 @@ class ModalConfirmation extends Component
         ];
 
         if ($this->status === 'disposition') {
+            $rules['notes'] = [
+                'required'
+            ];
             $rules['selectedDivision'] = [
                 'required',
             ];
@@ -96,7 +95,7 @@ class ModalConfirmation extends Component
         return [
             'status.required' => 'Status tidak boleh kosong',
             'selectedDivision.required' => 'Tujuan divisi tidak boleh kosong',
-            'revisionParts.required' => 'Butuh bagian yang harus di revisi'
+            'revisionParts.required' => 'Butuh bagian yang harus di revisi',
         ];
     }
 
@@ -118,18 +117,18 @@ class ModalConfirmation extends Component
         $this->authorize('can disposition', $this->letterId);
 
         DB::transaction(function () {
-            // Mencari object letter yang sesuai
             $letter = Letter::findOrFail($this->letterId);
 
             // Transisi status
             $letter->transitionStatusFromPending(
                 $this->status,
                 $this->getSelectedDivisionId(),
+                $this->notes
             );
 
             $letter->refresh();
 
-            $letter->logStatus($this->notes);
+            $letter->logStatus(null);
 
             DB::afterCommit(function () use ($letter) {
                 $letter->sendDispositionServiceRequestNotification();
@@ -147,7 +146,7 @@ class ModalConfirmation extends Component
     public function updatedStatus($value)
     {
         if ($value !== 'rejected') {
-            $this->notes = '';
+            // $this->notesHistorie = '';
         }
     }
 
@@ -175,45 +174,6 @@ class ModalConfirmation extends Component
             session()->flash('status', [
                 'variant' => 'success',
                 'message' => $siRequest->status->toastMessage(),
-            ]);
-
-            return $this->redirect("/letter/$this->letterId", true);
-        });
-    }
-
-    public function createMeeting()
-    {
-        $rules = [
-            'selectedOption' => 'required|in:in-person,online-meet',
-            'meeting.date' => 'required|date',
-            'meeting.start' => 'required|date_format:H:i',
-            'meeting.end' => 'required|date_format:H:i|after:meeting.start',
-        ];
-
-        if ($this->selectedOption === 'in-person') {
-            $rules['meeting.location'] = 'required|string|max:255';
-        } elseif ($this->selectedOption === 'online-meet') {
-            $rules['meeting.link'] = 'required|url|max:255';
-        }
-
-        $this->validate($rules);
-
-        $siRequest = $this->getSiDataRequests();
-
-        DB::transaction(function () use ($siRequest) {
-            $siRequest->update([
-                'meeting' => $this->meeting,
-            ]);
-
-            $siRequest->logStatusCustom('Rencana pertemuan telah dibuat, silahkan cek detailnya.');
-
-            // DB::afterCommit(function () use ($siRequest) {
-            //     $siRequest->sendMeetingServiceRequestNotification();
-            // });
-
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => 'Meeting berhasil dibuat',
             ]);
 
             return $this->redirect("/letter/$this->letterId", true);

@@ -14,6 +14,7 @@
         // Set active tab based on current route
         if (path.includes('overview')) this.activeTab = 'Overview';
         else if (path.includes('activity')) this.activeTab = 'Activity';
+        else if (this.isInformationSystemRoute && path.includes('meeting')) this.activeTab = 'Meeting';
         else if (this.isInformationSystemRoute && path.includes('version')) this.activeTab = 'Version';
     },
     goTo(tab) {
@@ -21,6 +22,7 @@
             'Overview': '{{ route( $overViewRoute , $id) }}',
             'Activity': '{{ route( $activityRoute , $id) }}',
             {{-- 'Chat': '{{ route('letter.chat', $id) }}', --}}
+            'Meeting': '{{ route('is.meeting', $id) }}',
             'Version': '{{ route('letter.version', $id) }}'
         };
         window.location.href = routes[tab];
@@ -49,6 +51,18 @@
                     class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none">
                     Activity
                 </button>
+
+                <!-- Meeting Tab -->
+                <template x-if="isInformationSystemRoute">
+                    <button @click="goTo('Meeting')"
+                        :class="{
+                            'text-blue-600 border-blue-600 dark:border-blue-600': activeTab === 'Meeting',
+                            'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600': activeTab !== 'Meeting'
+                        }"
+                        class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none">
+                        Meeting
+                    </button>
+                </template>
 
                 <!-- Version Tab -->
                 <template x-if="isInformationSystemRoute">
@@ -91,7 +105,7 @@
 
             <!-- Right Sidebar - Hidden on mobile unless toggled -->
             @if (isset($rightSidebar))
-                <div class="lg:w-80 lg:border-l lg:border-gray-200 p-4 md:p-6 bg-white"
+                <div class="lg:w-90 lg:border-l lg:border-gray-200 p-4 md:p-6 bg-white"
                     :class="{ 'hidden lg:block': !mobileDetailsOpen }"
                     x-show="mobileDetailsOpen || window.innerWidth >= 1024"
                     x-transition:enter="transition ease-out duration-200"

@@ -8,8 +8,8 @@ use App\Models\Template;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use App\Services\FileUploadServices;
+use Illuminate\Support\Facades\Storage;
 
 class SiDataRequestForm extends Component
 {
@@ -32,10 +32,11 @@ class SiDataRequestForm extends Component
             'files.1' => 'required|file|mimes:pdf|max:1048',
             'files.2' => 'required|file|mimes:pdf|max:1048',
             'files.3' => 'required|file|mimes:pdf|max:1048',
+            'files.4' => 'required|file|mimes:pdf|max:1048',
         ];
 
-        if (!empty($this->files[4])) {
-            $rules['files.4'] = 'file|mimes:pdf|max:1048';
+        if (!empty($this->files[5])) {
+            $rules['files.5'] = 'file|mimes:pdf|max:1048';
         }
 
         return $rules;
@@ -46,11 +47,17 @@ class SiDataRequestForm extends Component
         return [
             'title.required' => 'Judul harus ada',
             'reference_number.required' => 'Nomor surat harus ada',
-            'files.0.required' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus ada',
-            'files.1.required' => 'SOP Aplikasi SPBE harus ada',
-            'files.2.required' => 'Pakta Integritas Pemanfaatan Aplikasi harus ada',
-            'files.3.required' => 'Form RFC Pusdatinkes harus ada',
-            // 'files.4.required' => 'NDA Pusdatin Dinkes harus ada',
+            'files.0.required' => 'Permohonan (nota dinas) harus ada',
+            'files.1.required' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus ada',
+            'files.2.required' => 'SOP Aplikasi SPBE harus ada',
+            'files.3.required' => 'Pakta Integritas Pemanfaatan Aplikasi harus ada',
+            'files.4.required' => 'Form RFC Pusdatinkes harus ada',
+            'files.0.mimes' => 'Permohonan (nota dinas) harus ada',
+            'files.1.mimes' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus berbentuk .pdf',
+            'files.2.mimes' => 'SOP Aplikasi SPBE harus berbentuk .pdf',
+            'files.3.mimes' => 'Pakta Integritas Pemanfaatan Aplikasi harus berbentuk .pdf',
+            'files.4.mimes' => 'Form RFC Pusdatinkes harus berbentuk .pdf',
+            'files.5.mimes' => 'Surat perjanjian kerahasiaan harus berbentuk .pdf',
         ];
     }
 
@@ -58,23 +65,18 @@ class SiDataRequestForm extends Component
     {
         $this->validate();
 
-        DB::transaction(function () use($fileUploadServices) {
+        DB::transaction(function () use ($fileUploadServices) {
             $validFiles = array_filter($this->files);
 
             $letter = $this->createLetter();
             $uploads = $fileUploadServices->storeMultiplesFiles($validFiles);
             $this->insertDocumentUploads($uploads, $letter);
-            // $this->createLetterMappings($letter->id, $uploadIds);
             $letter->logStatus(null);
 
             // Notifikasi kirim ke kapusdatin
             $letter->sendNewServiceRequestNotification('head_verifier');
 
-            return redirect()->to('history')
-                ->with('status', [
-                    'variant' => 'success',
-                    'message' => 'Create direct Letter successfully!'
-                ]);
+            return $this->redirect("/history/information-system/$letter->id", true);
         });
     }
 
@@ -113,24 +115,24 @@ class SiDataRequestForm extends Component
         return $documentVersionId;
     }
 
-    // protected function createLetterMappings(int $letterId, Collection $uploadIds): void
-    // {
-    //     $mappings = $uploadIds->map(function ($uploadId) use ($letterId) {
-    //         return [
-    //             'letter_id' => $letterId,
-    //             'letterable_type' => DocumentUpload::class,
-    //             'letterable_id' => $uploadId,
-    //         ];
-    //     })->toArray();
+    public function downloadSOP()
+    {
+        $filePath = 'templates/SOP Pembangunan dan Pengembangan Aplikasi Pusdatin.pdf';
+        $disk = 'local';
 
-    //     LettersMapping::insert($mappings);
-    // }
+        if (auth()->user()) {
+            $fileDownload = Storage::disk($disk)->path($filePath);
+            return response()->download($fileDownload);
+        }
+
+        abort(404, 'Template not found.');
+    }
 
     public function downloadTemplate($typeNumber)
     {
         $template = Template::where('part_number', $typeNumber)->where('is_active', '1')->first();
 
-        if ($template) {
+        if (auth()->user() && $template) {
             $filePath = $template->file_path;
 
             $fileDownload = Storage::disk('public')->path($filePath);

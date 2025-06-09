@@ -23,7 +23,8 @@ class Letter extends Model
 
     protected $casts = [
         'status' => LetterStatus::class,
-        'meeting' => 'array'
+        'meeting' => 'array',
+        'notes' => 'array'
     ];
 
     public $fillable = [
@@ -35,7 +36,8 @@ class Letter extends Model
         'current_division',
         'active_revision',
         'need_review',
-        'meeting'
+        'meeting',
+        'notes'
     ];
 
     public function user()
@@ -137,16 +139,21 @@ class Letter extends Model
         $this->status->transitionTo(\App\States\Process::class);
     }
 
-    public function transitionStatusFromPending($newStatus, $division)
+    public function transitionStatusFromPending($newStatus, $division, $notes)
     {
         $newStatus = self::resolveStatusClassFromString($newStatus);
 
         $this->status->transitionTo($newStatus);
 
+        $newNotes = [
+            $notes
+        ];
+
         if ($division) {
             $this->update([
                 'active_checking' => $division,
                 'current_division' => $division,
+                'notes' => $newNotes
             ]);
         }
     }

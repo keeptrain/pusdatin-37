@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('status', 86)->default(PublicRelationRequest::getDefaultStates());
             $table->tinyInteger('month_publication');
+            $table->date('completed_date');
             $table->date('spesific_date')->nullable();
             $table->string('theme');
             $table->string('target');

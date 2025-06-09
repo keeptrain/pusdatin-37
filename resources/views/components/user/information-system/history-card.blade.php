@@ -1,11 +1,10 @@
-<!-- card-history.blade.php -->
 <div class="w-full max-w-4xl md:ml-5 2xl:ml-5 mb-3">
     <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow cursor-pointer">
         <!-- Header -->
         <div class="flex items-center justify-between mb-3">
             <div>
                 <h2 class="font-medium text-gray-900">{{ $letter->title }}</h2>
-                <p class="text-xs text-gray-500">{{ $letter->reference_number }}</p>
+                <p class="text-xs text-gray-500">No. {{ $letter->reference_number }}</p>
             </div>
             <div class="flex items-end space-2 gap-2 text-xs flex-col ">
                 <span class="text-gray-500"> {{ $letter->created_at }}</span>
@@ -73,5 +72,4 @@
             @endif
         </div>
     </div>
-
 </div>

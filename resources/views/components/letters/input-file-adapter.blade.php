@@ -11,7 +11,7 @@
     <h4 class="text-sm font-medium text-gray-700">
         {{ $title }}
         @if ($required)
-            <span class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md">Required</span>
+            <span class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md">Wajib</span>
         @endif
         @if ($optional)
             <span class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-md">Optional</span>
@@ -54,9 +54,9 @@
             <div class="flex items-center justify-center w-full px-4 py-3 text-center transition bg-white cursor-pointer focus:outline-none"
                 x-on:dragover.prevent x-on:drop="handleDrop" x-on:click="$refs.fileInput.click()">
                 <div class="p-w space-y-2">
-                    <flux:button variant="outline" size="sm">Click to upload</flux:button>
-                    <p class="text-sm text-gray-500">or drag and drop</p>
-                    <p class="text-xs text-gray-400 mt-1">PDF only, max 1MB</p>
+                    <flux:button variant="outline" size="sm">Klik untuk upload</flux:button>
+                    {{-- <p class="text-sm text-gray-500">atau drag and drop</p> --}}
+                    <p class="text-xs text-gray-400 mt-1">hanya PDF, max 1MB</p>
                 </div>
             </div>
         </template>

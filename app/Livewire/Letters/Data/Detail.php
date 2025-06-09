@@ -8,6 +8,7 @@ use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\DB;
 
 class Detail extends Component
 {
@@ -15,7 +16,9 @@ class Detail extends Component
     public int $letterId;
 
     public ?Letter $letter;
-    
+
+    public $notes = '';
+
     public function mount(int $id)
     {
         $this->letterId = $id;
@@ -36,6 +39,25 @@ class Detail extends Component
             })
             ->values()
             ->toArray();
+    }
+
+    public function inputNotes()
+    {
+        DB::transaction(function () {
+            $SiRequest = $this->letter;
+
+            $existingNotes = $SiRequest->notes;
+
+            $existingNotes[] = $this->notes;
+
+            $SiRequest->update(['notes' => $existingNotes]);
+
+            $SiRequest->load('documentUploads.activeVersion:id,file_path');
+
+            $this->reset('notes');
+
+            // return $this->redirect("$this->letterId",true);
+        });
     }
 
     public function backPending()

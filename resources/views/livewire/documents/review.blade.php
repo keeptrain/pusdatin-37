@@ -10,7 +10,7 @@
 
     {{-- Comparison Details --}}
     <div x-data="{ changesChoice: '' }" class="bg-gray-50 border-t border-gray-200 p-4 m-4 space-y-4">
-        <flux:legend>Notes sebelumnnya</flux:legend>
+        <flux:legend>Catatan sebelumnnya</flux:legend>
 
         <div class="space-y-3">
             @foreach ($latestRevisions as $map)

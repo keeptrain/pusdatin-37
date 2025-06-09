@@ -137,7 +137,7 @@ class Notifications extends Component
 
     public function goDetailPage($notificationId)
     {
-        // Ambil notifikasi berdasarkan ID
+        // Notification by id
         $notification = auth()->user()
             ->unreadNotifications()
             ->findOrFail($notificationId);
@@ -150,16 +150,16 @@ class Notifications extends Component
             $modelClass = $notification->data['requestable_type'];
             $modelId = $notification->data['requestable_id'];
 
-            // Validasi model class untuk mencegah injection
+            // Validation modelClass to prevent Injection
             if (!in_array($modelClass, [Letter::class, PublicRelationRequest::class])) {
                 throw new \InvalidArgumentException("Model class tidak valid.");
             }
 
-            // Ambil data requestable
+            // Get requestable data from available container instance
             $requestable = app($modelClass)->findOrFail($modelId);
 
             if ($modelClass === Letter::class || $modelClass === PublicRelationRequest::class) {
-                // $notification->markAsRead();
+                $notification->markAsRead();
                 return $this->redirect($requestable->handleRedirectNotification(auth()->user()), true);
             } else {
                 abort(404, 'Invalid model class.');

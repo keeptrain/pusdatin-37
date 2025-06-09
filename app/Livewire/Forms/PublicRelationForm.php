@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Forms;
 
+use Carbon\Carbon;
 use Livewire\Component;
 use App\Models\Template;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadServices;
 use App\Models\PublicRelationRequest;
@@ -15,6 +17,8 @@ class PublicRelationForm extends Component
     use WithFileUploads;
 
     public $monthPublication = '';
+
+    public $completedDate = '';
 
     public $spesificDate = '';
 
@@ -31,11 +35,13 @@ class PublicRelationForm extends Component
     public function rules()
     {
         $rules = [
-            'monthPublication' => 'required|lt:12',
+            'monthPublication' => 'required|lt:13',
+            'completedDate' => 'required|date|after_or_equal:' . now()->addDays(7)->toDateString(),
             'spesificDate' => 'required|date',
             'theme' => 'required|string',
             'target' => 'required|min:1',
             'mediaType' => 'required|min:1',
+            'uploadFile.0' => 'required'
         ];
 
         if ($this->mediaType) {
@@ -55,6 +61,7 @@ class PublicRelationForm extends Component
     {
         return [
             'otherTarget.required' => 'Harus mengisi sasaran other',
+            'uploadFile.0' => 'Membutuhkan file nota dinas',
             'uploadFile.1' => 'Membutuhkan file untuk materi audio',
             'uploadFile.2' => 'Membutuhkan file untuk materi infografis',
             'uploadFile.3' => 'Membutuhkan file untuk materi poster',
@@ -68,6 +75,19 @@ class PublicRelationForm extends Component
             'uploadFile.11' => 'Membutuhkan file untuk materi artikel',
 
         ];
+    }
+
+    #[Computed(persist: true, cache:true)]
+    public function getMonths()
+    {
+        $model = new PublicRelationRequest();
+
+        $months = [];
+        foreach (range(1, 12) as $month) {
+            $months[$month] = $model->getMonthPublicationAttribute($month);
+        }
+
+        return $months;
     }
 
     public function save(FileUploadServices $fileUploadServices)
@@ -101,6 +121,7 @@ class PublicRelationForm extends Component
         return PublicRelationRequest::create([
             'user_id' => auth()->user()->id,
             'month_publication' => $this->monthPublication,
+            'completed_date' => $this->completedDate,
             'spesific_date' => $this->spesificDate,
             'theme' => $this->theme,
             'target' => $target,

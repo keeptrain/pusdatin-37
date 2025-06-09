@@ -29,7 +29,7 @@ class FileUploadServices
                 $filePath = Storage::disk('public')->putFileAs('documents', $file, $fileName);
 
                 return [
-                    'part_number' => $index + 1,
+                    'part_number' => $index,
                     'file_path' => $filePath,
                 ];
             })->toArray();
