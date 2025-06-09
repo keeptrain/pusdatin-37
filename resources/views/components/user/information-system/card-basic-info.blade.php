@@ -73,10 +73,7 @@
             <div>
                 <div class="flex justify-end">
                     <template x-if="{{ $activerevision }}">
-                        <a href="{{ route('letter.edit', [$id]) }}"
-                            class="ml-0 sm:ml-4 bg-orange-600 hover:bg-orange-700 text-white font-small py-1 px-2 rounded-lg flex items-center transition duration-300 w-fit self-end">
-                            Lakukan Revisi
-                            <x-lucide-edit class="text-white w-5 ml-2" />
+                        <flux:button href="{{ route('letter.edit', [$id]) }}">Lakukan revisi</flux:button>
                     </template>
                 </div>
             </div>
