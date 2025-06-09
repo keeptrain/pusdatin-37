@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Forms;
 
-use Carbon\Carbon;
 use Livewire\Component;
 use App\Models\Template;
 use Livewire\WithFileUploads;
@@ -73,7 +72,7 @@ class PublicRelationForm extends Component
             'uploadFile.9' => 'Membutuhkan file untuk materi sertifikat',
             'uploadFile.10' => 'Membutuhkan file untuk materi press Release',
             'uploadFile.11' => 'Membutuhkan file untuk materi artikel',
-
+            'uploadFile.12' => 'Membutuhkan file untuk materi peliputan',
         ];
     }
 

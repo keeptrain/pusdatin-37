@@ -68,9 +68,11 @@
             </flux:fieldset>
         </template>
 
+        <flux:textarea wire:model="note" placeholder="Beri catatan kepada pemohon..." />
+
     </div>
     <div class="flex justify-end m-4">
-        <flux:button wire:click="save" variant="primary">Terima</flux:button>
+        <flux:button wire:click="save" variant="primary">Konfirmasi</flux:button>
     </div>
     {{-- <section>
         <!-- Empty notificaiton -->

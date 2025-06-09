@@ -16,7 +16,7 @@
                                 {{ $action->action }}
                             </flux:subheading>
                             @if (!empty($action->notes))
-                                Notes: {{ $action->notes }}
+                                Catatan: {{ $action->notes }}
                             @endif
                         @endforeach
                     </div>

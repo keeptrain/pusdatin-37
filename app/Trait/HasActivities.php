@@ -70,6 +70,14 @@ trait HasActivities
         ]);
     }
 
+    public function logStatusReview(?string $action,?string $notes)
+    {
+        return $this->requestStatusTrack()->create([
+            'action' => $action,
+            'notes' => $notes
+        ]); 
+    }
+
     public function logStatusCustom(?string $action)
     {
         return $this->requestStatusTrack()->create([

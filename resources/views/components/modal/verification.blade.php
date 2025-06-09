@@ -9,11 +9,11 @@
             </flux:heading>
         </div>
 
-        <flux:radio.group wire:model="status" name="status" label="Status" badge="Required" data-checked>
+        <flux:radio.group wire:model="status" name="status" label="Status" badge="Diperlukan" data-checked>
             <flux:radio value="approved_kasatpel" name="status" label="Disetujui Kasatpel"
                 x-on:click="status = 'approved'" />
             <flux:radio value="replied" name="status" label="Revisi" x-on:click="status = 'replied'" />
-            <flux:radio value="rejected" name="status" label="Ditolak Kasatpel" x-on:click="status = 'rejected'" />
+            {{-- <flux:radio value="rejected" name="status" label="Ditolak Kasatpel" x-on:click="status = 'rejected'" /> --}}
             {{--
             <flux:radio value="wrong" name="status" label="Test failed" x-on:click="status = 'wrong'" /> --}}
         </flux:radio.group>
