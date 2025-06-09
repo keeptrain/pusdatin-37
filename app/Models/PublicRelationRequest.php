@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Trait\HasActivities;
+use IntlDateFormatter;
 use Spatie\ModelStates\HasStates;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\DocumentUpload;
@@ -30,6 +31,7 @@ class PublicRelationRequest extends Model
     protected $fillable = [
         'user_id',
         'month_publication',
+        'completed_date',
         'spesific_date',
         'theme',
         'target',
@@ -81,22 +83,17 @@ class PublicRelationRequest extends Model
 
     public function getMonthPublicationAttribute($value)
     {
-        $monthNames = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember',
-        ];
+        $formatter = new IntlDateFormatter(
+            'id_ID', // Locale Indonesia
+            IntlDateFormatter::NONE,
+            IntlDateFormatter::NONE,
+            null,
+            null,
+            'MMMM' // Format untuk nama bulan penuh
+        );
 
-        return $monthNames[$value] ?? 'Bulan Tidak Diketahui';
+        // Konversi angka bulan menjadi nama bulan dalam bahasa Indonesia
+        return $formatter->format(mktime(0, 0, 0, $value, 1)) ?? 'Bulan Tidak Diketahui';
     }
 
     public function createdAtDMY()

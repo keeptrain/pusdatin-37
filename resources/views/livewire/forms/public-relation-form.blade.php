@@ -21,24 +21,19 @@
                             placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
 
                         <flux:select wire:model="monthPublication" label="Bulan usulan publikasi"
-                            placeholder="Pilih bulan...">
-                            <flux:select.option value="1">Januari</flux:select.option>
-                            <flux:select.option value="2">Februari</flux:select.option>
-                            <flux:select.option value="3">Maret</flux:select.option>
-                            <flux:select.option value="4">April</flux:select.option>
-                            <flux:select.option value="5">Mei</flux:select.option>
-                            <flux:select.option value="6">Juni</flux:select.option>
-                            <flux:select.option value="7">Juli</flux:select.option>
-                            <flux:select.option value="8">Agustus</flux:select.option>
-                            <flux:select.option value="9">September</flux:select.option>
-                            <flux:select.option value="10">Oktober</flux:select.option>
-                            <flux:select.option value="11">November</flux:select.option>
-                            <flux:select.option value="12">Desember</flux:select.option>
+                            placeholder="Pilih bulan..." required>
+                            @foreach ($this->getMonths() as $key => $month)
+                                <flux:select.option value="{{ $key }}">{{ $month }}</flux:select.option>
+                            @endforeach
                         </flux:select>
 
+                        <flux:input wire:model="completedDate" label="Tanggal selesai"
+                            description="Pengajuan harus dilakukan minimal 7 hari sebelum tanggal selesai"
+                            placeholder="Umum" type="date" min="{{ now()->addDays(7)->toDateString() }} " required />
+
                         <flux:input wire:model="spesificDate" label="Tanggal Spesifik Publikasi Media"
-                            description="Khusus pada usulan untuk Hari Besar Kesehatan" placeholder="Umum"
-                            type="date" />
+                            description="Khusus pada usulan untuk Hari Besar Kesehatan" placeholder="Umum" type="date"
+                            required />
 
                         <flux:input wire:model="theme" label="Tema pesan kesehatan"
                             description="Berdasarkan tema umum atau tema khusus pada peringatan hari kesehatan atau lainnya"
@@ -88,7 +83,7 @@
                             <flux:checkbox label="Bumper" value="5" />
                             <flux:checkbox label="Backdrop Kegiatan" value="6" />
                         </div>
-                    
+
                         <div class="flex flex-col space-y-2">
                             <flux:checkbox label="Spanduk" value="7" />
                             <flux:checkbox label="Roll Banner" value="8" />
@@ -105,6 +100,11 @@
                         class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
                     Kelengkapan Dokumen
                 </h3>
+
+                <div>
+                    <x-letters.input-file-adapter title="Permohonan (nota dinas)" model="uploadFile.0" required />
+                </div>
+
                 <div class="p-2 bg-amber-100  items-center rounded-lg">
                     <div class="flex items-center">
                         <flux:icon.arrow-down-circle class="text-amber-600 dark:text-amber-300" />
@@ -117,6 +117,19 @@
                 </div>
 
                 <section>
+                    <template x-if="selectedMediaType === null || selectedMediaType.length === 0">
+                        <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3"
+                            role="alert">
+                            <div>
+                                <h4 class="font-bold text-lg mb-1">Perhatian!</h4>
+                                <p class=" text-base">
+                                    Sepertinya Anda belum memilih **jenis media yang diusulkan** di bagian atas.
+                                    Silakan pilih setidaknya satu jenis media untuk dapat mengunggah dokumen terkait.
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+
                     <template x-if="selectedMediaType.includes('1')">
                         <div>
                             <x-letters.input-file-adapter title="Materi Audio" model="uploadFile.1" required />
@@ -144,7 +157,8 @@
                     </template>
                     <template x-if="selectedMediaType.includes('6')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Backdrop Kegiatan" model="uploadFile.6" required />
+                            <x-letters.input-file-adapter title="Materi Backdrop Kegiatan" model="uploadFile.6"
+                                required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('7')">
@@ -172,17 +186,9 @@
                             <x-letters.input-file-adapter title="Materi Artikel" model="uploadFile.11" required />
                         </div>
                     </template>
-                    
-                    <template x-if="selectedMediaType === null || selectedMediaType.length === 0">
-                        <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3"
-                            role="alert">
-                            <div>
-                                <h4 class="font-bold text-lg mb-1">Perhatian!</h4>
-                                <p class=" text-base">
-                                    Sepertinya Anda belum memilih **jenis media yang diusulkan** di bagian atas.
-                                    Silakan pilih setidaknya satu jenis media untuk dapat mengunggah dokumen terkait.
-                                </p>
-                            </div>
+                    <template x-if="selectedMediaType.includes('12')">
+                        <div>
+                            <x-letters.input-file-adapter title="Materi Peliputan" model="uploadFile.12" required />
                         </div>
                     </template>
                 </section>

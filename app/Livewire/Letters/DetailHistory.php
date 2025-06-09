@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Letters;
 
+use App\Enums\PublicRelationRequestPart;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
@@ -125,6 +126,19 @@ class DetailHistory extends Component
                 'part_number_label' => $documentUpload->part_number_label,
             ];
         });
+    }
+
+    #[Computed]
+    public function linkProductions()
+    {
+        return collect($this->content?->links)->map(function ($url, $key) {
+            $label = PublicRelationRequestPart::tryFrom((int)$key)?->label() ?? 'Unknown';
+
+            return [
+                'label' => $label,
+                'url' => $url,
+            ];
+        })->values();
     }
 
     public function additionalUploadFile()

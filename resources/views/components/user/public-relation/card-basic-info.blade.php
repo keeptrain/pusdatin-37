@@ -38,58 +38,41 @@
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1">Materi yang di upload</p>
-                    <div x-data="{
-                        hasPartNumber3: {{ $this->uploadedFile->contains(fn($file) => $file['part_number'] == 3) ? 'true' : 'false' }}
-                        }">
-                        @foreach ($this->uploadedFile as $file)
-                                            <div class="flex flex-row gap-2">
-                                                <x-lucide-circle-check-big class="w-4 text-green-500" />
-                                                <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
-                                                    class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
-                            ?? $file['part_number'] }}</a>
-                                            </div>
-                        @endforeach
+                    @foreach ($this->uploadedFile as $file)
+                    <div class="flex flex-row gap-2">
+                        <x-lucide-circle-check-big class="w-4 text-green-500" />
+                        <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
+                            class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
+                                ?? $file['part_number'] }}
+                        </a>
                     </div>
+                    @endforeach
                 </div>
-
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Bulan publikasi</p>
                     <p class="mt-1 text-gray-900">{{ ucfirst($prRequest->month_publication) }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Link Produksi</p>
-                    @if ($prRequest->links)
-                        @foreach ($prRequest->links as $key => $value)
-                            @php
-                                $label = match ($key) {
-                                    1 => 'Audio',
-                                    2 => 'Infografis',
-                                    3 => 'Poster',
-                                    4 => 'Media',
-                                    5 => 'Bumper',
-                                    6 => 'Backdrop Kegiatan',
-                                    7 => 'Spanduk',
-                                    8 => 'Roll Banner',
-                                    9 => 'Sertifikat',
-                                    10 => 'Press Release',
-                                    11 => 'Artikel',
-                                }
-                            @endphp
-                            <li>
-                                <a href="{{ $value }}" class="font-semibold text-blue-800">{{ $label }}</a>
-                            </li>
-                        @endforeach
-                    @else
+                    @forelse ($this->linkProductions as $value)
+                        <li>
+                            <a href="{{ $value['url'] }}" class="font-semibold text-blue-800">{{ $value['label']}}</a>
+                        </li>
+                    @empty
                         <span>-</span>
-                    @endif
+                    @endforelse
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Tanggal Selesai</p>
+                    <p class="mt-1 text-gray-900">{{ ucfirst($prRequest->completed_date) }}</p>
+                </div>
+                <div>
+                    {{-- <p class="text-xs font-medium text-gray-500 uppercase">Link Selesai</p>
+                    <p class="mt-1 text-gray-900">-</p> --}}
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Tanggal Spesifik Publikasi Media</p>
                     <p class="mt-1 text-gray-900">{{ ucfirst($prRequest->spesific_date) }}</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-500 uppercase">Link Publikasi</p>
-                    <p class="mt-1 text-gray-900">-</p>
                 </div>
             </div>
         </div>
