@@ -1,6 +1,6 @@
 <div class="bg-zinc-50 border rounded-lg p-4">
     <div class="flex items-center justify-between mb-4">
-        <p class="text-xs font-medium text-gray-500 uppercase">{{ $meeting['status']}}</p>
+        <flux:text size="sm" class="font-medium text-gray-500 uppercase">{{ $meeting['status']}}</flux:text>
         <flux:dropdown>
             <flux:button variant="ghost" icon="ellipsis-vertical" />
             <flux:menu>
@@ -13,27 +13,39 @@
     </div>
 
     <div class="flex flex-col md:flex-row gap-4">
-        <!-- Kolom Kiri -->
+        <!-- Left column -->
         <div class="flex-1 space-y-3 min-h-[150px]">
-            <div class="flex items-start text-sm">
-                @if (isset($meeting['location']))
-                    <section class="flex items-center space-x-2">
-                        <flux:icon.map-pin class="size-6 text-gray-400" />
-                        <flux:subheading size="lg" class="text-gray-800">
-                            <span class="text-gray-500">Lokasi:</span> {{ $meeting['location'] }}
+            <div class="flex items-start text-sm space-x-2">
+                @if (!empty($meeting['location']))
+                    <div class="flex-shrink-0 mt-1">
+                        <flux:icon.map-pin class="size-5 text-gray-400" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <flux:subheading size="lg" class="text-gray-500">Lokasi:
+                            <span class="text-gray-800">{{ $meeting['location'] }}</span>
                         </flux:subheading>
-                    </section>
-                @elseif (isset($meeting['link']))
-                    <section class="flex items-center space-x-2">
-                        <flux:icon.video-camera class="size-5 text-gray-500" />
-                        <flux:subheading size="lg" class="text-gray-800">
-                            <span class="text-gray-500">Online meeting:</span>
-                            <a href="{{ $meeting['link'] }}" target="_blank" rel="noopener noreferrer"
-                                class="text-blue-600 hover:text-blue-800 underline break-words">
-                                Link
-                            </a>
-                        </flux:subheading>
-                    </section>
+                    </div>
+                @elseif (!empty($meeting['link']))
+                    <div class="flex-shrink-0 mt-1">
+                        <flux:icon.video-camera class="size-5 text-gray-400" />
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <div class="flex items-baseline space-x-2">
+                            <flux:subheading size="lg" class="text-gray-500">Online meeting:
+                                <a href="{{ $meeting['link'] }}" target="_blank" rel="noopener noreferrer"
+                                    class="text-blue-600 hover:text-blue-800 underline break-all">
+                                    Link
+                                </a>
+                            </flux:subheading>
+                        </div>
+                        @if (!empty($meeting['password']))
+                            <div class="flex items-baseline mt-1 space-x-2">
+                                <flux:subheading size="lg" class="text-gray-500">Password:
+                                    <span class="text-gray-800 font-mono">{{ $meeting['password'] }}</span>
+                                </flux:subheading>
+                            </div>
+                        @endif
+                    </div>
                 @endif
             </div>
 
@@ -54,7 +66,7 @@
             </div>
         </div>
 
-        <!-- Kolom Kanan -->
+        <!-- Right column -->
         <div class="flex-1 flex items-start text-sm min-h-[150px]">
             <div class="w-full">
                 <div class="flex items-center space-x-2">

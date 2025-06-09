@@ -81,8 +81,9 @@
 
     <section @click.stop x-show="selectedOption === 'online-meet'" class="space-y-4">
         <div class="grid grid-cols-2 items-start gap-4">
-            <flux:textarea wire:model="meeting.link" label="Link" placeholder="Masukkan URL disini..." rows="2" />
-            <flux:input label="Password meeting" />
+            <flux:textarea wire:model="meeting.link" label="Link" placeholder="Masukkan link disini..." rows="2"
+                class="w-full" />
+            <flux:input wire:model="meeting.password" label="Password" class="w-1/2" />
         </div>
         <div class="grid grid-cols-3 gap-4">
             <flux:input wire:model="meeting.date" type="date" label="Tanggal" />

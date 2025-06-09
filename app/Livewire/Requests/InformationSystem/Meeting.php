@@ -27,6 +27,17 @@ class Meeting extends Component
         $this->siRequestId = $id;
     }
 
+    public function updatedSelectedOption($value)
+    {
+        $this->reset('meeting');
+
+        if ($value === 'in-person') {
+            $this->meeting['location'] = '';
+        } elseif ($value === 'online-meet') {
+            $this->meeting['link'] = '';
+        }
+    }
+
     #[Computed]
     public function getMeeting()
     {
@@ -125,6 +136,9 @@ class Meeting extends Component
                 $newMeeting['location'] = $this->meeting['location'];
             } elseif ($this->selectedOption === 'online-meet') {
                 $newMeeting['link'] = $this->meeting['link'];
+                if (!empty($this->meeting['password'])) {
+                    $newMeeting['password'] = $this->meeting['password'];
+                }
             }
 
             // Tambahkan meeting baru ke array dengan key incremental

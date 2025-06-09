@@ -18,10 +18,7 @@
                 </div>
 
                 <div class="items-start grid grid-cols-2 gap-2">
-                    <flux:menu.cards-with-icon wire:model="selectedOption" />
-                    @error('selectedOption')
-                        <span class="text-xs text-red-500">{{ $message }}</span>
-                    @enderror
+                    <flux:menu.cards-with-icon wire:model.live="selectedOption" />
                 </div>
             </form>
 
@@ -52,6 +49,5 @@
                 </flux:modal> --}}
             </section>
         </div>
-
     </x-letters.detail-layout>
 </div>
