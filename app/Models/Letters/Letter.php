@@ -141,11 +141,15 @@ class Letter extends Model
 
         $this->status->transitionTo($newStatus);
 
+        $newNotes = [
+            $notes
+        ];
+
         if ($division) {
             $this->update([
                 'active_checking' => $division,
                 'current_division' => $division,
-                'notes' => $notes
+                'notes' => $newNotes
             ]);
         }
     }
