@@ -21,7 +21,6 @@ class PrExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-
         $query = PublicRelationRequest::query()->with('user');
 
         if ($this->startDate) {
@@ -49,7 +48,7 @@ class PrExport implements FromCollection, WithHeadings
                     'Specific Date'      => $item->spesific_date,
                     'Status'             => $item->status->label(),
                     'Target'             => $item->target,
-                    'Links'              => $item->links,
+                    'Links'              => $item->getExportLinksAttribute(false),
                     'Created At'         => $item->created_at,
                 ];
             });
@@ -64,7 +63,7 @@ class PrExport implements FromCollection, WithHeadings
             'Tanggal Spesifik Publikasi Media',
             'Status',
             'Sasaran',
-            'Link Publikasi',
+            'Link Media',
             'Tanggal Permohonan',
         ];
     }

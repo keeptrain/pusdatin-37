@@ -47,7 +47,7 @@
 </head>
 
 <body>
-    <h1>List Data Permohonan Kehumasan (Filter)</h1>
+    <h1>Permohonan Kehumasan (Filter)</h1>
 
     <div class="meta">
         <span><strong>Start Date:</strong> {{ $start ?? '—' }}</span>
@@ -78,7 +78,7 @@
                 <th>Tanggal Spesifik Publikasi Media</th>
                 <th>Status</th>
                 <th>Sasaran</th>
-                <th>Link Publikasi</th>
+                <th>Link Media</th>
                 <th>Tanggal Permohonan</th>
             </tr>
         </thead>
@@ -92,15 +92,7 @@
                 <td>{{ $request->spesific_date }}</td>
                 <td>{{ $request->status->label() }}</td>
                 <td>{{ $request->target }}</td>
-                <td>
-                    @if(is_array($request->links))
-                    @foreach($request->links as $link)
-                    <a href="{{ $link }}" target="_blank" rel="noopener">{{ $link }}</a><br />
-                    @endforeach
-                    @else
-                    {{ $request->links }}
-                    @endif
-                </td>
+                <td>{!! $request->getExportLinksAttribute() !!}</td>
                 <td>{{ $request->created_at }}</td>
             </tr>
             @empty

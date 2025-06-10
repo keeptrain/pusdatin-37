@@ -34,7 +34,7 @@
 </head>
 
 <body>
-    <h1>List Data Permohonan Kehumasan</h1>
+    <h1>Permohonan Kehumasan</h1>
 
     <table>
         <thead>
@@ -46,35 +46,27 @@
                 <th>Tanggal Spesifik Publikasi Media</th>
                 <th>Status</th>
                 <th>Sasaran</th>
-                <th>Link Publikasi</th>
+                <th>Link Media</th>
                 <th>Tanggal Permohonan</th>
             </tr>
         </thead>
         <tbody>
             @forelse($requests as $index => $request)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $request->user ? $request->user->name : '—' }}</td>
-                <td>{{ $request->theme }}</td>
-                <td>{{ $request->month_publication }}</td>
-                <td>{{ $request->spesific_date }}</td>
-                <td>{{ $request->status->label() }}</td>
-                <td>{{ $request->target }}</td>
-                <td>
-                    @if(is_array($request->links))
-                    @foreach($request->links as $link)
-                    <a href="{{ $link }}" target="_blank" rel="noopener">{{ $link }}</a><br />
-                    @endforeach
-                    @else
-                    {{ $request->links }}
-                    @endif
-                </td>
-                <td>{{ $request->created_at }}</td>
-            </tr>
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $request->user ? $request->user->name : '—' }}</td>
+                    <td>{{ $request->theme }}</td>
+                    <td>{{ $request->month_publication }}</td>
+                    <td>{{ $request->spesific_date }}</td>
+                    <td>{{ $request->status->label() }}</td>
+                    <td>{{ $request->target }}</td>
+                    <td>{!! $request->getExportLinksAttribute() !!}</td>
+                    <td>{{ $request->created_at }}</td>
+                </tr>
             @empty
-            <tr>
-                <td colspan="9" style="text-align: center; padding: 12px;">Tidak Ada Permohonan.</td>
-            </tr>
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 12px;">Tidak Ada Permohonan.</td>
+                </tr>
             @endforelse
         </tbody>
     </table>

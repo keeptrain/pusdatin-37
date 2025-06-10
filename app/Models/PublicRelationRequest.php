@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PublicRelationRequestPart;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Trait\HasActivities;
@@ -160,5 +161,28 @@ class PublicRelationRequest extends Model
             ]);
         }
         return route('pr.show', ['id' => $this->id]);
+    }
+
+    public function getExportLinksAttribute($needHyperLink = true)
+    {
+        $links = $this->links;
+
+        // Pastikan $links adalah array valid
+        $linksArray = is_string($links) ? json_decode($links, true) : $links;
+
+        $separator = $needHyperLink ? "<br><br>" : "\n";
+
+        // Format setiap isi array links
+        return collect($linksArray)->map(function ($link, $index) use ($needHyperLink) {
+            $mediaLabel = PublicRelationRequestPart::tryFrom($index)?->label() ?? 'Media Tidak Dikenal';
+            $mediaHyperLink = "<a href=\"$link\" target=\"_blank\">$link</a>";
+
+            if (!$needHyperLink) {
+                return "Media $mediaLabel: $link";
+            }
+
+            // Label media dan link sebagai hyperlink aktif
+            return "Media $mediaLabel: $mediaHyperLink";
+        })->implode($separator);
     }
 }
