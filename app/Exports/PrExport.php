@@ -32,8 +32,6 @@ class PrExport implements FromCollection, WithHeadings
         }
 
         if ($this->status && $this->status !== 'all') {
-
-
             $statusClass = PublicRelationRequest::resolveStatusClassFromString($this->status);
             $query->whereState('status', $statusClass);
         }

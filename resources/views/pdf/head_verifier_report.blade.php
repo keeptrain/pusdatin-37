@@ -60,22 +60,22 @@
         </thead>
         <tbody>
             @forelse($letters as $index => $letter)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $letter->user?->name ?? '—' }}</td>
-                <td>{{ $letter->title }}</td>
-                <td>{{ $letter->reference_number }}</td>
-                <td>{{ $letter->status->label() }}</td>
-                <td>{{ $letter->division_label }}</td>
-                {{-- <td>{{ $letter->active_revision }}</td> --}}
-                {{-- <td>{{ $letter->need_review }}</td> --}}
-                <td>{{ $letter->formatted_meetings }}</td>
-                <td>{{ $letter->createdAtDMY() }}</td>
-            </tr>
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $letter->user?->name ?? '—' }}</td>
+                    <td>{{ $letter->title }}</td>
+                    <td>{{ $letter->reference_number }}</td>
+                    <td>{{ $letter->status->label() }}</td>
+                    <td>{{ $letter->division_label }}</td>
+                    {{-- <td>{{ $letter->active_revision }}</td> --}}
+                    {{-- <td>{{ $letter->need_review }}</td> --}}
+                    <td>{{ $letter->formatted_meetings }}</td>
+                    <td>{{ $letter->createdAtDMY() }}</td>
+                </tr>
             @empty
-            <tr>
-                <td colspan="10" style="text-align: center; padding: 12px;">Tidak Ada Permohonan</td>
-            </tr>
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 12px;">Tidak Ada Permohonan</td>
+                </tr>
             @endforelse
         </tbody>
     </table>
@@ -97,29 +97,21 @@
         </thead>
         <tbody>
             @forelse($prRequests as $index => $request)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $request->user ? $request->user->name : '—' }}</td>
-                <td>{{ $request->theme }}</td>
-                <td>{{ $request->month_publication }}</td>
-                <td>{{ $request->spesific_date }}</td>
-                <td>{{ $request->status->label() }}</td>
-                <td>{{ $request->target }}</td>
-                <td>
-                    @if(is_array($request->links))
-                    @foreach($request->links as $link)
-                    <a href="{{ $link }}" target="_blank" rel="noopener">{{ $link }}</a><br />
-                    @endforeach
-                    @else
-                    {{ $request->links }}
-                    @endif
-                </td>
-                <td>{{ $request->created_at }}</td>
-            </tr>
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $request->user ? $request->user->name : '—' }}</td>
+                    <td>{{ $request->theme }}</td>
+                    <td>{{ $request->month_publication }}</td>
+                    <td>{{ $request->spesific_date }}</td>
+                    <td>{{ $request->status->label() }}</td>
+                    <td>{{ $request->target }}</td>
+                    <td>{!! $request->getExportLinksAttribute() !!}</td>
+                    <td>{{ $request->created_at }}</td>
+                </tr>
             @empty
-            <tr>
-                <td colspan="9" style="text-align: center; padding: 12px;">Tidak Ada Permohonan.</td>
-            </tr>
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 12px;">Tidak Ada Permohonan.</td>
+                </tr>
             @endforelse
         </tbody>
     </table>

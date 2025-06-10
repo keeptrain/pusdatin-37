@@ -242,17 +242,8 @@ class Letter extends Model
     {
         $meetings = $this->meeting;
 
-        if (empty($meetings)) {
-            return 'Tidak Ada Meeting';
-        }
-
         // $meetings adalah array valid
         $meetingsArray = is_string($meetings) ? json_decode($meetings, true) : $meetings;
-
-        // Jika decoding gagal atau hasilnya bukan array, kembalikan fallback
-        if (!is_array($meetingsArray)) {
-            return 'Tidak Ada Meeting';
-        }
 
         // Format setiap meeting menjadi blok teks terstruktur
         return collect($meetingsArray)->map(function ($meeting, $index) {

@@ -152,14 +152,7 @@
                 <td>{{ $request->spesific_date }}</td>
                 <td>{{ $request->status->label() }}</td>
                 <td>{{ $request->target }}</td>
-                <td>
-                    @if(is_array($request->links))
-                    @foreach($request->links as $link)
-                    <a href="{{ $link }}" target="_blank" rel="noopener">{{ $link }}</a><br />
-                    @endforeach
-                    @else
-                    {{ $request->links }}
-                    @endif
+                <td>{!! $request->getExportLinksAttribute() !!}</td>
                 </td>
                 <td>{{ $request->created_at }}</td>
             </tr>
