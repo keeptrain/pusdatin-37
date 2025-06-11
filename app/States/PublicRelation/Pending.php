@@ -36,6 +36,11 @@ class Pending extends PublicRelationStatus
         return 'w-[10%]';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Berhasil mengajukan permohonan layanan kehumasan';
+    }
+
     public function trackingMessage(): String
     {
         return "Permohonan layanan sudah kami terima, mohon tunggu konfirmasi selanjutnya.";

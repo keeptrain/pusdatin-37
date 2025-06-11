@@ -8,7 +8,7 @@
             </div>
         </template> --}}
 
-        @foreach ($publicRelationRequest->documentUploads as $documentUpload)
+        @foreach ($allowedDocument as $documentUpload)
             <p class="mt-2">{{ $documentUpload->part_number_label }}</p>
             @php
                 $fieldName = 'curationFileUpload.' . $documentUpload->part_number;

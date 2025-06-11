@@ -37,6 +37,11 @@ class Completed extends PublicRelationStatus
         return 'w-[100%]';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Berhasil menyelesaikan permohonan layanan';
+    }
+
     public function trackingMessage(): String
     {
         return "Permohonan layanan telah selesai dan link media yang di usulkan telah disisipkan.";

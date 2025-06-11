@@ -75,7 +75,7 @@ class PublicRelationRequestPolicy
 
     public function queuePromkes(User $user, PublicRelationRequest $publicRelationRequest): bool
     {
-        return $user->can('can queue pr request') && $this->statusCheckingForQueue($publicRelationRequest);
+        return $user->can('queue pr promkes') && $this->statusCheckingForQueue($publicRelationRequest);
     }
 
     private function statusCheckingForCuration(PublicRelationRequest $publicRelationRequest): bool
@@ -98,12 +98,12 @@ class PublicRelationRequestPolicy
         return $user->can('queue pr pusdatin') && $this->statusCheckingForQueuePusdatin($publicRelationRequest);
     }
 
-    public function dispositionToPr(User $user, PublicRelationRequest $publicRelationRequest): bool
+    public function processPusdatin(User $user, PublicRelationRequest $publicRelationRequest): bool
     {
-        return $user->can('disposition pr pusdatin') && $publicRelationRequest->status instanceof PusdatinQueue;
+        return $user->can('process pr pusdatin') && $publicRelationRequest->status instanceof PusdatinQueue;
     }
 
-    public function completedPrProcess(User $user, PublicRelationRequest $publicRelationRequest): bool
+    public function completedRequest(User $user, PublicRelationRequest $publicRelationRequest): bool
     {
         return $user->can('completing pr request') && $publicRelationRequest->status instanceof PusdatinProcess;
     }

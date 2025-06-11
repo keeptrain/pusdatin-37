@@ -2,6 +2,7 @@
 
 namespace App\Trait;
 
+
 use Carbon\Carbon;
 use App\Models\User;
 use App\States\Replied;
@@ -15,11 +16,11 @@ use App\States\PublicRelation\Completed;
 use App\Models\Letters\RequestStatusTrack;
 use Illuminate\Support\Facades\Notification;
 use App\States\PublicRelation\PromkesComplete;
-use App\States\PublicRelation\PusdatinProcess;
 use App\Notifications\NewServiceRequestNotification;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Notifications\LetterServiceRequestNotification;
 use App\Notifications\PublicRelationRequestNotification;
+use App\States\PublicRelation\PusdatinQueue;
 use App\States\RepliedKapusdatin;
 
 trait HasActivities
@@ -191,7 +192,7 @@ trait HasActivities
                     Notification::send($recipients, new PublicRelationRequestNotification($this));
                 }
             },
-            PusdatinProcess::class => function () {
+            PusdatinQueue::class => function () {
                 $recipients = User::role('pr_verifier')->get();
                 if ($recipients->isNotEmpty()) {
                     Notification::send($recipients, new PublicRelationRequestNotification($this));

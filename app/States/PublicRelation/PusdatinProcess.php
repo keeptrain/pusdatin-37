@@ -37,6 +37,11 @@ class PusdatinProcess extends PublicRelationStatus
         return 'w-[85%]';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Berhasil memproses permohonan layanan';
+    }
+
     public function trackingMessage(): String
     {
         return "Permohonan layanan sedang di proses oleh Kehumasan";

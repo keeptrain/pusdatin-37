@@ -37,6 +37,11 @@ class PromkesQueue extends PublicRelationStatus
         return 'w-[15%]';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Berhasil mengantrikan permohonan layanan';
+    }
+
     public function trackingMessage(): String
     {
         return "Sedang dalam antrian Promkes";

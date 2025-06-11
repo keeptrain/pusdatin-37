@@ -43,11 +43,12 @@ class PermissionRoleSeeder extends Seeder
 
         $prPermisions = [
             'view pr request',
+            'process pr pusdatin',
             'completing pr request',
         ];
 
         $promkesPermissions = [
-            'can queue pr request',
+            'queue pr promkes',
             'curation',
         ];
 

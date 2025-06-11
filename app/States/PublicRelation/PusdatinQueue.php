@@ -37,6 +37,11 @@ class PusdatinQueue extends PublicRelationStatus
         return 'w-[60%]';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Berhasil mengantrekan permohonan layanan';
+    }
+
     public function trackingMessage(): String
     {
         return "Permohonan layanan sedang dalam antrean di Pusat Data Teknologi dan Dinas Kesehatan";
@@ -44,6 +49,6 @@ class PusdatinQueue extends PublicRelationStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan ini membutuhkan disposisi kehumasan";
+        return "Permohonan ini diantrekan oleh Kapusdatin";
     }
 }

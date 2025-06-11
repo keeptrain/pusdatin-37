@@ -36,6 +36,11 @@ class PromkesComplete extends PublicRelationStatus
         return 'w-[50%]';
     }
 
+    public function toastMessage(): string
+    {
+        return 'Berhasil mengkurasi permohonan layanan';
+    }
+
     public function trackingMessage(): String
     {
         return "Permohonan layanan telah di kurasi oleh promkes";

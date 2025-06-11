@@ -3,7 +3,7 @@
     <flux:subheading>Masukkan link sesuai dengan jenis media yang di ajukan</flux:subheading>
     <form wire:submit="completed">
         <div>
-            @foreach ($publicRelationRequest->documentUploads as $upload)
+            @foreach ($allowedDocument as $upload)
                 <section class="mt-6 mb-6">
                     <p class="mb-3">{{ $upload->part_number_label }}</p>
                     <flux:textarea wire:model="mediaLinks.{{ $upload->part_number }}" placeholder="Masukkan link disini..."

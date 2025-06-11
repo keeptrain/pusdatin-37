@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Division;
 use App\Enums\PublicRelationRequestPart;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -62,6 +63,11 @@ class PublicRelationRequest extends Model
         };
     }
 
+    public function getCompletedDateAttribute($value)
+    {
+        return Carbon::parse($value)->format('d F Y');
+    }
+
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d F Y');
@@ -107,6 +113,21 @@ class PublicRelationRequest extends Model
         return Carbon::parse($this->spesific_Date)->format('d F');
     }
 
+    public function scopeFilterByRole(Builder $query,  $role)
+    {
+        // Jika role tidak diberikan, kembalikan query tanpa filter
+        if (empty($role)) {
+            return $query;
+        }
+
+        // Filter berdasarkan role
+        match ($role) {
+            Division::PROMKES_ID->value => $query->whereIn('status', ['App\States\PublicRelation\Pending', 'App\States\PublicRelation\PromkesQueue', 'App\States\PublicRelation\PromkesComplete']),
+            Division::HEAD_ID->value => $query->whereIn('status', ['App\States\PublicRelation\PromkesComplete', 'App\States\PublicRelation\PusdatinQueue']),
+            Division::PR_ID->value => $query->whereIn('status', ['App\States\PublicRelation\PusdatinQueue', 'App\States\PublicRelation\PusdatinProcess', 'App\States\PublicRelation\Completed']),
+        };
+    }
+
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder
     {
         $resolveStatus = static::resolveStatusClassFromString($filterStatus);
@@ -128,14 +149,16 @@ class PublicRelationRequest extends Model
 
     public function transitionStatusToPusdatinQueue()
     {
-        $this->update(['status' => $this->status->transitionTo(PusdatinQueue::class)]);
+        $this->update([
+            'status' => $this->status->transitionTo(PusdatinQueue::class),
+            'active_checking' => 5
+        ]);
     }
 
     public function transitionStatusToPusdatinProcess()
     {
         $this->update([
             'status' => $this->status->transitionTo(PusdatinProcess::class),
-            'active_checking' => 5
         ]);
     }
 
@@ -149,11 +172,6 @@ class PublicRelationRequest extends Model
 
     public function handleRedirectNotification($user)
     {
-        if ($user->can('queue pr pusdatin') && $this->status instanceof PromkesComplete) {
-            $this->transitionStatusToPusdatinQueue();
-            $this->logStatus(null);
-        }
-
         if ($user->hasRole('user')) {
             return route('history.detail', [
                 'type' => 'public-relation',
