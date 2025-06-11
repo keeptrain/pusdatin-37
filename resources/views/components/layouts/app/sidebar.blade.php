@@ -7,11 +7,11 @@
 
 <body class="min-h-screen bg-white dark:bg-zinc-800">
     @if (session('status'))
-    @php
-    $variant = session('status')['variant'];
-    $message = session('status')['message'];
-    @endphp
-    <flux:notification.toast :variant="$variant" :message="$message" />
+        @php
+            $variant = session('status')['variant'];
+            $message = session('status')['message'];
+        @endphp
+        <flux:notification.toast :variant="$variant" :message="$message" />
     @endif
     <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
@@ -79,17 +79,23 @@
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Systems')" class="grid">
                 @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier')
-                <flux:navlist.item :href="route('analytic.index')" icon="chart-pie" wire:navigate>Analytics
+                <flux:navlist.item :href="route('analytic.index')" icon="chart-pie" wire:navigate>
+                    Analytics
                 </flux:navlist.item>
                 @endhasanyrole
 
                 @hasanyrole('si_verifier|data_verifier|pr_verifier')
-                <flux:navlist.item :href="route('manage.templates')" icon="document-text" wire:navigate>Templates
+                <flux:navlist.item :href="route('manage.templates')" icon="document-text" wire:navigate>
+                    Templates
                 </flux:navlist.item>
                 @endhasanyrole
 
                 @hasanyrole('administrator')
-                <flux:navlist.item :href="route('manage.users')" icon="users" wire:navigate>Users
+                <flux:navlist.item :href="route('manage.users')" icon="users" wire:navigate>
+                    Users
+                </flux:navlist.item>
+                <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
+                    Seksi
                 </flux:navlist.item>
                 @endhasanyrole
             </flux:navlist.group>
