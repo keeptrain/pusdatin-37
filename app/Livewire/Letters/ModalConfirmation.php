@@ -118,8 +118,10 @@ class ModalConfirmation extends Component
 
         DB::transaction(function () {
             $systemRequest = Letter::findOrFail($this->letterId);
+            $systemRequest = Letter::findOrFail($this->letterId);
 
             // Transisi status
+            $systemRequest->transitionStatusFromPending(
             $systemRequest->transitionStatusFromPending(
                 $this->status,
                 $this->getSelectedDivisionId(),
@@ -127,9 +129,13 @@ class ModalConfirmation extends Component
             );
 
             $systemRequest->refresh();
+            $systemRequest->refresh();
 
             $systemRequest->logStatus(null);
+            $systemRequest->logStatus(null);
 
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendDispositionServiceRequestNotification();
             DB::afterCommit(function () use ($systemRequest) {
                 $systemRequest->sendDispositionServiceRequestNotification();
             });
@@ -139,6 +145,7 @@ class ModalConfirmation extends Component
                 'message' => $systemRequest->status->toastMessage(),
             ]);
 
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
             $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
         });
     }
@@ -158,15 +165,22 @@ class ModalConfirmation extends Component
 
         DB::transaction(function () {
             $systemRequest = $this->getSiDataRequests();
+            $systemRequest = $this->getSiDataRequests();
 
+            $this->checkRevisionInputForRepliedStatus($systemRequest);
             $this->checkRevisionInputForRepliedStatus($systemRequest);
 
             $systemRequest->transitionStatusFromProcess($this->status);
+            $systemRequest->transitionStatusFromProcess($this->status);
 
+            $systemRequest->refresh();
             $systemRequest->refresh();
 
             $systemRequest->logStatus($this->notes);
+            $systemRequest->logStatus($this->notes);
 
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendProcessServiceRequestNotification();
             DB::afterCommit(function () use ($systemRequest) {
                 $systemRequest->sendProcessServiceRequestNotification();
             });
@@ -176,6 +190,7 @@ class ModalConfirmation extends Component
                 'message' => $systemRequest->status->toastMessage(),
             ]);
 
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
             $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
         });
     }
