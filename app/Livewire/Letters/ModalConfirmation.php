@@ -117,29 +117,29 @@ class ModalConfirmation extends Component
         $this->authorize('can disposition', $this->letterId);
 
         DB::transaction(function () {
-            $letter = Letter::findOrFail($this->letterId);
+            $systemRequest = Letter::findOrFail($this->letterId);
 
             // Transisi status
-            $letter->transitionStatusFromPending(
+            $systemRequest->transitionStatusFromPending(
                 $this->status,
                 $this->getSelectedDivisionId(),
                 $this->notes
             );
 
-            $letter->refresh();
+            $systemRequest->refresh();
 
-            $letter->logStatus(null);
+            $systemRequest->logStatus(null);
 
-            DB::afterCommit(function () use ($letter) {
-                $letter->sendDispositionServiceRequestNotification();
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendDispositionServiceRequestNotification();
             });
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => $letter->status->toastMessage(),
+                'message' => $this->status->toastMessage(),
             ]);
 
-            return $this->redirect("/letter/$this->letterId", true);
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
         });
     }
 
@@ -157,26 +157,26 @@ class ModalConfirmation extends Component
         // $this->authorize('canPerformStep1Verification', $this->getSiDataRequests());
 
         DB::transaction(function () {
-            $siRequest = $this->getSiDataRequests();
+            $systemRequest = $this->getSiDataRequests();
 
-            $this->checkRevisionInputForRepliedStatus($siRequest);
+            $this->checkRevisionInputForRepliedStatus($systemRequest);
 
-            $siRequest->transitionStatusFromProcess($this->status);
+            $systemRequest->transitionStatusFromProcess($this->status);
 
-            $siRequest->refresh();
+            $systemRequest->refresh();
 
-            $siRequest->logStatus($this->notes);
+            $systemRequest->logStatus($this->notes);
 
-            DB::afterCommit(function () use ($siRequest) {
-                $siRequest->sendProcessServiceRequestNotification();
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendProcessServiceRequestNotification();
             });
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => $siRequest->status->toastMessage(),
+                'message' => $this->status->toastMessage(),
             ]);
 
-            return $this->redirect("/letter/$this->letterId", true);
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
         });
     }
 

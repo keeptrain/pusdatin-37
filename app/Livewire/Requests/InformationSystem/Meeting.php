@@ -150,14 +150,14 @@ class Meeting extends Component
             ]);
 
             // Log status dan notifikasi
-            $siRequest->logStatusCustom('Rencana pertemuan telah dibuat, silahkan cek detailnya.');
+            $siRequest->logStatusCustom('Meeting telah dibuat, silahkan cek detailnya.');
 
             session()->flash('status', [
                 'variant' => 'success',
                 'message' => 'Meeting berhasil dibuat',
             ]);
 
-            return $this->redirect("/letter/$this->siRequestId/meeting", true);
+            $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
         });
     }
 
@@ -178,10 +178,10 @@ class Meeting extends Component
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => 'Hasil meeting telah di input',
+                'message' => 'Hasil meeting berhasil diupdate',
             ]);
 
-            return $this->redirect("/letter/$this->siRequestId/meeting", true);
+            $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
         });
     }
 

@@ -92,7 +92,7 @@ class Review extends Component
                 'message' => 'Berhasil melakukan review'
             ]);
 
-            return $this->redirect("/letter/$this->letterId", true);
+            $this->redirectRoute('is.show', ['id' => $this->letterId]);
         });
     }
 
