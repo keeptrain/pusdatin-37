@@ -58,8 +58,8 @@ class Letter extends Model
     public static function resolveStatusClassFromString($statusString)
     {
         return match ($statusString) {
-            'disposition'  => \App\States\Disposition::class,
-            'process'  => \App\States\Process::class,
+            'disposition' => \App\States\Disposition::class,
+            'process' => \App\States\Process::class,
             'replied' => \App\States\Replied::class,
             'approved_kasatpel' => \App\States\ApprovedKasatpel::class,
             'replied_kapusdatin' => \App\States\RepliedKapusdatin::class,
@@ -226,7 +226,7 @@ class Letter extends Model
                 'id' => $this->id
             ]);
         }
-        return route('letter.detail', ['id' => $this->id]);
+        return route('is.show', ['id' => $this->id]);
     }
 
     public function hasNonZeroPartNumber()

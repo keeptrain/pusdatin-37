@@ -157,7 +157,7 @@ class Meeting extends Component
                 'message' => 'Meeting berhasil dibuat',
             ]);
 
-            return $this->redirect("/letter/$this->siRequestId/meeting", true);
+            $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
         });
     }
 
@@ -178,10 +178,10 @@ class Meeting extends Component
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => 'Hasil meeting telah di input',
+                'message' => 'Hasil meeting berhasil diupdate',
             ]);
 
-            return $this->redirect("/letter/$this->siRequestId/meeting", true);
+            $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
         });
     }
 
