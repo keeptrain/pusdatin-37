@@ -279,7 +279,7 @@
                             data: {
                                 labels: raw.months,
                                 datasets: [{
-                                    label: 'Sistem',
+                                    label: 'Sistem Informasi',
                                     data: raw.letterData,
                                     backgroundColor: '#00786f',
                                     borderSkipped: false,
