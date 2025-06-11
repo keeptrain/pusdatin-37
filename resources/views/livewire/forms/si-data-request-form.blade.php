@@ -1,4 +1,16 @@
 <x-layouts.form.request legend="Form Permohonan layanan" nameForm="Sistem Informasi & Data">
+    {{-- <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3 mt-4"
+        role="alert">
+        <div>
+            <h4 class="font-bold text-lg mb-1">Penting!</h4>
+            <p class=" text-base">
+                Anda harus membaca dan memahami Standar Operasional Prosedur (SOP) sebelum
+                mengajukan permohonan.
+                <a wire:click="downloadSOP" class="underline font-bold hover:text-blue-900 cursor-pointer">Download
+                    disini</a>
+            </p>
+        </div>
+    </div> --}}
     <!-- Section 1: Basic information -->
     <form wire:submit="save" class="space-y-6 mt-6">
         <div class="grid lg:grid-cols-2 gap-4">
@@ -28,21 +40,7 @@
                         <flux:input label="Seksi/Subbag/Subkel Pengusul"
                             placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
 
-                        <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3"
-                            role="alert">
-                            <div>
-                                <h4 class="font-bold text-lg mb-1">Penting!</h4>
-                                <p class=" text-base">
-                                    Anda harus membaca dan memahami Standar Operasional Prosedur (SOP) sebelum
-                                    mengajukan permohonan.
-                                    <a wire:click="downloadSOP"
-                                        class="underline font-bold hover:text-blue-900 cursor-pointer">Download
-                                        disini</a>
-                                </p>
-                            </div>
-                        </div>
                     </div>
-                    <x-letters.input-file-adapter title="Permohonan (nota dinas)" model="files.0" required />
                 </div>
             </section>
 
@@ -63,6 +61,8 @@
                                 class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
                             Kelengkapan Dokumen
                         </h3>
+
+                        <x-letters.input-file-adapter title="Permohonan (nota dinas)" model="files.0" required />
 
                         <!-- File Upload -->
                         <x-letters.input-file-adapter title="1. Dokumen Identifikasi Aplikasi" model="files.1" required
