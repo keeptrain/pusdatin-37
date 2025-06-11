@@ -20,8 +20,6 @@ use App\Livewire\Forms\PublicRelationForm;
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Requests\PublicRelation\Show;
 use App\Livewire\Documents\RevisionComparision;
-use App\Livewire\Letters\Data\ApplicationTable;
-use App\Livewire\Requests\PublicRelation\Index;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ExportPdf\DataVerifierPdfExportController;
 use App\Http\Controllers\ExportPdf\HeadVerifierPdfExportController;
@@ -42,29 +40,33 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 Route::middleware(['auth'])->group(function () {
     Route::get('letter', CreateLetter::class)->name('letter');
     Route::get('letter/form', DirectForm::class)->name('letter.form');
-    Route::get('letter/table', ApplicationTable::class)->name('letter.table');
+    
 
     // Information System & Data
     Route::get('form/si-data', SiDataRequestForm::class)->name('si-data.form');
 
+    // Information System & Data
+    Route::get('information-system', \App\Livewire\Requests\InformationSystem\Index::class)->name('is.index');
+    Route::get('information-system/{id}', \App\Livewire\Requests\InformationSystem\Show::class)->name('is.show');
+    Route::get('information-system/{id}/activity', \App\Livewire\Requests\InformationSystem\Activity::class)->name('is.activity');
+    Route::get('information-system/{id}/meeting', Meeting::class)->name('is.meeting');
+
+    Route::get('information-system/{id}/version', RevisionComparision::class)->name('comparison.version');
+
     // Public Relation
     Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form');
-    Route::get('public-relation', Index::class)->name('pr.index');
+    Route::get('public-relation', \App\Livewire\Requests\PublicRelation\Index::class)->name('pr.index');
     Route::get('public-relation/{id}', Show::class)->name('pr.show');
     Route::get('public-relation/{id}/activity', \App\Livewire\Requests\PublicRelation\Activity::class)->name('pr.activity');
 
     Route::get('history', HistoryLetter::class)->name('history');
     Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
-
-    // Information System & Data
-    Route::get('letter/{id}', Detail::class)->name('letter.detail');
+   
     Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
     Route::get('letter/{id}/review', Review::class)->name('letter.review');
-    Route::get('letter/{id}/activity', Activity::class)->name('letter.activity');
-    Route::get('letter/{id}/meeting', Meeting::class)->name('is.meeting');
     Route::get('letter/{id}/chat', Chat::class)->name('letter.chat');
     Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
-    Route::get('letter/{id}/version', RevisionComparision::class)->name('letter.version');
+
 
     // analytic
 

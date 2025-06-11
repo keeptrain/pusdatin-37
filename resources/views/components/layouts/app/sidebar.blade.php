@@ -20,6 +20,7 @@
             <x-app-logo />
         </a>
 
+        @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier|promkes_verifier')
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Main')" class="grid">
                 <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
@@ -46,23 +47,25 @@
 
             </flux:navlist.group>
         </flux:navlist>
+        @endhasanyrole
 
+        @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier|promkes_verifier')
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Manage')" class="grid">
                 {{-- @hasanyrole('administrator|head_verifier')
                 <flux:navlist.item href="#" icon="arrow-right-circle">Disposisi</flux:navlist.item>
                 @endrole --}}
                 @hasanyrole('head_verifier')
-                <flux:navlist.item :href="route('letter.table')" icon="folder-open"
-                    :current="request()->routeIs('letter.table')" wire:navigate>Layanan SI & Data</flux:navlist.item>
+                <flux:navlist.item :href="route('is.index')" icon="folder-open"
+                    :current="request()->routeIs('is.index')" wire:navigate>Layanan SI & Data</flux:navlist.item>
                 @endrole
                 @hasanyrole('si_verifier')
-                <flux:navlist.item :href="route('letter.table')" icon="folder-open"
-                    :current="request()->routeIs('letter.table')" wire:navigate>Layanan SI</flux:navlist.item>
+                <flux:navlist.item :href="route('is.index')" icon="folder-open"
+                    :current="request()->routeIs('is.index')" wire:navigate>Layanan SI</flux:navlist.item>
                 @endrole
                 @hasanyrole('data_verifier')
-                <flux:navlist.item :href="route('letter.table')" icon="folder-open"
-                    :current="request()->routeIs('letter.table')" wire:navigate>Layanan Data</flux:navlist.item>
+                <flux:navlist.item :href="route('is.index')" icon="folder-open"
+                    :current="request()->routeIs('is.index')" wire:navigate>Layanan Data</flux:navlist.item>
                 @endrole
                 @hasanyrole('head_verifier|pr_verifier|promkes_verifier')
                 <flux:navlist.item :href="route('pr.index')" icon="folder-open"
@@ -70,6 +73,7 @@
                 @endrole
             </flux:navlist.group>
         </flux:navlist>
+        @endhasanyrole
 
         @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier|administrator')
         <flux:navlist variant="outline">
@@ -85,7 +89,7 @@
                 @endhasanyrole
 
                 @hasanyrole('administrator')
-                <flux:navlist.item :href="route('manage.users')" icon="globe-alt" wire:navigate>User
+                <flux:navlist.item :href="route('manage.users')" icon="users" wire:navigate>Users
                 </flux:navlist.item>
                 @endhasanyrole
             </flux:navlist.group>

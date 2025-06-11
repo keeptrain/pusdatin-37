@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Letters\Data;
+namespace App\Livewire\Requests\InformationSystem;
 
 use App\States\Pending;
 use App\States\Process;
@@ -10,7 +10,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 
-class Detail extends Component
+class Show extends Component
 {
     #[Locked]
     public int $letterId;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Letters\Data;
+namespace App\Livewire\Requests\InformationSystem;
 
 use Livewire\Component;
 use App\States\Disposition;
@@ -8,7 +8,7 @@ use Livewire\WithPagination;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Computed;
 
-class ApplicationTable extends Component
+class Index extends Component
 {
     use WithPagination;
 
@@ -34,6 +34,11 @@ class ApplicationTable extends Component
 
     public function mount() {}
 
+    public function render()
+    {
+        return view('livewire.requests.information-system.index');
+    }
+
     public function detailPageForProcess(int $id)
     {
         $letter = Letter::findOrFail($id);
@@ -45,9 +50,9 @@ class ApplicationTable extends Component
         return $this->redirect("{$id}", true);
     }
 
-    public function detailPage(int $id)
+    public function show(int $id)
     {
-        return $this->redirect("{$id}", true);
+        return $this->redirect("information-system/{$id}", true);
     }
 
     #[Computed()]

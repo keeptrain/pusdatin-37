@@ -1,6 +1,6 @@
 <div class="lg:p-3">
-    <flux:heading size="xl" level="1">{{ __('List') }}</flux:heading>
-    <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan') }}</flux:heading>
+    <flux:heading size="xl" level="1">{{ __('Daftar') }}</flux:heading>
+    <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan SI & Data') }}</flux:heading>
     <flux:menu.tabs :statuses="$statuses" :filterStatus="$filterStatus" />
 
     <div class="flex flex-1 justify-between items-center mb-4 h-10">
@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    <flux:table.base :perPage="$perPage" :paginate="$this->letters" emptyMessage="No data letter available.">
+    <flux:table.base :perPage="$perPage" :paginate="$this->letters">
         <x-slot name="header">
             <flux:table.column class="w-1 border-l-2 border-white dark:border-l-zinc-800">
             </flux:table.column>
@@ -58,7 +58,7 @@
 
         <x-slot name="body">
             @foreach ($this->letters as $item)
-                <tr @click="$wire.detailPage({{ $item->id }})" class="{{ in_array($item->id, $selectedLetters) ? 'relative bg-zinc-50 dark:bg-zinc-900 ' : 'dark:bg-zinc-800' }}
+                <tr @click="$wire.show({{ $item->id }})" class="{{ in_array($item->id, $selectedLetters) ? 'relative bg-zinc-50 dark:bg-zinc-900 ' : 'dark:bg-zinc-800' }}
                         border-b border-b-zinc-100 dark:border-b-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900
                         cursor-pointer">
                     <flux:table.row @click.stop class="{{ in_array($item->id, $selectedLetters)}}">
@@ -77,7 +77,7 @@
                             <flux:button icon:trailing="ellipsis-vertical" variant="ghost"></flux:button>
 
                             <flux:menu>
-                                <flux:menu.item :href="route('letter.activity', [$item->id])" icon="list-bullet"
+                                <flux:menu.item :href="route('is.activity', [$item->id])" icon="list-bullet"
                                     wire:navigate>Activity
                                 </flux:menu.item>
                                 <flux:menu.item :href="route('letter.chat', [$item->id])" icon="chat-bubble-left-right"

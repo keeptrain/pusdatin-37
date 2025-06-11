@@ -6,7 +6,7 @@
 <section x-data="{
     activeTab: 'Overview',
     mobileDetailsOpen: false,
-    isInformationSystemRoute: window.location.pathname.includes('letter/'),
+    isInformationSystemRoute: window.location.pathname.includes('information-system/'),
     isPublicRelationRoute: window.location.pathname.includes('public-relation/'),
     init() {
         const path = window.location.pathname;
@@ -23,7 +23,7 @@
             'Activity': '{{ route( $activityRoute , $id) }}',
             {{-- 'Chat': '{{ route('letter.chat', $id) }}', --}}
             'Meeting': '{{ route('is.meeting', $id) }}',
-            'Version': '{{ route('letter.version', $id) }}'
+            'Version': '{{ route('comparison.version', $id) }}'
         };
         window.location.href = routes[tab];
     }
@@ -49,7 +49,7 @@
                         'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600': activeTab !== 'Activity'
                     }"
                     class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none">
-                    Activity
+                    Aktivitas
                 </button>
 
                 <!-- Meeting Tab -->
@@ -72,7 +72,7 @@
                             'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600': activeTab !== 'Version'
                         }"
                         class="py-4 px-2 text-sm font-medium border-b-2 whitespace-nowrap cursor-pointer focus:outline-none">
-                        Version
+                        Versi
                     </button>
                 </template>
             </div>

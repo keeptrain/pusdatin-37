@@ -1,9 +1,9 @@
 <div x-data="{ createMeeting: false, selectedOption: '' }">
-    <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Kembali ke Tabel</flux:button>
+    <flux:button :href="route('is.index')" icon="arrow-long-left" variant="subtle">Kembali ke Tabel</flux:button>
 
-    <flux:heading size="xl" class="p-4">Meeting Permohonan Layanan</flux:heading>
+    <flux:heading size="lg" class="p-4">Meeting Permohonan Layanan</flux:heading>
 
-    <x-letters.detail-layout overViewRoute="letter.detail" activityRoute="letter.activity" :id="$siRequestId">
+    <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$siRequestId">
 
         <div class="md:p-12 space-y-4">
             <flux:button @click="createMeeting = !createMeeting" class="w-full" icon="plus-circle">
@@ -49,5 +49,5 @@
                 </flux:modal> --}}
             </section>
         </div>
-    </x-letters.detail-layout>
+    </x-layouts.requests.show>
 </div>

@@ -1,9 +1,9 @@
 <section>
-    <flux:button :href="route('letter.table')" icon="arrow-long-left" variant="subtle">Kembali ke Tabel</flux:button>
+    <flux:button :href="route('is.index')" icon="arrow-long-left" variant="subtle">Kembali ke Tabel</flux:button>
 
-    <flux:heading size="xl" class="p-4">Perbandingan Versi</flux:heading>
+    <flux:heading size="lg" class="p-4">Perbandingan Versi</flux:heading>
 
-    <x-letters.detail-layout overViewRoute="letter.detail" activityRoute="letter.activity" :id="$siDataRequestId">
+    <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$siDataRequestId">
         {{-- Comparison Container --}}
         @if ($this->checkAvailableAnyVersions())
             <div class="grid lg:grid-cols-2 gap-0 divide-x divide-gray-200">
@@ -20,5 +20,5 @@
                 <p class="text-center text-gray-500">di Permohonan layanan ini</p>
             </div>
         @endif
-    </x-letters.detail-layout>
+    </x-layouts.requests.show>
 </section>

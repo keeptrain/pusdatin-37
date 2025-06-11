@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Letters\Data;
+namespace App\Livewire\Requests\InformationSystem;
 
 use App\Services\TrackingStepped;
 use Livewire\Component;
