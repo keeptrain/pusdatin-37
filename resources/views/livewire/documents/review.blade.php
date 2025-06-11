@@ -1,6 +1,6 @@
 <div>
-    <flux:button :href="route('letter.detail', [$letterId])" 
-        icon="arrow-long-left" variant="subtle">Back to Detail </flux:button>
+    <flux:button :href="route('is.show', [$letterId])" 
+        icon="arrow-long-left" variant="subtle">Kembali</flux:button>
 
     <div class="grid grid-cols-2">
         <x-documents.current-document title="Sebelum revisi" :mapping="$currentVersions" />

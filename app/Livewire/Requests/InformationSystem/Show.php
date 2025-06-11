@@ -30,7 +30,9 @@ class Show extends Component
     #[Computed]
     public function availablePart()
     {
-        return $this->letter->documentUploads
+        return $this->letter->documentUploads->filter(function ($documentUpload) {
+            return $documentUpload->part_number !== 0;
+        })
             ->map(function ($upload) {
                 return [
                     'part_number' => $upload->part_number,
@@ -55,8 +57,6 @@ class Show extends Component
             $SiRequest->load('documentUploads.activeVersion:id,file_path');
 
             $this->reset('notes');
-
-            // return $this->redirect("$this->letterId",true);
         });
     }
 

@@ -53,7 +53,7 @@ class ModalConfirmation extends Component
                 'required',
                 'string'
             ];
-        };
+        }
 
         if ($this->status === 'replied') {
             $rules['status'] = [
@@ -136,7 +136,7 @@ class ModalConfirmation extends Component
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => $this->status->toastMessage(),
+                'message' => $systemRequest->status->toastMessage(),
             ]);
 
             $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
@@ -173,7 +173,7 @@ class ModalConfirmation extends Component
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => $this->status->toastMessage(),
+                'message' => $systemRequest->status->toastMessage(),
             ]);
 
             $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
