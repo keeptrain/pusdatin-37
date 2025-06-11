@@ -69,7 +69,6 @@ Route::middleware(['auth'])->group(function () {
 
 
     // analytic
-
     // Route::get('/letter/{letter}/activity', function (Letter $letter) {
     //     // Controller atau Closure ini akan memuat view yang me-render komponen Livewire
     //     return view('components.user.tracking-list', [

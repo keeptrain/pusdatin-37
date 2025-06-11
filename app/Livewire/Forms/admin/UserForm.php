@@ -16,9 +16,13 @@ class UserForm extends Form
 
     public $email = '';
 
-    public $password ='';
+    public $section = '';
 
-    public $role = '';
+    public $contact = '';
+
+    public $password = '';
+
+    public $role = 'user';
 
     public function rules()
     {
@@ -26,18 +30,20 @@ class UserForm extends Form
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
-                'required', 
-                'string', 
-                'email', 
+                'required',
+                'string',
+                'email',
                 'max:255',
                 $this->id ? Rule::unique('users', 'email')->ignore($this->id) : 'unique:users,email'
             ],
-            'password' => $this->id 
-                ? ['nullable'] 
+            'section' => ['required', 'string', 'max:255'],
+            'contact' => ['required', 'string', 'max:255'],
+            'password' => $this->id
+                ? ['nullable']
                 : ['required', 'string', 'min:8', 'max:46'],
             'role' => [
-                'required', 
-                'string', 
+                'required',
+                'string',
                 Rule::exists('roles', 'name')
             ],
         ];
@@ -45,12 +51,16 @@ class UserForm extends Form
 
     public function setUser(User $user)
     {
-        
+
         $this->id = $user->id;
 
         $this->name = $user->name;
 
         $this->email = $user->email;
+
+        $this->section = $user->section;
+
+        $this->contact = $user->contact;
 
         $this->role = $user->roles->first()->name ?? null;
 
@@ -72,7 +82,7 @@ class UserForm extends Form
     public function update()
     {
         $this->validate();
-        
+
         $this->user = User::findOrFail($this->id);
 
         $this->user->update(
@@ -82,7 +92,7 @@ class UserForm extends Form
         $this->user->syncRoles($this->role);
 
         return redirect()->route('admin.users');
-        
+
     }
 
 }

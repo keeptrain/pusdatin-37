@@ -26,6 +26,6 @@ class CreateUser extends Component
     {
         $this->form->store();
 
-        return redirect()->route('admin.users');
+        return redirect()->route('manage.users');
     }
 }

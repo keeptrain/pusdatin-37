@@ -52,6 +52,6 @@ class ManageUsers extends Component
 
         $this->selectedUsers = [];
 
-        return redirect()->route('admin.users');
+        return redirect()->route('manage.users');
     }
 }

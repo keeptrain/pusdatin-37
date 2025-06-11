@@ -44,17 +44,14 @@
                 <flux:checkbox wire:click="toggleSelectAll" />
             </flux:table.column>
             <flux:table.column>Name</flux:table.column>
-
             <flux:table.column>Email</flux:table.column>
             <flux:table.column>Role</flux:table.column>
-
             <flux:table.column>Created date</flux:table.column>
             <flux:table.column></flux:table.column>
         </x-slot>
 
         <x-slot name="body">
             @foreach ($users as $user)
-            
                 <tr class="
                     {{ in_array($user->id, $selectedUsers) ? 'relative bg-zinc-50 dark:bg-zinc-900 ' : 'dark:bg-zinc-800' }}
                     border-b border-b-zinc-100 dark:border-b-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-900 cursor-pointer"
@@ -84,19 +81,10 @@
                 </tr>
             @endforeach
         </x-slot>
-
-        <x-slot name="emptyRow">
-            <td class="py-3">&nbsp;</td>
-            <td class="py-3">&nbsp;</td>
-            <td class="py-3">&nbsp;</td>
-            <td class="py-3">&nbsp;</td>
-            <td class="py-3">&nbsp;</td>
-            <td class="py-3">&nbsp;</td>
-        </x-slot>
     </flux:table.base>
 
-    <livewire:admin.create-user/>
+    <livewire:admin.create-user />
 
-    <livewire:admin.update-user/>
-    
+    <livewire:admin.update-user />
+
 </div>

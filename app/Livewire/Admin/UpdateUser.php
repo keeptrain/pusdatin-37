@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Admin;
 
-use Flux\Flux;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -16,7 +15,14 @@ class UpdateUser extends Component
 
     public $showUpdateModal = false;
 
-    public function mount() {}
+    public function placeholder()
+    {
+        return <<<'HTML'
+        <div>
+            <flux:icon.loading />
+        </div>
+        HTML;
+    }
 
     #[On('update-user')]
     public function open($id)
@@ -29,11 +35,7 @@ class UpdateUser extends Component
 
     public function save()
     {
-
-        
         $this->form->update();
-
-        
     }
 
     public function render()
