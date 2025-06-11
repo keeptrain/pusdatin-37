@@ -19,9 +19,9 @@
                 wire:navigate>
                 {{ __('Dashboard') }}
             </flux:navbar.item>
-            <flux:navbar.item icon="clock" :href="route('history')" :current="request()->routeIs('history')"
+            <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
                 wire:navigate>
-                {{ __('History Permohonan') }}
+                {{ __('Permohonan') }}
             </flux:navbar.item>
         </flux:navbar>
 
@@ -105,9 +105,9 @@
                     :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navlist.item>
-                <flux:navbar.item icon="clock" :href="route('history')" :current="request()->routeIs('history')"
+                <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
                     wire:navigate>
-                    {{ __('History Permohonan') }}
+                    {{ __('Permohonan') }}
                 </flux:navbar.item>
             </flux:navlist.group>
         </flux:navlist>
@@ -115,7 +115,7 @@
         <flux:spacer />
 
     </flux:sidebar>
-    
+
     <div class="max-w-[1440px] mx-auto"> <!--dubungkus max-w biar ga jadi melebar di layar besar -->
         {{ $slot }}
     </div>

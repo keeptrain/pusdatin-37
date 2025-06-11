@@ -23,32 +23,58 @@ class HistoryLetter extends Component
     #[Computed]
     public function allRequests()
     {
-        $lettersQuery = Letter::select(
-            'id',
-            DB::raw("'Sistem Informasi & Data' as type"),
-            'status',
-            'created_at',
-            'active_revision'
-        )->where('user_id', auth()->id());
+        // Gabungkan query dari kedua model
+        $combinedQuery = $this->getCombinedQuery();
 
-        $publicRelationRequestsQuery = PublicRelationRequest::select(
-            'id',
-            DB::raw("'Kehumasan' as type"),
-            'status',
-            'created_at',
-            DB::raw("null as active_revision"),
-        )->where('user_id', auth()->id());
+        // Eksekusi query gabungan dengan paginasi
+        $paginator = $this->paginateAndTransform($combinedQuery);
+
+        return $paginator;
+    }
+
+    /**
+     * Menggabungkan query dari Letter dan PublicRelationRequest.
+     */
+    protected function getCombinedQuery()
+    {
+        // Query untuk Letter
+        $informationSystemRequestsQuery = $this->buildBaseQuery(Letter::class, 'Sistem Informasi & Data', 'title');
+
+        // Query untuk PublicRelationRequest
+        $publicRelationRequestsQuery = $this->buildBaseQuery(PublicRelationRequest::class, 'Kehumasan', 'theme', true);
 
         // Gabungkan kedua query dengan UNION ALL
-        $combinedQuery = $lettersQuery->unionAll($publicRelationRequestsQuery);
+        return $informationSystemRequestsQuery->unionAll($publicRelationRequestsQuery);
+    }
 
-        // Dapatkan SQL dan binding dari query gabungan
+    /**
+     * Membuat query dasar untuk model tertentu.
+     */
+    protected function buildBaseQuery($modelClass, $type, $informationField, $isNullRevision = false)
+    {
+        $query = $modelClass::select(
+            'id',
+            DB::raw("'$type' as type"),
+            "$informationField as information",
+            'status',
+            'created_at',
+            $isNullRevision ? DB::raw('null as active_revision') : 'active_revision'
+        )->where('user_id', auth()->id())->getQuery();
+
+        return $query;
+    }
+
+    /**
+     * Paginasi dan transformasi data.
+     */
+    protected function paginateAndTransform($combinedQuery)
+    {
+        // SQL dan binding dari query gabungan
         $sql = $combinedQuery->toSql();
-        $combinedQuery->getBindings();
 
         // Query untuk paginasi
         $mainQuery = DB::table(DB::raw("($sql) as combined_table"))
-            ->mergeBindings($combinedQuery->getQuery())
+            ->mergeBindings($combinedQuery)
             ->orderBy('created_at', 'desc');
 
         // Paginasi menggunakan metode Livewire
@@ -59,8 +85,9 @@ class HistoryLetter extends Component
             return (object) [
                 'id' => $item->id,
                 'type' => $item->type,
+                'information' => $item->information,
                 'status' => $this->getStatusLabel($item->type, $item->status),
-                'created_at' => Carbon::parse($item->created_at)->format('d F Y, H:m'),
+                'created_at' => Carbon::parse($item->created_at)->format('d F Y, H:i'),
                 'active_revision' => $item->active_revision
             ];
         });
