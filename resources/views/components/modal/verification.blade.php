@@ -28,7 +28,7 @@
                 revisionPart: [],
             }">
                 <flux:checkbox.group wire:model="revisionParts" label="Bagian" class="space-y-4">
-                    @foreach ($availablePart as $part)
+                    @foreach ($allowedParts as $part)
                         <flux:checkbox :value="$part['part_number']" :label="$part['part_number_label']"
                             x-model="revisionPart" />
                     @endforeach

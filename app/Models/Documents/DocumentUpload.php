@@ -68,6 +68,23 @@ class DocumentUpload extends Model
         }
     }
 
+    public function createRevision(string $revisionNote)
+    {
+        // Increment version
+        $nextVersion = $this->versions()->latest('version')->first()->version + 1;
+
+        // Create new version
+        $this->versions()->create([
+            'version' => $nextVersion,
+            'revision_note' => $revisionNote,
+        ]);
+
+        // Set need revision to true
+        $this->update([
+            'need_revision' => true,
+        ]);
+    }
+
     public function getLatestUnapprovedRevision()
     {
         return $this->versions()

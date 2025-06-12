@@ -1,33 +1,45 @@
-@can('viewDisposition', $letter)
+@can('viewDisposition', $systemRequest)
     <flux:modal.trigger name="disposition-modal">
-        <flux:button x-on:click="$dispatch('modal-show', { name: 'disposition-modal' })" variant="primary" icon:trailing="arrow-right" class="w-full">Disposisi</flux:button>
+        <flux:button variant="primary" icon:trailing="arrow-right" class="w-full">Disposisi</flux:button>
     </flux:modal.trigger>
-@elsecan('viewVerificationSiStep1', $letter)
-    <flux:modal.trigger name="verification-modal" x-on:click="$dispatch('modal-show', { name: 'verification-modal' })">
-        <flux:button variant="primary" type="click" icon="check" class="w-full" :disabled="$letter->active_revision == true">
+@elsecan('viewVerificationSiStep1', $systemRequest)
+    <flux:modal.trigger name="verification-modal">
+        <flux:button variant="primary" type="click" icon="check" class="w-full">
             {{ __('Verifikasi') }}
         </flux:button>
     </flux:modal.trigger>
-@elsecan('viewVerificationDataStep1', $letter)
-    <flux:modal.trigger name="verification-modal" x-on:click="$dispatch('modal-show', { name: 'verification-modal' })">
-        <flux:button variant="primary" type="click" icon="check" class="w-full" :disabled="$letter->active_revision == true">
+@elsecan('viewVerificationDataStep1', $systemRequest)
+    <flux:modal.trigger name="verification-modal">
+        <flux:button variant="primary" type="click" icon="check" class="w-full">
             {{ __('Verifikasi') }}
         </flux:button>
     </flux:modal.trigger>
-@elsecan('viewReviewSiStep1', $letter)
-    <flux:button href="{{ route('letter.review', [ $letterId ]) }}" variant="primary" type="click" icon="viewfinder-circle" class="w-full" :disabled="$letter->active_revision == true" wire:navigate>
+@elsecan('viewReviewSiStep1', $systemRequest)
+    <flux:button href="{{ route('letter.review', [$systemRequestId]) }}" variant="primary" type="click"
+        icon="viewfinder-circle" class="w-full" wire:navigate>
         {{ __('Review') }}
     </flux:button>
-@elsecan('viewReviewDataStep1', $letter)
-    <flux:button href="{{ route('letter.review', [ $letterId ]) }}" variant="primary" type="click" icon="viewfinder-circle" class="w-full" :disabled="$letter->active_revision == true" wire:navigate>
+@elsecan('viewReviewDataStep1', $systemRequest)
+    <flux:button href="{{ route('letter.review', [$systemRequestId]) }}" variant="primary" type="click"
+        icon="viewfinder-circle" class="w-full" wire:navigate>
         {{ __('Review') }}
     </flux:button>
-@elsecan('viewVerificationStep2', $letter)
+@elsecan('viewVerificationStep2', $systemRequest)
     <flux:modal.trigger name="approved-modal">
-        <flux:button x-on:click="$dispatch('modal-show', { name: 'approved-modal' })" variant="primary" icon="check-badge" class="w-full" :disabled="$letter->active_revision == true">Verifikasi</flux:button>
+        <flux:button variant="primary" icon="check-badge" class="w-full">
+            Verifikasi</flux:button>
     </flux:modal.trigger>
-@elsecan('viewReviewStep2', $letter)
-    <flux:button href="{{ route('letter.review', [ $letterId ]) }}" variant="primary" type="click" icon="viewfinder-circle" class="w-full" :disabled="$letter->active_revision == true" wire:navigate>
+@elsecan('viewReviewStep2', $systemRequest)
+    <flux:button href="{{ route('letter.review', [$systemRequestId]) }}" variant="primary" type="click"
+        icon="viewfinder-circle" class="w-full" wire:navigate>
         {{ __('Review') }}
     </flux:button>
+@elsecan('actionProcessRequest', $systemRequest)
+    <flux:modal.trigger name="process-completed-modal">
+        <flux:button x-on:click="mode = 'process'" variant="primary" icon="rocket-launch" class="w-full">Proses
+        </flux:button>
+    </flux:modal.trigger>
+@elsecan('actionCompletedRequest', $systemRequest)
+    <flux:button x-on:click="mode = 'completed'; $dispatch('modal-show', { name: 'process-completed-modal' });"
+        variant="primary" icon="rocket-launch" class="w-full">Selesaikan</flux:button>
 @endcan

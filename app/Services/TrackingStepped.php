@@ -5,26 +5,24 @@ namespace App\Services;
 use App\Models\Letters\Letter;
 use App\Models\PublicRelationRequest;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\Division;
 
 class TrackingStepped
 {
-    protected const HEAD_DIVISION_ID = 2;
-    protected const DIVISION_SI_ID = 3;
-    protected const DIVISION_DATA_ID = 4;
-
-    public static function SiDataRequest(Letter $letter)
+    public static function SiDataRequest(Letter $systemRequest)
     {
         $orderedStates = [
             \App\States\Pending::class,
             \App\States\Disposition::class,
-            // \App\States\Process::class,
             \App\States\ApprovedKasatpel::class,
             \App\States\ApprovedKapusdatin::class,
+            \App\States\Process::class,
+            \App\States\Completed::class,
         ];
 
         $statuses = collect($orderedStates)
-            ->map(function ($stateClass) use ($letter) {
-                $state = new $stateClass($letter);
+            ->map(function ($stateClass) use ($systemRequest) {
+                $state = new $stateClass($systemRequest);
                 return [
                     'label' => $state->label(),
                     'icon' => $state->icon(),
@@ -33,38 +31,35 @@ class TrackingStepped
             ->values()
             ->toArray();
 
-        // Logika untuk "Rejected"
-        if ($letter->status instanceof \App\States\Rejected) {
-            $statuses = array_filter($statuses, function ($status) use ($letter) {
-                return $status['label'] !== (new \App\States\ApprovedKasatpel($letter))->label();
-            });
-        }
-
         // Menambahkan "Rejected"
-        if ($letter->status instanceof \App\States\Rejected) {
-            $statuses[4] = [
-                'label' => (new \App\States\Rejected($letter))->label(),
-                'icon' => (new \App\States\Rejected($letter))->icon(),
+        if ($systemRequest->status instanceof \App\States\Rejected) {
+            $statuses = array_slice($statuses, 0, 2);
+
+            // Tambahkan status "Rejected" pada indeks [2]
+            $statuses[2] = [
+                'label' => (new \App\States\Rejected($systemRequest))->label(),
+                'icon' => (new \App\States\Rejected($systemRequest))->icon(),
             ];
+
         }
 
-        $activeChecking = $letter->active_checking;
+        $activeChecking = $systemRequest->active_checking;
 
-        if ($letter->status instanceof \App\States\Replied) {
-            if ($activeChecking == static::DIVISION_SI_ID || $activeChecking == static::DIVISION_DATA_ID) {
+        if ($systemRequest->status instanceof \App\States\Replied) {
+            if ($activeChecking == Division::SI_ID->value || $activeChecking == Division::DATA_ID->value) {
                 array_splice($statuses, 2, 0, [
-                    ['label' => (new \App\States\Replied($letter))->label(), 'icon' => (new \App\States\Replied($letter))->icon()]
+                    ['label' => (new \App\States\Replied($systemRequest))->label(), 'icon' => (new \App\States\Replied($systemRequest))->icon()]
                 ]);
             }
         }
 
-        if ($letter->status instanceof \App\States\RepliedKapusdatin && $activeChecking == static::HEAD_DIVISION_ID) {
+        if ($systemRequest->status instanceof \App\States\RepliedKapusdatin && $activeChecking == Division::HEAD_ID->value) {
             array_splice($statuses, 3, 0, [
-                ['label' => (new \App\States\RepliedKapusdatin($letter))->label(), 'icon' => (new \App\States\RepliedKapusdatin($letter))->icon()]
+                ['label' => (new \App\States\RepliedKapusdatin($systemRequest))->label(), 'icon' => (new \App\States\RepliedKapusdatin($systemRequest))->icon()]
             ]);
         }
 
-        return array_values($statuses);
+        return array_values($statuses); // Reindex array
     }
 
     public static function PublicRelationRequest(PublicRelationRequest $prRequest)

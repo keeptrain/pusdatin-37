@@ -49,13 +49,9 @@ trait HasActivities
 
     public function logStatus(?string $notes)
     {
-        $divisionParamForTrackingMessage = null;
-
-        if ($this->status instanceof ApprovedKasatpel) {
-            $divisionParamForTrackingMessage = (int) $this->current_division;
-        } else {
-            $divisionParamForTrackingMessage = (int) $this->active_checking;
-        }
+        $divisionParamForTrackingMessage = ($this->status instanceof ApprovedKasatpel || $this->status instanceof Process)
+            ? (int) $this->current_division
+            : (int) $this->active_checking;
 
         return $this->requestStatusTrack()->create([
             'action' => $this->status->trackingMessage($divisionParamForTrackingMessage),
@@ -71,12 +67,12 @@ trait HasActivities
         ]);
     }
 
-    public function logStatusReview(?string $action,?string $notes)
+    public function logStatusReview(?string $action, ?string $notes)
     {
         return $this->requestStatusTrack()->create([
             'action' => $action,
             'notes' => $notes
-        ]); 
+        ]);
     }
 
     public function logStatusCustom(?string $action)
@@ -135,8 +131,8 @@ trait HasActivities
 
         $notificationLogicMap = [
             ApprovedKapusdatin::class => function (): void {
-                $recipient = User::findOrFail($this->user_id);
-                $recipient->notify(new LetterServiceRequestNotification($this));
+                $recipient = User::role($this->current_division)->get();
+                Notification::send($recipient, new LetterServiceRequestNotification($this));
             },
             RepliedKapusdatin::class => function () {
                 if ($this->need_review) {

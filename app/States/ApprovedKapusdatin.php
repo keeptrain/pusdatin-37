@@ -28,7 +28,7 @@ class ApprovedKapusdatin extends LetterStatus
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan layanan anda diterima";
+        return "Permohonan ini telah mendapatkan persetujuan kapusdatin";
     }
 
     public function icon(): string

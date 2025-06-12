@@ -8,7 +8,7 @@ class Rejected extends LetterStatus
 {
     public function label(): string
     {
-        return 'Rejected';
+        return 'Ditolak';
     }
 
     public function color(): string

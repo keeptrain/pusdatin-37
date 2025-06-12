@@ -4,7 +4,7 @@
         <div class="relative flex items-center justify-between w-full">
             <div class="absolute left-0 top-2/4 h-0.5 w-full -translate-y-2/4 bg-gray-300 dark:bg-gray-600"></div>
             <div class="absolute left-0 top-2/4 h-0.5 -translate-y-2/4 transition-all duration-500
-                {{ $isRejected && $currentIndex === 3 ? 'bg-red-500 dark:bg-red-600' : 'bg-zinc-600 dark:bg-zinc-500' }}"
+                {{ $isRejected && $currentIndex === 2 ? 'bg-red-400 dark:bg-red-600' : 'bg-zinc-600 dark:bg-zinc-500' }}"
                 style="width: {{ $currentIndex == 0 ? '0%' : ($currentIndex / (count($statuses) - 1)) * 100 . '%' }}">
             </div>
 
@@ -15,7 +15,7 @@
                         {{-- Dot --}}
                         <div class="relative z-10 grid w-12 h-12 rounded-full place-items-center font-bold transition-all duration-300
                             @if ($index <= $currentIndex)
-                                {{ $step['label'] === 'Rejected' ? 'bg-red-500 dark:bg-red-600' : 'bg-zinc-600 dark:bg-zinc-500 text-white' }}
+                                {{ $step['label'] === 'Ditolak' ? 'bg-red-400 dark:bg-red-600' : 'bg-zinc-600 dark:bg-zinc-500 text-white' }}
                             @else
                                 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100
                             @endif">
@@ -24,7 +24,7 @@
 
                         {{-- Label --}}
                         <span class="absolute mt-16 text-xs font-medium text-center whitespace-wrap
-                            @if ($step['label'] === 'Rejected') text-red-500 dark:text-red-600
+                            @if ($step['label'] === 'Ditolak') text-red-500 dark:text-red-600
                             @elseif ($index <= $currentIndex)
                                 text-zinc-600 dark:text-zinc-500
                             @else
@@ -54,11 +54,11 @@
             @foreach ($statuses as $index => $step)
                 <div class="relative flex items-center mb-10 last:mb-0">
                     {{-- Dot --}}
-                    <div class="relative z-20 w-4 h-4 rounded-full flex items-center justify-center font-bold
+                    <div class="relative z-20 p-4 rounded-full flex items-center justify-center font-bold
                     @if ($index <= $currentIndex) {{ $index == 3 && $isRejected ? 'bg-red-500 dark:bg-red-600 text-white' : 'bg-zinc-600 dark:bg-zinc-500 text-white' }}
                     @else
                     bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 @endif">
-                        <x-dynamic-component :component="'lucide-' . $step['icon']" class="w-6 text-white" />
+                        <x-dynamic-component :component="'lucide-' . $step['icon']" class="w-5 h-5 text-white" />
                     </div>
 
                     {{-- Label --}}

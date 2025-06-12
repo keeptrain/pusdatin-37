@@ -3,10 +3,12 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\States\ApprovedKasatpel;
 use App\States\Pending;
+use App\States\ApprovedKapusdatin;
+use App\States\ApprovedKasatpel;
 use App\Models\Letters\Letter;
 use App\States\Disposition;
+use App\States\Process;
 use App\States\Replied;
 use App\States\RepliedKapusdatin;
 
@@ -101,7 +103,7 @@ class LetterPolicy
         return false;
     }
 
-    private function conditionLetterForVerification(Letter $letter)
+    private function conditionForVerification(Letter $letter)
     {
         if (!$letter->active_revision && !$letter->need_review) {
             return true;
@@ -112,7 +114,7 @@ class LetterPolicy
 
     public function viewVerificationSiStep1(User $user, Letter $letter): bool
     {
-        if ($user->can('verification request si step1') && $this->checkDivisionLetter(static::DIVISION_SI_ID, $letter) && $this->commonVerificationStatusChecking($letter) && $this->conditionLetterForVerification($letter)) {
+        if ($user->can('verification request si step1') && $this->checkDivisionLetter(static::DIVISION_SI_ID, $letter) && $this->commonVerificationStatusChecking($letter) && $this->conditionForVerification($letter)) {
             return true;
         }
 
@@ -121,7 +123,7 @@ class LetterPolicy
 
     public function viewVerificationDataStep1(User $user, Letter $letter): bool
     {
-        if ($user->can('verification request data step1') && $this->checkDivisionLetter(static::DIVISION_DATA_ID, $letter) && $this->commonVerificationStatusChecking($letter) && $this->conditionLetterForVerification($letter)) {
+        if ($user->can('verification request data step1') && $this->checkDivisionLetter(static::DIVISION_DATA_ID, $letter) && $this->commonVerificationStatusChecking($letter) && $this->conditionForVerification($letter)) {
             return true;
         }
 
@@ -177,7 +179,7 @@ class LetterPolicy
 
     public function viewVerificationStep2(User $user, Letter $letter): bool
     {
-        if ($user->can('verification request si-data step2') && $this->headDivisionLetter($letter) && $this->conditionLetterForVerification($letter) && $this->commonStatusCheckingStep2($letter)) {
+        if ($user->can('verification request si-data step2') && $this->headDivisionLetter($letter) && $this->conditionForVerification($letter) && $this->commonStatusCheckingStep2($letter)) {
             return true;
         }
 
@@ -187,6 +189,25 @@ class LetterPolicy
     public function viewReviewStep2(User $user, Letter $letter): bool
     {
         if ($user->can('review request si-data step2') && $this->headDivisionLetter($letter) && $this->conditionLetterForReview($letter) && $letter->status instanceof RepliedKapusdatin) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public function actionProcessRequest(User $user, Letter $letter): bool
+    {
+        if ($user->can('can process si') && $this->conditionForVerification($letter) && $letter->status instanceof ApprovedKapusdatin) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function actionCompletedRequest(User $user, Letter $letter): bool
+    {
+        if ($user->can('completed request') && $this->conditionForVerification($letter) && $letter->status instanceof Process) {
             return true;
         }
 

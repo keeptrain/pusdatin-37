@@ -1,7 +1,10 @@
 <section>
-    <x-modal.disposition :letterId="$letterId" />
+    <x-modal.disposition :systemRequestId="$systemRequestId" />
 
-    <x-modal.verification :letterId="$letterId" :status="$status" :availablePart="$availablePart" />
+    <x-modal.verification :systemRequestId="$systemRequestId" :allowedParts="$allowedParts" />
 
-    <x-modal.approved :letterId="$letterId" :status="$status" :availablePart="$availablePart" />
+    <x-modal.approved :systemRequestId="$systemRequestId" :allowedParts="$allowedParts" />
+
+    <x-modal.information-system.completed />
+
 </section>

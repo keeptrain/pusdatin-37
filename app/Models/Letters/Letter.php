@@ -135,16 +135,16 @@ class Letter extends Model
         );
     }
 
-    public function transitionStatusToProcess($division)
-    {
-        $this->status->transitionTo(\App\States\Process::class);
-    }
-
-    public function transitionStatusFromPending($newStatus, $division, $notes)
+    private function transitionStatusFromString($newStatus)
     {
         $newStatus = self::resolveStatusClassFromString($newStatus);
 
         $this->status->transitionTo($newStatus);
+    }
+
+    public function transitionStatusFromPending($newStatus, $division, $notes)
+    {
+        $this->transitionStatusFromString($newStatus);
 
         $newNotes = [
             $notes
@@ -159,14 +159,27 @@ class Letter extends Model
         }
     }
 
+    public function allowedParts()
+    {
+        return $this->documentUploads->filter(function ($documentUpload) {
+            return $documentUpload->part_number !== 0;
+        })
+            ->map(function ($upload) {
+                return [
+                    'part_number' => $upload->part_number,
+                    'part_number_label' => $upload->part_number_label,
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
     public function transitionStatusFromProcess($newStatus)
     {
-        $resolveNewStatus = self::resolveStatusClassFromString($newStatus);
-
-        $this->status->transitionTo($resolveNewStatus);
+        $this->transitionStatusFromString($newStatus);
 
         match ($newStatus) {
-            'approved_kapusdatin' => [],
+            'approved_kapusdatin' => $this->update(['active_checking' => $this->current_division]),
             'replied_kapusdatin' => $this->update([
                 'active_revision' => true
             ]),
@@ -180,6 +193,16 @@ class Letter extends Model
             ])
         };
     }
+
+    public function transitionStatusFromApprovedKapusdatin($newStatus)
+    {
+        $this->transitionStatusFromString($newStatus);
+
+        $this->update([
+            'active_checking' => $this->current_division,
+        ]);
+    }
+
 
     public function updatedForNeedReview()
     {

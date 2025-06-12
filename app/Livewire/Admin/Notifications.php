@@ -17,7 +17,7 @@ class Notifications extends Component
     public function mount()
     {
         $this->notificationCount = $this->emitCount();
-        $this->userTabs =  $this->tabBaseRoles();
+        $this->userTabs = $this->tabBaseRoles();
     }
 
     public function placeholder()
@@ -51,7 +51,7 @@ class Notifications extends Component
         if ($user->hasRole('head_verifier')) {
             $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
         } else if ($user->hasRole('si_verifier|data_verifier')) {
-            $userTabs = ['all', 'disposisi', 'revisi'];
+            $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
         } else if ($user->hasRole('pr_verifier')) {
             $userTabs = ['all', 'disposisi'];
         } else if ($user->hasRole('promkes_verifier')) {

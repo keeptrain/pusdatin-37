@@ -100,10 +100,10 @@ class PermissionRoleSeeder extends Seeder
         $role->givePermissionTo($headPermissions, 'view pr request', 'view si request', 'view data request');
 
         $role = \Spatie\Permission\Models\Role::findByName('si_verifier');
-        $role->givePermissionTo([$siPermissions]);
+        $role->givePermissionTo([$siPermissions, 'completed request']);
 
         $role = \Spatie\Permission\Models\Role::findByName('data_verifier');
-        $role->givePermissionTo([$dataPermissions]);
+        $role->givePermissionTo([$dataPermissions, 'completed request']);
 
         $role = \Spatie\Permission\Models\Role::findByName('pr_verifier');
         $role->givePermissionTo([$prPermisions]);

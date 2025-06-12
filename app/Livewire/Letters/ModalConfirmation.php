@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\DB;
 class ModalConfirmation extends Component
 {
     #[Locked]
-    public int $letterId;
+    public int $systemRequestId;
 
-    public $availablePart;
+    public $allowedParts;
 
     public $status = '';
 
@@ -32,7 +32,7 @@ class ModalConfirmation extends Component
             'status' => [
                 'required',
                 'string',
-                Rule::in('approved_kapusdatin', 'approved_kasatpel', 'replied', 'rejected', 'disposition')
+                Rule::in('completed', 'process', 'approved_kapusdatin', 'approved_kasatpel', 'replied', 'rejected', 'disposition')
             ],
         ];
 
@@ -99,25 +99,25 @@ class ModalConfirmation extends Component
         ];
     }
 
-    public function mount(int $letterId, $availablePart)
+    public function mount(int $systemRequestId, $allowedParts)
     {
-        $this->letterId = $letterId;
-        $this->availablePart = $availablePart;
+        $this->systemRequestId = $systemRequestId;
+        $this->allowedParts = $allowedParts;
     }
 
     private function getSiDataRequests()
     {
-        return Letter::with('documentUploads')->findOrFail($this->letterId);
+        return Letter::with('documentUploads')->findOrFail($this->systemRequestId);
     }
 
     public function saveDisposition()
     {
         $this->validate();
 
-        $this->authorize('can disposition', $this->letterId);
+        $this->authorize('can disposition', $this->systemRequestId);
 
         DB::transaction(function () {
-            $systemRequest = Letter::findOrFail($this->letterId);
+            $systemRequest = Letter::findOrFail($this->systemRequestId);
 
             // Transisi status
             $systemRequest->transitionStatusFromPending(
@@ -197,19 +197,58 @@ class ModalConfirmation extends Component
                     $documentUpload = $documentUploadsByPartNumber->get($partNumber);
 
                     if ($documentUpload) {
-                        // Lanjutkan dengan membuat catatan version
-                        $latestRevision = $documentUpload->versions()->latest('version')->first();
-                        $nextVersion = $latestRevision ? $latestRevision->version + 1 : 1;
-
-                        $documentUpload->versions()->create([
-                            'version' => $nextVersion,
-                            'revision_note' => $revisionNote
-                        ]);
-
-                        $documentUpload->update(['need_revision' => true]);
+                        $documentUpload->createRevision($revisionNote);
                     }
                 }
             }
         }
+    }
+
+    public function processPusdatin()
+    {
+        DB::transaction(function () {
+            $systemRequest = Letter::findOrFail($this->systemRequestId);
+
+            $systemRequest->status->transitionTo(\App\States\Process::class);
+
+            $systemRequest->refresh();
+
+            $systemRequest->logStatus(null);
+
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendProcessServiceRequestNotification();
+            });
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $systemRequest->status->toastMessage(),
+            ]);
+
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
+        });
+    }
+
+    public function completed()
+    {
+        DB::transaction(function () {
+            $systemRequest = Letter::findOrFail($this->systemRequestId);
+
+            $systemRequest->status->transitionTo(\App\States\Completed::class);
+
+            $systemRequest->refresh();
+
+            $systemRequest->logStatus(null);
+
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendProcessServiceRequestNotification();
+            });
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $systemRequest->status->toastMessage(),
+            ]);
+
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
+        });
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Livewire\Requests\InformationSystem;
 
 use Livewire\Component;
-use App\States\Disposition;
 use Livewire\WithPagination;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Computed;
@@ -32,30 +31,17 @@ class Index extends Component
 
     public $searchQuery = '';
 
-    public function mount() {}
-
     public function render()
     {
         return view('livewire.requests.information-system.index');
     }
 
-    public function detailPageForProcess(int $id)
+    public function show(int $systemRequestId)
     {
-        $letter = Letter::findOrFail($id);
-
-        if ($letter->status == Disposition::class) {
-            $letter->transitionStatusToProcess($letter->current_division);
-            $letter->logStatus(null);
-        }
-        return $this->redirect("{$id}", true);
+        return $this->redirectRoute('is.show', ['id' => $systemRequestId], true);
     }
 
-    public function show(int $id)
-    {
-        return $this->redirect("information-system/{$id}", true);
-    }
-
-    #[Computed()]
+    #[Computed]
     public function letters()
     {
         // Kriteria sorting

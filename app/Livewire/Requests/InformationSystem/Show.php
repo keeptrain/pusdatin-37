@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
-use App\States\Pending;
-use App\States\Process;
 use Livewire\Component;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
@@ -13,48 +11,35 @@ use Illuminate\Support\Facades\DB;
 class Show extends Component
 {
     #[Locked]
-    public int $letterId;
+    public int $systemRequestId;
 
-    public ?Letter $letter;
+    public Letter $systemRequest;
 
     public $notes = '';
 
     public function mount(int $id)
     {
-        $this->letterId = $id;
-        $this->letter = Letter::with([
-            'documentUploads.activeVersion:id,file_path'
-        ])->findOrFail($id);
+        $this->systemRequestId = $id;
+        $this->systemRequest = Letter::with('documentUploads.activeVersion:id,file_path')->findOrFail($this->systemRequestId);
     }
 
     #[Computed]
-    public function availablePart()
+    public function allowedParts()
     {
-        return $this->letter->documentUploads->filter(function ($documentUpload) {
-            return $documentUpload->part_number !== 0;
-        })
-            ->map(function ($upload) {
-                return [
-                    'part_number' => $upload->part_number,
-                    'part_number_label' => $upload->part_number_label,
-                ];
-            })
-            ->values()
-            ->toArray();
+        return $this->systemRequest->allowedParts();
     }
 
     public function inputNotes()
     {
-        DB::transaction(function () {
-            $SiRequest = $this->letter;
+        $systemRequest = $this->systemRequest;
+        
+        DB::transaction(function () use ($systemRequest) {
 
-            $existingNotes = $SiRequest->notes;
+            $existingNotes = $systemRequest->notes;
 
             $existingNotes[] = $this->notes;
 
-            $SiRequest->update(['notes' => $existingNotes]);
-
-            $SiRequest->load('documentUploads.activeVersion:id,file_path');
+            $systemRequest->update(['notes' => $existingNotes]);
 
             $this->reset('notes');
         });
@@ -62,17 +47,17 @@ class Show extends Component
 
     public function backPending()
     {
-        $letter = Letter::findOrFail($this->letterId);
+        $letter = Letter::findOrFail($this->systemRequestId);
         $letter->status->transitionTo(Pending::class);
-        return $this->redirect("/letter/$this->letterId", true);
+        return $this->redirect("/letter/$this->systemRequestId", true);
     }
 
     public function backProcess()
     {
-        $letter = Letter::findOrFail($this->letterId);
+        $letter = Letter::findOrFail($this->systemRequestId);
         $letter->status->transitionTo(Process::class);
         $letter->active_revision = false;
         $letter->save();
-        return $this->redirect("/letter/$this->letterId", true);
+        return $this->redirect("/letter/$this->systemRequestId", true);
     }
 }

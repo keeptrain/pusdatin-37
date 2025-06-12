@@ -8,7 +8,7 @@ class Process extends LetterStatus
 {
     public function label(): string
     {
-        return 'Proses';
+        return 'Proses Permohonan';
     }
 
     public function color(): string
@@ -25,12 +25,12 @@ class Process extends LetterStatus
     {
         $divisionName = $this->getDivisionName($division);
 
-        return "Permohonan layanan sedang diproses oleh Kepala Satuan Pelaksana {$divisionName}";
+        return "Permohonan layanan sedang diproses oleh divisi {$divisionName}";
     }
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan layanan ini memerlukan verifikasi" . $context['verifikator'];
+        return "Permohonan layanan ini menunggu proses";
     }
 
     public function icon(): string
