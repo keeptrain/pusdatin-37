@@ -8,11 +8,9 @@ use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Letters\Data\Edit;
 use App\Livewire\Settings\Password;
 use App\Livewire\Letters\DirectForm;
-use App\Livewire\Letters\Data\Detail;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Letters\CreateLetter;
-use App\Livewire\Letters\Data\Activity;
 use App\Livewire\Letters\Data\Rollback;
 use App\Livewire\Letters\DetailHistory;
 use App\Livewire\Letters\HistoryLetter;
@@ -40,7 +38,6 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 Route::middleware(['auth'])->group(function () {
     Route::get('letter', CreateLetter::class)->name('letter');
     Route::get('letter/form', DirectForm::class)->name('letter.form');
-    
 
     // Information System & Data
     Route::get('form/si-data', SiDataRequestForm::class)->name('si-data.form');
@@ -61,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('history', HistoryLetter::class)->name('history');
     Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
-   
+
     Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
     Route::get('letter/{id}/review', Review::class)->name('letter.review');
     Route::get('letter/{id}/chat', Chat::class)->name('letter.chat');

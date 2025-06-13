@@ -291,4 +291,73 @@ class Letter extends Model
             return implode("\n", $details); // Newline untuk memisahkan setiap detail
         })->implode("\n\n"); // Dua newline untuk memisahkan setiap meeting
     }
+
+
+    public static function getNearMeetingsByDate()
+    {
+        $now = Carbon::now();
+        $userId = auth()->id();
+
+        // Ambil semua meeting dari user
+        $allMeetings = self::where('user_id', $userId)
+            ->get()
+            ->pluck('meeting')->flatMap(function ($meeting) {
+                return $meeting;
+            })->filter();
+
+        // Filter meeting dalam 3 hari ke depan
+        $filteredMeetings = $allMeetings->filter(function ($meeting) use ($now) {
+            if (!isset($meeting['date'])) return false;
+            $meetingDate = Carbon::parse($meeting['date'])->startOfDay();
+            $todayStart = $now->copy()->startOfDay();
+            $twoDaysLater = $todayStart->copy()->addDays(2)->endOfDay();
+
+            return $meetingDate->between($todayStart, $twoDaysLater);
+        });
+
+        // Group by tanggal
+        $groupedMeetings = $filteredMeetings->groupBy('date')->map(function ($meetings, $date) {
+            $dateCarbon = Carbon::parse($date)->locale('id');
+
+            return [
+                'date_number' => $dateCarbon->day,
+                'date_day' => $dateCarbon->translatedFormat('l'),
+                'date_month' => $dateCarbon->translatedFormat('F'),
+                'is_today' => $dateCarbon->isToday(),
+                'meetings' => collect($meetings)->map(function ($meeting) {
+                    return [
+                        'start' => $meeting['start'],
+                        'end' => $meeting['end'],
+                        'link_location' => [
+                            'type' => isset($meeting['link']) ? 'link' : (isset($meeting['location']) ? 'location' : null),
+                            'value' => $meeting['link'] ?? $meeting['location'] ?? null,
+                        ],
+                    ];
+                })->sortBy('start')->values()->all(),
+                'has_meetings' => $meetings->isNotEmpty(),
+            ];
+        });
+
+        // Generate 3 hari terdekat (hari ini + 2 hari)
+        $datesToCheck = [
+            $now->copy()->format('Y-m-d'),
+            $now->copy()->addDay()->format('Y-m-d'),
+            $now->copy()->addDays(2)->format('Y-m-d'),
+        ];
+
+        // Merge dengan tanggal yang tidak memiliki meeting
+        $result = collect($datesToCheck)->map(function ($date) use ($groupedMeetings) {
+            $dateParse = Carbon::parse($date);
+            return $groupedMeetings[$date] ?? [
+                'date_number' => $dateParse->day,
+                'date_day' => $dateParse->locale('id')->translatedFormat('l'),
+                'date_month' => $dateParse->locale('id')->translatedFormat('F'),
+                'is_today' => $dateParse->isToday(),
+                'meetings' => [],
+                'has_meetings' => false,
+            ];
+        })->values();
+
+        return $result;
+    }
 }

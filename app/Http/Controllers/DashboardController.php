@@ -17,7 +17,9 @@ class DashboardController extends Controller
 
         // Redirect user dashboard if the role is 'user'
         if ($user->hasRole('user')) {
-            return view('dashboard-user');
+            return view('dashboard-user', [
+                'meetingList' => $this->getMeetingList()
+            ]);
         }
 
         // Fetch data based on user roles
@@ -34,10 +36,14 @@ class DashboardController extends Controller
             'categoryPercentages' => $this->calculateCategoryPercentages($data['totalPr']),
             'statusCounts' => $data['statusCounts'],
             'monthlyLetterData' => $this->getMonthlyLetterData($userRoles),
-            'monthlySiData'     => $monthlySiData,
-            'monthlyDataDiv'    => $monthlyDataDiv,
-
+            'monthlySiData' => $monthlySiData,
+            'monthlyDataDiv' => $monthlyDataDiv,
         ]);
+    }
+
+    public function getMeetingList()
+    {
+        return Letter::getNearMeetingsByDate();
     }
 
     /**
@@ -172,11 +178,11 @@ class DashboardController extends Controller
     {
         $statusStates = [
             'pending' => 'App\States\Pending',
-            'disposition' =>  'App\States\Disposition',
-            'process' =>  'App\States\Process',
-            'replied' =>  'App\States\Replied',
+            'disposition' => 'App\States\Disposition',
+            'process' => 'App\States\Process',
+            'replied' => 'App\States\Replied',
             'approvedKasatpel' => 'App\States\ApprovedKasatpel',
-            'repliedKapusdatin' =>  'App\States\RepliedKapusdatin',
+            'repliedKapusdatin' => 'App\States\RepliedKapusdatin',
             'approvedKapusdatin' => 'App\States\ApprovedKapusdatin',
         ];
 
@@ -201,14 +207,14 @@ class DashboardController extends Controller
         ];
     }
 
-    private function getPrStatusCounts(?String $user = null)
+    private function getPrStatusCounts(?string $user = null)
     {
         $statusStates = [
             'pending' => 'App\States\PublicRelation\Pending',
-            'promkesQueue' =>  'App\States\PublicRelation\PromkesQueue',
-            'promkesCompleted' =>  'App\States\PublicRelation\PromkesComplete',
+            'promkesQueue' => 'App\States\PublicRelation\PromkesQueue',
+            'promkesCompleted' => 'App\States\PublicRelation\PromkesComplete',
             'pusdatinQueue' => 'App\States\PublicRelation\PusdatinQueue',
-            'pusdatinProcess' =>  'App\States\PublicRelation\PusdatinProcess',
+            'pusdatinProcess' => 'App\States\PublicRelation\PusdatinProcess',
             'completed' => 'App\States\PublicRelation\Completed',
         ];
 
@@ -364,7 +370,7 @@ class DashboardController extends Controller
         }
 
         return [
-            'months'     => $months,
+            'months' => $months,
             'letterData' => $data,
         ];
     }
@@ -393,7 +399,7 @@ class DashboardController extends Controller
         }
 
         return [
-            'months'     => $months,
+            'months' => $months,
             'letterData' => $data,
         ];
     }
