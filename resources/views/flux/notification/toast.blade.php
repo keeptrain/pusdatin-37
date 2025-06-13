@@ -1,11 +1,10 @@
 @props([
-    'variant' => null, // Default variant
-    'message' => null, // Default message
-    'duration' => null, // Default duration in milliseconds (3 seconds)
+    'variant' => null,
+    'message' => null,
+    'duration' => 3000, // Default duration to 3000ms (3 seconds) if not provided
 ])
 
 @php
-    // Mapping for icons and colors based on variant
     $icons = [
         'success' => 'check-circle',
         'error' => 'exclamation-circle',
@@ -20,16 +19,24 @@
         'info' => 'text-blue-600 dark:text-blue-300',
     ];
 
-    $icon = $icons[$variant];
+    $icon = $icons[$variant] ?? $icons['info'];
     $colorClass = $colors[$variant] ?? $colors['info'];
 @endphp
 
-<div id="toast-container"
-    class="fixed p-3 bottom-6 right-6 rounded-xl border-1 border-gray-300 shadow-md bg-white dark:bg-gray-800 text-black dark:text-white w-auto max-w-md flex flex-col">
-
-    <!-- Top Row: Icon, Heading, and Close Button -->
-    <div class="flex items-center justify-between  space-x-4">
-        <!-- Icon dan Heading -->
+<div
+    x-data="{ show: true }"
+    x-init="setTimeout(() => show = false, {{ $duration }})"
+    x-show="show" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 transform translate-y-3"
+    x-transition:enter-end="opacity-100 transform translate-y-0"
+    x-transition:leave="transition ease-in duration-300"
+    x-transition:leave-start="opacity-100 transform translate-y-0"
+    x-transition:leave-end="opacity-0 transform translate-y-3"
+    id="toast-container"
+    class="flex flex-col fixed p-3 top-6 right-6 z-10 rounded-xl border-1 border-gray-300 shadow-md bg-white dark:bg-gray-800 text-black dark:text-white w-auto max-w-md"
+>
+    <div class="flex items-center justify-between space-x-4">
         <div class="flex items-center space-x-2 flex-grow min-w-0">
             <flux:icon :name="$icon" variant="solid" class="{{ $colorClass }} size-5" />
             <div class="truncate">
@@ -37,26 +44,13 @@
             </div>
         </div>
 
-        <!-- Close Button -->
         <flux:button variant="ghost" icon="x-mark" alt="Close toast"
-            class="flex-shrink-0 text-zinc-400 hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-white transition duration-200 "
-            onclick="this.closest('#toast-container').remove()" inset></flux:button>
+            class="flex-shrink-0 text-zinc-400 hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-white transition duration-200"
+            @click="show = false" inset>
+        </flux:button>
     </div>
 
-    <!-- Message -->
     <div class="pl-7 pr-7 break-words whitespace-normal">
         <flux:text variant="subtle">{{ $message }}</flux:text>
     </div>
 </div>
-
-<script>
-    // Automatically remove the toast after the specified duration
-    document.addEventListener('DOMContentLoaded', () => {
-        const toastContainer = document.getElementById('toast-container');
-        if (toastContainer) {
-            setTimeout(() => {
-                toastContainer.remove();
-            }, {{ $duration }});
-        }
-    });
-</script>

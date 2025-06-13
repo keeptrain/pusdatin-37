@@ -8,21 +8,50 @@ class Rejected extends LetterStatus
 {
     public function label(): string
     {
-        return 'Rejected';
-    }
-    
-    public function color(): string
-    {
-        return 'red';
+        return 'Ditolak';
     }
 
-    public function trackingMessage(): string
+    public function color(): string
     {
-        return 'Surat di tolak';
+        return 'text-red-800';
+    }
+
+    public function toastMessage(): string
+    {
+        return 'Berhasil menolak permohonan layanan';
+    }
+
+    public function trackingMessage(?int $division): string
+    {
+        $resolvedDivisonName = $this->getDivisionName($division);
+        if ($division == 2 ) {
+            return "Permohonan layanan anda ditolak oleh " . $resolvedDivisonName;
+        }
+        return "Permohonan layanan anda ditolak oleh Kasatpel " . $resolvedDivisonName;
     }
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan layanan anda ditolak";
+        return "Permohonan layanan anda ditolak" ;
+    }
+
+    public function icon(): string
+    {
+        return 'x';
+    }
+
+    public function badgeBg(): string
+    {
+        return 'bg-red-100';
+    }
+    
+    public function percentage(): string
+    {
+        return '0%';
+    }
+    
+    public function percentageBar(): string
+    {
+        return 'w-[0%]';
     }
 }

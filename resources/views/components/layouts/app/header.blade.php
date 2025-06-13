@@ -2,10 +2,11 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 
 <head>
+    @livewireStyles
     @include('partials.head')
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
+<body class="min-h-screen bg-white dark:bg-zinc-800 p-0">
     <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
@@ -18,29 +19,28 @@
                 wire:navigate>
                 {{ __('Dashboard') }}
             </flux:navbar.item>
-            <flux:navbar.item icon="document-text" :href="route('letter')" :current="request()->routeIs('letter')"
+            <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
                 wire:navigate>
-                {{ __('Letter') }}
+                {{ __('Permohonan') }}
             </flux:navbar.item>
         </flux:navbar>
 
         <flux:spacer />
 
         <flux:navbar class="mr-1.5 space-x-0.5 py-0!">
-            <flux:tooltip :content="__('Search')" position="bottom">
+            {{-- <flux:tooltip :content="__('Search')" position="bottom">
                 <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#"
                     :label="__('Search')" />
-            </flux:tooltip>
+            </flux:tooltip> --}}
 
-            <flux:modal.trigger name="notifications-user" >
+            <flux:modal.trigger name="notifications-user">
 
                 <flux:tooltip :content="__('Notifications')" position="bottom">
                     <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="bell-alert" target="_blank"
-                        :label="__('Notifications')"  />
+                        :label="__('Notifications')" />
                 </flux:tooltip>
-                
-            </flux:modal.trigger>
 
+            </flux:modal.trigger>
 
             <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false" class="md:w-96">
                 <livewire:admin.notifications />
@@ -105,29 +105,22 @@
                     :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navlist.item>
-                <flux:navlist.item icon="document-text" :href="route('letter')"
-                    :current="request()->routeIs('letter')" wire:navigate>
-                    {{ __('Letter') }}
-                </flux:navlist.item>
+                <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
+                    wire:navigate>
+                    {{ __('Permohonan') }}
+                </flux:navbar.item>
             </flux:navlist.group>
         </flux:navlist>
 
         <flux:spacer />
 
-        <flux:navlist variant="outline">
-            <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit"
-                target="_blank">
-                {{ __('Repository') }}
-            </flux:navlist.item>
-
-            <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits" target="_blank">
-                {{ __('Documentation') }}
-            </flux:navlist.item>
-        </flux:navlist>
     </flux:sidebar>
 
-    {{ $slot }}
+    <div class="max-w-[1440px] mx-auto"> <!--dubungkus max-w biar ga jadi melebar di layar besar -->
+        {{ $slot }}
+    </div>
 
+    @livewireScripts
     @fluxScripts
 </body>
 

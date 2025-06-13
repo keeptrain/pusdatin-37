@@ -2,16 +2,14 @@
 
 namespace App\Livewire\Letters\Data;
 
-use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
-use App\Models\Letters\LetterUpload;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewServiceRequestNotification;
+use App\Models\Documents\DocumentUpload;
+use App\Models\Documents\UploadVersion;
 
 class Edit extends Component
 {
@@ -23,25 +21,23 @@ class Edit extends Component
     public $letter;
 
     public $title;
-    public $responsible_person;
     public $reference_number;
-    public $body;
 
     public $revisedFiles = [];
-    public $revisionNote;
+
+    public $notes = '';
 
     public function rules()
     {
         $rules = [
             'title' => 'required|string',
-            'responsible_person' => 'required|string',
             'reference_number' => 'required|string'
         ];
 
-        $revisedParts = $this->letterNeedRevision(LetterUpload::class);
+        $revisedParts = $this->letterNeedRevision();
 
-        foreach ($revisedParts as $partName) {
-            $rules["revisedFiles.$partName"] = 'required|file|mimes:pdf|max:1048';
+        foreach ($revisedParts as $partNumber) {
+            $rules["revisedFiles.$partNumber"] = 'required|file|mimes:pdf|max:1048';
         }
 
         return $rules;
@@ -49,25 +45,26 @@ class Edit extends Component
 
     public function messages()
     {
-        $messages = [];
-
-        return $messages;
+        return [
+            'title.required' => 'Title is required',
+            'reference_number.required' => 'Reference number is required',
+            'revisedFiles.1.required' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus ada',
+            'revisedFiles.2.required' => 'SOP Aplikasi SPBE harus ada',
+            'revisedFiles.3.required' => 'Pakta Integritas Pemanfaatan Aplikasi harus ada',
+            'revisedFiles.4.required' => 'Form RFC Pusdatinkes harus ada',
+            'revisedFiles.5.required' => 'NDA Pusdatin Dinkes harus ada',
+        ];
     }
 
     public function mount(int $id)
     {
         $this->letterId = $id;
         $this->letter = Letter::with([
-            'mapping.letterable' => function ($morphTo) {
-                $morphTo->morphWith([
-                    \App\Models\Letters\LetterUpload::class => [],
-                    \App\Models\Letters\LetterDirect::class => [],
-                ]);
-            }
+            'documentUploads.versions',
         ])->findOrFail($id);
 
         $this->fill(
-            $this->letter->only('title', 'responsible_person', 'reference_number')
+            $this->letter->only('title', 'reference_number')
         );
     }
 
@@ -77,75 +74,90 @@ class Edit extends Component
 
         DB::transaction(function () {
             $letter = $this->letter;
-            $user = Auth::user();
-
-            $letter->update([
-                'title' => $this->title,
-                'responsible_person' => $this->responsible_person,
-                'reference_number' => $this->reference_number,
-                'current_revision' => $letter->current_revision + 1,
-                'active_revision' => false,
-            ]);
 
             $revisedParts = [];
+            $pathsToUpdateInRevisions = [];
+            $documentUploadIdsToMarkNotNeedingRevision = [];
 
-            foreach ($this->revisedFiles as $partName => $file) {
-                $uploadsByPart = collect($this->letter->mapping)
-                    ->mapWithKeys(fn($m) => [$m->letterable->part_name => $m->letterable]);
+            foreach ($this->revisedFiles as $partNumber => $file) {
+                $documentUpload = $letter->documentUploads->first(function ($doc) use ($partNumber) {
+                    return $doc->part_number == $partNumber && $doc->need_revision;
+                });
 
-                $letterUpload = $uploadsByPart[$partName] ?? null;
-
-                if ($letterUpload) {
-                    $path = $file->store('letter', 'public');
-
-                    $letterUpload->update([
-                        'file_path' => $path,
-                        'version' => $letterUpload->version + 1,
-                        'needs_revision' => false,
-                        'revision_note' => null,
-                        'updated_at' => now()
-                    ]);
+                if (!$documentUpload) {
+                    continue;
                 }
 
-                $revisedParts[] = $partName;
-            }
+                $path = $file->store('documents', 'public');
 
-            if ($letter->isDirty()) {
-                $letter->save();
-            }
+                $documentUpload->load('versions');
 
-            if (!empty($revisedParts)) {
-                $statusTrack = $this->letter->requestStatusTrack()->create([
-                    'letter_id' => $letter->id,
-                    'action' => $user->name . ' telah melakukan revisi di bagian: ' . implode(', ', $revisedParts),
-                    'created_by' => $user->name,
-                ]);
+                $revision = $documentUpload->versions
+                    ->where('is_resolved', false)
+                    ->whereNull('file_path')
+                    ->sortByDesc('id')
+                    ->first();
 
-                if (!empty($this->revisionNote)) {
-                    $statusTrack->notes = $this->revisionNote;
-                    $statusTrack->save();
+                if (!$revision) {
+                    continue;
                 }
 
-                $user = User::role(['administrator','verifikator'])->get();
-                Notification::send($user, new NewServiceRequestNotification($letter, auth()->user()));
+                // Kumpulkan untuk update
+                $pathsToUpdateInRevisions[$revision->id] = $path;
+                $documentUploadIdsToMarkNotNeedingRevision[] = $documentUpload->id;
+
+                $revisedParts[] = $documentUpload->part_number_label;
             }
 
-            return redirect()->to("/letter/$this->letterId/activity")
-                ->with('status', [
-                    'variant' => 'success',
-                    'message' => 'Create direct Letter successfully!'
-                ]);
+            if (!empty($documentUploadIdsToMarkNotNeedingRevision)) {
+                DocumentUpload::whereIn('id', array_unique($documentUploadIdsToMarkNotNeedingRevision))
+                    ->update(['need_revision' => false]);
+            }
+
+            if (!empty($pathsToUpdateInRevisions)) {
+                foreach ($pathsToUpdateInRevisions as $revisionId => $filePath) {
+                    UploadVersion::where('id', $revisionId)->update(['file_path' => $filePath]);
+                }
+            }
+
+            $letter->updatedForNeedReview();
+
+            $letter->refresh();
+
+            $letter->logStatusRevision($this->notes, $revisedParts);
+
+            DB::afterCommit(function () use ($letter) {
+                $letter->sendProcessServiceRequestNotification();
+            });
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $letter->status->toastMessage(),
+            ]);
+
+            return $this->redirect("/history/information-system/{$this->letterId}", true);
         });
     }
 
-    public function updateForRevision() {}
-
-    public function letterNeedRevision($instanceof)
+    #[Computed]
+    public function checkNotResolvedDocuments()
     {
-        return collect($this->letter->mapping)
-            ->filter(fn($map) => $map->letterable instanceof $instanceof)
-            ->filter(fn($map) => $map->letterable->needs_revision)
-            ->map(fn($map) => $map->letterable->part_name)
+        return $this->letter->documentUploads->versions->where('is_resolved', false);
+    }
+
+    #[Computed]
+    public function checkDocumentUploadNeedRevision()
+    {
+        return $this->letter->documentUploads->contains(function ($documentUpload) {
+            return $documentUpload->need_revision;
+        });
+    }
+
+    public function letterNeedRevision()
+    {
+        return collect($this->letter->documentUploads)
+            ->filter(fn($map) => $map->need_revision)
+            ->map(fn($map) => $map->part_number)
             ->values();
     }
 }

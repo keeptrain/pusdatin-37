@@ -1,4 +1,4 @@
-<section>
+<div>
     <flux:modal wire:model.self="showUpdateModal" name="update-user" :show="$errors->isNotEmpty()" focusable class="max-w-lg">
         <form wire:submit="save" class="space-y-6">
             <div>
@@ -13,6 +13,10 @@
             <flux:input wire:model="form.name" label="Name" />
 
             <flux:input wire:model="form.email" label="Email" type="email" />
+
+            <flux:input wire:model="form.section" label="Section" />
+
+            <flux:input wire:model="form.contact" label="Contact" type="number" />
 
             <flux:radio.group wire:model="form.role" label="Role">
                 <flux:radio name="role" value="administrator" label="Administrator"
@@ -32,5 +36,4 @@
             </div>
         </form>
     </flux:modal>
-    
-</section>
+</div>

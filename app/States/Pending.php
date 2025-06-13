@@ -8,21 +8,46 @@ class Pending extends LetterStatus
 {
     public function label(): string
     {
-        return 'Pending';
-    }
-    
-    public function color(): string
-    {
-        return 'lime';
+        return 'Permohonan Masuk';
     }
 
-    public function trackingMessage(): string
+    public function color(): string
     {
-        return 'Surat telah di kirim, mohon di cek berkala';
+        return 'text-yellow-800';
+    }
+
+    public function badgeBg(): string
+    {
+        return 'bg-yellow-100';
+    }
+
+    public function icon(): string
+    {
+        return 'folder-check';
+    }
+
+    public function percentage(): string
+    {
+        return '10%';
+    }
+
+    public function percentageBar(): string
+    {
+        return 'w-[10%]';
+    }
+
+    public function toastMessage(): string
+    {
+        return 'Berhasil mengajukan permohonan layanan';
+    }
+
+    public function trackingMessage(?int $division): string
+    {
+        return 'Permohonan layanan sudah kami terima, mohon tunggu konfirmasi selanjutnya.';
     }
 
     public function userNotificationMessage(array $context): string
     {
-        return "Surat baru telah diajukan oleh " . $context['responsible_person'];
+        return "Permohonan layanan ini perlu disposisi sistem informasi / data";
     }
 }

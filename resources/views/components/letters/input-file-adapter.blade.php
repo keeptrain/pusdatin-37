@@ -1,11 +1,30 @@
-{{-- @props([
-'title' => null,
-'model' => null
-]) --}}
+@props([
+    'title' => null,
+    'model' => null,
+    'required' => false,
+    'optional' => false,
+    'template' => false,
+    'filePath' => null
+])
 
-<h4 class="text-sm font-medium text-gray-700 mb-2">{{ $title }}</h4>
-<div
-    class="border-2 rounded-lg p-6 border-dashed hover:border-accent-content 
+<div class="flex flex-1 p-4 bg-zinc-50 justify-between border-t-1 border-l-1 border-r-1 rounded-t-lg mt-6">
+    <h4 class="text-sm font-medium text-gray-700">
+        {{ $title }}
+        @if ($required)
+            <span class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md">Wajib</span>
+        @endif
+        @if ($optional)
+            <span class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-md">Optional</span>
+        @endif
+    </h4>
+    @if ($template)
+    <flux:button wire:click="{{ $filePath }}" size="xs" variant="primary" icon="arrow-down-tray">
+        Download Template
+    </flux:button>
+    @endif
+</div>
+
+<div class="border-2 border-dashed hover:border-zinc-400 
     {{ $errors->has($model) ? 'border-red-500 ' : 'border-gray-300 ' }} cursor-pointer">
     <div x-data="{
         uploading: false,
@@ -21,8 +40,7 @@
                 this.fileName = files[0].name;
             }
         }
-            }" 
-        x-on:livewire-upload-start="uploading = true"
+            }" x-on:livewire-upload-start="uploading = true"
         x-on:livewire-upload-finish.prevent="event => { uploadedFilename = event.detail.uploadedFilename; uploading = false; }"
         x-on:livewire-upload-error="uploading = false" x-on:livewire-upload-progress="progress = $event.detail.progress"
         class="w-full">
@@ -35,24 +53,24 @@
         <template x-if="!fileName">
             <div class="flex items-center justify-center w-full px-4 py-3 text-center transition bg-white cursor-pointer focus:outline-none"
                 x-on:dragover.prevent x-on:drop="handleDrop" x-on:click="$refs.fileInput.click()">
-                <div>
-                    <p class="text-sm text-black font-black">Click to upload
-                        <span class="font-normal">or drag and drop</span>
-                    </p>
-                    <p class="text-xs text-gray-500">PDF only, max 1MB</p>
+                <div class="p-w space-y-2">
+                    <flux:button variant="outline" size="sm">Klik untuk upload</flux:button>
+                    {{-- <p class="text-sm text-gray-500">atau drag and drop</p> --}}
+                    <p class="text-xs text-gray-400 mt-1">hanya PDF, max 1MB</p>
                 </div>
             </div>
         </template>
 
-        <!-- File Preview -->
         <template x-if="fileName">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <!-- Replace with your icon -->
-                    <x-flux::icon.document />
-
-                    <span class="text-sm text-gray-700 truncate" x-text="fileName"></span>
+            <div class="flex items-start justify-between pl-2 pt-4 pb-4 pr-2">
+                <div class="flex items-start gap-2 flex-1 min-w-0 mr-2">
+                    <div class="flex-shrink-0">
+                        <x-flux::icon.document />
+                    </div>
+                    
+                    <span class="text-sm text-gray-700 break-words" x-text="fileName"></span>
                 </div>
+        
                 <button type="button" x-on:click="
                         $wire.cancelUpload('{{ $model }}');
                         $wire.set('{{ $model }}', null);
@@ -61,26 +79,27 @@
                         progress = 0;
                         uploading = false;
                         $refs.fileInput.value = null;
-                " class="text-red-500 hover:text-red-700">
+                    " class="text-red-500 hover:text-red-700 flex-shrink-0 ml-auto">
                     <flux:icon.trash />
                 </button>
-
             </div>
         </template>
 
         <!-- Progress Bar -->
         <template x-if="uploading">
-
-            <div class="mt-2">
-                <div class="w-full bg-gray-200 rounded-full h-2.5">
-                    <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-200" :style="'width: ' + progress + '%'"></div>
+            <div class="p-2">
+                <div class="w-full bg-gray-200 rounded-md h-2.5">
+                    <div class="bg-blue-300 h-2.5 rounded-md transition-all duration-200" :style="'width: ' + progress + '%'"></div>
                 </div>
                 <div class="text-xs text-gray-500 mt-1" x-text="progress + '%'"></div>
             </div>
         </template>
+        
         <!-- Error Message -->
         @error($model)
-            <p class="text-xs text-red-500 mt-3">{{ $message }}</p>
+            <p class="text-xs text-red-500 pl-4 pb-4">{{ $message }}</p>
         @enderror
     </div>
 </div>
+
+{{ $slot }}

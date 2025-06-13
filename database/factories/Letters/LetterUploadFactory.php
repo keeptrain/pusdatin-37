@@ -2,8 +2,9 @@
 
 namespace Database\Factories\Letters;
 
+use App\Models\Documents\DocumentUpload;
 use App\Models\Letters\Letter;
-use App\Models\Letters\LetterUpload;
+// use App\Models\Letters\LetterUpload;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class LetterUploadFactory extends Factory
 {
-    protected $model = LetterUpload::class;
+    protected $model = DocumentUpload::class;
     /**
      * Define the model's default state.
      *
@@ -43,5 +44,5 @@ class LetterUploadFactory extends Factory
     //     });
     // }
 
- 
+
 }

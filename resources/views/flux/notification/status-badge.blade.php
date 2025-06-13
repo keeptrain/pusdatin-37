@@ -1,15 +1,2 @@
-@props([
-    'status' => null,
-])
-
-<flux:badge class="flex items-center "
-    :color="match($status) {
-        'Pending' => 'lime',
-        'Process' => 'sky',
-        'Replied' => 'yellow',
-        'Approved' => 'green',
-        'Rejected' => 'red',
-        default => 'zinc'
-    }">
-    {{ $slot }}
-</flux:badge>
+<span
+    class="px-2 py-1 {{ $status->badgeBg() }} {{ $status->color() }} rounded-full">{{ $status->label() }}</span>

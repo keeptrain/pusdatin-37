@@ -2,41 +2,29 @@
 
 namespace App\Livewire\Letters;
 
-use App\Models\User;
+use App\Enums\Division;
 use Livewire\Component;
-use App\States\LetterStatus;
 use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
-use App\Models\Letters\LetterUpload;
-use App\Models\letters\LettersMapping;
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewServiceRequestNotification;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ModalConfirmation extends Component
 {
-    public $showModal = false;
-
     #[Locked]
-    public int $letterId;
+    public int $systemRequestId;
 
-    public Letter $letter;
+    public $allowedParts;
 
     public $status = '';
 
     public $notes = '';
 
-    public bool $activeRevision;
+    public $selectedDivision = '';
 
     public $revisionParts = [];
 
     public $revisionNotes = [];
-
-    public $showPart = false;
-
-    public $showNotes = false;
 
     public function rules()
     {
@@ -44,16 +32,49 @@ class ModalConfirmation extends Component
             'status' => [
                 'required',
                 'string',
-                Rule::in($this->getStatusMap()->keys()),
+                Rule::in('completed', 'process', 'approved_kapusdatin', 'approved_kasatpel', 'replied', 'rejected', 'disposition')
             ],
         ];
 
+        if ($this->status === 'disposition') {
+            $rules['notes'] = [
+                'required'
+            ];
+            $rules['selectedDivision'] = [
+                'required',
+            ];
+        }
+
+        if ($this->status === 'process') {
+            $rules['status'] = [
+                Rule::in('process', 'rejected')
+            ];
+            $rules['selectedDivision'] = [
+                'required',
+                'string'
+            ];
+        }
+
         if ($this->status === 'replied') {
-            if ($this->activeRevision) {
-                $rules['status'][] = function ($attribute, $value, $fail) {
-                    $fail('Masih ada revisi aktif yang belum diselesaikan. Tidak dapat membuat revisi baru.');
-                };
+            $rules['status'] = [
+                Rule::in('approved_kasatpel', 'replied', 'rejected')
+            ];
+
+            $rules['revisionParts'] = [
+                'required',
+                'array',
+                'min:1'
+            ];
+
+            foreach ($this->revisionParts as $index => $partNumber) {
+                $rules["revisionNotes.$partNumber"] = ['required', 'string'];
             }
+        }
+
+        if ($this->status === 'replied_kapusdatin') {
+            $rules['status'] = [
+                Rule::in('approved_kapusdatin', 'replied_kapusdatin')
+            ];
 
             $rules['revisionParts'] = [
                 'required',
@@ -72,130 +93,162 @@ class ModalConfirmation extends Component
     public function messages()
     {
         return [
-            'status.required' => 'Status surat tidak boleh kosong',
-            'revisionParts.required' => 'Butuh bagian yang harus di revisi'
+            'status.required' => 'Status tidak boleh kosong',
+            'selectedDivision.required' => 'Tujuan divisi tidak boleh kosong',
+            'revisionParts.required' => 'Butuh bagian yang harus di revisi',
         ];
     }
 
-    public function mount()
+    public function mount(int $systemRequestId, $allowedParts)
     {
-        $this->showModal = true;
+        $this->systemRequestId = $systemRequestId;
+        $this->allowedParts = $allowedParts;
     }
 
-    public function openModal(int $id, $activeRevision)
+    private function getSiDataRequests()
     {
-        $this->letterId = $id;
-        $this->activeRevision = $activeRevision;
+        return Letter::with('documentUploads')->findOrFail($this->systemRequestId);
     }
 
-    public function closeModal()
+    public function saveDisposition()
     {
-        $this->showModal = false;
+        $this->validate();
+
+        $this->authorize('can disposition', $this->systemRequestId);
+
+        DB::transaction(function () {
+            $systemRequest = Letter::findOrFail($this->systemRequestId);
+
+            // Transisi status
+            $systemRequest->transitionStatusFromPending(
+                $this->status,
+                $this->getSelectedDivisionId(),
+                $this->notes
+            );
+
+            $systemRequest->refresh();
+
+            $systemRequest->logStatus(null);
+
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendDispositionServiceRequestNotification();
+            });
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $systemRequest->status->toastMessage(),
+            ]);
+
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
+        });
     }
 
-    public function openNotesClosePart()
+    public function updatedStatus($value)
     {
-        $this->showNotes = true;
-        $this->showPart = false;
-    }
-
-    public function openPartCloseNotes()
-    {
-        $this->showNotes = false;
-        $this->showPart = true;
-    }
-
-    public function getStatusMap()
-    {
-        $allowedStates = ['Approved', 'Replied', 'Rejected'];
-
-        return collect(LetterStatus::getStateMapping())->filter(
-            fn($class) => in_array(class_basename($class), $allowedStates)
-        )->mapWithKeys(
-            fn($class) => [
-                strtolower(class_basename($class)) => $class,
-            ]
-        );
-    }
-
-    private function getStatusFromInput()
-    {
-        $map = $this->getStatusMap();
-
-        $stateClass = $map[$this->status];
-
-        return $stateClass;
-    }
-
-    public function updateRevisionFromMapping(int $letterId, string $partName, string $note)
-    {
-        $mapping = LettersMapping::where('letter_id', $letterId)
-            ->where('letterable_type', LetterUpload::class)
-            ->whereHasMorph('letterable', [LetterUpload::class], function ($query) use ($partName) {
-                $query->where('part_name', $partName);
-            })
-            ->first();
-
-        if (!$mapping) {
-            throw new \Exception("Mapping tidak ditemukan untuk letter ID $letterId dan part $partName.");
-        }
-
-        $letterUpload = LetterUpload::where('id', $mapping->letterable_id)
-            ->latest('version')
-            ->first();
-
-        if (!$letterUpload) {
-            throw new \Exception("LetterUpload tidak ditemukan.");
-        }
-
-        $letterUpload->update([
-            'needs_revision' => true,
-            'revision_note' => $note,
-            // 'version' => DB::raw('version + 1'),`
-        ]);
-    }
-
-    public function checkRevisionInputForRepliedStatus()
-    {
-        if (in_array($this->status, ['replied', 'rejected'])) {
-            foreach ($this->revisionParts as $partName) {
-                $note = $this->revisionNotes[$partName] ?? null;
-
-                $this->updateRevisionFromMapping($this->letterId, $partName, $note);
-            }
+        if ($value !== 'rejected') {
+            // $this->notesHistorie = '';
         }
     }
 
     public function save()
     {
-        try {
-            $this->validate();
+        $this->validate();
 
-            DB::transaction(function () {
-                $this->checkRevisionInputForRepliedStatus();
+        // $this->authorize('canPerformStep1Verification', $this->getSiDataRequests());
 
-                $letter = Letter::findOrFail($this->letterId);
+        DB::transaction(function () {
+            $systemRequest = $this->getSiDataRequests();
 
-                $letter->transitionToStatus($this->getStatusFromInput(), ($this->notes) ? $this->notes : null);
+            $this->checkRevisionInputForRepliedStatus($systemRequest);
 
-                $user = User::findOrFail($letter->user_id);
-                Notification::send($user, new NewServiceRequestNotification($letter, auth()->user()));
+            $systemRequest->transitionStatusFromProcess($this->status);
 
-                $this->reset(['status', 'notes']);
-                $this->closeModal();
+            $systemRequest->refresh();
 
-                return redirect()->to("/letter/$this->letterId")
-                    ->with('status', [
-                        'variant' => 'success',
-                        'message' => 'Create direct Letter successfully!'
-                    ]);
+            $systemRequest->logStatus($this->notes);
+
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendProcessServiceRequestNotification();
             });
-        } catch (ModelNotFoundException $e) {
-            $this->dispatch('alert', [
-                'type' => 'error',
-                'message' => 'Letter not found',
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $systemRequest->status->toastMessage(),
             ]);
-            return;
+
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
+        });
+    }
+
+    public function getSelectedDivisionId()
+    {
+        return Division::getIdFromString($this->selectedDivision);
+    }
+
+    public function checkRevisionInputForRepliedStatus($siRequest)
+    {
+        if (in_array($this->status, ['replied', 'replied_kapusdatin'])) {
+            $documentUploadsByPartNumber = $siRequest->documentUploads->keyBy('part_number');
+
+            foreach ($this->revisionParts as $partNumber) {
+                if (isset($this->revisionNotes[$partNumber])) {
+                    $revisionNote = $this->revisionNotes[$partNumber];
+
+                    $documentUpload = $documentUploadsByPartNumber->get($partNumber);
+
+                    if ($documentUpload) {
+                        $documentUpload->createRevision($revisionNote);
+                    }
+                }
+            }
         }
+    }
+
+    public function processPusdatin()
+    {
+        DB::transaction(function () {
+            $systemRequest = Letter::findOrFail($this->systemRequestId);
+
+            $systemRequest->status->transitionTo(\App\States\Process::class);
+
+            $systemRequest->refresh();
+
+            $systemRequest->logStatus(null);
+
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendProcessServiceRequestNotification();
+            });
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $systemRequest->status->toastMessage(),
+            ]);
+
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
+        });
+    }
+
+    public function completed()
+    {
+        DB::transaction(function () {
+            $systemRequest = Letter::findOrFail($this->systemRequestId);
+
+            $systemRequest->status->transitionTo(\App\States\Completed::class);
+
+            $systemRequest->refresh();
+
+            $systemRequest->logStatus(null);
+
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendProcessServiceRequestNotification();
+            });
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $systemRequest->status->toastMessage(),
+            ]);
+
+            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
+        });
     }
 }

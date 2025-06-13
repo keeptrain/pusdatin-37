@@ -17,13 +17,56 @@ class PermissionRoleSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions
-        $permissions = [
-            'create',
-            'read',
-            'update',
-            'delete',
+        $permissions = [];
+
+        $headPermissions = [
+            'can disposition',
+            'verification request si-data step2',
+            'review request si-data step2',
+            'queue pr pusdatin',
+            'disposition pr pusdatin',
         ];
-        
+
+        $siPermissions = [
+            'view si request',
+            'can process si',
+            'verification request si step1',
+            'review revision si'
+        ];
+
+        $dataPermissions = [
+            'view data request',
+            'can process data',
+            'verification request data step1',
+            'review revision data',
+        ];
+
+        $prPermisions = [
+            'view pr request',
+            'process pr pusdatin',
+            'completing pr request',
+        ];
+
+        $promkesPermissions = [
+            'queue pr promkes',
+            'curation',
+        ];
+
+        $userPermissions = [
+            'create request',
+            'view requests',
+            'revision si-data request',
+        ];
+
+        $permissions = array_unique([
+            ...$headPermissions,
+            ...$siPermissions,
+            ...$dataPermissions,
+            ...$prPermisions,
+            ...$promkesPermissions,
+            ...$userPermissions,
+        ]);
+
         foreach ($permissions as $permission) {
             Permission::create([
                 'name' => $permission,
@@ -34,7 +77,11 @@ class PermissionRoleSeeder extends Seeder
         // Create roles
         $roles = [
             'administrator',
-            'verifikator',
+            'head_verifier',
+            'si_verifier',
+            'data_verifier',
+            'pr_verifier',
+            'promkes_verifier',
             'user',
         ];
 
@@ -49,11 +96,22 @@ class PermissionRoleSeeder extends Seeder
         $role = \Spatie\Permission\Models\Role::findByName('administrator');
         $role->givePermissionTo($permissions);
 
-        $role = \Spatie\Permission\Models\Role::findByName('verifikator');
-        $role->givePermissionTo(['read', 'update']);
+        $role = \Spatie\Permission\Models\Role::findByName('head_verifier');
+        $role->givePermissionTo($headPermissions, 'view pr request', 'view si request', 'view data request');
+
+        $role = \Spatie\Permission\Models\Role::findByName('si_verifier');
+        $role->givePermissionTo([$siPermissions, 'completed request']);
+
+        $role = \Spatie\Permission\Models\Role::findByName('data_verifier');
+        $role->givePermissionTo([$dataPermissions, 'completed request']);
+
+        $role = \Spatie\Permission\Models\Role::findByName('pr_verifier');
+        $role->givePermissionTo([$prPermisions]);
+
+        $role = \Spatie\Permission\Models\Role::findByName('promkes_verifier');
+        $role->givePermissionTo($promkesPermissions, 'view pr request',);
 
         $role = \Spatie\Permission\Models\Role::findByName('user');
-        $role->givePermissionTo(['create','read','update','delete']);
-
+        $role->givePermissionTo($userPermissions);
     }
 }

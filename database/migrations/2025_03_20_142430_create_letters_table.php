@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -17,13 +18,15 @@ return new class extends Migration
         Schema::create('letters', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            // $table->morphs('letterable');
+            $table->string('status', 86)->default(Letter::getDefaultStates());
             $table->string('title', 255);
-            $table->string('responsible_person', 255);
             $table->string('reference_number', 255);
-            $table->string('status', 86)->default('pending');
-            $table->integer('current_revision')->default(0);
+            $table->integer('active_checking');
+            $table->integer('current_division')->nullable();
             $table->boolean('active_revision')->default(false);
+            $table->boolean('need_review')->default(false);
+            $table->text('meeting')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
@@ -38,32 +41,12 @@ return new class extends Migration
          */
         Schema::create('request_status_tracks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('letter_id');
+            $table->morphs('statusable');
             $table->string('action', 255);
             $table->text('notes')->nullable();
             $table->string('created_by', 100);
             $table->timestamps();
-
-            /**
-             * Add Foreign Key to Letters Table
-             */
-            $table->foreign('letter_id')->references('id')->on('letters');
-        });
-
-        /**
-         * Create the letter_uploads table
-         */
-        Schema::create('letter_uploads', function (Blueprint $table) {
-            $table->id();
-            // $table->foreignId('letter_id')->constrained('letters')->onDelete('cascade');
-            $table->string('part_name');
-            // $table->string('file_name');
-            $table->string('file_path');
-            // $table->string('file_type')->nullable();
-            $table->integer('version')->default(1);
-            $table->boolean('needs_revision')->default(false);
-            $table->text('revision_note')->nullable();
-            $table->timestamps();
+            $table->softDeletes();
         });
 
         /**
@@ -82,7 +65,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('letter_id');
             $table->morphs('letterable');
-            $table->timestamps();
 
             // Add Foreign Key to Letters Table
             $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
@@ -101,13 +83,11 @@ return new class extends Migration
             $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
         });
 
-        Schema::create('letter_templates', function (Blueprint $table) {
+        Schema::create('document_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('type');
+            $table->tinyInteger('part_number');
             $table->string('file_path');
-            $table->enum('format', ['docx', 'pdf']);
-            $table->foreignId('created_by')->constrained('users');
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
@@ -138,9 +118,10 @@ return new class extends Migration
     {
         Schema::dropIfExists('letters');
         Schema::dropIfExists('request_status_tracks');
+        Schema::dropIfExists('letters_mappings');
         Schema::dropIfExists('letter_uploads');
         Schema::dropIfExists('letter_directs');
-        Schema::dropIfExists('letters_mappings');
         Schema::dropIfExists('letter_messages');
+        Schema::dropIfExists('document_templates');
     }
 };

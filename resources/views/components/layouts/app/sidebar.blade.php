@@ -6,6 +6,13 @@
 </head>
 
 <body class="min-h-screen bg-white dark:bg-zinc-800">
+    @if (session('status'))
+        @php
+            $variant = session('status')['variant'];
+            $message = session('status')['message'];
+        @endphp
+        <flux:notification.toast :variant="$variant" :message="$message" />
+    @endif
     <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
@@ -13,6 +20,7 @@
             <x-app-logo />
         </a>
 
+        @unlessrole('administrator')
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Main')" class="grid">
                 <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
@@ -40,36 +48,61 @@
             </flux:navlist.group>
         </flux:navlist>
 
-
-        <flux:navlist.group :heading="__('Manage')" class="grid">
-            <flux:navlist.group expandable heading="Letter" class=" lg:grid">
-                <flux:navlist.item :href="route('letter.table')" wire:navigate>Application</flux:navlist.item>
-                <flux:navlist.item href="#">Data</flux:navlist.item>
-                <flux:navlist.item href="#">Humas</flux:navlist.item>
-            </flux:navlist.group>
-
-            {{-- <flux:navlist.group expandable heading="System" class=" lg:grid">
-                <flux:navlist.item :href="route('admin.users')" wire:navigate>User</flux:navlist.item>
-                <flux:navlist.item wire:navigate>Template</flux:navlist.item>
-            </flux:navlist.group> --}}
-
-        </flux:navlist.group>
-
         <flux:navlist variant="outline">
-            <flux:navlist.item :href="route('manage.templates')" icon="document-text" wire:navigate>Template
-            </flux:navlist.item>
-            <flux:navlist.item :href="route('manage.users')" icon="globe-alt" wire:navigate>System
-            </flux:navlist.item>
-        </flux:navlist>
-
-        {{-- <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Monitoring')" class="grid">
-                <flux:navlist.item icon="newspaper" :href="route('letter')" :current="request()->routeIs('letter')"
-                    wire:navigate>{{ __('Reporting') }}</flux:navlist.item>
-                <flux:navlist.item icon="cake" :href="route('letter')" :current="request()->routeIs('letter')"
-                    wire:navigate>{{ __('Events & Logs') }}</flux:navlist.item>
+            <flux:navlist.group :heading="__('Manage')" class="grid">
+                @hasanyrole('head_verifier')
+                <flux:navlist.item :href="route('is.index')" icon="folder-open"
+                    :current="request()->routeIs('is.index')" wire:navigate>Layanan SI & Data</flux:navlist.item>
+                @endrole
+                @hasanyrole('si_verifier')
+                <flux:navlist.item :href="route('is.index')" icon="folder-open"
+                    :current="request()->routeIs('is.index')" wire:navigate>Layanan SI</flux:navlist.item>
+                @endrole
+                @hasanyrole('data_verifier')
+                <flux:navlist.item :href="route('is.index')" icon="folder-open"
+                    :current="request()->routeIs('is.index')" wire:navigate>Layanan Data</flux:navlist.item>
+                @endrole
+                @hasanyrole('head_verifier|pr_verifier|promkes_verifier')
+                <flux:navlist.item :href="route('pr.index')" icon="folder-open"
+                    :current="request()->routeIs('pr.index')" wire:navigate>Layanan Kehumasan</flux:navlist.item>
+                @endrole
             </flux:navlist.group>
-        </flux:navlist> --}}
+        </flux:navlist>
+        @endunlessrole
+
+        @unlessrole('administrator|promkes_verifier')
+        <flux:navlist variant="outline">
+            <flux:navlist.group :heading="__('Systems')" class="grid">
+                @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier')
+                <flux:navlist.item :href="route('analytic.index')" icon="chart-pie" wire:navigate>
+                    Analytics
+                </flux:navlist.item>
+                @endhasanyrole
+
+                @hasanyrole('si_verifier|data_verifier|pr_verifier')
+                <flux:navlist.item :href="route('manage.templates')" icon="document-text" wire:navigate>
+                    Templates
+                </flux:navlist.item>
+                @endhasanyrole
+            </flux:navlist.group>
+        </flux:navlist>
+        @endunlessrole
+
+        @hasrole('administrator')
+        <flux:navlist variant="outline">
+            <flux:navlist.group :heading="__('Systems')" class="grid">
+                <flux:navlist.item :href="route('manage.users')" icon="users" :current="request()->routeIs('manage.users')" wire:navigate>
+                    Users
+                </flux:navlist.item>
+                <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
+                    Permissions
+                </flux:navlist.item>
+                <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
+                    Seksi
+                </flux:navlist.item>
+            </flux:navlist.group>
+        </flux:navlist>
+        @endhasrole
 
         <flux:spacer />
 
@@ -159,6 +192,7 @@
                         {{ __('Log Out') }}
                     </flux:menu.item>
                 </form>
+
             </flux:menu>
         </flux:dropdown>
 
@@ -167,6 +201,8 @@
     {{ $slot }}
 
     @fluxScripts
+    @stack('scripts')
+
 </body>
 
 </html>
