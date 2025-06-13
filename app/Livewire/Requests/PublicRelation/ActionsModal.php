@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
 use App\States\PublicRelation\PromkesQueue;
 
-class ConfirmModal extends Component
+class ActionsModal extends Component
 {
     use WithFileUploads;
 

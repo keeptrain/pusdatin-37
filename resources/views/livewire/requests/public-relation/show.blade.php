@@ -2,6 +2,7 @@
     @can('view', $this->publicRelation)
     <div x-data="{
         partTab: '{{ $this->publicRelation->documentUploads->first()->part_number ?? '' }}',
+        mode: ''
     }"
         class="overflow-x-auto">
         <flux:button :href="route('pr.index')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
@@ -18,8 +19,8 @@
             @empty
                 <p>Tidak ada dokumen yang diunggah untuk permintaan ini.</p>
             @endforelse
-          
-            <livewire:requests.public-relation.confirm-modal :publicRelationId="$publicRelationId" :publicRelationRequest="$this->publicRelation" />
+
+            <livewire:requests.public-relation.actions-modal :publicRelationId="$publicRelationId" :publicRelationRequest="$this->publicRelation" />
 
             <x-slot name="rightSidebar">
                 <h3 class="text-lg font-bold mb-4">General</h3>
@@ -64,10 +65,10 @@
                     <p class="text-gray-800">
                         {{ $this->publicRelation->createdAtDMY() }}
                     </p>
-                    
+
                     <section>
                         <h4 class="text-gray-500 mb-1">Jenis media</h4>
-                        <div x-data="{ 
+                        <div x-data="{
                             parts: {{ json_encode($this->getAllowedDocument()) }},
                             links: {{ json_encode($this->publicRelation->links ?? []) }}
                         }">
@@ -82,7 +83,7 @@
                                             </a>
                                         </div>
                                     </template>
-                    
+
                                     <!-- Jika link null -->
                                     <template x-if="!links?.[part.part_number]">
                                         <div class="flex flex-1">
@@ -112,7 +113,7 @@
                             @endforeach
                         </div>
                     </div>
-        
+
                     <div class="border-1 rounded-lg p-3">
                         <h4 class="text-gray-500 mb-3">Materi</h4>
                         <div class="space-y-3">
