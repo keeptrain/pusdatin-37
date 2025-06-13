@@ -1,10 +1,10 @@
 <div x-data="{ status: '' }">
-    <flux:button :href="route('letter.detail', [$letterId])" icon="arrow-long-left" variant="subtle">Cancel
+    <flux:button :href="route('is.show', [$letterId])" icon="arrow-long-left" variant="subtle">Batal
     </flux:button>
 
     <form wire:submit="save">
         <div class="p-4 space-y-6">
-            <flux:heading size="xl">Rollback Request Service</flux:heading>
+            <flux:heading size="lg">Rollback</flux:heading>
 
             <div class="space-y-2">
                 <div class="flex">
@@ -16,23 +16,32 @@
                     <flux:icon.arrow-long-right class="size-6 pt-1 ml-6 mr-6" />
                     <div>
                         <flux:select wire:model="changeStatus" size="sm" placeholder="Ke status...">
-                            <flux:select.option value="pending" x-on:click="status = 'pending'">Permohonan Masuk
+                            <flux:select.option value="pending" x-on:click="status = 'pending'">P
+                                Permohonan Masuk
                             </flux:select.option>
-                            <flux:select.option value="disposition" x-on:click="status = 'disposition'">Disposisi
+                            <flux:select.option value="disposition" x-on:click="status = 'disposition'">
+                                Disposisi
                             </flux:select.option>
-                            <flux:select.option value="process" x-on:click="status = 'proses'">Proses
+                            <flux:select.option value="process" x-on:click="status = 'proses'">
+                                Proses
                             </flux:select.option>
-                            <flux:select.option value="replied" x-on:click="status = 'balasan kasatpel'">Balasan Kasatpel
-                            </flux:select.option>
-                            <flux:select.option value="approved_kasatpel" x-on:click="status = 'pending'">Disetujui
-                                Kasatpel</flux:select.option>
-                            <flux:select.option value="replied_kapusdatin" x-on:click="status = 'replied_kapusdatin'">
+                            <flux:select.option value="replied" x-on:click="status = 'balasan kasatpel'">
                                 Balasan Kasatpel
+                            </flux:select.option>
+                            <flux:select.option value="approved_kasatpel" x-on:click="status = 'pending'">
+                                Disetujui Kasatpel
+                            </flux:select.option>
+                            <flux:select.option value="replied_kapusdatin" x-on:click="status = 'replied_kapusdatin'">
+                                Balasan Kapusdatin
                             </flux:select.option>
                             <flux:select.option value="approved_kapusdatin" x-on:click="status = 'approved_kapusdatin'">
-                                Balasan Kasatpel
+                                Disetujui Kapusdatin
                             </flux:select.option>
-                            <flux:select.option value="rejected" x-on:click="status = 'rejected'">Ditolak
+                            <flux:select.option value="approved_kapusdatin" x-on:click="status = 'approved_kapusdatin'">
+                                Proses
+                            </flux:select.option>
+                            <flux:select.option value="rejected" x-on:click="status = 'rejected'">
+                                Ditolak
                             </flux:select.option>
                         </flux:select>
                     </div>
