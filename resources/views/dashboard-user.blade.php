@@ -1,15 +1,15 @@
 <x-layouts.app :title="__('Dashboard')">
     <!-- Welcome Section -->
-    <div x-data="{ 
-        greeting: '', 
+    <div x-data="{
+        greeting: '',
         currentDate: '',
         isNight: false,
         updateTime() {
             const now = new Date();
-            this.currentDate = now.toLocaleDateString('id-ID', { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long' 
+            this.currentDate = now.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
             });
             const hour = now.getHours();
             if (hour >= 5 && hour < 12) {
@@ -50,7 +50,7 @@
 
         <x-user.hero-dashboard />
 
-        <x-user.meeting-list :meetingList="$meetingList" />
+        <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
 
         {{-- <x-user.about-me /> --}}
 

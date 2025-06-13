@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Letters\Letter;
+use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
 use Carbon\Carbon;
@@ -17,9 +19,11 @@ class DashboardController extends Controller
 
         // Redirect user dashboard if the role is 'user'
         if ($user->hasRole('user')) {
-            return view('dashboard-user', [
-                'meetingList' => $this->getMeetingList()
-            ]);
+            $meetingList = $this->getMeetingList();
+            $todayMeetingCount = $meetingList->where('is_today', true)->sum(function ($dateGroup) {
+                return count($dateGroup['meetings']);
+            });
+            return view('dashboard-user', compact('meetingList', 'todayMeetingCount'));
         }
 
         // Fetch data based on user roles
@@ -49,11 +53,11 @@ class DashboardController extends Controller
     /**
      * Fetch dashboard data based on user roles.
      *
-     * @param \App\Models\User $user
-     * @param \Illuminate\Support\Collection $userRoles
+     * @param User $user
+     * @param Collection $userRoles
      * @return array
      */
-    private function fetchDashboardData($user, $userRoles)
+    private function fetchDashboardData(User $user, Collection $userRoles): array
     {
         if ($user->hasRole(['administrator', 'head_verifier'])) {
             return $this->getDataForHeadVerifier();
@@ -96,7 +100,7 @@ class DashboardController extends Controller
     /**
      * Get data for SI verifier or data verifier.
      *
-     * @param \Illuminate\Support\Collection $userRoles
+     * @param Collection $userRoles
      * @return array
      */
     private function getDataForSiVerifierOrDataVerifier($user, $userRoles)
