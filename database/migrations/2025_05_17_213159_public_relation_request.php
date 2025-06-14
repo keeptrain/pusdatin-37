@@ -24,6 +24,7 @@ return new class extends Migration
             $table->text('links')->nullable();
             $table->tinyInteger('active_checking');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('user_id')->references('id')->on('users');
         });

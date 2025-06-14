@@ -16,17 +16,16 @@ class HistoryLetter extends Component
 {
     use WithPagination;
 
-    public $page = 1;
-    public $perPage = 10;
-    public $searchQuery = '';
+    public int $page = 1;
+    public int $perPage = 10;
+    public string $searchQuery = '';
 
     #[Computed]
     public function allRequests()
     {
-        // Gabungkan query dari kedua model
+        // Merge 2 query from InformationSystemRequest and PublicRelationRequest
         $combinedQuery = $this->getCombinedQuery();
 
-        // Eksekusi query gabungan dengan paginasi
         $paginator = $this->paginateAndTransform($combinedQuery);
 
         return $paginator;
@@ -37,35 +36,33 @@ class HistoryLetter extends Component
      */
     protected function getCombinedQuery()
     {
-        // Query untuk Letter
+        // Query for InformationSystemRequest
         $informationSystemRequestsQuery = $this->buildBaseQuery(Letter::class, 'Sistem Informasi & Data', 'title');
 
-        // Query untuk PublicRelationRequest
+        // Query for PublicRelationRequest
         $publicRelationRequestsQuery = $this->buildBaseQuery(PublicRelationRequest::class, 'Kehumasan', 'theme', true);
 
-        // Gabungkan kedua query dengan UNION ALL
+        // Union all query
         return $informationSystemRequestsQuery->unionAll($publicRelationRequestsQuery);
     }
 
     /**
-     * Membuat query dasar untuk model tertentu.
+     * Build base query.
      */
     protected function buildBaseQuery($modelClass, $type, $informationField, $isNullRevision = false)
     {
-        $query = $modelClass::select(
+        return $modelClass::select(
             'id',
             DB::raw("'$type' as type"),
             "$informationField as information",
             'status',
             'created_at',
             $isNullRevision ? DB::raw('null as active_revision') : 'active_revision'
-        )->where('user_id', auth()->id())->getQuery();
-
-        return $query;
+        )->where('user_id', auth()->id())->whereNull('deleted_at')->getQuery();
     }
 
     /**
-     * Paginasi dan transformasi data.
+     * Paginate and transform data.
      */
     protected function paginateAndTransform($combinedQuery)
     {

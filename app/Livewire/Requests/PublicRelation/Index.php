@@ -2,15 +2,16 @@
 
 namespace App\Livewire\Requests\PublicRelation;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\PublicRelationRequest;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class Index extends Component
 {
-    public $perPage = 10; // Default per page
+    public int $perPage = 10; // Default per page
 
-    public $filterStatus = 'all';
+    public string $filterStatus = 'all';
 
     public array $statuses = [
         'all' => 'All',
@@ -21,14 +22,14 @@ class Index extends Component
         'completed' => 'Selesai',
     ];
 
-    public $sortBy = 'date_created';
+    public string $sortBy = 'date_created';
 
-    public $selectedPrRequest = [];
+    public array $selectedPrRequest = [];
 
-    public $searchQuery = '';
+    public string $searchQuery = '';
 
     #[Computed]
-    public function publicRelations()
+    public function publicRelations(): LengthAwarePaginator
     {
         [$column, $direction] = $this->getSortCriteria();
 
@@ -53,30 +54,29 @@ class Index extends Component
         return $query->paginate($this->perPage);
     }
 
-    public function show(int $id)
+    public function show(int $id): void
     {
-        return $this->redirect("public-relation/{$id}", true);
+        $this->redirectRoute('pr.show', $id,  navigate: true);
     }
 
     private function getSortCriteria(): array
     {
         return match ($this->sortBy) {
             'date_created' => ['created_at', 'desc'],
-            'latest_activity' => ['updated_at', 'desc'],
             default => ['updated_at', 'desc'],
         };
     }
 
-    public function deleteSelected()
+    public function deleteSelected(): void
     {
         PublicRelationRequest::whereIn('id', $this->selectedPrRequest)->delete();
 
         $this->selectedPrRequest = [];
 
-        $this->redirect('public-relation', navigate: true);
+        $this->redirectRoute('pr.index', navigate: true);
     }
 
-    public function render()
+    public function render(): object
     {
         return view('livewire.requests.public-relation.index');
     }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Division;
 use App\Enums\PublicRelationRequestPart;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use App\Trait\HasActivities;
 use IntlDateFormatter;
@@ -21,7 +22,7 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class PublicRelationRequest extends Model
 {
-    use HasActivities, HasStates;
+    use HasActivities, HasStates, SoftDeletes;
 
     protected $table = "public_relation_requests";
 
@@ -61,6 +62,11 @@ class PublicRelationRequest extends Model
             'proses_pusdatin' => PusdatinProcess::class,
             'completed' => Completed::class,
         };
+    }
+
+    public function resolveLinkLabel($key)
+    {
+        return PublicRelationRequestPart::tryFrom($key)->label() ?? 'Link Media Tidak Dikenal';
     }
 
     public function getCompletedDateAttribute($value)
