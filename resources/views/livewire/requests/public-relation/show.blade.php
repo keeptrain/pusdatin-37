@@ -5,7 +5,7 @@
         mode: ''
     }"
         class="overflow-x-auto">
-        <flux:button :href="route('pr.index')" icon="arrow-long-left" variant="subtle">Back to Table</flux:button>
+        <flux:button :href="route('pr.index')" icon="arrow-long-left" variant="subtle">Kembali ke Tabel</flux:button>
 
         <flux:heading size="xl" class="p-4">Detail Permohonan Layanan</flux:heading>
 
@@ -141,7 +141,7 @@
                         <flux:button icon="ellipsis-horizontal" class="w-full"/>
                         <flux:menu>
                             {{-- <flux:menu.item :href="route('letter.edit', [$publicRelationId])" icon="pencil-square">Force edit</flux:menu.item> --}}
-                            <flux:menu.item :href="route('letter.rollback', [$publicRelationId])" icon="backward">Rollback</flux:menu.item>
+                            <flux:menu.item :href="route('pr.rollback', [$publicRelationId])" icon="pencil-square">Edit</flux:menu.item>
                             <flux:menu.item icon="trash" variant="danger">Delete</flux:menu.item>
                         </flux:menu>
                     </flux:dropdown>

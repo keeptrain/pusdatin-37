@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('public-relation', \App\Livewire\Requests\PublicRelation\Index::class)->name('pr.index');
     Route::get('public-relation/{id}', Show::class)->name('pr.show');
     Route::get('public-relation/{id}/activity', \App\Livewire\Requests\PublicRelation\Activity::class)->name('pr.activity');
+    Route::get('public-relation/{id}/rollback', \App\Livewire\Requests\PublicRelation\Rollback::class)->name('pr.rollback');
 
     Route::get('history', HistoryLetter::class)->name('history');
     Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
