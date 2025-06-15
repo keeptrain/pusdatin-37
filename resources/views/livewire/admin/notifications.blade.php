@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center">
         <div>
-            <h1 class="text-xl font-semibold text-gray-800">Notifications</h1>
+            <h1 class="text-xl font-semibold text-gray-800">Notifikasi</h1>
         </div>
         <div class="flex space-x-2">
             <flux:modal.close>
@@ -49,8 +49,8 @@
                             <polyline points="22,6 12,13 2,6"></polyline>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-1">No notifications</h3>
-                    <p class="text-center text-gray-500">You're all caught up! Check back later for new updates.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-1">Tidak ada notifikasi</h3>
+                    <p class="text-center text-gray-500">Anda sudah terupdate!</p>
                 </div>
             @endforelse
         </div>

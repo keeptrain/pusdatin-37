@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use App\Enums\PublicRelationRequestPart;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use App\Trait\HasActivities;
 use IntlDateFormatter;
 use Spatie\ModelStates\HasStates;
+use App\Enums\PublicRelationRequestPart;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\DocumentUpload;
 use App\States\PublicRelation\Completed;
@@ -180,7 +180,7 @@ class PublicRelationRequest extends Model
 
     public function handleRedirectNotification($user)
     {
-        if ($user->hasRole('user')) {
+        if ($user->roles->pluck('name')->contains('user')) {
             return route('history.detail', [
                 'type' => 'public-relation',
                 'id' => $this->id

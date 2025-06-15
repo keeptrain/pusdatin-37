@@ -45,16 +45,16 @@ class Notifications extends Component
 
     private function tabBaseRoles()
     {
-        $user = auth()->user();
+        $user = auth()->user()->roles->pluck('name');
         $userTabs = [];
 
-        if ($user->hasRole('head_verifier')) {
+        if ($user->contains('head_verifier')) {
             $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
-        } else if ($user->hasRole('si_verifier|data_verifier')) {
+        } else if ($user->contains('si_verifier|data_verifier')) {
             $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
-        } else if ($user->hasRole('pr_verifier')) {
+        } else if ($user->contains('pr_verifier')) {
             $userTabs = ['all', 'disposisi'];
-        } else if ($user->hasRole('promkes_verifier')) {
+        } else if ($user->contains('promkes_verifier')) {
             $userTabs = ['all'];
         } else {
             $userTabs = ['all', 'revisi', 'disetujui'];
@@ -142,17 +142,19 @@ class Notifications extends Component
             ->unreadNotifications()
             ->findOrFail($notificationId);
 
+        // Check notification data    
         if (!$notification || !isset($notification->data['requestable_type'], $notification->data['requestable_id'])) {
-            return redirect()->route('dashboard')->with('error', 'Notifikasi tidak valid.');
+            return redirect()->route('dashboard')->with('error', 'Notification not found.');
         }
 
         try {
+            // Get model class and id from notification data
             $modelClass = $notification->data['requestable_type'];
             $modelId = $notification->data['requestable_id'];
 
             // Validation modelClass to prevent Injection
             if (!in_array($modelClass, [Letter::class, PublicRelationRequest::class])) {
-                throw new \InvalidArgumentException("Model class tidak valid.");
+                throw new \InvalidArgumentException("Class model invalid");
             }
 
             // Get requestable data from available container instance
@@ -160,12 +162,12 @@ class Notifications extends Component
 
             if ($modelClass === Letter::class || $modelClass === PublicRelationRequest::class) {
                 $notification->markAsRead();
-                return $this->redirect($requestable->handleRedirectNotification(auth()->user()), true);
+                $this->redirect($requestable->handleRedirectNotification(auth()->user()), true);
             } else {
                 abort(404, 'Invalid model class.');
             }
         } catch (\Exception $e) {
-            return redirect()->route('dashboard')->with('error', 'Gagal memuat detail notifikasi: ' . $e->getMessage());
+            return redirect()->route('dashboard')->with('error', 'Failed to load notification: ' . $e->getMessage());
         }
     }
 
