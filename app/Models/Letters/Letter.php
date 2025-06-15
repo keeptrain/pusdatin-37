@@ -58,6 +58,7 @@ class Letter extends Model
     public static function resolveStatusClassFromString($statusString)
     {
         return match ($statusString) {
+            'pending' => \App\States\Pending::class,
             'disposition' => \App\States\Disposition::class,
             'process' => \App\States\Process::class,
             'replied' => \App\States\Replied::class,

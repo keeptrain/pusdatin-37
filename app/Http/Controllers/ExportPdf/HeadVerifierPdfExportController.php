@@ -20,7 +20,7 @@ class HeadVerifierPdfExportController extends Controller
             'prRequests' => $prRequests,
         ];
 
-        $pdf = Pdf::loadView('pdf.head_verifier_report', $data);
+        $pdf = Pdf::loadView('pdf.head_verifier_report', $data)->setPaper('a4', 'landscape');
 
         return $pdf->download('List Data Permohonan.pdf');
     }
@@ -74,7 +74,7 @@ class HeadVerifierPdfExportController extends Controller
         ];
 
 
-        $pdf = Pdf::loadView('pdf.head_verifier_filtered', $data);
+        $pdf = Pdf::loadView('pdf.head_verifier_filtered', $data)->setPaper('a4', 'landscape');
 
 
         $fileName = 'List Data Permohonan(Filter).pdf';

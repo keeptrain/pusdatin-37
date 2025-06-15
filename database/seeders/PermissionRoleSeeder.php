@@ -31,7 +31,8 @@ class PermissionRoleSeeder extends Seeder
             'view si request',
             'can process si',
             'verification request si step1',
-            'review revision si'
+            'review revision si',
+            'completed request'
         ];
 
         $dataPermissions = [
@@ -39,6 +40,7 @@ class PermissionRoleSeeder extends Seeder
             'can process data',
             'verification request data step1',
             'review revision data',
+            'completed request',
         ];
 
         $prPermisions = [

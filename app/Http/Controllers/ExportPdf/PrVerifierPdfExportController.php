@@ -18,7 +18,7 @@ class PrVerifierPdfExportController extends Controller
             'requests' => $requests,
         ];
 
-        $pdf = Pdf::loadView('pdf.pr_verifier_report', $data);
+        $pdf = Pdf::loadView('pdf.pr_verifier_report', $data)->setPaper('a4', 'landscape');
 
         return $pdf->download('Data Permohonan Kehumasan.pdf');
     }
@@ -51,7 +51,7 @@ class PrVerifierPdfExportController extends Controller
             'status' => $status,
         ];
 
-        $pdf = Pdf::loadView('pdf.pr_verifier_filtered', $data);
+        $pdf = Pdf::loadView('pdf.pr_verifier_filtered', $data)->setPaper('a4', 'landscape');
 
         $fileName = 'Data Permohonan Kehumasan (Filter).pdf';
 
