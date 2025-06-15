@@ -58,14 +58,22 @@ class Letter extends Model
     public static function resolveStatusClassFromString($statusString)
     {
         return match ($statusString) {
+            'all' => 'All',
+            'pending' => \App\States\Pending::class,
             'disposition' => \App\States\Disposition::class,
-            'process' => \App\States\Process::class,
             'replied' => \App\States\Replied::class,
             'approved_kasatpel' => \App\States\ApprovedKasatpel::class,
-            'replied_kapusdatin' => \App\States\RepliedKapusdatin::class,
+            // 'replied_kapusdatin' => \App\States\RepliedKapusdatin::class,
             'approved_kapusdatin' => \App\States\ApprovedKapusdatin::class,
+            'process_request' => \App\States\Process::class,
+            'completed' => \App\States\Completed::class,
             'rejected' => \App\States\Rejected::class
         };
+    }
+
+    public static function resolveStatusClassFromArray(array $statuses): array
+    {
+        return array_map(fn($status) => static::resolveStatusClassFromString($status), $statuses);
     }
 
     /**
@@ -119,18 +127,16 @@ class Letter extends Model
         return 'Invalid date';
     }
 
-    public function scopeFilterByCurrentUser($query)
+    public function scopeFilterCurrentDivisionByCurrentUser($query, $user)
     {
-        $user = auth()->user();
-
         // Periksa apakah pengguna memiliki role 'head_verifier'
-        $isHeadVerifier = $user->roles()->where('name', 'head_verifier')->exists();
+        $isHeadVerifier = auth()->user()->roles->pluck('name')->contains('head_verifier');
 
         return $query->when(
             !$isHeadVerifier, // Kondisi: jika bukan head_verifier
             function ($query) use ($user) {
                 // Filter berdasarkan current_division
-                $query->where('current_division', $user->roles()->pluck('id'));
+                $query->where('current_division', $user);
             }
         );
     }
@@ -229,6 +235,16 @@ class Letter extends Model
         }
 
         return $query;
+    }
+
+    public function scopeFilterByStatuses(Builder $query, ?array $filterStatuses): Builder
+    {
+        $resolveStatuses = static::resolveStatusClassFromArray($filterStatuses);
+        if (empty($filterStatuses)) {
+            return $query;
+        }
+
+        return $query->whereIn('status', $resolveStatuses);
     }
 
     public static function getTotalRequestsByRole($rolesId = null)

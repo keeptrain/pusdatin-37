@@ -71,4 +71,12 @@ class User extends Authenticatable
         return Auth::user();
     }
 
+    /**
+     * Get the current user role id from the session.
+     *
+     */
+    public static function currentUserRoleId()
+    {
+        return auth()->user()->roles->pluck('id')->first();
+    }
 }

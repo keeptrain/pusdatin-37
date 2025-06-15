@@ -2,6 +2,8 @@
 
 namespace App\States;
 
+use App\Enums\Division;
+use App\Models\User;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 
@@ -16,6 +18,14 @@ abstract class LetterStatus extends State
         4 => 'Pengelolaan Data',
         5 => 'Hubungan Masyarakat',
     ];
+
+    public static function config(): StateConfig
+    {
+        return parent::config()
+            ->default(Pending::class)
+            ->allowAllTransitions()
+        ;
+    }
 
     abstract public function color(): string;
 
@@ -33,16 +43,20 @@ abstract class LetterStatus extends State
 
     abstract public function userNotificationMessage(array $context): string;
 
-    public static function config(): StateConfig
-    {
-        return parent::config()
-            ->default(Pending::class)
-            ->allowAllTransitions()
-        ;
-    }
-
-    protected function getDivisionName($division):string
+    protected function getDivisionName($division): string
     {
         return self::DIVISION_MAP[$division] ?? 'Unknown Division';
+    }
+
+    public static function statusesBasedRole($user): array
+    {
+        $siDataStatuses = ['disposition', 'replied', 'approved_kasatpel', 'rejected', 'approved_kapusdatin', 'process_request', 'completed'];
+
+        return match ($user) {
+            Division::HEAD_ID->value => ['pending', 'disposition', 'approved_kasatpel', 'rejected', 'approved_kapusdatin'],
+            Division::SI_ID->value => $siDataStatuses,
+            Division::DATA_ID->value => $siDataStatuses,
+            default => [''],
+        };
     }
 }
