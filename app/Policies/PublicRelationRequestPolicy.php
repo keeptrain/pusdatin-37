@@ -49,7 +49,7 @@ class PublicRelationRequestPolicy
      */
     public function delete(User $user, PublicRelationRequest $publicRelationRequest): bool
     {
-        return false;
+        return $user->hasRole('pr_verifier|promkes_verifier');
     }
 
     /**

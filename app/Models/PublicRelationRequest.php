@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\Division;
 use App\Enums\PublicRelationRequestPart;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\DocumentUpload;
 use App\States\PublicRelation\Completed;
 use Illuminate\Database\Eloquent\Builder;
+use App\States\PublicRelation\Pending;
 use App\States\PublicRelation\PromkesQueue;
 use App\States\PublicRelation\PusdatinQueue;
 use App\States\PublicRelation\PromkesComplete;
@@ -52,16 +52,23 @@ class PublicRelationRequest extends Model
         return $this->morphMany(DocumentUpload::class, 'documentable');
     }
 
-    public static function resolveStatusClassFromString($statusString)
+    public static function resolveStatusClassFromString(string $status): string
     {
-        return match ($statusString) {
+        return match ($status) {
             'all' => 'All',
+            'permohonan_masuk' => Pending::class,
             'antrian_promkes' => PromkesQueue::class,
             'kurasi_promkes' => PromkesComplete::class,
             'antrian_pusdatin' => PusdatinQueue::class,
             'proses_pusdatin' => PusdatinProcess::class,
             'completed' => Completed::class,
+            default => 'All',
         };
+    }
+
+    public static function resolveStatusClassFromArray(array $statuses): array
+    {
+        return array_map(fn($status) => static::resolveStatusClassFromString($status), $statuses);
     }
 
     public function resolveLinkLabel($key)
@@ -119,21 +126,6 @@ class PublicRelationRequest extends Model
         return Carbon::parse($this->spesific_Date)->format('d F');
     }
 
-    public function scopeFilterByRole(Builder $query,  $role)
-    {
-        // Jika role tidak diberikan, kembalikan query tanpa filter
-        if (empty($role)) {
-            return $query;
-        }
-
-        // Filter berdasarkan role
-        match ($role) {
-            Division::PROMKES_ID->value => $query->whereIn('status', ['App\States\PublicRelation\Pending', 'App\States\PublicRelation\PromkesQueue', 'App\States\PublicRelation\PromkesComplete']),
-            Division::HEAD_ID->value => $query->whereIn('status', ['App\States\PublicRelation\PromkesComplete', 'App\States\PublicRelation\PusdatinQueue']),
-            Division::PR_ID->value => $query->whereIn('status', ['App\States\PublicRelation\PusdatinQueue', 'App\States\PublicRelation\PusdatinProcess', 'App\States\PublicRelation\Completed']),
-        };
-    }
-
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder
     {
         $resolveStatus = static::resolveStatusClassFromString($filterStatus);
@@ -143,6 +135,16 @@ class PublicRelationRequest extends Model
         }
 
         return $query;
+    }
+
+    public function scopeFilterByStatuses(Builder $query, ?array $filterStatuses): Builder
+    {
+        $resolveStatuses = static::resolveStatusClassFromArray($filterStatuses);
+        if (empty($filterStatuses)) {
+            return $query;
+        }
+
+        return $query->whereIn('status', $resolveStatuses);
     }
 
     public function transitionStatusToPromkesComplete()
@@ -191,12 +193,12 @@ class PublicRelationRequest extends Model
     {
         $links = $this->links;
 
-        // Pastikan $links adalah array valid
+        //$links valid array
         $linksArray = is_string($links) ? json_decode($links, true) : $links;
 
         $separator = $needHyperLink ? "<br><br>" : "\n";
 
-        // Format setiap isi array links
+        // Format every element in array
         return collect($linksArray)->map(function ($link, $index) use ($needHyperLink) {
             $mediaLabel = PublicRelationRequestPart::tryFrom($index)?->label() ?? 'Media Tidak Dikenal';
             $mediaHyperLink = "<a href=\"$link\" target=\"_blank\">$link</a>";
@@ -205,7 +207,6 @@ class PublicRelationRequest extends Model
                 return "Media $mediaLabel: $link";
             }
 
-            // Label media dan link sebagai hyperlink aktif
             return "Media $mediaLabel: $mediaHyperLink";
         })->implode($separator);
     }

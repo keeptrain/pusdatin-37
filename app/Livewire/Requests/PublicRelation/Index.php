@@ -2,19 +2,25 @@
 
 namespace App\Livewire\Requests\PublicRelation;
 
+use App\States\PublicRelation\PublicRelationStatus;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\PublicRelationRequest;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithPagination;
+use Illuminate\Support\Facades\DB;
 
 class Index extends Component
 {
+    use WithPagination;
+
     public int $perPage = 10; // Default per page
 
     public string $filterStatus = 'all';
 
     public array $statuses = [
         'all' => 'All',
+        'permohonan_masuk' => 'Permohonan Masuk',
         'antrian_promkes' => 'Antrean Promkes',
         'kurasi_promkes' => 'Kurasi Promkes',
         'antrian_pusdatin' => 'Antrean Pusdatin',
@@ -22,41 +28,134 @@ class Index extends Component
         'completed' => 'Selesai',
     ];
 
+    public array $allowedStatuses = [];
+
+    public array $previousAllowedStatuses = [];
+
+    public array $oldAllowedStatuses = [];
+
     public string $sortBy = 'date_created';
 
     public array $selectedPrRequest = [];
 
     public string $searchQuery = '';
 
-    #[Computed]
-    public function publicRelations(): LengthAwarePaginator
+    public function mount()
     {
-        [$column, $direction] = $this->getSortCriteria();
-
-        $query = PublicRelationRequest::select('id', 'user_id', 'completed_date', 'month_publication', 'theme', 'status')->with('user:id,name')
-            ->filterByRole(auth()->user()->roles()->pluck('id')->first());
-
-        if ($this->filterStatus !== 'all') {
-            $query->filterByStatus($this->filterStatus);
-        }
-
-        // Filter berdasarkan search query
-        if ($this->searchQuery) {
-            $query->where(function ($q) {
-                $q->where('theme', 'like', '%' . $this->searchQuery . '%')
-                    ->orWhereHas('user', function ($q) {
-                        $q->where('name', 'like', '%' . $this->searchQuery . '%');
-                    });
-            });
-        }
-        $query->orderBy($column, $direction);
-
-        return $query->paginate($this->perPage);
+        $this->allowedStatuses = $this->getAllowedStatusesByRole();
     }
 
     public function show(int $id): void
     {
-        $this->redirectRoute('pr.show', $id,  navigate: true);
+        $this->redirectRoute('pr.show', $id, navigate: true);
+    }
+
+    public function render(): object
+    {
+        return view('livewire.requests.public-relation.index');
+    }
+
+    #[Computed]
+    public function publicRelations(): LengthAwarePaginator
+    {
+        return $this->getPaginatedPublicRelations();
+    }
+
+    protected function buildBaseQuery()
+    {
+        return PublicRelationRequest::select('id', 'user_id', 'completed_date', 'month_publication', 'theme', 'status')
+            ->with('user:id,name')
+            ->filterByStatuses($this->allowedStatuses);
+    }
+
+    protected function getPaginatedPublicRelations(): LengthAwarePaginator
+    {
+        $query = $this->buildBaseQuery()
+            ->when($this->filterStatus !== 'all', fn($q) => $q->filterByStatus($this->filterStatus))
+            ->when($this->searchQuery, fn($q) => $this->applySearch($q))
+            ->when(
+                $this->sortBy === 'completed_date',
+                fn($q) => $q->orderBy('completed_date', 'asc'),
+                fn($q) => $q->orderBy(...$this->getSortCriteria())
+            );
+
+        return $query->paginate($this->perPage);
+    }
+
+    protected function applySearch($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('theme', 'like', '%' . $this->searchQuery . '%')
+                ->orWhereHas('user', function ($q) {
+                    $q->where('name', 'like', '%' . $this->searchQuery . '%');
+                });
+        });
+    }
+
+    protected function getCacheKey(): string
+    {
+        return sprintf(
+            'public-relations-%s-%s-%s-%s-%s',
+            $this->filterStatus,
+            $this->searchQuery,
+            $this->sortBy,
+            $this->perPage,
+            $this->getPage()
+        );
+    }
+
+    public function getAllowedStatusesByRole(): array
+    {
+        return PublicRelationStatus::statusesBasedRole(auth()->user());
+    }
+
+    public function updatedAllowedStatuses($value): void
+    {
+        // Limit maximum 7 statuses
+        if (count($this->allowedStatuses) > 7) {
+            $this->allowedStatuses = array_slice($this->allowedStatuses, 0, 7);
+        }
+
+        // State before change
+        $oldStatuses = $this->oldAllowedStatuses;
+        $this->oldAllowedStatuses = $this->allowedStatuses;
+
+        $allStatuses = array_keys($this->statuses);
+
+        // Detect change state "all"
+        $wasAllChecked = in_array('all', $oldStatuses);
+        $isAllCheckedNow = in_array('all', $this->allowedStatuses);
+
+        // If user unchecked "all"
+        if ($wasAllChecked && !$isAllCheckedNow) {
+            $this->allowedStatuses = $this->previousAllowedStatuses;
+            $this->previousAllowedStatuses = [];
+        }
+        // If user checked "all"
+        elseif (!$wasAllChecked && $isAllCheckedNow) {
+            $this->previousAllowedStatuses = array_diff($this->allowedStatuses, ['all']);
+            $this->allowedStatuses = array_merge($allStatuses, ['all']);
+        }
+        // If change on status other than "all"
+        else {
+            // If "all" active when other status changed
+            if ($isAllCheckedNow) {
+                $this->allowedStatuses = array_diff($this->allowedStatuses, ['all']);
+            }
+
+            // Check if all status selected
+            $allSelected = empty(array_diff($allStatuses, $this->allowedStatuses));
+
+            if ($allSelected) {
+                $this->allowedStatuses = array_merge($allStatuses, ['all']);
+            }
+        }
+
+        $this->allowedStatuses = array_unique($this->allowedStatuses);
+
+        if (empty($this->allowedStatuses)) {
+            $this->allowedStatuses = $this->getAllowedStatusesByRole();
+        }
     }
 
     private function getSortCriteria(): array
@@ -69,15 +168,11 @@ class Index extends Component
 
     public function deleteSelected(): void
     {
-        PublicRelationRequest::whereIn('id', $this->selectedPrRequest)->delete();
-
-        $this->selectedPrRequest = [];
+        DB::transaction(function () {
+            PublicRelationRequest::whereIn('id', $this->selectedPrRequest)->delete();
+            $this->selectedPrRequest = [];
+        });
 
         $this->redirectRoute('pr.index', navigate: true);
-    }
-
-    public function render(): object
-    {
-        return view('livewire.requests.public-relation.index');
     }
 }

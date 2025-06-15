@@ -2,6 +2,8 @@
 
 namespace App\States\PublicRelation;
 
+use App\Enums\Division;
+use App\Models\User;
 use App\States\PublicRelation\Pending;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
@@ -32,4 +34,14 @@ abstract class PublicRelationStatus extends State
     abstract public function trackingMessage(): string;
 
     abstract public function userNotificationMessage(array $context): string;
+
+    public static function statusesBasedRole(User $user): array
+    {
+        return match ($user->roles()->pluck('id')->first()) {
+            Division::HEAD_ID->value => ['kurasi_promkes'],
+            Division::PR_ID->value => ['antrian_pusdatin', 'proses_pusdatin', 'completed'],
+            Division::PROMKES_ID->value => ['permohonan_masuk', 'antrian_promkes', 'kurasi_promkes'],
+            default => [''],
+        };
+    }
 }
