@@ -32,13 +32,14 @@ trait HasActivities
 
     public function getRawRequestStatusTracksRelation(): MorphMany
     {
-        return $this->requestStatusTrack(); // Memanggil relasi yang didefinisikan di trait ini
+        return $this->requestStatusTrack();
     }
 
     public function getGroupedRequestStatusTracks(): Collection
     {
-        $allTracks = $this->requestStatusTrack()->get(['statusable_type', 'statusable_id', 'action', 'notes', 'created_at']); // Memanggil relasi yang didefinisikan di trait ini
-
+        // Get relation request status track
+        $allTracks = $this->requestStatusTrack; 
+        
         return $allTracks
             ->sortByDesc('created_at')
             ->groupBy([
@@ -49,7 +50,7 @@ trait HasActivities
 
     public function logStatus(?string $notes)
     {
-        $divisionParamForTrackingMessage = ($this->status instanceof ApprovedKasatpel || $this->status instanceof Process)
+        $divisionParamForTrackingMessage = ($this->status instanceof ApprovedKasatpel || $this->status instanceof Process && $this->status instanceof Completed)
             ? (int) $this->current_division
             : (int) $this->active_checking;
 

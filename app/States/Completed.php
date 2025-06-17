@@ -38,14 +38,14 @@ class Completed extends LetterStatus
 
     public function toastMessage(): string
     {
-        return 'Berhasil mengajukan permohonan layanan';
+        return 'Berhasil menyelesaikan permohonan';
     }
 
     public function trackingMessage(?int $division): string
     {
         $divisionName = $this->getDivisionName($division);
 
-        return 'Permohonan layanan telah selesai di kerjakan oleh divisi ' . $this->getDivisionName($divisionName);
+        return "Permohonan layanan telah selesai di kerjakan oleh divisi {$divisionName}";
     }
 
     public function userNotificationMessage(array $context): string
