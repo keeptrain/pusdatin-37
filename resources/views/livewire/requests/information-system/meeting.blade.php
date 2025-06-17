@@ -21,7 +21,7 @@
                 </div>
             </form>
 
-            <section class="items-start grid grid-rows-2">
+            <section class="items-start grid grid-rows-2 space-y-4">
                 @forelse ($this->getMeeting as $key => $value)
                     <x-menu.information-system.meeting-adapter wire:key="{{ $key }}" :key="$key" :meeting="$value" />
                 @empty
