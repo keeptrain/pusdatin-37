@@ -15,61 +15,61 @@ class Activity extends Component
 
     public $status;
 
-    private Letter $siRequestInstance;
+    private Letter $siRequest;
 
     public function mount($id)
     {
         $this->siRequestId = $id;
-        $this->loadPrRequest();
-        $this->status = $this->siRequestInstance->status->label();
+        $this->loadSiRequest();
+        $this->status = $this->siRequest->status->label();
     }
 
-    private function loadPrRequest()
+    private function loadSiRequest()
     {
         try {
-            $this->siRequestInstance = Letter::findOrFail($this->siRequestId);
+            $this->siRequest = Letter::with('requestStatusTrack:statusable_id,statusable_type,action,notes,created_at')->findOrFail($this->siRequestId);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            abort(404, 'Letter not found.');
+            abort(404, 'Activity Information System Request not found.');
         }
     }
 
     #[Computed]
     public function groupedActivities()
     {
-        return $this->siRequestInstance->getGroupedRequestStatusTracks();
+        return $this->siRequest->getGroupedRequestStatusTracks();
     }
 
     #[Computed]
     public function statuses()
     {
-        return TrackingStepped::SiDataRequest($this->siRequestInstance);
+        return TrackingStepped::SiDataRequest($this->siRequest);
     }
 
     #[Computed]
     public function currentStatus()
     {
-        if ($this->siRequestInstance && $this->status) {
-            return $this->siRequestInstance->status->label();
+        if ($this->siRequest && $this->status) {
+            return $this->siRequest->status->label();
         }
 
-        return (new \App\States\Pending($this->siRequestInstance))->label();
+        return (new \App\States\Pending($this->siRequest))->label();
     }
 
     #[Computed]
     public function isRejected()
     {
-        return $this->currentStatus() === (new \App\States\Rejected($this->siRequestInstance))->label();
+        return $this->currentStatus() === (new \App\States\Rejected($this->siRequest))->label();
     }
 
     private function isReplied()
     {
-        return $this->currentStatus() === (new \App\States\Replied($this->siRequestInstance))->label();
+        return $this->currentStatus() === (new \App\States\Replied($this->siRequest))->label();
     }
 
     #[Computed]
     public function currentIndex()
     {
         $statuses = $this->statuses();
-        return TrackingStepped::currentIndex($this->siRequestInstance, $statuses);
+        return TrackingStepped::currentIndex($this->siRequest, $statuses);
     }
 }
