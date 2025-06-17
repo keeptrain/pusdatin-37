@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Letters\Data;
+namespace App\Livewire\Requests\InformationSystem;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;

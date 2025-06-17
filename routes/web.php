@@ -1,16 +1,12 @@
 <?php
 
-use App\Livewire\Forms\SiDataRequestForm;
 use App\Livewire\Letters\Chat;
 use App\Livewire\Documents\Review;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
-use App\Livewire\Letters\Data\Edit;
 use App\Livewire\Settings\Password;
-use App\Livewire\Letters\DirectForm;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Letters\CreateLetter;
 use App\Livewire\Letters\Data\Rollback;
 use App\Livewire\Letters\DetailHistory;
 use App\Livewire\Letters\HistoryLetter;
@@ -26,6 +22,8 @@ use App\Http\Controllers\ExportPdf\SiVerifierPdfExportController;
 use App\Livewire\Admin\Analytic;
 use App\Livewire\Documents\Template;
 use App\Livewire\Requests\InformationSystem\Meeting;
+use App\Livewire\Requests\InformationSystem\Edit;
+use App\Livewire\Forms\SiDataRequestForm;
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,35 +34,37 @@ Route::get('dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('letter', CreateLetter::class)->name('letter');
-    Route::get('letter/form', DirectForm::class)->name('letter.form');
 
     // Information System & Data
-    Route::get('form/si-data', SiDataRequestForm::class)->name('si-data.form');
+    Route::get('form/si-data', SiDataRequestForm::class)->name('si-data.form')->middleware('can:create request');
+    Route::get('information-system/{id}/edit', Edit::class)->name('is.edit')->middleware('can:revision si-data request');
 
-    // Information System & Data
-    Route::get('information-system', \App\Livewire\Requests\InformationSystem\Index::class)->name('is.index');
-    Route::get('information-system/{id}', \App\Livewire\Requests\InformationSystem\Show::class)->name('is.show');
-    Route::get('information-system/{id}/activity', \App\Livewire\Requests\InformationSystem\Activity::class)->name('is.activity');
-    Route::get('information-system/{id}/meeting', Meeting::class)->name('is.meeting');
-
-    Route::get('information-system/{id}/version', RevisionComparision::class)->name('comparison.version');
+    Route::middleware('can:view si request')->group(function () {
+        Route::get('information-system', \App\Livewire\Requests\InformationSystem\Index::class)->name('is.index');
+        Route::get('information-system/{id}', \App\Livewire\Requests\InformationSystem\Show::class)->name('is.show');
+        Route::get('information-system/{id}/activity', \App\Livewire\Requests\InformationSystem\Activity::class)->name('is.activity');
+        Route::get('information-system/{id}/meeting', Meeting::class)->name('is.meeting');
+        Route::get('information-system/{id}/version', RevisionComparision::class)->name('comparison.version');
+        Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
+    });
 
     // Public Relation
-    Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form');
-    Route::get('public-relation', \App\Livewire\Requests\PublicRelation\Index::class)->name('pr.index');
-    Route::get('public-relation/{id}', Show::class)->name('pr.show');
-    Route::get('public-relation/{id}/activity', \App\Livewire\Requests\PublicRelation\Activity::class)->name('pr.activity');
-    Route::get('public-relation/{id}/rollback', \App\Livewire\Requests\PublicRelation\Rollback::class)->name('pr.rollback');
+    Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form')->middleware('can:create request');
 
-    Route::get('history', HistoryLetter::class)->name('history');
-    Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
+    Route::middleware('can:view pr request')->group(function () {
+        Route::get('public-relation', \App\Livewire\Requests\PublicRelation\Index::class)->name('pr.index');
+        Route::get('public-relation/{id}', Show::class)->name('pr.show');
+        Route::get('public-relation/{id}/activity', \App\Livewire\Requests\PublicRelation\Activity::class)->name('pr.activity');
+        Route::get('public-relation/{id}/rollback', \App\Livewire\Requests\PublicRelation\Rollback::class)->name('pr.rollback');
+    });
 
-    Route::get('letter/{id}/edit', Edit::class)->name('letter.edit');
+    Route::middleware('can:view requests')->group(function () {
+        Route::get('history', HistoryLetter::class)->name('history');
+        Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
+    });
+
     Route::get('letter/{id}/review', Review::class)->name('letter.review');
     Route::get('letter/{id}/chat', Chat::class)->name('letter.chat');
-    Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
-
 
     // analytic
     // Route::get('/letter/{letter}/activity', function (Letter $letter) {

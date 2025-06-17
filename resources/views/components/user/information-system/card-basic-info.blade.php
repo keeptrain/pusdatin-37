@@ -73,7 +73,7 @@
             <div>
                 <div class="flex justify-end">
                     <template x-if="{{ $activerevision }}">
-                        <flux:button href="{{ route('letter.edit', [$id]) }}">Lakukan revisi</flux:button>
+                        <flux:button href="{{ route('is.edit', [$id]) }}">Lakukan revisi</flux:button>
                     </template>
                 </div>
             </div>

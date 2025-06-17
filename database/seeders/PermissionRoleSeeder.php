@@ -31,7 +31,7 @@ class PermissionRoleSeeder extends Seeder
             'view si request',
             'can process si',
             'verification request si step1',
-            'review revision si'
+            'review revision si',
         ];
 
         $dataPermissions = [
@@ -39,6 +39,10 @@ class PermissionRoleSeeder extends Seeder
             'can process data',
             'verification request data step1',
             'review revision data',
+        ];
+
+        $siDataPermisions = [
+            'completed request'
         ];
 
         $prPermisions = [
@@ -62,6 +66,7 @@ class PermissionRoleSeeder extends Seeder
             ...$headPermissions,
             ...$siPermissions,
             ...$dataPermissions,
+            ...$siDataPermisions,
             ...$prPermisions,
             ...$promkesPermissions,
             ...$userPermissions,
@@ -100,10 +105,10 @@ class PermissionRoleSeeder extends Seeder
         $role->givePermissionTo($headPermissions, 'view pr request', 'view si request', 'view data request');
 
         $role = \Spatie\Permission\Models\Role::findByName('si_verifier');
-        $role->givePermissionTo([$siPermissions, 'completed request']);
+        $role->givePermissionTo([$siPermissions, $siDataPermisions]);
 
         $role = \Spatie\Permission\Models\Role::findByName('data_verifier');
-        $role->givePermissionTo([$dataPermissions, 'completed request']);
+        $role->givePermissionTo([$dataPermissions, $siDataPermisions]);
 
         $role = \Spatie\Permission\Models\Role::findByName('pr_verifier');
         $role->givePermissionTo([$prPermisions]);

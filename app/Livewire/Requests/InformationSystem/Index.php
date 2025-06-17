@@ -162,7 +162,7 @@ class Index extends Component
         $this->allowedStatuses = array_unique($this->allowedStatuses);
 
         if (empty($this->allowedStatuses)) {
-            $this->allowedStatuses = $this->getAllowedStatusesByRole();
+            $this->allowedStatuses = $this->getAllowedStatusesByRole($this->getCurrentRoleId);
         }
     }
 
