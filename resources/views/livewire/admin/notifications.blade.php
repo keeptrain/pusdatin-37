@@ -141,7 +141,7 @@
                     <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-1">Tidak ada notifikasi</h3>
+            <flux:subheading class="text-gray-400">Belum ada notifikasi</flux:subheading>
         </div>
     @endforelse
     </div>

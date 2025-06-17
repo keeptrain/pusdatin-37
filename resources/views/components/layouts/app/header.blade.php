@@ -7,6 +7,13 @@
 </head>
 
 <body class="min-h-screen bg-white dark:bg-zinc-800 p-0">
+    @if (session('status'))
+        @php
+            $variant = session('status')['variant'];
+            $message = session('status')['message'];
+        @endphp
+        <flux:notification.toast :variant="$variant" :message="$message" />
+    @endif
     <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 

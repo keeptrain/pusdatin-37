@@ -143,7 +143,7 @@ class Notifications extends Component
 
     public function goDetailPage($notificationId)
     {
-        // Notification by id
+        // Find notification by id
         $notification = $this->unreadNotifications->where('id', $notificationId)->first();
 
         // Check notification data    
@@ -166,13 +166,27 @@ class Notifications extends Component
 
             if ($modelClass === Letter::class || $modelClass === PublicRelationRequest::class) {
                 // $notification->markAsRead();
-                $this->redirect($requestable->handleRedirectNotification(auth()->user(), $notification->data['status']), true);
+                if (!$requestable->active_revision) {
+                    $this->flashErrorMessage();
+                } else {
+                    $this->redirect($requestable->handleRedirectNotification(auth()->user(), $notification->data['status']), true);
+                }
             } else {
                 abort(404, 'Invalid model class.');
             }
         } catch (\Exception $e) {
             return redirect()->route('dashboard')->with('error', 'Failed to load notification: ' . $e->getMessage());
         }
+    }
+
+    public function flashErrorMessage()
+    {
+        session()->flash('status', [
+            'variant' => 'error',
+            'message' => 'Sudah melakukan revisi pada permohonan ini.',
+        ]);
+
+        $this->redirectRoute('dashboard', navigate: true);
     }
 
     public function markAllAsRead()

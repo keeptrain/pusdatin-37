@@ -178,7 +178,7 @@ class PublicRelationRequest extends Model
         ]);
     }
 
-    public function handleRedirectNotification($user)
+    public function handleRedirectNotification($user, $status)
     {
         if ($user->roles->pluck('name')->contains('user')) {
             return route('history.detail', [

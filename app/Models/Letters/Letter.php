@@ -209,7 +209,6 @@ class Letter extends Model
         ]);
     }
 
-
     public function updatedForNeedReview()
     {
         $this->update([
@@ -264,7 +263,7 @@ class Letter extends Model
         }
 
         return match ($status) {
-            'Revisi Kasatpel' => route('letter.edit', ['id' => $this->id]),
+            'Revisi Kasatpel' => route('is.edit', ['id' => $this->id]),
             default => route('history.detail', [
                 'type' => 'information-system',
                 'id' => $this->id
