@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
+
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Title;
 use App\States\LetterStatus;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Computed;
@@ -48,6 +50,7 @@ class Index extends Component
         $this->allowedStatuses = $this->getAllowedStatusesByRole($this->getCurrentRoleId);
     }
 
+    #[Title('Permohonan Sistem Informasi')]
     public function render()
     {
         return view('livewire.requests.information-system.index');

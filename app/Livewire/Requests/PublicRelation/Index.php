@@ -2,13 +2,15 @@
 
 namespace App\Livewire\Requests\PublicRelation;
 
-use App\States\PublicRelation\PublicRelationStatus;
+use Carbon\Carbon;
+use Livewire\Attributes\Title;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\PublicRelationRequest;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
+use App\States\PublicRelation\PublicRelationStatus;
 
 class Index extends Component
 {
@@ -50,6 +52,7 @@ class Index extends Component
         $this->redirectRoute('pr.show', $id, navigate: true);
     }
 
+    #[Title('Permohonan Kehumasan')]
     public function render(): object
     {
         return view('livewire.requests.public-relation.index');
@@ -82,15 +85,40 @@ class Index extends Component
         return $query->paginate($this->perPage);
     }
 
+    public function stringMonthPublicationToNumber($searchQuery)
+    {
+        $monthValue = null;
+
+        // If input is month name
+        foreach (range(1, 12) as $monthNumber) {
+            $monthName = Carbon::create(null, $monthNumber)->locale('id')->isoFormat('MMMM');
+            if (str_contains(strtolower($monthName), $searchQuery)) {
+                $monthValue = $monthNumber;
+                break;
+            }
+        }
+
+        // If input is number
+        if (is_numeric($searchQuery) && $searchQuery >= 1 && $searchQuery <= 12) {
+            $monthValue = (int) $searchQuery;
+        }
+
+        return $monthValue;
+    }
+
     protected function applySearch($query)
     {
-        return $query->where(function ($q) {
-            $q->where('theme', 'like', '%' . $this->searchQuery . '%')
-                ->orWhereHas('user', function ($q) {
-                    $q->where('name', 'like', '%' . $this->searchQuery . '%');
+        $searchQuery = strtolower($this->searchQuery);
+
+        return $query->where(function ($q) use ($searchQuery) {
+            $q->where('theme', 'like', "%$searchQuery%")
+                ->orWhere('month_publication', '=', $this->stringMonthPublicationToNumber($searchQuery))
+                ->orWhereHas('user', function ($q) use ($searchQuery) {
+                    $q->where('name', 'like', "%$searchQuery%");
                 });
         });
     }
+
 
     protected function getCacheKey(): string
     {

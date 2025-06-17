@@ -20,8 +20,8 @@
 
             <x-slot name="rightSidebar">
                 <h3 class="text-lg font-bold mb-4">General</h3>
-
-                <x-layouts.requests.information-system.right-sidebar-content :systemRequest="$systemRequest" />
+                <x-layouts.requests.information-system.right-sidebar-content :systemRequest="$systemRequest"
+                    :timeline="$this->timeline" />
 
                 <div class="mt-6">
                     <x-menu.information-system.actions-buttons-on-show :systemRequestId="$systemRequestId"

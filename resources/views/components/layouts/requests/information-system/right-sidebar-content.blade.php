@@ -44,6 +44,13 @@
 </div>
 
 <div class="mb-6">
+    @if ($timeline)
+        <h4 class="text-gray-500 mb-1">Timeline pengerjaan</h4>
+        <p class="text-gray-800">{{ $timeline }}</p>
+    @endif
+</div>
+
+<div class="mb-6">
     <h4 class="text-gray-500 mb-1">Status</h4>
     <flux:notification.status-badge :status="$systemRequest->status"/>
 </div>
