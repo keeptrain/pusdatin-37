@@ -10,14 +10,17 @@ use App\Models\PublicRelationRequest;
 
 class Notifications extends Component
 {
+    public bool $dashboardUser = false;
+
     public $notificationCount = 0;
 
     public array $userTabs = [];
 
-    public function mount()
+    public function mount(bool $dashboardUser = false)
     {
         $this->notificationCount = $this->emitCount();
         $this->userTabs = $this->tabBaseRoles();
+        $this->dashboardUser = $dashboardUser;
     }
 
     public function placeholder()
@@ -32,10 +35,15 @@ class Notifications extends Component
     }
 
     #[Computed]
+    public function unreadNotifications()
+    {
+        return auth()->user()->unreadNotifications();
+    }
+
+    #[Computed]
     public function notifications()
     {
-        $notifications = auth()->user()
-            ->unreadNotifications()
+        $notifications = $this->unreadNotifications
             ->latest()
             ->take(10)
             ->get(['id', 'data', 'created_at']);
@@ -63,9 +71,9 @@ class Notifications extends Component
         return $userTabs;
     }
 
-    private function prepareNotifications($rawNotifications)
+    private function prepareNotifications($notifications)
     {
-        return collect($rawNotifications)->map(function ($notification) {
+        return collect($notifications)->map(function ($notification) {
             return [
                 'id' => $notification->id,
                 'username' => $notification->data['username'] ?? 'Unknown',
@@ -126,9 +134,7 @@ class Notifications extends Component
 
     public function emitCount(): void
     {
-        $count = auth()->user()
-            ->unreadNotifications()
-            ->count();
+        $count = $this->unreadNotifications->count();
 
         $this->dispatch('notification-count-updated', [
             'count' => $count,
@@ -138,9 +144,7 @@ class Notifications extends Component
     public function goDetailPage($notificationId)
     {
         // Notification by id
-        $notification = auth()->user()
-            ->unreadNotifications()
-            ->findOrFail($notificationId);
+        $notification = $this->unreadNotifications->where('id', $notificationId)->first();
 
         // Check notification data    
         if (!$notification || !isset($notification->data['requestable_type'], $notification->data['requestable_id'])) {
@@ -161,8 +165,8 @@ class Notifications extends Component
             $requestable = app($modelClass)->findOrFail($modelId);
 
             if ($modelClass === Letter::class || $modelClass === PublicRelationRequest::class) {
-                $notification->markAsRead();
-                $this->redirect($requestable->handleRedirectNotification(auth()->user()), true);
+                // $notification->markAsRead();
+                $this->redirect($requestable->handleRedirectNotification(auth()->user(), $notification->data['status']), true);
             } else {
                 abort(404, 'Invalid model class.');
             }

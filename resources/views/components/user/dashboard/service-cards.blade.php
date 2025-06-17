@@ -2,7 +2,7 @@
 <div class="grid md:grid-cols-2 gap-6 mt-6">
     <!-- Information & Data Service -->
     <div
-        class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group">
+        class="bg-white rounded-lg p-3 shadow-xs border-slate-200 hover:shadow-lg transition-all duration-300 group">
         <div class="flex items-start justify-between mb-4">
             <div
                 class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
@@ -20,7 +20,7 @@
 
     <!-- Public Relations Service -->
     <div
-        class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300 group">
+        class="bg-white rounded-lg p-3 shadow-xs border-slate-200 hover:shadow-lg transition-all duration-300 group">
         <div class="flex items-start justify-between mb-4">
             <div
                 class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">

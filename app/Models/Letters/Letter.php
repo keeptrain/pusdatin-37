@@ -257,15 +257,19 @@ class Letter extends Model
         return $query->count('id');
     }
 
-    public function handleRedirectNotification($user)
+    public function handleRedirectNotification($user, $status)
     {
-        if ($user->hasRole('user')) {
-            return route('history.detail', [
+        if (!$user->hasRole('user')) {
+            return route('is.show', ['id' => $this->id]);
+        }
+
+        return match ($status) {
+            'Revisi Kasatpel' => route('letter.edit', ['id' => $this->id]),
+            default => route('history.detail', [
                 'type' => 'information-system',
                 'id' => $this->id
-            ]);
-        }
-        return route('is.show', ['id' => $this->id]);
+            ]),
+        };
     }
 
     public function hasNonZeroPartNumber()
@@ -307,7 +311,6 @@ class Letter extends Model
             return implode("\n", $details); // Newline untuk memisahkan setiap detail
         })->implode("\n\n"); // Dua newline untuk memisahkan setiap meeting
     }
-
 
     public static function getNearMeetingsByDate()
     {

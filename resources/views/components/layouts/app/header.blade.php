@@ -32,20 +32,20 @@
                 <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#"
                     :label="__('Search')" />
             </flux:tooltip> --}}
+            @if (Route::currentRouteName() != 'dashboard')
+                <flux:modal.trigger name="notifications-user">
 
-            <flux:modal.trigger name="notifications-user">
+                    <flux:tooltip :content="__('Notifications')" position="bottom">
+                        <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="bell-alert" target="_blank"
+                            :label="__('Notifications')" />
+                    </flux:tooltip>
 
-                <flux:tooltip :content="__('Notifications')" position="bottom">
-                    <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="bell-alert" target="_blank"
-                        :label="__('Notifications')" />
-                </flux:tooltip>
+                </flux:modal.trigger>
 
-            </flux:modal.trigger>
-
-            <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false" class="md:w-96">
-                <livewire:admin.notifications />
-            </flux:modal>
-
+                <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false" class="md:w-96">
+                    <livewire:admin.notifications :dashboardUser="false" />
+                </flux:modal>
+            @endif
         </flux:navbar>
 
         <!-- Desktop User Menu -->
@@ -105,10 +105,30 @@
                     :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navlist.item>
-                <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
+
+                {{-- <flux:modal.trigger name="notifications-user">
+                    <flux:navlist.item icon="bell-alert">
+                        <div class="flex items-center justify-between w-full">
+                            <span>{{ __('Notifications') }}</span>
+                            <flux:badge x-text="$store.notifications.count" size="sm" color="lime" :position="'right'"
+                                class="ml-2" />
+                        </div>
+                    </flux:navlist.item>
+                </flux:modal.trigger>
+
+                @if (Route::currentRouteName() == 'dashboard')
+                <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false"
+                    class="md:w-96">
+                    {{--
+                    <livewire:admin.notifications :dashboardUser="false" />
+                </flux:modal>
+                @endif --}}
+
+                <flux:navlist.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
                     wire:navigate>
                     {{ __('Permohonan') }}
-                </flux:navbar.item>
+                </flux:navlist.item>
+
             </flux:navlist.group>
         </flux:navlist>
 
