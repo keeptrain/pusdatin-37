@@ -4,8 +4,11 @@
         <flux:dropdown>
             <flux:button variant="ghost" icon="ellipsis-vertical" />
             <flux:menu>
-                <flux:menu.item x-on:click="$dispatch('modal-show', { name: 'create-meeting-modal' })"
-                    icon="video-camera" class="w-full">Edit</flux:menu.item>
+                @if (isset($meeting['result']))
+                    <flux:modal.trigger name="edit-meeting-{{ $key }}-modal">
+                        <flux:menu.item icon="pencil-square" class="w-full">Edit</flux:menu.item>
+                    </flux:modal.trigger>
+                @endif
                 <flux:menu.item wire:click="delete({{ $key }})" icon="trash" variant="danger">Delete
                 </flux:menu.item>
             </flux:menu>
@@ -14,7 +17,7 @@
 
     <div class="flex flex-col md:flex-row gap-4">
         <!-- Left column -->
-        <div class="flex-1 space-y-3 min-h-[150px]">
+        <div class="flex-1 space-y-3 min-h-[100px]">
             <div class="flex items-start text-sm space-x-2">
                 @if (!empty($meeting['location']))
                     <div class="flex-shrink-0 mt-1">
@@ -67,7 +70,7 @@
         </div>
 
         <!-- Right column -->
-        <div class="flex-1 flex items-start text-sm min-h-[150px]">
+        <div class="flex-1 flex items-start text-sm min-h-[100px]">
             <div class="w-full">
                 <div class="flex items-center space-x-2">
                     <flux:icon.chat-bubble-left-right class="size-5 text-gray-400" />

@@ -35,7 +35,7 @@
         </flux:modal.trigger>
 
         {{-- Modal yang berisi meeting lainnya --}}
-        <flux:modal name="history-meeting">
+        <flux:modal name="history-meeting" class="w-1/2">
             <flux:legend>Riwayat Meeting</flux:legend>
             <div class="space-y-2 mt-4">
                 @foreach ($this->meeting as $value)

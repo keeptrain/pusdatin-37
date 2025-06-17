@@ -1,9 +1,8 @@
 <!-- In Person Option -->
 <div @click="selectedOption === 'in-person' ? selectedOption = '' : selectedOption = 'in-person'"
-    x-modelable="selectedOption" {{ $attributes }}
-    :class="selectedOption === 'in-person' ? 'border-blue-500 bg-blue-50' :
+    x-modelable="selectedOption" {{ $attributes }} :class="selectedOption === 'in-person' ? 'border-blue-500 bg-blue-50' :
         'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'"
-    class="relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200">
+    class="relative p-4 rounded-lg border cursor-pointer transition-all duration-200">
     <!-- Radio button -->
     <div class="absolute top-4 right-4">
         <div :class="selectedOption === 'in-person' ? 'border-blue-500 bg-blue-500' : 'border-gray-300 bg-white'"
@@ -23,8 +22,7 @@
             </svg>
         </div>
         <section>
-            <h3 :class="selectedOption === 'in-person' ? 'text-blue-900' : 'text-gray-900'"
-                class="font-medium text-base">
+            <h3 :class="selectedOption === 'in-person' ? 'text-blue-900' : 'text-gray-900'" class="font-medium text-base">
                 Pertemuan Langsung
             </h3>
             <p :class="selectedOption === 'in-person' ? 'text-blue-700' : 'text-gray-600'" class="text-sm">
@@ -34,8 +32,7 @@
     </div>
 
     <section @click.stop x-show="selectedOption === 'in-person'" class="space-y-4">
-        <flux:textarea wire:model="meeting.location" label="Lokasi" placeholder="Masukkan lokasi disini..."
-            rows="1" />
+        <flux:textarea wire:model="meeting.location" label="Lokasi" placeholder="Masukkan lokasi disini..." rows="1" />
         <div>
             <flux:input wire:model="meeting.date" type="date" label="Tanggal" min="{{ now()->toDateString() }}" />
         </div>
@@ -53,10 +50,9 @@
 
 <!-- Online Meet Option -->
 <div @click="selectedOption === 'online-meet' ? selectedOption = '' : selectedOption = 'online-meet'"
-    x-modelable="selectedOption" {{ $attributes }}
-    :class="selectedOption === 'online-meet' ? 'border-blue-500 bg-blue-50' :
+    x-modelable="selectedOption" {{ $attributes }} :class="selectedOption === 'online-meet' ? 'border-blue-500 bg-blue-50' :
         'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'"
-    class="relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200">
+    class="relative p-4 rounded-lg border cursor-pointer transition-all duration-200">
     <!-- Radio button -->
     <div class="absolute top-4 right-4">
         <div :class="selectedOption === 'online-meet' ? 'border-blue-500 bg-blue-500' : 'border-gray-300 bg-white'"

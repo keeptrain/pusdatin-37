@@ -22,9 +22,17 @@ class Meeting extends Component
 
     public $result = [];
 
+    public $resultUpdate = [];
+
     public function mount($id)
     {
         $this->siRequestId = $id;
+
+        foreach ($this->getMeeting as $key => $meeting) {
+            if (!empty($meeting['result'])) {
+                $this->result[$key] = $meeting['result'];
+            }
+        }
     }
 
     public function updatedSelectedOption($value)
@@ -42,8 +50,8 @@ class Meeting extends Component
     public function getMeeting()
     {
         // Ambil data InformationSystemRequest berdasarkan ID
-        $letter = Letter::select('meeting')->findOrFail($this->siRequestId);
-        $meetings = $letter->meeting ?? [];
+        $siRequest = Letter::select('meeting')->findOrFail($this->siRequestId);
+        $meetings = $siRequest->meeting ?? [];
 
         // Simpan waktu saat ini sekali saja untuk efisiensi
         $now = Carbon::now();
@@ -98,7 +106,7 @@ class Meeting extends Component
         return $meetings;
     }
 
-    public function createMeeting()
+    public function create()
     {
         // Validasi input
         $rules = [
@@ -150,7 +158,7 @@ class Meeting extends Component
             ]);
 
             // Log status dan notifikasi
-            $siRequest->logStatusCustom('Meeting telah dibuat, silahkan cek detailnya.');
+            // $siRequest->logStatusCustom('Meeting telah dibuat, silahkan cek detailnya.');
 
             session()->flash('status', [
                 'variant' => 'success',
