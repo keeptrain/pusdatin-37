@@ -4,9 +4,14 @@ namespace App\Exports;
 
 use App\Models\PublicRelationRequest;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class PrExport implements FromCollection, WithHeadings
+class PrExport implements FromCollection, WithHeadings, WithEvents, ShouldAutoSize
 {
     protected $startDate;
     protected $endDate;
@@ -21,35 +26,39 @@ class PrExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        $query = PublicRelationRequest::query()->with('user');
+        $query = PublicRelationRequest::with('user');
 
         if ($this->startDate) {
             $query->whereDate('created_at', '>=', $this->startDate);
         }
-
         if ($this->endDate) {
             $query->whereDate('created_at', '<=', $this->endDate);
         }
-
         if ($this->status && $this->status !== 'all') {
             $statusClass = PublicRelationRequest::resolveStatusClassFromString($this->status);
             $query->whereState('status', $statusClass);
         }
 
-        return $query
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'User Name'          => $item->user ? $item->user->name : '—',
-                    'Theme'              => $item->theme,
-                    'Month Publication'  => $item->month_publication,
-                    'Specific Date'      => $item->spesific_date,
-                    'Status'             => $item->status->label(),
-                    'Target'             => $item->target,
-                    'Links'              => $item->getExportLinksAttribute(false),
-                    'Created At'         => $item->created_at,
-                ];
-            });
+        $items = $query->get();
+        $total = $items->count();
+
+        return $items->map(function ($item, $idx) use ($total) {
+            return [
+                // urutannya harus sama dengan headings()
+                $item->user?->name ?? '—',
+                $item->theme,
+                $item->month_publication,
+                $item->spesific_date,
+                $item->status->label(),
+                $item->target,
+                is_array($item->links)
+                    ? implode("\n", $item->links)
+                    : $item->links,
+                $item->created_at,
+                // hanya baris pertama yg ditampilkan total
+                $idx === 0 ? $total : '',
+            ];
+        });
     }
 
     public function headings(): array
@@ -63,6 +72,30 @@ class PrExport implements FromCollection, WithHeadings
             'Sasaran',
             'Link Media',
             'Tanggal Permohonan',
+            'Total Data',
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet        = $event->sheet->getDelegate();
+                $lastColIndex = count($this->headings());
+                $colLetter    = Coordinate::stringFromColumnIndex($lastColIndex);
+
+                // styling baris 1 & 2 di kolom Total Data
+                $range = "{$colLetter}1:{$colLetter}2";
+                $sheet->getStyle($range)->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                    ],
+                    'fill' => [
+                        'fillType'   => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'FFA500'],
+                    ],
+                ]);
+            },
         ];
     }
 }

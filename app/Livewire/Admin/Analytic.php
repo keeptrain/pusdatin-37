@@ -15,14 +15,15 @@ class Analytic extends Component
     public $source; // Menambah properti source untuk memilih data (letter/pr)
 
     public $statusOptions = [
-        'all'                => 'All Status',
-        'disposition'        => 'Disposition',
-        'process'            => 'Process',
-        'replied'            => 'Replied',
-        'approved_kasatpel'  => 'Approved Kasatpel',
-        'replied_kapusdatin' => 'Replied Kapusdatin',
-        'approved_kapusdatin' => 'Approved Kapusdatin',
-        'rejected'           => 'Rejected',
+        'all'                => 'Semua Status',
+        'pending'            => 'Permohonan Masuk',
+        'disposition'        => 'Disposisi',
+        'process'            => 'Proses',
+        'replied'            => 'Revisi Kasatpel',
+        'approved_kasatpel'  => 'Disetujui Kasatpel',
+        'replied_kapusdatin' => 'Revisi Kapusdatin',
+        'approved_kapusdatin' => 'Disetujui Kapusdatin',
+        'rejected'           => 'Ditolak',
     ];
 
     public $statusOptionsPr = [
