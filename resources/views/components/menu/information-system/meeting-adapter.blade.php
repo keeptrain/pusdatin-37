@@ -92,4 +92,15 @@
             </div>
         </div>
     </div>
+    <flux:modal name="edit-meeting-{{ $key }}-modal" focusable class="md:w-120" size="lg">
+        <form wire:submit="updateResultMeeting({{ $key }})">
+            <section class="space-y-4">
+                <flux:heading size="lg">Edit hasil meeting</flux:heading>
+                <flux:textarea wire:model="result.{{ $key }}" placeholder="Input disini..." rows="2" />
+                <div class="flex justify-end space-x-2">
+                    <flux:button type="submit" size="sm">Simpan</flux:button>
+                </div>
+            </section>
+        </form>
+    </flux:modal>
 </div>

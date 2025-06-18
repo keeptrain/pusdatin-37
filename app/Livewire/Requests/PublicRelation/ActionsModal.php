@@ -169,9 +169,23 @@ class ActionsModal extends Component
             $dynamicRules["mediaLinks.{$documentUpload->part_number}"] = ['required', 'url'];
         }
 
-        $this->validate($dynamicRules, [
-            'mediaLinks.1.required' => 'Diperlukan'
-        ]);
+        $this->validate(
+            $dynamicRules,
+            [
+                'mediaLinks.1' => 'Link audio di perlukan',
+                'mediaLinks.2' => 'Link infografis di perlukan',
+                'mediaLinks.3' => 'Link poster di perlukan',
+                'mediaLinks.4' => 'Link media di perlukan',
+                'mediaLinks.5' => 'Link bumper di perlukan',
+                'mediaLinks.6' => 'Link backdrop kegiatan di perlukan',
+                'mediaLinks.7' => 'Link spanduk di perlukan',
+                'mediaLinks.8' => 'Link roll banner di perlukan',
+                'mediaLinks.9' => 'Link sertifikat di perlukan',
+                'mediaLinks.10' => 'Link press release di perlukan',
+                'mediaLinks.11' => 'Link artikel di perlukan',
+                'mediaLinks.12' => 'Link peliputan di perlukan',
+            ]
+        );
 
         $this->authorize('completedRequest', $prRequest);
 
