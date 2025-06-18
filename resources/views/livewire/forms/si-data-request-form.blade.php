@@ -12,7 +12,13 @@
         </div>
     </div> --}}
     <!-- Section 1: Basic information -->
-    <form wire:submit="save" class="space-y-6 mt-6">
+    <form x-data="{
+        activeUploads: 0,
+        progress: 0,
+        get uploading() {
+            return this.activeUploads > 0;
+        } 
+        }" wire:submit="save" class="space-y-6 mt-6">
         <div class="grid lg:grid-cols-2 gap-4">
             <section>
                 <div class="border border-gray-200 rounded-lg p-4">
@@ -46,13 +52,7 @@
 
             <!-- Section 2: Document Upload -->
             <section>
-                <div x-data="{
-                activeUploads: 0,
-                    progress: 0,
-                    get uploading() {
-                        return this.activeUploads > 0;
-                    }
-                }" x-on:livewire-upload-start="activeUploads++" x-on:livewire-upload-finish="activeUploads--"
+                <div x-on:livewire-upload-start="activeUploads++" x-on:livewire-upload-finish="activeUploads--"
                     x-on:livewire-upload-error="activeUploads--" x-on:livewire-upload-cancel="activeUploads--"
                     x-on:livewire-upload-progress="progress = $event.detail.progress">
                     <div class="border border-gray-200 rounded-lg p-4">
@@ -118,7 +118,7 @@
                 {{ __('Cancel') }}
             </flux:button>
 
-            <flux:button type="submit" variant="primary">
+            <flux:button type="submit" variant="primary" x-bind:disabled="uploading">
                 {{ __('Ajukan') }}
             </flux:button>
         </div>

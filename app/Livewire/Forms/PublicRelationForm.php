@@ -5,12 +5,14 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use App\Models\Template;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadServices;
 use App\Models\PublicRelationRequest;
 use Illuminate\Support\Facades\Storage;
 
+#[Title('Form Kehumasan')]
 class PublicRelationForm extends Component
 {
     use WithFileUploads;

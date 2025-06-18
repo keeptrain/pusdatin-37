@@ -6,11 +6,13 @@ use App\Enums\Division;
 use Livewire\Component;
 use App\Models\Template;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Title;
 use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadServices;
 use Illuminate\Support\Facades\Storage;
 
+#[Title('Form Sistem Informasi & Data')]
 class SiDataRequestForm extends Component
 {
     use WithFileUploads;

@@ -1,7 +1,16 @@
 <x-layouts.form.request legend="Form Permohonan layanan" nameForm="Kehumasan">
 
     <!-- Section 1: Basic information -->
-    <form wire:submit="save" class="space-y-6 mt-6">
+    <form x-data="{
+        activeUploads: null,
+        selectedMediaType: $wire.mediaType,
+        uploadedFiles: { },
+        otherValue: false,
+        progress: 0,
+        get uploading() {
+            return this.activeUploads > 0;
+        }
+        }" wire:submit="save" class="space-y-6 mt-6">
         <div class="grid lg:grid-cols-2 gap-4">
             <section>
                 <div class="border border-gray-200 rounded-lg p-4">
@@ -43,16 +52,7 @@
             </section>
 
             <!-- Section 2: Document Upload -->
-            <div x-data="{
-                activeUploads: null,
-                selectedMediaType: $wire.mediaType,
-                uploadedFiles: { },
-                otherValue: false,
-                progress: 0,
-                    get uploading() {
-                        return this.activeUploads > 0;
-                    }
-                }" x-on:livewire-upload-start="activeUploads++" x-on:livewire-upload-finish="activeUploads--"
+            <div x-on:livewire-upload-start="activeUploads++" x-on:livewire-upload-finish="activeUploads--"
                 x-on:livewire-upload-error="activeUploads--" x-on:livewire-upload-cancel="activeUploads--"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 class="space-y-6 border border-gray-200 rounded-lg p-4">
@@ -64,7 +64,7 @@
                     <div class="flex items-center">
                         <flux:radio label="Other:" value="other" />
                         <!-- Input Field for "Other" -->
-                        <input type="text"
+                        <input type="text" wire:model.blur="otherTarget"
                             class="ml-2 border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-1 w-60" />
                     </div>
                     @error('otherTarget')
@@ -196,11 +196,11 @@
         </div>
 
         <div class="flex flex-row justify-between mt-4">
-            <flux:button type="button" :href="route('letter')" wire:navigate>
+            <flux:button type="button" :href="route('dashboard')" wire:navigate>
                 {{ __('Cancel') }}
             </flux:button>
 
-            <flux:button type="submit" variant="primary">
+            <flux:button type="submit" variant="primary" x-bind:disabled="uploading">
                 {{ __('Ajukan') }}
             </flux:button>
         </div>
