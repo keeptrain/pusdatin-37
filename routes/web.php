@@ -39,7 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('form/si-data', SiDataRequestForm::class)->name('si-data.form')->middleware('can:create request');
     Route::get('information-system/{id}/edit', Edit::class)->name('is.edit')->middleware('can:revision si-data request');
 
-    Route::middleware('can:view si request')->group(function () {
+    Route::middleware('permission:view si request|view data request')->group(function () {
         Route::get('information-system', \App\Livewire\Requests\InformationSystem\Index::class)->name('is.index');
         Route::get('information-system/{id}', \App\Livewire\Requests\InformationSystem\Show::class)->name('is.show');
         Route::get('information-system/{id}/activity', \App\Livewire\Requests\InformationSystem\Activity::class)->name('is.activity');

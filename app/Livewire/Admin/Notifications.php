@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
+use App\States\Replied;
 use App\Models\Letters\Letter;
 use Livewire\Attributes\Computed;
 use App\Models\PublicRelationRequest;
@@ -18,9 +19,9 @@ class Notifications extends Component
 
     public function mount(bool $dashboardUser = false)
     {
+        $this->dashboardUser = $dashboardUser;
         $this->notificationCount = $this->emitCount();
         $this->userTabs = $this->tabBaseRoles();
-        $this->dashboardUser = $dashboardUser;
     }
 
     public function placeholder()
@@ -166,7 +167,7 @@ class Notifications extends Component
 
             if ($modelClass === Letter::class || $modelClass === PublicRelationRequest::class) {
                 // $notification->markAsRead();
-                if (!$requestable->active_revision) {
+                if (!$requestable->active_revision && $requestable->status == Replied::class && auth()->user()->currentUserRoleId() == 7) {
                     $this->flashErrorMessage();
                 } else {
                     $this->redirect($requestable->handleRedirectNotification(auth()->user(), $notification->data['status']), true);

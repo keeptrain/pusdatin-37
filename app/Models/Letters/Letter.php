@@ -273,11 +273,7 @@ class Letter extends Model
 
     public function hasNonZeroPartNumber()
     {
-        return $this->documentUploads()
-            ->whereHas('versions', function ($query) {
-                $query->where('version', '!=', 0);
-            })
-            ->exists();
+        return $this->documentUploads->reject(fn($file) => $file->part_number !== 0);
     }
 
     protected function getFormattedMeetingsAttribute()

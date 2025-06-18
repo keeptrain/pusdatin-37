@@ -50,7 +50,7 @@ class Index extends Component
         $this->allowedStatuses = $this->getAllowedStatusesByRole($this->getCurrentRoleId);
     }
 
-    #[Title('Permohonan Sistem Informasi')]
+    #[Title('Permohonan SI & Data')]
     public function render()
     {
         return view('livewire.requests.information-system.index');

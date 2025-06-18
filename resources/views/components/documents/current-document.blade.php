@@ -6,24 +6,19 @@
     {{-- Selector --}}
     <div class="flex flex-wrap gap-2 mb-4">
         @foreach ($mapping as $map)
-            @php $part = $map['part_number']; @endphp
-            <flux:button x-on:click="selectedPart = '{{ $part }}'">
-                {{ $map['part_number_label'] }} 
+            <flux:button size="sm" x-on:click="selectedPart = '{{ $map['part_number'] }}'">
+                {{ $map['part_number_label'] }}
             </flux:button>
         @endforeach
     </div>
 
     {{-- PDF Viewer --}}
-    <div class="h-[600px] bg-gray-100 rounded-lg overflow-hidden">
+    <div class="h-[700px] bg-gray-100 rounded-lg overflow-hidden">
         @foreach ($mapping as $map)
-            @php
-                $file = $map['file_path'];
-                $part = $map['part_number'];
-            @endphp
-
-            <div x-show="selectedPart === '{{ $part }}'" class="w-full h-full">
-                @if ($file)
-                    <iframe src="{{ asset($file) }}" class="w-full h-full" frameborder="0"></iframe>
+            <div x-show="selectedPart === '{{ $map['part_number'] }}'" class="w-full h-full">
+                @if ($map['file_path'])
+                    <iframe src="{{ asset($map['file_path']) }}" class="w-full h-full rounded-lg mt-2" frameborder="0"
+                        loading="lazy"></iframe>
                 @else
                     <div class="w-full h-full flex items-center justify-center text-gray-500">
                         File tidak tersedia.
