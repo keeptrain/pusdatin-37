@@ -9,7 +9,7 @@
             <div class="mt-3 mr-3">
                 @foreach ($systemRequest->documentUploads as $fileData)
                     <div x-show="partTab === '{{ $fileData['part_number'] }}'" x-cloak>
-                        <iframe loading="lazy" src="{{ asset($fileData->activeVersion->file_path)}}" width="100%"
+                        <iframe loading="lazy" src="{{asset($fileData->activeVersion->file_path)}}" width="100%"
                             height="800" class="rounded-lg shadow border-none">
                             This browser does not support PDFs. Please download the PDF to view it:
                             <a href="{{ asset($fileData->activeVersion->file_path)}}">Download PDF</a>
