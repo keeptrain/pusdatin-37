@@ -179,7 +179,7 @@ class PublicRelationForm extends Component
         if ($template) {
             $filePath = $template->file_path;
 
-            $fileDownload = Storage::disk('public')->path($filePath);
+            $fileDownload = Storage::disk('local')->path($filePath);
 
             return response()->download($fileDownload);
         }

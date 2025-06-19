@@ -2,7 +2,6 @@
     openModal: false,
     hasReadSOP: false,
     sopConfirmed: false,
-    sopPdfUrl: '{{ asset('pdf/sop-sistem-informasi-data.pdf') }}',
     
     init() {
         // Cek apakah user sudah pernah membaca SOP
@@ -17,16 +16,6 @@
            
             this.openModal = true;
         }
-    },
-    
-    downloadSOP() {
-        // Download PDF dari folder public
-        const link = document.createElement('a');
-        link.href = this.sopPdfUrl;  
-        link.download = 'sop-sistem-informasi.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     },
     
     confirmReadSOP() {

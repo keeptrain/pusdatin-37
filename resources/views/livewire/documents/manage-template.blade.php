@@ -19,7 +19,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 py-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach ($templates as $template)
-                <div class="shadow-sm overflow-hidden">
+                <div class="shadow-sm overflow-hidden" wire:key="template-{{ $template->id }}">
                     <!-- Template Preview -->
                     <div class="template-preview h-40 p-6 flex items-center justify-center relative">
                         <div class="absolute top-4 right-4">
@@ -48,7 +48,7 @@
                         <div class="absolute top-4 left-4">
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                    {{ $template->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                            {{ $template->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                 <span
                                     class="w-1.5 h-1.5 rounded-full mr-1.5 {{ $template->is_active ? 'bg-green-400' : 'bg-gray-400' }}"></span>
                                 {{ $template->is_active ? 'Aktif' : 'Tidak aktif' }}

@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Letters\Letter;
+use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Letters\Letter;
+use App\Services\ZipServices;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
@@ -17,8 +18,8 @@ class DashboardController extends Controller
         $user = auth()->user();
         $userRoles = $user->roles()->pluck('id');
 
-        // Redirect user dashboard if the role is 'user'
-        if ($user->hasRole('user')) {
+        // Redirect user da shboard if the role is 'user'
+        if ($user->hasRole(roles: 'user')) {
             $meetingList = $this->getMeetingList();
             $todayMeetingCount = $meetingList->where('is_today', true)->sum(function ($dateGroup) {
                 return count($dateGroup['meetings']);
@@ -48,6 +49,15 @@ class DashboardController extends Controller
     public function getMeetingList()
     {
         return Letter::getNearMeetingsByDate();
+    }
+
+    public function downloadSopAndTemplates()
+    {
+        try {
+            return new ZipServices()->downloadSopAndTemplates();
+        } catch (\Exception $e) {
+            abort(500, 'Error: ' . $e->getMessage());
+        }
     }
 
     /**

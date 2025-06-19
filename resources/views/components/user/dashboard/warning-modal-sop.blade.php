@@ -9,25 +9,57 @@
     <div class="fixed inset-0" style="background-color: rgba(0,0,0,0.6);" aria-hidden="true"></div>
 
     {{-- Modal panel --}}
-    <div class="relative z-10  bg-white rounded-lg shadow-xl sm:max-w-lg w-full overflow-hidden">
+    <div class="relative z-10 bg-white rounded-lg shadow-xl sm:max-w-lg w-full overflow-hidden">
+        <div class="p-6 space-y-4">
+            <!-- Requirements List -->
+            <div class="space-y-4">
+                <flux:heading size="xl">Perhatian!</flux:heading>
+                <flux:subheading size="md">Sebelum mengajukan, harap memahami syarat & ketentuan di
+                    bawah ini.</flux:subheading>
 
-        {{-- Header --}}
-        <div class="px-6 py-5 text-center bg-amber-50 space-y-4">
-            <div class="mx-auto mb-4 flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
-                <x-lucide-file-text class="h-6 w-6 text-amber-600" />
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div
+                            class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-blue-600 font-bold text-sm">1</span>
+                        </div>
+                        <div class="flex flex-col items-start space-x-2">
+                            <p class="text-gray-700 text-sm leading-relaxed">Unduh dokumen SOP & template terbaru</p>
+                            <flux:button size="sm" href="{{ route('download.sop-and-templates') }}"
+                                icon="arrow-down-tray">
+                                Download</flux:button>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div
+                            class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-blue-600 font-bold text-sm">2</span>
+                        </div>
+                        <p class="text-gray-700 text-sm leading-relaxed">Membaca dan memahami SOP secara keseluruhan</p>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div
+                            class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-blue-600 font-bold text-sm">3</span>
+                        </div>
+                        <p class="text-gray-700 text-sm leading-relaxed">Memahami template yang telah disediakan, berada
+                            pada folder templates</p>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div
+                            class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span class="text-blue-600 font-bold text-sm">4</span>
+                        </div>
+                        <p class="text-gray-700 text-sm leading-relaxed">Mengisi form kelengkapan dokumen sesuai dengan
+                            template yang telah disediakan </p>
+                    </div>
+                </div>
             </div>
-            <flux:heading size="lg">SOP Permohonan Sistem Informasi & Data</flux:heading>
-
-            <p class="mt-2 text-base text-gray-800">
-                Silakan download dan baca SOP terlebih dahulu sebelum mengisi form permohonan.
-            </p>
-            <flux:button @click="downloadSOP()" icon="arrow-down-tray">Download SOP</flux:button>
         </div>
 
-        {{-- Body --}}
         <div class="px-6 pb-5 text-center">
             {{-- Checkbox confirmation --}}
-            <div class="mt-6 text-left">
+            <div class="text-left">
                 <label class="flex items-start space-x-3">
                     <flux:checkbox x-model="sopConfirmed"></flux:checkbox>
                     <span class="text-sm text-gray-700">
@@ -39,12 +71,11 @@
 
         {{-- Footer --}}
         <div class=" px-6 py-4 flex justify-end flex-col-reverse gap-1 sm:flex-row sm:justify-end sm:space-x-3">
-            <flux:button @click="closeModal()" variant="ghost">Batal</flux:button>
+            <flux:button @click="closeModal()" variant="subtle">Batal</flux:button>
 
-            <button @click="confirmReadSOP()" :disabled="!sopConfirmed" :class="sopConfirmed ? 'bg-[#364872] hover:bg-[#2c3751] focus:ring-[#364872]' : 'bg-gray-300 cursor-not-allowed'"
-                class="sm:w-auto justify-center rounded-md px-4 py-2 text-sm font-medium text-white focus:outline-none transition">
-                Lanjut Isi Form
-            </button>
+            <flux:button @click="confirmReadSOP()" variant="primary" x-bind:disabled="!sopConfirmed">
+                Isi Form
+            </flux:button>
         </div>
     </div>
 </div>

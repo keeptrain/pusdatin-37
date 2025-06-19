@@ -2,14 +2,18 @@
 
 namespace App\Livewire\Documents;
 
+use App\Models\Template;
+use GuzzleHttp\Psr7\MimeType;
 use Livewire\Component;
+use Livewire\Attributes\Title;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Template as ModelsTemplate;
+use App\Services\FileUploadServices;
 
-class Template extends Component
+#[Title('Atur Template')]
+class ManageTemplate extends Component
 {
     use WithFileUploads;
 
@@ -33,12 +37,48 @@ class Template extends Component
 
     public function mount()
     {
-        $this->templates = ModelsTemplate::filterByRole(auth()->user())->get();
+        $this->templates = Template::filterByRole(auth()->user())->get();
+    }
+
+    public function save(FileUploadServices $services)
+    {
+        if (auth()->user()->hasRole('pr_verifier')) {
+            $this->partNumber = 6;
+        }
+
+        $this->validate(
+            [
+                'name' => 'required|string',
+                'partNumber' => 'required|numeric',
+                'file' => 'required|file|mimes:doc,docx',
+            ]
+        );
+
+        DB::transaction(function () use ($services) {
+            $file = $this->file;
+            $fileName = $services->generateFileName($file, $file->extension());
+            $filePath = Storage::disk('local')->putFileAs('templates', $file, $fileName);
+
+            Template::create([
+                'name' => $this->name,
+                'part_number' => $this->partNumber,
+                'file_path' => $filePath,
+                'mime_type' => MimeType::fromFilename($filePath),
+                'is_active' => false,
+            ]);
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => 'Berhasil membuat template baru',
+            ]);
+        });
+
+        $this->redirectRoute("manage.templates", navigate: true);
     }
 
     public function edit($id)
     {
-        $template = ModelsTemplate::findOrFail($id);
+        $template = Template::findOrFail($id);
         $this->selectedTemplateId = $template->id;
         $this->updateName = $template->name;
         $this->updateIsActive = $template->is_active;
@@ -54,7 +94,7 @@ class Template extends Component
         ]);
 
         if (!$this->updateIsActive) {
-            $activeTemplates = ModelsTemplate::where('part_number', $this->updatePartNumber)
+            $activeTemplates = Template::where('part_number', $this->updatePartNumber)
                 ->where('id', '!=', $this->updatePartNumber) // Jangan termasuk diri sendiri
                 ->where('is_active', true)
                 ->exists();
@@ -69,10 +109,10 @@ class Template extends Component
         $selectedTemplateId = $this->selectedTemplateId;
 
         DB::transaction(function () use ($selectedTemplateId) {
-            $template = ModelsTemplate::findOrFail($selectedTemplateId);
+            $template = Template::findOrFail($selectedTemplateId);
 
             if ($this->updateIsActive) {
-                ModelsTemplate::where('part_number', $template->part_number)
+                Template::where('part_number', $template->part_number)
                     ->where('id', '!=', $selectedTemplateId) // Jangan nonaktifkan diri sendiri
                     ->update(['is_active' => false]);
             }
@@ -103,91 +143,48 @@ class Template extends Component
         });
     }
 
-    public function save()
-    {
-        $this->validate(
-            [
-                'name' => 'required|string',
-                'partNumber' => 'required|numeric',
-                'file' => 'required|file',
-                // 'isActive' => 'required|boolean',
-            ]
-        );
-
-        // $existingActiveTemplate = ModelsTemplate::where('part_number', $this->partNumber)
-        //     ->where('is_active', true)
-        //     ->exists();
-
-        // if ($existingActiveTemplate && $this->isActive) {
-        //     $this->addError('isActive', 'Part number ini sudah digunakan oleh template yang aktif.');
-        //     return;
-        // }
-
-        DB::transaction(function () {
-            $fileName = $this->file->getClientOriginalName();
-            $filePath = Storage::disk('public')->putFileAs('templates', $this->file, $fileName);
-
-            // Simpan data ke database
-            ModelsTemplate::create([
-                'name' => $this->name,
-                'part_number' => $this->partNumber,
-                'file_path' => $filePath,
-                'is_active' => false,
-            ]);
-
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => 'Berhasil membuat template baru',
-            ]);
-
-            return $this->redirect("/system/templates", navigate: true);
-        });
-    }
-
     public function delete($id)
     {
         DB::transaction(function () use ($id) {
-            $template = ModelsTemplate::findOrFail($id);
+            $template = Template::findOrFail($id);
 
-            // Pengecekan: Apakah ini satu-satunya template dengan part_number yang sama?
-            $otherTemplates = ModelsTemplate::where('part_number', $template->part_number)
-                ->where('id', '!=', $id) // Jangan termasuk diri sendiri
+            // Check if there are other templates with the same part number
+            $otherTemplates = Template::where('part_number', $template->part_number)
+                ->where('id', '!=', $id)
                 ->exists();
 
             if (!$otherTemplates) {
-                // Tambahkan pesan error ke session
                 session()->flash('status', [
                     'variant' => 'error',
-                    'message' => 'Tidak dapat menghapus template ini karena tidak ada template lain dengan part number yang sama.',
+                    'message' => 'Tidak dapat menghapus template ini karena tidak ada template lain dengan bagian template yang sama.',
                 ]);
 
-                return $this->redirect("/system/templates", navigate: true);
+                return $this->redirectRoute("manage.templates", navigate: true);
             }
-            
+
             $template->delete();
-            Storage::disk('public')->delete($template->file_path);
+            Storage::disk('local')->delete($template->file_path);
 
             session()->flash('status', [
                 'variant' => 'success',
                 'message' => 'Berhasil menghapus template',
             ]);
 
-            return $this->redirect("/system/templates", navigate: true);
         });
+
+        $this->redirectRoute('manage.templates', navigate: true);
     }
 
     public function download(int $id)
     {
-        $template = ModelsTemplate::findOrFail($id);
+        $template = Template::select('file_path')->findOrFail($id);
 
-        if (!$template) {
-            abort(404, 'Template not found.');
-        }
-
-        if (!Storage::disk('public')->exists($template->file_path)) {
+        // Validation file
+        if (!Storage::disk('local')->exists($template->file_path)) {
             abort(404, 'File not found in storage.');
         }
 
-        return response()->download(Storage::disk('public')->path($template->file_path));
+        $filePath = Storage::disk('local')->path($template->file_path);
+        return response()->download($filePath);
     }
 }

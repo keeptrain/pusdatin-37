@@ -5,8 +5,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -50,26 +49,8 @@ return new class extends Migration
         });
 
         /**
-         * Create the letter_directs table
+         * Create the letter_messages table
          */
-        Schema::create('letter_directs', function (Blueprint $table) {
-            $table->id();
-            $table->text('body');
-            $table->timestamps();
-        });
-
-        /**
-         * Create the letters_mappings table
-         */
-        Schema::create('letters_mappings', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('letter_id');
-            $table->morphs('letterable');
-
-            // Add Foreign Key to Letters Table
-            $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
-        });
-
         Schema::create('letter_messages', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('letter_id');
@@ -82,33 +63,6 @@ return new class extends Migration
             // Add Foreign Key to Letters Table
             $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
         });
-
-        Schema::create('document_templates', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->tinyInteger('part_number');
-            $table->string('file_path');
-            $table->boolean('is_active')->default(false);
-            $table->timestamps();
-        });
-
-        // // Create letter_revisions table to store revision history
-        // Schema::create('letter_revisions', function (Blueprint $table) {
-        //     $table->id();
-        //     $table->unsignedBigInteger('letter_id');
-        //     $table->unsignedBigInteger('revised_by'); // User who made the revision
-        //     $table->integer('revision_number');
-        //     $table->string('title', 255)->nullable();
-        //     $table->string('responsible_person', 255)->nullable();
-        //     $table->string('reference_number', 255)->nullable();
-        //     $table->text('revision_notes')->nullable(); // Notes explaining the revision
-        //     $table->text('changes_json')->nullable(); // Store changes in JSON format
-        //     $table->timestamps();
-
-        //     // Add Foreign Keys
-        //     $table->foreign('letter_id')->references('id')->on('letters');
-        //     $table->foreign('revised_by')->references('id')->on('users');
-        // });
     }
 
     /**
@@ -118,10 +72,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('letters');
         Schema::dropIfExists('request_status_tracks');
-        Schema::dropIfExists('letters_mappings');
-        Schema::dropIfExists('letter_uploads');
-        Schema::dropIfExists('letter_directs');
         Schema::dropIfExists('letter_messages');
-        Schema::dropIfExists('document_templates');
     }
 };

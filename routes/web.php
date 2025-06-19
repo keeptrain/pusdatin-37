@@ -20,7 +20,7 @@ use App\Http\Controllers\ExportPdf\HeadVerifierPdfExportController;
 use App\Http\Controllers\ExportPdf\PrVerifierPdfExportController;
 use App\Http\Controllers\ExportPdf\SiVerifierPdfExportController;
 use App\Livewire\Admin\Analytic;
-use App\Livewire\Documents\Template;
+use App\Livewire\Documents\ManageTemplate;
 use App\Livewire\Requests\InformationSystem\Meeting;
 use App\Livewire\Requests\InformationSystem\Edit;
 use App\Livewire\Forms\SiDataRequestForm;
@@ -34,8 +34,8 @@ Route::get('dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-
     // Information System & Data
+    Route::get('/download-sop-and-templates', [DashboardController::class, 'downloadSopAndTemplates'])->name('download.sop-and-templates')->middleware('role:user');
     Route::get('form/si-data', SiDataRequestForm::class)->name('si-data.form')->middleware('can:create request');
     Route::get('information-system/{id}/edit', Edit::class)->name('is.edit')->middleware('can:revision si-data request');
 
@@ -88,7 +88,7 @@ Route::middleware(['auth'])->group(function () {
 Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_verifier|pr_verifier|head_verifier']], function () {
     Route::prefix('system')->group(function () {
         Route::get('users', ManageUsers::class)->name('manage.users');
-        Route::get('templates', Template::class)->name('manage.templates');
+        Route::get('templates', ManageTemplate::class)->name('manage.templates');
         // Route::get('template/create', [TemplateController::class, 'create'])->name('create.template');
         // Route::post('template/store', [TemplateController::class, 'store'])->name('store.template');
         // Route::put('template/update/{id}', [TemplateController::class, 'update'])->name('update.template');
