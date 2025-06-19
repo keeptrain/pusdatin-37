@@ -4,13 +4,11 @@ namespace App\Livewire\Forms;
 
 use App\Enums\Division;
 use Livewire\Component;
-use App\Models\Template;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Title;
 use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadServices;
-use Illuminate\Support\Facades\Storage;
 
 #[Title('Form Sistem Informasi & Data')]
 class SiDataRequestForm extends Component
@@ -115,33 +113,5 @@ class SiDataRequestForm extends Component
         }
 
         return $documentVersionId;
-    }
-
-    public function downloadSOP()
-    {
-        $filePath = 'templates/SOP Pembangunan dan Pengembangan Aplikasi Pusdatin.pdf';
-        $disk = 'local';
-
-        if (auth()->user()) {
-            $fileDownload = Storage::disk($disk)->path($filePath);
-            return response()->download($fileDownload);
-        }
-
-        abort(404, 'Template not found.');
-    }
-
-    public function downloadTemplate($typeNumber)
-    {
-        $template = Template::where('part_number', $typeNumber)->where('is_active', '1')->first();
-
-        if (auth()->user() && $template) {
-            $filePath = $template->file_path;
-
-            $fileDownload = Storage::disk('public')->path($filePath);
-
-            return response()->download($fileDownload);
-        }
-
-        abort(404, 'Template not found.');
     }
 }

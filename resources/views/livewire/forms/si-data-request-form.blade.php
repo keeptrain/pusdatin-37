@@ -1,17 +1,4 @@
 <x-layouts.form.request legend="Form Permohonan layanan" nameForm="Sistem Informasi & Data">
-    {{-- <div class="bg-blue-50 border-blue-400 text-blue-800 p-4 rounded-md shadow-sm flex items-start space-x-3 mt-4"
-        role="alert">
-        <div>
-            <h4 class="font-bold text-lg mb-1">Penting!</h4>
-            <p class=" text-base">
-                Anda harus membaca dan memahami Standar Operasional Prosedur (SOP) sebelum
-                mengajukan permohonan.
-                <a wire:click="downloadSOP" class="underline font-bold hover:text-blue-900 cursor-pointer">Download
-                    disini</a>
-            </p>
-        </div>
-    </div> --}}
-    <!-- Section 1: Basic information -->
     <form x-data="{
         activeUploads: 0,
         progress: 0,
@@ -65,20 +52,18 @@
                         <x-letters.input-file-adapter title="Permohonan (nota dinas)" model="files.0" required />
 
                         <!-- File Upload -->
-                        <x-letters.input-file-adapter title="1. Dokumen Identifikasi Aplikasi" model="files.1" required
-                            template filePath="downloadTemplate('1')" />
+                        <x-letters.input-file-adapter title="1. Dokumen Identifikasi Aplikasi" model="files.1"
+                            required />
 
-                        <x-letters.input-file-adapter title="2. SOP Aplikasi" model="files.2" required template
-                            filePath="downloadTemplate('2')" />
+                        <x-letters.input-file-adapter title="2. SOP Aplikasi" model="files.2" required />
 
-                        <x-letters.input-file-adapter title="3. Pakta Integritas Implementasi" model="files.3" required
-                            template filePath="downloadTemplate('3')" />
+                        <x-letters.input-file-adapter title="3. Pakta Integritas Implementasi" model="files.3"
+                            required />
 
-                        <x-letters.input-file-adapter title="4. Form RFC Pusdatinkes" model="files.4" required template
-                            filePath="downloadTemplate('4')" />
+                        <x-letters.input-file-adapter title="4. Form RFC Pusdatinkes" model="files.4" required />
 
-                        <x-letters.input-file-adapter title="5. Surat perjanjian kerahasiaan" model="files.5" optional
-                            template filePath="downloadTemplate('5')" />
+                        <x-letters.input-file-adapter title="5. Surat perjanjian kerahasiaan" model="files.5"
+                            optional />
 
                         <div x-data="{ open: false }" class="border-l-2 border-gray-400 bg-gray-50 ">
                             <div class="p-2 flex justify-between items-center cursor-pointer" @click="open = !open">
