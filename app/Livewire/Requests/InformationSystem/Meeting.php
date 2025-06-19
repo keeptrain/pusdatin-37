@@ -49,57 +49,57 @@ class Meeting extends Component
     #[Computed]
     public function getMeeting()
     {
-        // Ambil data InformationSystemRequest berdasarkan ID
+        // Get information system request by id
         $siRequest = Letter::select('meeting')->findOrFail($this->siRequestId);
         $meetings = $siRequest->meeting ?? [];
 
-        // Simpan waktu saat ini sekali saja untuk efisiensi
+        // Get current time
         $now = Carbon::now();
 
-        // Tambahkan informasi waktu ke setiap meeting
+        // Add time information to each meeting
         $meetings = array_map(function ($meeting) use ($now) {
             $meetingStart = Carbon::parse("{$meeting['date']} {$meeting['start']}");
             $meetingEnd = Carbon::parse("{$meeting['date']} {$meeting['end']}");
 
-            // Tentukan status meeting
+            // Determine meeting status
             if ($now->lt($meetingStart)) {
-                // Meeting belum dimulai
+                // Meeting has not started
                 $diffInDays = round($now->diffInDays($meetingStart, false));
                 $meeting['status'] = $diffInDays == 0 ? "Hari ini" : "$diffInDays hari lagi";
             } elseif ($now->lte($meetingEnd)) {
-                // Meeting sedang berlangsung
+                // Meeting is ongoing
                 $meeting['status'] = "Sedang berlangsung";
             } elseif ($now->isSameDay($meetingEnd)) {
-                // Meeting sudah lewat, tetapi masih di hari yang sama
+                // Meeting is today but already passed
                 $meeting['status'] = "Hari ini tetapi sudah lewat";
             } else {
-                // Meeting sudah lewat (hari lain)
+                // Meeting is passed (other day)
                 $meeting['status'] = "Sudah lewat";
             }
 
-            // Simpan selisih waktu (opsional)
+            // Save time difference (optional)
             $meeting['time_diff'] = $now->diffInDays($meetingStart, false);
 
             return $meeting;
         }, $meetings);
 
-        // Urutkan meeting berdasarkan waktu terdekat dari sekarang
+        // Sort meeting based on the closest time from now
         uasort($meetings, function ($a, $b) use ($now) {
             $timeA = Carbon::parse("{$a['date']} {$a['end']}");
             $timeB = Carbon::parse("{$b['date']} {$b['end']}");
 
-            // Prioritaskan meeting yang belum lewat
+            // Prioritize meeting that has not started
             if ($timeA->isFuture() && $timeB->isFuture()) {
-                return $timeA <=> $timeB; // Keduanya belum lewat, urutkan berdasarkan waktu terdekat
+                return $timeA <=> $timeB; // Both have not started, sort based on closest time
             }
             if ($timeA->isFuture()) {
-                return -1; // $a belum lewat, prioritas lebih tinggi
+                return -1; // $a has not started, prioritize higher
             }
             if ($timeB->isFuture()) {
-                return 1; // $b belum lewat, prioritas lebih tinggi
+                return 1; // $b has not started, prioritize higher
             }
 
-            // Jika keduanya sudah lewat, urutkan dari yang paling lama lewat ke yang baru saja lewat
+            // If both have passed, sort from the oldest to the most recent
             return $timeA <=> $timeB;
         });
 
@@ -108,7 +108,7 @@ class Meeting extends Component
 
     public function create()
     {
-        // Validasi input
+        // Validate input
         $rules = [
             'selectedOption' => 'required|in:in-person,online-meet',
             'meeting.date' => 'required|date',
@@ -116,7 +116,7 @@ class Meeting extends Component
             'meeting.end' => 'required|date_format:H:i|after:meeting.start',
         ];
 
-        // Tambahkan validasi berdasarkan pilihan lokasi atau link menggunakan array dinamis
+        // Add validation based on location or link selection using dynamic array
         $rules['meeting.' . ($this->selectedOption === 'in-person' ? 'location' : 'link')] =
             $this->selectedOption === 'in-person'
             ? 'required|string|max:255'
@@ -124,11 +124,11 @@ class Meeting extends Component
 
         $this->validate($rules);
 
-        // Temukan record Letter berdasarkan ID
+        // Find record Letter based on ID
         $siRequest = Letter::findOrFail($this->siRequestId);
 
         DB::transaction(function () use ($siRequest) {
-            // Ambil meeting yang sudah ada (jika ada)
+            // Get existing meetings (if any)
             $existingMeetings = $siRequest->meeting ?? [];
 
             // Data meeting baru
@@ -139,7 +139,7 @@ class Meeting extends Component
                 'result' => null,
             ];
 
-            // Tambahkan location atau link sesuai pilihan
+            // Add location or link based on selection
             if ($this->selectedOption === 'in-person') {
                 $newMeeting['location'] = $this->meeting['location'];
             } elseif ($this->selectedOption === 'online-meet') {
@@ -149,10 +149,10 @@ class Meeting extends Component
                 }
             }
 
-            // Tambahkan meeting baru ke array dengan key incremental
+            // Add new meeting to array with incremental key
             $existingMeetings[] = $newMeeting;
 
-            // Update kolom meeting di database
+            // Update meeting column in database
             $siRequest->update([
                 'meeting' => $existingMeetings,
             ]);
@@ -175,10 +175,10 @@ class Meeting extends Component
             $SiRequest = Letter::findOrFail($this->siRequestId);
             $meetings = $SiRequest->meeting;
 
-            // Perbarui hasil meeting untuk key yang dipilih
+            // Update meeting result for selected key
             $meetings[$selectedResultKey]['result'] = $this->result[$selectedResultKey];
 
-            // Simpan kembali ke database
+            // Save back to database
             $SiRequest->update(['meeting' => $meetings]);
 
             // Reset form
@@ -200,13 +200,13 @@ class Meeting extends Component
 
             $meetings = $SiRequest->meeting;
 
-            // Hapus elemen berdasarkan key
+            // Remove element based on key
             unset($meetings[$selectedKey]);
 
-            // Reset index jika kamu ingin (opsional tergantung kebutuhan)
+            // Reset index if you want (optional depending on needs)
             $meetings = array_values($meetings);
 
-            // Simpan kembali array meeting yang telah dihapus ke model
+            // Save back array meeting that has been deleted to model
             $SiRequest->meeting = $meetings;
             $SiRequest->save();
         });

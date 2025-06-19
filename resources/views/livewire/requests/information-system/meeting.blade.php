@@ -5,6 +5,7 @@
 
     <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$siRequestId">
         <div class="md:p-12 space-y-4">
+            @unlessrole('head_verifier')
             <flux:button @click="createMeeting = !createMeeting" class="w-full" icon="plus">
                 Rapat baru
             </flux:button>
@@ -16,10 +17,12 @@
                     <p class="text-sm text-gray-600">Buat rapat baru berdasarkan opsi yang dipilih</p>
                 </div>
 
+
                 <div class="items-start space-y-2 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-0">
                     <x-menu.information-system.meeting-options wire:model.live="selectedOption" />
                 </div>
             </form>
+            @endunlessrole
 
             <section class="items-start grid grid-rows-2 space-y-4">
                 @forelse ($this->getMeeting as $key => $value)
