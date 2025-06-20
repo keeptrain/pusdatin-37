@@ -109,7 +109,7 @@
                                         wire:navigate>
                                         Activity
                                     </flux:menu.item>
-                                    <flux:menu.item :href="route('letter.chat', [$item->id])" icon="chat-bubble-left-right"
+                                    <flux:menu.item :href="route('request.chat', [$item->id])" icon="chat-bubble-left-right"
                                         wire:navigate>Chat</flux:menu.item>
                                     <flux:menu.item :href="route('is.rollback', [$item->id])" icon="backward"
                                         wire:navigate>
