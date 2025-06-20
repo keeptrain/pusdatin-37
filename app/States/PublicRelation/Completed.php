@@ -6,8 +6,7 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class Completed extends PublicRelationStatus
 {
-
-    public function label(): String
+    public function label(): string
     {
         return "Permohonan Selesai";
     }
@@ -42,13 +41,13 @@ class Completed extends PublicRelationStatus
         return 'Berhasil menyelesaikan permohonan layanan';
     }
 
-    public function trackingMessage(): String
+    public function trackingMessage(): string
     {
-        return "Permohonan layanan telah selesai dan link media yang di usulkan telah disisipkan.";
+        return "Permohonan layanan telah selesai dan link media yang di usulkan telah dilampirkan.";
     }
 
     public function userNotificationMessage(array $context): string
     {
-        return "Permohonan ini telah selesai, link sudah disisipkan";
+        return "Permohonan ini telah selesai, link sudah dilampirkan";
     }
 }
