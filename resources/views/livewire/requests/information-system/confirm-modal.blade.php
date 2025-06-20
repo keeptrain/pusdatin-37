@@ -6,5 +6,4 @@
     <x-modal.approved :systemRequestId="$systemRequestId" :allowedParts="$allowedParts" />
 
     <x-modal.information-system.completed />
-
 </section>

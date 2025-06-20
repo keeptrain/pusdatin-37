@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Letters;
+namespace App\Livewire\Requests\InformationSystem;
 
 use App\Enums\Division;
 use Livewire\Component;
@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 
-class ModalConfirmation extends Component
+class ConfirmModal extends Component
 {
     #[Locked]
     public int $systemRequestId;
