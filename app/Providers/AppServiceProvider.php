@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\InformationSystemRequest;
+use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Illuminate\Support\Facades\Gate;
 use App\Policies\InformationSystemRequestPolicy;
