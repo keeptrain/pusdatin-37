@@ -1,16 +1,11 @@
 <?php
 
-use App\Livewire\Letters\Chat;
 use App\Livewire\Documents\Review;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Appearance;
-use App\Livewire\User\Detail;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Letters\Data\Rollback;
-use App\Livewire\Letters\DetailHistory;
-use App\Livewire\Letters\HistoryLetter;
 use App\Livewire\Forms\PublicRelationForm;
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Requests\PublicRelation\Show;
@@ -49,6 +44,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('information-system/{id}/rollback', \App\Livewire\Requests\InformationSystem\Rollback::class)->name('is.rollback');
     });
 
+    Route::get('request/{id}/chat', \App\Livewire\Requests\Chat::class)->name('request.chat');
+
     // Public Relation
     Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form')->middleware('can:create request');
 
@@ -64,8 +61,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('permohonan/{type}/{id}', \App\Livewire\Requests\User\Detail::class)->name('detail.request');
     });
 
-    Route::get('letter/{id}/review', Review::class)->name('letter.review');
-    Route::get('letter/{id}/chat', Chat::class)->name('letter.chat');
+    // Route::get('information-system/{id}/review', Review::class)->name('is.review');
+    
 
     // analytic
     // Route::get('/letter/{letter}/activity', function (Letter $letter) {
