@@ -42,6 +42,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('information-system/{id}/meeting', Meeting::class)->name('is.meeting');
         Route::get('information-system/{id}/version', RevisionComparision::class)->name('comparison.version');
         Route::get('information-system/{id}/rollback', \App\Livewire\Requests\InformationSystem\Rollback::class)->name('is.rollback');
+        Route::get('information-system/{id}/review', Review::class)->name('is.review');
     });
 
     Route::get('request/{id}/chat', \App\Livewire\Requests\Chat::class)->name('request.chat');
@@ -61,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('permohonan/{type}/{id}', \App\Livewire\Requests\User\Detail::class)->name('detail.request');
     });
 
-    // Route::get('information-system/{id}/review', Review::class)->name('is.review');
+    
     
 
     // analytic
