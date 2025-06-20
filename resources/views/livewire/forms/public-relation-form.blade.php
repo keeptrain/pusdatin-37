@@ -57,20 +57,21 @@
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 class="space-y-6 border border-gray-200 rounded-lg p-4">
 
-                <flux:radio.group wire:model="target" label="Sasaran">
-                    <flux:radio label="Masyarakat Umum" value="masyarakat_umum" />
-                    <flux:radio label="Tenaga Kesehatan" value="tenaga_kesehatan" />
-                    <flux:radio label="Anak Sekolah" value="anak_sekolah" />
-                    <div class="flex items-center">
-                        <flux:radio label="Other:" value="other" />
+                <flux:checkbox.group label="Sasaran">
+                    <flux:checkbox label="Masyarakat Umum" value="masyarakat_umum" wire:model.live="target" />
+                    <flux:checkbox label="Tenaga Kesehatan" value="tenaga_kesehatan" wire:model.live="target" />
+                    <flux:checkbox label="Anak Sekolah" value="anak_sekolah" wire:model.live="target" />
+                    <flux:checkbox label="Semua orang" value="semua_orang" wire:model.live="target" />
+                    {{-- <div class="flex items-center">
+                        <flux:checkbox label="Other:" value="other" />
                         <!-- Input Field for "Other" -->
                         <input type="text" wire:model.blur="otherTarget"
                             class="ml-2 border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-1 w-60" />
-                    </div>
+                    </div> --}}
                     @error('otherTarget')
                         <flux:text class="text-md text-red-500">{{ $message }}</flux:text>
                     @enderror
-                </flux:radio.group>
+                </flux:checkbox.group>
 
                 <flux:checkbox.group wire:model="mediaType" label="Jenis Media yang Diusulkan"
                     x-model="selectedMediaType">
