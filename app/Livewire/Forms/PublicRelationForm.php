@@ -25,7 +25,7 @@ class PublicRelationForm extends Component
 
     public $theme = '';
 
-    public $target = '';
+    public $target = [];
 
     public $otherTarget = '';
 
@@ -78,7 +78,7 @@ class PublicRelationForm extends Component
         ];
     }
 
-    #[Computed(persist: true, cache:true)]
+    #[Computed(persist: true, cache: true)]
     public function getMonths()
     {
         $model = new PublicRelationRequest();
@@ -100,7 +100,7 @@ class PublicRelationForm extends Component
 
             $prData = $this->createPublicRelationForm();
             $prData->logStatus(null);
-            $uploads = $fileUploadServices->storeMultiplesFilesPr($validFiles, $this->mediaType);
+            $uploads = $fileUploadServices->storeMultiplesFilesPr($validFiles);
             $this->insertDocumentUploads($uploads, $prData);
             $prData->sendNewServiceRequestNotification('promkes_verifier');
 
@@ -108,10 +108,10 @@ class PublicRelationForm extends Component
         });
     }
 
-    public function updatedOtherTarget($value)
+    public function updatedTarget($value)
     {
-        if ($value && $this->target !== 'other') {
-            $this->target = 'other';
+        if ($value === 'semua_orang') {
+            $this->target = ['semua_orang', 'masyarakat_umum', 'tenaga_kesehatan', 'anak_sekolah'];
         }
     }
 

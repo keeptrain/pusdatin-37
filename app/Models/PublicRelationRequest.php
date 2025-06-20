@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Support\Str;
-use App\Trait\HasActivities;
 use IntlDateFormatter;
+use App\Trait\HasActivities;
 use Spatie\ModelStates\HasStates;
 use App\Enums\PublicRelationRequestPart;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -28,6 +27,7 @@ class PublicRelationRequest extends Model
 
     protected $casts = [
         'status' => PublicRelationStatus::class,
+        'target' => 'array',
         'links' => 'array'
     ];
 
@@ -81,9 +81,14 @@ class PublicRelationRequest extends Model
         return Carbon::parse($value)->format('d F Y');
     }
 
-    public function getCreatedAtAttribute($value)
+    public function getSpesificDateAttribute($value)
     {
         return Carbon::parse($value)->format('d F Y');
+    }
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d F Y, H:i');
     }
 
     public function publicationPlan()
@@ -98,7 +103,12 @@ class PublicRelationRequest extends Model
 
     public function getTargetAttribute($value)
     {
-        return Str::headline($value);
+        $arrayData = json_decode($value, true) ?? []; // 'true' for array associative, ?? [] for fallback
+
+        return array_map(
+            fn($item) => is_string($item) ? ucwords(str_replace('_', ' ', $item)) : $item,
+            $arrayData
+        );
     }
 
     public function getMonthPublicationAttribute($value)
@@ -109,10 +119,10 @@ class PublicRelationRequest extends Model
             IntlDateFormatter::NONE,
             null,
             null,
-            'MMMM' // Format untuk nama bulan penuh
+            'MMMM' // Format for full month name
         );
 
-        // Konversi angka bulan menjadi nama bulan dalam bahasa Indonesia
+        // Convert month number to full month name in Indonesian
         return $formatter->format(mktime(0, 0, 0, $value, 1)) ?? 'Bulan Tidak Diketahui';
     }
 
