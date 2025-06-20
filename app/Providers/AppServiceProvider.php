@@ -38,6 +38,6 @@ class AppServiceProvider extends ServiceProvider
         // Public Relation Request Policy
         Gate::policy(PublicRelationRequest::class, PublicRelationRequestPolicy::class);
 
-        Model::preventLazyLoading(! app()->isProduction());
+        Model::preventLazyLoading(!app()->isProduction());
     }
 }
