@@ -4,7 +4,7 @@
             <x-lucide-log-in />
         </span>
     </a>
-    <x-auth-header :title="__('Log in to your account')" :description="null" />
+    <x-auth-header :title="__('Masuk ke akun Anda')" :description="null" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -20,8 +20,9 @@
                 autocomplete="current-password" :placeholder="__('Password')" />
 
             @if (Route::has('password.request'))
-                <flux:link variant="subtle" class="absolute right-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
-                    {{ __('Forgot your password?') }}
+                <flux:link variant="subtle" class="absolute right-0 top-0 text-sm" :href="route('password.request')"
+                    wire:navigate>
+                    {{ __('Lupa password?') }}
                 </flux:link>
             @endif
         </div>
