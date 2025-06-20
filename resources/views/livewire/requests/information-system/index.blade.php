@@ -111,7 +111,7 @@
                                     </flux:menu.item>
                                     <flux:menu.item :href="route('letter.chat', [$item->id])" icon="chat-bubble-left-right"
                                         wire:navigate>Chat</flux:menu.item>
-                                    <flux:menu.item :href="route('letter.rollback', [$item->id])" icon="backward"
+                                    <flux:menu.item :href="route('is.rollback', [$item->id])" icon="backward"
                                         wire:navigate>
                                         Rollback</flux:menu.item>
                                 </flux:menu>

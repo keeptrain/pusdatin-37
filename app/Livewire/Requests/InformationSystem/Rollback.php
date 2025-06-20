@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Livewire\Letters\Data;
+namespace App\Livewire\Requests\InformationSystem;
 
 use Livewire\Attributes\Computed;
 use Livewire\Component;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\DB;
-use App\Models\Letters\RequestStatusTrack;
+use App\Models\RequestStatusTrack;
 use Livewire\Attributes\Locked;
 
 class Rollback extends Component
 {
     #[Locked]
-    public $letterId;
+    public $systemRequestId;
 
     public $changeStatus = '';
 
@@ -25,18 +25,18 @@ class Rollback extends Component
 
     public function mount(int $id)
     {
-        $this->letterId = $id;
+        $this->systemRequestId = $id;
     }
 
     #[Computed]
-    public function letter(): Letter
+    public function systemRequest(): InformationSystemRequest
     {
-        return Letter::with([
+        return InformationSystemRequest::with([
             'requestStatusTrack' => fn($query) =>
             $query->filterByUser(auth()->user()->name)
                 ->sortBy($this->filter['sortBy'])
                 ->withDeletedRecords($this->filter['deletedRecords'])
-        ])->findOrFail($this->letterId);
+        ])->findOrFail($this->systemRequestId);
     }
 
     public function updatedFilter()
@@ -47,12 +47,12 @@ class Rollback extends Component
     public function save()
     {
         DB::transaction(function () {
-            $letter = $this->letter;
+            $systemRequest = $this->systemRequest;
 
-            $letter->transitionStatusOnly($this->changeStatus);
-            $letter->update(['active_revision' => false]);
+            $systemRequest->transitionStatusOnly($this->changeStatus);
+            $systemRequest->update(['active_revision' => false]);
 
-            $letter->mapping->each(function ($mapping) {
+            $systemRequest->mapping->each(function ($mapping) {
                 if ($mapping->letterable) {
                     $mapping->letterable->update([
                         'needs_revision' => false,
@@ -60,7 +60,7 @@ class Rollback extends Component
                 }
             });
 
-            $validIds = $letter->requestStatusTrack
+            $validIds = $systemRequest->requestStatusTrack
                 ->pluck('id')
                 ->intersect($this->trackId);
 
@@ -72,7 +72,7 @@ class Rollback extends Component
                 }
             }
 
-            return redirect()->to("/letter/{$this->letterId}/activity")
+            return redirect()->to("/information-system/{$this->systemRequestId}")
                 ->with('status', [
                     'variant' => 'success',
                     'message' => 'Successfully rollback action!'

@@ -45,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('information-system/{id}/activity', \App\Livewire\Requests\InformationSystem\Activity::class)->name('is.activity');
         Route::get('information-system/{id}/meeting', Meeting::class)->name('is.meeting');
         Route::get('information-system/{id}/version', RevisionComparision::class)->name('comparison.version');
-        Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
+        Route::get('information-system/{id}/rollback', \App\Livewire\Requests\InformationSystem\Rollback::class)->name('is.rollback');
     });
 
     // Public Relation

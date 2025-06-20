@@ -1,5 +1,5 @@
 <div x-data="{ status: '' }">
-    <flux:button :href="route('is.show', [$letterId])" icon="arrow-long-left" variant="subtle">Batal
+    <flux:button :href="route('is.show', [$systemRequestId])" icon="arrow-long-left" variant="subtle">Batal
     </flux:button>
 
     <form wire:submit="save">
@@ -12,7 +12,7 @@
                 </div>
 
                 <div class="flex">
-                    <flux:notification.status-badge :status="$this->letter->status" />
+                    <flux:notification.status-badge :status="$this->systemRequest->status" />
                     <flux:icon.arrow-long-right class="size-6 pt-1 ml-6 mr-6" />
                     <div>
                         <flux:select wire:model="changeStatus" size="sm" placeholder="Ke status...">
@@ -85,7 +85,7 @@
                     </div>
 
                     <flux:checkbox.group wire:model.live="trackId" class="h-60 p-3 overflow-y-auto">
-                        @foreach ($this->letter->requestStatusTrack as $track)
+                        @foreach ($this->systemRequest->requestStatusTrack as $track)
                             <div class="mb-4">
                                 <flux:checkbox wire:key="{{ $track->id }}" value="{{ $track->id }}"
                                     label="{{ $track->created_at->format('d F y, H:i') }}"
