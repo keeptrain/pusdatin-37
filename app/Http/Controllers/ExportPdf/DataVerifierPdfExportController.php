@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\ExportPdf;
 
 use App\Http\Controllers\Controller;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -11,11 +11,10 @@ class DataVerifierPdfExportController extends Controller
 {
     public function export()
     {
-
-        $letters = Letter::with('user')->where('current_division', 4)->get();
+        $informationSystemRequests = InformationSystemRequest::with('user')->where('current_division', 4)->get();
 
         $data = [
-            'letters' => $letters,
+            'informationSystemRequests' => $informationSystemRequests,
         ];
 
         $pdf = Pdf::loadView('pdf.data_verifier_report', $data);
@@ -28,7 +27,7 @@ class DataVerifierPdfExportController extends Controller
         $end    = $request->query('end_date');
         $status = $request->query('status');
 
-        $query = Letter::with('user')
+        $query = InformationSystemRequest::with('user')
             ->where('current_division', 4);
 
         if ($start) {
@@ -38,13 +37,13 @@ class DataVerifierPdfExportController extends Controller
             $query->whereDate('created_at', '<=', $end);
         }
         if ($status && $status !== 'all') {
-            $stateClass = Letter::resolveStatusClassFromString($status);
+            $stateClass = InformationSystemRequest::resolveStatusClassFromString($status);
             $query->whereState('status', $stateClass);
         }
 
-        $letters = $query->get();
+        $informationSystemRequests = $query->get();
 
-        $data = compact('letters', 'start', 'end', 'status');
+        $data = compact('informationSystemRequests', 'start', 'end', 'status');
 
         $pdf = Pdf::loadView('pdf.data_verifier_filtered', $data);
 

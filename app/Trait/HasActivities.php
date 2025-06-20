@@ -5,11 +5,6 @@ namespace App\Trait;
 
 use Carbon\Carbon;
 use App\Models\User;
-use App\States\Replied;
-use App\States\Rejected;
-use App\States\Disposition;
-use App\States\ApprovedKasatpel;
-use App\States\ApprovedKapusdatin;
 use Illuminate\Support\Collection;
 use App\Models\PublicRelationRequest;
 use App\States\PublicRelation\Completed;
@@ -18,10 +13,15 @@ use Illuminate\Support\Facades\Notification;
 use App\States\PublicRelation\PromkesComplete;
 use App\Notifications\NewServiceRequestNotification;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use App\Notifications\LetterServiceRequestNotification;
+use App\Notifications\SiServiceRequestNotification;
 use App\Notifications\PublicRelationRequestNotification;
 use App\States\PublicRelation\PusdatinQueue;
-use App\States\RepliedKapusdatin;
+use App\States\InformationSystem\RepliedKapusdatin;
+use App\States\InformationSystem\Replied;
+use App\States\InformationSystem\Rejected;
+use App\States\InformationSystem\Disposition;
+use App\States\InformationSystem\ApprovedKasatpel;
+use App\States\InformationSystem\ApprovedKapusdatin;
 
 trait HasActivities
 {
@@ -50,7 +50,7 @@ trait HasActivities
 
     public function logStatus(?string $notes)
     {
-        $divisionParamForTrackingMessage = ($this->status instanceof ApprovedKasatpel || $this->status instanceof Process && $this->status instanceof Completed)
+        $divisionParamForTrackingMessage = ($this->status instanceof ApprovedKasatpel || $this->status instanceof Process && $this->status instanceof \App\States\InformationSystem\Completed)
             ? (int) $this->current_division
             : (int) $this->active_checking;
 
@@ -115,14 +115,14 @@ trait HasActivities
             // Kirim notifikasi ke setiap roles
             if ($finalRecipients->isNotEmpty()) {
                 $finalRecipients->each(function ($user) use ($siRequest) {
-                    $user->notify(new LetterServiceRequestNotification($siRequest));
+                    $user->notify(new SiServiceRequestNotification($siRequest));
                 });
             }
         } elseif ($newStatus == Rejected::class) {
             $finalRecipient = User::findOrFail($siRequest->user_id);
 
             // Kirim notifikasi ke pemohon
-            $finalRecipient->notify(new LetterServiceRequestNotification($siRequest));
+            $finalRecipient->notify(new SiServiceRequestNotification($siRequest));
         }
     }
 
@@ -133,39 +133,39 @@ trait HasActivities
         $notificationLogicMap = [
             ApprovedKapusdatin::class => function (): void {
                 $recipient = User::role($this->current_division)->get();
-                Notification::send($recipient, new LetterServiceRequestNotification($this));
+                Notification::send($recipient, new SiServiceRequestNotification($this));
             },
             RepliedKapusdatin::class => function () {
                 if ($this->need_review) {
                     $recipients = User::role($this->active_checking)->get();
                     if ($recipients->isNotEmpty()) {
-                        Notification::send($recipients, new LetterServiceRequestNotification($this));
+                        Notification::send($recipients, new SiServiceRequestNotification($this));
                     }
                 } else {
                     $recipient = User::findOrFail($this->user_id);
-                    $recipient->notify(new LetterServiceRequestNotification($this));
+                    $recipient->notify(new SiServiceRequestNotification($this));
                 }
             },
             ApprovedKasatpel::class => function () {
                 $recipients = User::role($this->active_checking)->get();
                 if ($recipients->isNotEmpty()) {
-                    Notification::send($recipients, new LetterServiceRequestNotification($this));
+                    Notification::send($recipients, new SiServiceRequestNotification($this));
                 }
             },
             Replied::class => function () {
                 if ($this->need_review) {
                     $recipients = User::role($this->active_checking)->get();
                     if ($recipients->isNotEmpty()) {
-                        Notification::send($recipients, new LetterServiceRequestNotification($this));
+                        Notification::send($recipients, new SiServiceRequestNotification($this));
                     }
                 } else {
                     $recipient = User::findOrFail($this->user_id);
-                    $recipient->notify(new LetterServiceRequestNotification($this));
+                    $recipient->notify(new SiServiceRequestNotification($this));
                 }
             },
             Rejected::class => function () {
                 $recipient = User::findOrFail($this->user_id);
-                $recipient->notify(new LetterServiceRequestNotification($this));
+                $recipient->notify(new SiServiceRequestNotification($this));
             }
         ];
 

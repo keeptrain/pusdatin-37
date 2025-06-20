@@ -2,6 +2,7 @@
 
 namespace App\Models\Letters;
 
+use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,9 +30,9 @@ class RequestStatusTrack extends Model
         });
     }
 
-    public function letter()
+    public function informationSystem()
     {
-        return $this->belongsTo(Letter::class);
+        return $this->belongsTo(InformationSystemRequest::class);
     }
 
     public function publicRelation()

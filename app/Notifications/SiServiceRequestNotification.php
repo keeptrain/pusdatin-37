@@ -3,28 +3,28 @@
 namespace App\Notifications;
 
 use App\Models\User;
-use App\States\Replied;
-use App\States\Rejected;
-use App\States\Disposition;
 use Illuminate\Bus\Queueable;
-use App\Models\Letters\Letter;
-use App\States\ApprovedKasatpel;
-use App\States\RepliedKapusdatin;
+use App\States\InformationSystem\ApprovedKasatpel;
+use App\States\InformationSystem\Disposition;
+use App\States\InformationSystem\Rejected;
+use App\States\InformationSystem\Replied;
+use App\States\InformationSystem\RepliedKapusdatin;
+use App\Models\InformationSystemRequest;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class LetterServiceRequestNotification extends Notification implements ShouldQueue
+class SiServiceRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public Letter $letter;
+    public InformationSystemRequest $informationSystemRequest;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($letter)
+    public function __construct($informationSystemRequest)
     {
-        $this->letter = $letter;
+        $this->informationSystemRequest = $informationSystemRequest;
     }
 
     /**
@@ -44,7 +44,7 @@ class LetterServiceRequestNotification extends Notification implements ShouldQue
      */
     public function toArray(object $notifiable): array
     {
-        $siRequest = $this->letter;
+        $siRequest = $this->informationSystemRequest;
         $context = [];
 
         $userName = User::findOrFail($siRequest->user_id)->name;

@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Events\AfterSheet;
@@ -26,7 +26,7 @@ class SiVerifierExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        $query = Letter::with('user')
+        $query = InformationSystemRequest::with('user')
             ->where('current_division', 3);
 
         // Jika ada tanggal mulai, filter created_at >= startDate
@@ -40,7 +40,7 @@ class SiVerifierExport implements FromCollection, WithHeadings
         }
         if ($this->status && $this->status !== 'all') {
             // filter berdasarkan status
-            $statusClass = Letter::resolveStatusClassFromString($this->status);
+            $statusClass = InformationSystemRequest::resolveStatusClassFromString($this->status);
             $query->whereState('status', $statusClass);
         }
         $items = $query->get();

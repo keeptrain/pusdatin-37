@@ -4,7 +4,6 @@ namespace App\Models\Documents;
 
 use App\Enums\InformationSystemRequestPart;
 use App\Enums\PublicRelationRequestPart;
-use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\UploadVersion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,11 +23,6 @@ class DocumentUpload extends Model
     ];
 
     protected $appends = ['part_number_label'];
-
-    public function mapping()
-    {
-        return $this->morphOne(LettersMapping::class, 'letterable');
-    }
 
     public function documentable()
     {
@@ -60,7 +54,7 @@ class DocumentUpload extends Model
             case 'PublicRelationRequest':
                 $partEnumCase = PublicRelationRequestPart::tryFrom($this->part_number);
                 return $partEnumCase->label();
-            case 'Letter':
+            case 'InformationSystemRequest':
                 $partEnumCase = InformationSystemRequestPart::tryFrom($this->part_number);
                 return $partEnumCase->label();
             default:

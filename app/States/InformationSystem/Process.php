@@ -1,57 +1,55 @@
 <?php
 
-namespace App\States;
+namespace App\States\InformationSystem;
 
-use App\States\LetterStatus;
+use App\States\InformationSystem\InformationSystemStatus;
 
-class Disposition extends LetterStatus
+class Process extends InformationSystemStatus
 {
     public function label(): string
     {
-        return 'Didisposisikan';
+        return 'Proses Permohonan';
     }
 
     public function color(): string
     {
-        return 'text-purple-800';
+        return 'text-blue-800';
     }
 
     public function toastMessage(): string
     {
-        return 'Berhasil mendisposisikan permohonan layanan';
+        return 'Berhasil memproses permohonan layanan';
     }
 
     public function trackingMessage(?int $division): string
     {
         $divisionName = $this->getDivisionName($division);
 
-        return "Permohonan layanan anda di disposisikan oleh Kepala Pusat Data dan Teknologi Dinas Kesehatan 
-                ke Kepala Satuan Pelaksana {$divisionName}";
+        return "Permohonan layanan sedang diproses oleh divisi {$divisionName}";
     }
 
     public function userNotificationMessage(array $context): string
     {
-
-        return "Permohonan layanan didisposisikan dari Kapusdatin";
+        return "Permohonan layanan ini menunggu proses";
     }
 
     public function icon(): string
     {
-        return 'locate';
+        return 'hourglass';
     }
 
     public function badgeBg(): string
     {
-        return 'bg-purple-100';
+        return 'bg-blue-100';
     }
 
     public function percentage(): string
     {
-        return '25%';
+        return '50%';
     }
 
     public function percentageBar(): string
     {
-        return 'w-[25%]';
+        return 'w-[50%]';
     }
 }

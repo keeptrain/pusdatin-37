@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\ExportPdf;
 
 use App\Http\Controllers\Controller;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -12,11 +12,11 @@ class HeadVerifierPdfExportController extends Controller
 {
     public function export()
     {
-        $letters = Letter::with('user')->get();
+        $informationSystemRequests = InformationSystemRequest::with('user')->where('current_division', 3)->get();
         $prRequests = PublicRelationRequest::with('user')->get();
 
         $data = [
-            'letters' => $letters,
+            'informationSystemRequests' => $informationSystemRequests,
             'prRequests' => $prRequests,
         ];
 
@@ -34,9 +34,9 @@ class HeadVerifierPdfExportController extends Controller
         $source    = $request->query('source'); // 'letter' atau 'pr'
 
 
-        if ($source === 'letter') {
-            $query = Letter::with('user');
-        } else if ($source === 'pr') {
+        if ($source === 'information_system_request') {
+            $query = InformationSystemRequest::with('user');
+        } else if ($source === 'public_relation_request') {
             $query = PublicRelationRequest::with('user');
         } else {
             return abort(404);
@@ -53,10 +53,10 @@ class HeadVerifierPdfExportController extends Controller
 
         // Filter berdasarkan status (jika ada)
         if ($status && $status !== 'all') {
-            if ($source === 'letter') {
-                $stateClass = Letter::resolveStatusClassFromString($status);
+            if ($source === 'information_system_request') {
+                $stateClass = InformationSystemRequest::resolveStatusClassFromString($status);
                 $query->whereState('status', $stateClass);
-            } else if ($source === 'pr') {
+            } else if ($source === 'public_relation_request') {
                 $stateClassPr = PublicRelationRequest::resolveStatusClassFromString($status);
                 $query->whereState('status', $stateClassPr);
             }

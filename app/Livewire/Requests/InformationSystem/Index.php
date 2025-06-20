@@ -2,15 +2,14 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
-
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Title;
-use App\States\LetterStatus;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\States\InformationSystem\InformationSystemStatus;
 
 class Index extends Component
 {
@@ -75,7 +74,7 @@ class Index extends Component
 
     protected function buildBaseQuery()
     {
-        return Letter::select('id', 'user_id', 'title', 'current_division', 'status', 'created_at')
+        return InformationSystemRequest::select('id', 'user_id', 'title', 'current_division', 'status', 'created_at')
             ->with('user:id,name')
             ->filterCurrentDivisionByCurrentUser($this->getCurrentRoleId)
             ->filterByStatuses($this->allowedStatuses);
@@ -117,7 +116,7 @@ class Index extends Component
 
     public function getAllowedStatusesByRole($role): array
     {
-        return LetterStatus::statusesBasedRole($role);
+        return InformationSystemStatus::statusesBasedRole($role);
     }
 
     public function updatedAllowedStatuses($value): void
@@ -172,7 +171,7 @@ class Index extends Component
     public function deleteSelected()
     {
         DB::transaction(function () {
-            Letter::whereIn('id', $this->selectedSystemRequests)->delete();
+            InformationSystemRequest::whereIn('id', $this->selectedSystemRequests)->delete();
             $this->selectedSystemRequests = [];
         });
 

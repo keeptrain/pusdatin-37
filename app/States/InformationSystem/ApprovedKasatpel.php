@@ -1,10 +1,10 @@
 <?php
 
-namespace App\States;
+namespace App\States\InformationSystem;
 
-use App\States\LetterStatus;
+use App\States\InformationSystem\InformationSystemStatus;
 
-class ApprovedKasatpel extends LetterStatus
+class ApprovedKasatpel extends InformationSystemStatus
 {
     public function label(): string
     {

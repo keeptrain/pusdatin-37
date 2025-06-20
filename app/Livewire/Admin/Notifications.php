@@ -4,8 +4,8 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use App\States\Replied;
-use App\Models\Letters\Letter;
+use App\States\InformationSystem\Replied;
+use App\Models\InformationSystemRequest;
 use Livewire\Attributes\Computed;
 use App\Models\PublicRelationRequest;
 
@@ -158,16 +158,17 @@ class Notifications extends Component
             $modelId = $notification->data['requestable_id'];
 
             // Validation modelClass to prevent Injection
-            if (!in_array($modelClass, [Letter::class, PublicRelationRequest::class])) {
+            if (!in_array($modelClass, [InformationSystemRequest::class, PublicRelationRequest::class])) {
                 throw new \InvalidArgumentException("Class model invalid");
             }
 
             // Get requestable data from available container instance
             $requestable = app($modelClass)->findOrFail($modelId);
 
-            if ($modelClass === Letter::class || $modelClass === PublicRelationRequest::class) {
+            if ($modelClass === InformationSystemRequest::class || $modelClass === PublicRelationRequest::class) {
                 // $notification->markAsRead();
-                if (!$requestable->active_revision && $requestable->status == Replied::class && auth()->user()->currentUserRoleId() == 7) {
+                // Still bug cannot flash error
+                if (!$requestable->active_revision && $requestable->status === Replied::class && auth()->user()->currentUserRoleId() === 7) {
                     $this->flashErrorMessage();
                 } else {
                     $this->redirect($requestable->handleRedirectNotification(auth()->user(), $notification->data['status']), true);

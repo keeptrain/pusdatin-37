@@ -3,9 +3,9 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
-use App\Models\Letters\Letter;
+use Livewire\Attributes\Title;
+use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class Analytic extends Component
 {
@@ -15,28 +15,33 @@ class Analytic extends Component
     public $source; // Menambah properti source untuk memilih data (letter/pr)
 
     public $statusOptions = [
-        'all'                => 'Semua Status',
-        'pending'            => 'Permohonan Masuk',
-        'disposition'        => 'Disposisi',
-        'process'            => 'Proses',
-        'replied'            => 'Revisi Kasatpel',
-        'approved_kasatpel'  => 'Disetujui Kasatpel',
+        'all' => 'Semua Status',
+        'pending' => 'Permohonan Masuk',
+        'disposition' => 'Disposisi',
+        'process' => 'Proses',
+        'replied' => 'Revisi Kasatpel',
+        'approved_kasatpel' => 'Disetujui Kasatpel',
         'replied_kapusdatin' => 'Revisi Kapusdatin',
         'approved_kapusdatin' => 'Disetujui Kapusdatin',
-        'rejected'           => 'Ditolak',
+        'rejected' => 'Ditolak',
     ];
 
     public $statusOptionsPr = [
-        'all'               => 'All',
-        'antrian_promkes'   => 'Antrian Promkes',
-        'kurasi_promkes'    => 'Kurasi Promkes',
-        'antrian_pusdatin'  => 'Antrian Pusdatin',
-        'proses_pusdatin'   => 'Proses Pusdatin',
-        'completed'         => 'Completed',
+        'all' => 'All',
+        'antrian_promkes' => 'Antrian Promkes',
+        'kurasi_promkes' => 'Kurasi Promkes',
+        'antrian_pusdatin' => 'Antrian Pusdatin',
+        'proses_pusdatin' => 'Proses Pusdatin',
+        'completed' => 'Completed',
     ];
 
-
     public $showModal = false;
+
+    #[Title('Analitik')]
+    public function render()
+    {
+        return view('livewire.admin.analytic');
+    }
 
     public function exportHeadVerifier()
     {
@@ -44,7 +49,7 @@ class Analytic extends Component
 
             // Ambil data dari Letter atau PR berdasarkan source
             if ($this->source === 'letter') {
-                $query = Letter::with('user');
+                $query = InformationSystemRequest::with('user');
             } elseif ($this->source === 'pr') {
                 $query = PublicRelationRequest::with('user');
             } else {
@@ -63,7 +68,7 @@ class Analytic extends Component
             // Filter berdasarkan status (jika ada)
             if ($this->status && $this->status !== 'all') {
                 if ($this->source === 'letter') {
-                    $stateClass = Letter::resolveStatusClassFromString($this->status);
+                    $stateClass = InformationSystemRequest::resolveStatusClassFromString($this->status);
                     $query->whereState('status', $stateClass);
                 } else if ($this->source === 'pr') {
                     $stateClassPr = PublicRelationRequest::resolveStatusClassFromString($this->status);
@@ -97,14 +102,9 @@ class Analytic extends Component
     public function resetFilters()
     {
         $this->start_date = null;
-        $this->end_date   = null;
-        $this->status     = null;
-        $this->source     = null; // Reset source
-        $this->showModal  = false;
-    }
-
-    public function render()
-    {
-        return view('livewire.admin.analytic');
+        $this->end_date = null;
+        $this->status = null;
+        $this->source = null; // Reset source
+        $this->showModal = false;
     }
 }

@@ -4,21 +4,21 @@ namespace App\Livewire\Requests\InformationSystem;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Models\Documents\DocumentUpload;
 use App\Models\Documents\UploadVersion;
+use App\Models\InformationSystemRequest;
 
 class Edit extends Component
 {
     use WithFileUploads;
 
     #[Locked]
-    public int $letterId;
+    public int $systemRequestId;
 
-    public $letter;
+    public $systemRequest;
 
     public $title;
     public $reference_number;
@@ -34,7 +34,7 @@ class Edit extends Component
             'reference_number' => 'required|string'
         ];
 
-        $revisedParts = $this->letterNeedRevision();
+        $revisedParts = $this->systemRequestNeedRevision();
 
         foreach ($revisedParts as $partNumber) {
             $rules["revisedFiles.$partNumber"] = 'required|file|mimes:pdf|max:1048';
@@ -58,13 +58,13 @@ class Edit extends Component
 
     public function mount(int $id)
     {
-        $this->letterId = $id;
-        $this->letter = Letter::with([
+        $this->systemRequestId = $id;
+        $this->systemRequest = InformationSystemRequest::with([
             'documentUploads.versions',
         ])->findOrFail($id);
 
         $this->fill(
-            $this->letter->only('title', 'reference_number')
+            $this->systemRequest->only('title', 'reference_number')
         );
     }
 
@@ -73,14 +73,14 @@ class Edit extends Component
         $this->validate();
 
         DB::transaction(function () {
-            $letter = $this->letter;
+            $systemRequest = $this->systemRequest;
 
             $revisedParts = [];
             $pathsToUpdateInRevisions = [];
             $documentUploadIdsToMarkNotNeedingRevision = [];
 
             foreach ($this->revisedFiles as $partNumber => $file) {
-                $documentUpload = $letter->documentUploads->first(function ($doc) use ($partNumber) {
+                $documentUpload = $systemRequest->documentUploads->first(function ($doc) use ($partNumber) {
                     return $doc->part_number == $partNumber && $doc->need_revision;
                 });
 
@@ -120,42 +120,42 @@ class Edit extends Component
                 }
             }
 
-            $letter->updatedForNeedReview();
+            $systemRequest->updatedForNeedReview();
 
-            $letter->refresh();
+            $systemRequest->refresh();
 
-            $letter->logStatusRevision($this->notes, $revisedParts);
+            $systemRequest->logStatusRevision($this->notes, $revisedParts);
 
-            DB::afterCommit(function () use ($letter) {
-                $letter->sendProcessServiceRequestNotification();
+            DB::afterCommit(function () use ($systemRequest) {
+                $systemRequest->sendProcessServiceRequestNotification();
             });
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => $letter->status->toastMessage(),
+                'message' => $systemRequest->status->toastMessage(),
             ]);
 
-            return $this->redirect("/history/information-system/{$this->letterId}", true);
+            return $this->redirect("/history/information-system/{$this->systemRequestId}", true);
         });
     }
 
     #[Computed]
     public function checkNotResolvedDocuments()
     {
-        return $this->letter->documentUploads->versions->where('is_resolved', false);
+        return $this->systemRequest->documentUploads->versions->where('is_resolved', false);
     }
 
     #[Computed]
     public function checkDocumentUploadNeedRevision()
     {
-        return $this->letter->documentUploads->contains(function ($documentUpload) {
+        return $this->systemRequest->documentUploads->contains(function ($documentUpload) {
             return $documentUpload->need_revision;
         });
     }
 
-    public function letterNeedRevision()
+    public function systemRequestNeedRevision()
     {
-        return collect($this->letter->documentUploads)
+        return collect($this->systemRequest->documentUploads)
             ->filter(fn($map) => $map->need_revision)
             ->map(fn($map) => $map->part_number)
             ->values();
