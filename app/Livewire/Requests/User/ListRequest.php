@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Letters;
+namespace App\Livewire\Requests\User;
 
 use Carbon\Carbon;
 use Livewire\Attributes\Title;
@@ -14,7 +14,7 @@ use App\States\PublicRelation\PublicRelationStatus;
 use App\States\InformationSystem\InformationSystemStatus;
 
 #[Title('Daftar Permohonan')]
-class HistoryLetter extends Component
+class ListRequest extends Component
 {
     use WithPagination;
 

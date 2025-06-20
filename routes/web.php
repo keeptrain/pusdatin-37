@@ -60,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware('can:view requests')->group(function () {
-        Route::get('history', HistoryLetter::class)->name('history');
+        Route::get('permohonan', \App\Livewire\Requests\User\ListRequest::class)->name('list.request');
         Route::get('permohonan/{type}/{id}', \App\Livewire\Requests\User\Detail::class)->name('detail.request');
     });
 

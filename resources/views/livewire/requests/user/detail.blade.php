@@ -1,5 +1,5 @@
 <section>
-    <flux:button :href="route('history')" icon="arrow-long-left" variant="subtle">Kembali</flux:button>
+    <flux:button :href="route('list.request')" icon="arrow-long-left" variant="subtle">Kembali</flux:button>
     <div class="bg-white border-b border-gray-200 px-4 py-6">
         <div class="max-w-screen-xl mx-auto">
             <div class="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
