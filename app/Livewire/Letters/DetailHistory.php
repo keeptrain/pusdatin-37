@@ -5,12 +5,12 @@ namespace App\Livewire\Letters;
 use App\Enums\PublicRelationRequestPart;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use App\Services\TrackingStepped;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
+use App\Models\InformationSystemRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
@@ -37,15 +37,15 @@ class DetailHistory extends Component
     protected function loadContent()
     {
         $this->content = match ($this->type) {
-            'information-system' => $this->letters(),
+            'information-system' => $this->systemRequests(),
             'public-relation' => $this->prRequests(),
             default => abort(404, 'Invalid content type.')
         };
     }
 
-    public function letters()
+    public function systemRequests()
     {
-        return Letter::with('documentUploads.activeVersion:id,file_path')->findOrFail($this->id);
+        return InformationSystemRequest::with('documentUploads.activeVersion:id,file_path')->findOrFail($this->id);
     }
 
     public function prRequests()
@@ -104,7 +104,7 @@ class DetailHistory extends Component
     #[Computed]
     public function isRejected()
     {
-        return $this->currentStatus() === (new \App\States\Rejected($this->content))->label();
+        return $this->currentStatus() === (new \App\States\InformationSystem\Rejected($this->content))->label();
     }
 
     #[Computed]
@@ -114,7 +114,7 @@ class DetailHistory extends Component
             return $this->content->status->label();
         }
 
-        return (new \App\States\Pending($this->siRequestInstance))->label();
+        return (new \App\States\InformationSystem\Pending($this->content))->label();
     }
 
     #[Computed]
@@ -132,7 +132,7 @@ class DetailHistory extends Component
     public function linkProductions()
     {
         return collect($this->content?->links)->map(function ($url, $key) {
-            $label = PublicRelationRequestPart::tryFrom((int)$key)?->label() ?? 'Unknown';
+            $label = PublicRelationRequestPart::tryFrom((int) $key)?->label() ?? 'Unknown';
 
             return [
                 'label' => $label,

@@ -4,13 +4,13 @@ namespace App\Livewire\Letters;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use App\States\LetterStatus;
 use Livewire\WithPagination;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
 use App\States\PublicRelation\PublicRelationStatus;
+use App\States\InformationSystem\InformationSystemStatus;
 
 class HistoryLetter extends Component
 {
@@ -37,7 +37,7 @@ class HistoryLetter extends Component
     protected function getCombinedQuery()
     {
         // Query for InformationSystemRequest
-        $informationSystemRequestsQuery = $this->buildBaseQuery(Letter::class, 'Sistem Informasi & Data', 'title');
+        $informationSystemRequestsQuery = $this->buildBaseQuery(InformationSystemRequest::class, 'Sistem Informasi & Data', 'title');
 
         // Query for PublicRelationRequest
         $publicRelationRequestsQuery = $this->buildBaseQuery(PublicRelationRequest::class, 'Kehumasan', 'theme', true);
@@ -99,7 +99,7 @@ class HistoryLetter extends Component
     {
         try {
             if ($type === 'Sistem Informasi & Data') {
-                $state = LetterStatus::make($status, new Letter());
+                $state = InformationSystemStatus::make($status, new InformationSystemRequest());
                 return $state;
             }
 

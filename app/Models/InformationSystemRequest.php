@@ -1,28 +1,36 @@
 <?php
 
-namespace App\Models\Letters;
+namespace App\Models;
 
-use App\Enums\Division;
 use Carbon\Carbon;
 use App\Models\User;
-use App\States\LetterStatus;
+use App\Enums\Division;
+use App\States\InformationSystem\ApprovedKapusdatin;
+use App\States\InformationSystem\ApprovedKasatpel;
+use App\States\InformationSystem\Completed;
+use App\States\InformationSystem\Disposition;
+use App\States\InformationSystem\Pending;
+use App\States\InformationSystem\Process;
+use App\States\InformationSystem\Rejected;
+use App\States\InformationSystem\Replied;
 use Spatie\ModelStates\HasStates;
-use App\Models\letters\LettersMapping;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\DocumentUpload;
 use App\Trait\HasActivities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\States\InformationSystem\InformationSystemStatus;
+use App\States\InformationSystem\RepliedKapusdatin;
 
-class Letter extends Model
+class InformationSystemRequest extends Model
 {
     use HasActivities, HasFactory, HasStates, SoftDeletes;
 
-    protected $table = "letters";
+    protected $table = "information_system_requests";
 
     protected $casts = [
-        'status' => LetterStatus::class,
+        'status' => InformationSystemStatus::class,
         'meeting' => 'array',
         'notes' => 'array'
     ];
@@ -50,24 +58,19 @@ class Letter extends Model
         return $this->morphMany(DocumentUpload::class, 'documentable');
     }
 
-    public function mapping()
-    {
-        return $this->morphMany(LettersMapping::class, 'letterable');
-    }
-
     public static function resolveStatusClassFromString($statusString)
     {
         return match ($statusString) {
             'all' => 'All',
-            'pending' => \App\States\Pending::class,
-            'disposition' => \App\States\Disposition::class,
-            'replied' => \App\States\Replied::class,
-            'approved_kasatpel' => \App\States\ApprovedKasatpel::class,
-            // 'replied_kapusdatin' => \App\States\RepliedKapusdatin::class,
-            'approved_kapusdatin' => \App\States\ApprovedKapusdatin::class,
-            'process_request' => \App\States\Process::class,
-            'completed' => \App\States\Completed::class,
-            'rejected' => \App\States\Rejected::class
+            'pending' => Pending::class,
+            'disposition' => Disposition::class,
+            'replied' => Replied::class,
+            'approved_kasatpel' => ApprovedKasatpel::class,
+            'replied_kapusdatin' => RepliedKapusdatin::class,
+            'approved_kapusdatin' => ApprovedKapusdatin::class,
+            'process_request' => Process::class,
+            'completed' => Completed::class,
+            'rejected' => Rejected::class
         };
     }
 
@@ -248,7 +251,7 @@ class Letter extends Model
 
     public static function getTotalRequestsByRole($rolesId = null)
     {
-        $query = Letter::select('id');
+        $query = self::select('id');
         if ($rolesId !== null) {
             $query->whereIn('current_division', $rolesId);
         }

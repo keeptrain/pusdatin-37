@@ -1,51 +1,49 @@
 <?php
 
-namespace App\States;
+namespace App\States\InformationSystem;
 
-use App\States\LetterStatus;
+use App\States\InformationSystem\InformationSystemStatus;
 
-class Completed extends LetterStatus
+class Pending extends InformationSystemStatus
 {
     public function label(): string
     {
-        return 'Permohonan Selesai';
+        return 'Permohonan Masuk';
     }
 
     public function color(): string
     {
-        return 'text-teal-800';
+        return 'text-yellow-800';
     }
 
     public function badgeBg(): string
     {
-        return 'bg-teal-100';
+        return 'bg-yellow-100';
     }
 
     public function icon(): string
     {
-        return 'check-circle';
+        return 'folder-check';
     }
 
     public function percentage(): string
     {
-        return '100%';
+        return '10%';
     }
 
     public function percentageBar(): string
     {
-        return 'w-[100%]';
+        return 'w-[10%]';
     }
 
     public function toastMessage(): string
     {
-        return 'Berhasil menyelesaikan permohonan';
+        return 'Berhasil mengajukan permohonan layanan';
     }
 
     public function trackingMessage(?int $division): string
     {
-        $divisionName = $this->getDivisionName($division);
-
-        return "Permohonan layanan telah selesai di kerjakan oleh divisi {$divisionName}";
+        return 'Permohonan layanan sudah kami terima, mohon tunggu konfirmasi selanjutnya.';
     }
 
     public function userNotificationMessage(array $context): string

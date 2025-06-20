@@ -4,7 +4,7 @@ namespace App\Livewire\Requests\InformationSystem;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +50,7 @@ class Meeting extends Component
     public function getMeeting()
     {
         // Get information system request by id
-        $siRequest = Letter::select('meeting')->findOrFail($this->siRequestId);
+        $siRequest = InformationSystemRequest::select('meeting')->findOrFail($this->siRequestId);
         $meetings = $siRequest->meeting ?? [];
 
         // Get current time
@@ -124,8 +124,8 @@ class Meeting extends Component
 
         $this->validate($rules);
 
-        // Find record Letter based on ID
-        $siRequest = Letter::findOrFail($this->siRequestId);
+        // Find record InformationSystemRequest based on ID
+        $siRequest = InformationSystemRequest::findOrFail($this->siRequestId);
 
         DB::transaction(function () use ($siRequest) {
             // Get existing meetings (if any)
@@ -172,7 +172,7 @@ class Meeting extends Component
     public function updateResultMeeting($selectedResultKey)
     {
         DB::transaction(function () use ($selectedResultKey) {
-            $SiRequest = Letter::findOrFail($this->siRequestId);
+            $SiRequest = InformationSystemRequest::findOrFail($this->siRequestId);
             $meetings = $SiRequest->meeting;
 
             // Update meeting result for selected key
@@ -196,7 +196,7 @@ class Meeting extends Component
     public function delete($selectedKey)
     {
         DB::transaction(function () use ($selectedKey) {
-            $SiRequest = Letter::findOrFail($this->siRequestId);
+            $SiRequest = InformationSystemRequest::findOrFail($this->siRequestId);
 
             $meetings = $SiRequest->meeting;
 

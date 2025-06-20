@@ -8,7 +8,6 @@ use Livewire\Attributes\On;
 
 class CreateUser extends Component
 {
-
     public UserForm $form;
 
     public function render()

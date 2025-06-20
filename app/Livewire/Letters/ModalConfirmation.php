@@ -4,7 +4,7 @@ namespace App\Livewire\Letters;
 
 use App\Enums\Division;
 use Livewire\Component;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
@@ -105,9 +105,9 @@ class ModalConfirmation extends Component
         $this->allowedParts = $allowedParts;
     }
 
-    private function getSiDataRequests()
+    private function getInformationSystemRequest()
     {
-        return Letter::with('documentUploads')->findOrFail($this->systemRequestId);
+        return InformationSystemRequest::with('documentUploads')->findOrFail($this->systemRequestId);
     }
 
     public function saveDisposition()
@@ -117,7 +117,7 @@ class ModalConfirmation extends Component
         $this->authorize('can disposition', $this->systemRequestId);
 
         DB::transaction(function () {
-            $systemRequest = Letter::findOrFail($this->systemRequestId);
+            $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
 
             // Transisi status
             $systemRequest->transitionStatusFromPending(
@@ -154,10 +154,10 @@ class ModalConfirmation extends Component
     {
         $this->validate();
 
-        // $this->authorize('canPerformStep1Verification', $this->getSiDataRequests());
+        // $this->authorize('canPerformStep1Verification', $this->getInformationSystemRequest());
 
         DB::transaction(function () {
-            $systemRequest = $this->getSiDataRequests();
+            $systemRequest = $this->getInformationSystemRequest();
 
             $this->checkRevisionInputForRepliedStatus($systemRequest);
 
@@ -185,10 +185,10 @@ class ModalConfirmation extends Component
         return Division::getIdFromString($this->selectedDivision);
     }
 
-    public function checkRevisionInputForRepliedStatus($siRequest)
+    public function checkRevisionInputForRepliedStatus($systemRequest)
     {
         if (in_array($this->status, ['replied', 'replied_kapusdatin'])) {
-            $documentUploadsByPartNumber = $siRequest->documentUploads->keyBy('part_number');
+            $documentUploadsByPartNumber = $systemRequest->documentUploads->keyBy('part_number');
 
             foreach ($this->revisionParts as $partNumber) {
                 if (isset($this->revisionNotes[$partNumber])) {
@@ -207,9 +207,9 @@ class ModalConfirmation extends Component
     public function processPusdatin()
     {
         DB::transaction(function () {
-            $systemRequest = Letter::findOrFail($this->systemRequestId);
+            $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
 
-            $systemRequest->status->transitionTo(\App\States\Process::class);
+            $systemRequest->status->transitionTo(\App\States\InformationSystem\Process::class);
 
             $systemRequest->refresh();
 
@@ -231,9 +231,9 @@ class ModalConfirmation extends Component
     public function completed()
     {
         DB::transaction(function () {
-            $systemRequest = Letter::findOrFail($this->systemRequestId);
+            $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
 
-            $systemRequest->status->transitionTo(\App\States\Completed::class);
+            $systemRequest->status->transitionTo(\App\States\InformationSystem\Completed::class);
 
             $systemRequest->refresh();
 

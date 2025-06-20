@@ -1,16 +1,16 @@
 <?php
 
-namespace App\States;
+namespace App\States\InformationSystem;
 
 use App\Enums\Division;
-use App\Models\User;
+use App\States\InformationSystem\Pending;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 
 /**
- * @extends State<\App\Models\Letters\Letter>
+ * @extends State<\App\Models\InformationSystemRequest>
  */
-abstract class LetterStatus extends State
+abstract class InformationSystemStatus extends State
 {
     const DIVISION_MAP = [
         2 => 'Kepala Pusat Dinas Kesehatan',

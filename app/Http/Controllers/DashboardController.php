@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\User;
-use App\Models\Letters\Letter;
 use App\Services\ZipServices;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
 use Illuminate\Support\Facades\Cache;
+use App\Models\InformationSystemRequest;
 
 class DashboardController extends Controller
 {
@@ -40,7 +40,7 @@ class DashboardController extends Controller
             'widthPercentage' => $this->calculateWidthPercentage($data['totalServices'], $data['totalPr']),
             'categoryPercentages' => $this->calculateCategoryPercentages($data['totalPr']),
             'statusCounts' => $data['statusCounts'],
-            'monthlyLetterData' => $this->getMonthlyLetterData($userRoles),
+            'monthlyLetterData' => $this->getMonthlySystemRequestData($userRoles),
             'monthlySiData' => $monthlySiData,
             'monthlyDataDiv' => $monthlyDataDiv,
         ]);
@@ -48,7 +48,7 @@ class DashboardController extends Controller
 
     public function getMeetingList()
     {
-        return Letter::getNearMeetingsByDate();
+        return InformationSystemRequest::getNearMeetingsByDate();
     }
 
     public function downloadSopAndTemplates()
@@ -173,7 +173,7 @@ class DashboardController extends Controller
 
     private function totalSiRequestServices($rolesId = null)
     {
-        return Letter::getTotalRequestsByRole($rolesId);
+        return InformationSystemRequest::getTotalRequestsByRole($rolesId);
     }
 
     private function totalPrRequestServices()
@@ -200,7 +200,7 @@ class DashboardController extends Controller
             'approvedKapusdatin' => 'App\States\ApprovedKapusdatin',
         ];
 
-        $query = Letter::select('status', DB::raw('COUNT(*) as total'))
+        $query = InformationSystemRequest::select('status', DB::raw('COUNT(*) as total'))
             ->whereIn('status', array_values($statusStates))
             ->groupBy('status');
 
@@ -275,7 +275,7 @@ class DashboardController extends Controller
 
     private function calculateCategoryPercentages($totalPr)
     {
-        $totalsByDivision = Letter::select('current_division')
+        $totalsByDivision = InformationSystemRequest::select('current_division')
             ->whereIn('current_division', [3, 4])
             ->groupBy('current_division')
             ->selectRaw('current_division, COUNT(*) as total')
@@ -295,12 +295,12 @@ class DashboardController extends Controller
         return $percentages;
     }
 
-    private function getMonthlyLetterData($userRoles = null)
+    private function getMonthlySystemRequestData($userRoles = null)
     {
         $user = auth()->user();
 
         // Query untuk data Letter dengan pemisahan berdasarkan current_division
-        $letterQuery = Letter::select(
+        $query = InformationSystemRequest::select(
             DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as total'),
             'current_division'
@@ -312,10 +312,10 @@ class DashboardController extends Controller
 
         // Filter berdasarkan role user
         if (!$user->hasRole('head_verifier') && $userRoles !== null) {
-            $letterQuery->whereIn('current_division', $userRoles);
+            $query->whereIn('current_division', $userRoles);
         }
 
-        $monthlyLetterData = $letterQuery->get();
+        $monthlyLetterData = $query->get();
 
         // Pisahkan data berdasarkan current_division
         $informationSystemDivisionData = [];
@@ -363,7 +363,7 @@ class DashboardController extends Controller
     private function getMonthlySiVerifierData(int $year): array
     {
         // Query data sistem informasi
-        $letterCounts = Letter::select(
+        $siCounts = InformationSystemRequest::select(
             DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as total')
         )
@@ -380,7 +380,7 @@ class DashboardController extends Controller
         // Isi array data dengan default 0 untuk bulan tanpa record
         $data = [];
         for ($m = 1; $m <= 12; $m++) {
-            $data[] = $letterCounts[$m] ?? 0;
+            $data[] = $siCounts[$m] ?? 0;
         }
 
         return [
@@ -392,7 +392,7 @@ class DashboardController extends Controller
     private function getMonthlyDataDiv(int $year): array
     {
         // Query data permohonan data
-        $letterCounts = Letter::select(
+        $dataCounts = InformationSystemRequest::select(
             DB::raw('MONTH(created_at) as month'),
             DB::raw('COUNT(*) as total')
         )
@@ -409,7 +409,7 @@ class DashboardController extends Controller
         // Isi array data dengan default 0 untuk bulan tanpa record
         $data = [];
         for ($m = 1; $m <= 12; $m++) {
-            $data[] = $letterCounts[$m] ?? 0;
+            $data[] = $dataCounts[$m] ?? 0;
         }
 
         return [

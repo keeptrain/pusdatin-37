@@ -54,7 +54,7 @@
                             x-on:livewire-upload-cancel="activeUploads--"
                             x-on:livewire-upload-progress="progress = $event.detail.progress" class="space-y-6">
 
-                            @foreach ($letter->documentUploads as $documentUpload)
+                            @foreach ($systemRequest->documentUploads as $documentUpload)
                                 @if ($documentUpload->need_revision)
                                 <section>
                                     <x-letters.input-file-adapter :title="$documentUpload->part_number_label"
@@ -92,7 +92,7 @@
 
         <!-- Form Actions -->
         <div class="flex justify-between">
-            <flux:button href="{{ route('history.detail', ['type' => 'information-system' ,$letterId]) }}">
+            <flux:button href="{{ route('history.detail', ['type' => 'information-system' ,$systemRequestId]) }}">
                 Cancel
             </flux:button>
             <flux:button type="submit" variant="primary">

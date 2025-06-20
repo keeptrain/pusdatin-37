@@ -1,8 +1,8 @@
 <?php
 
-namespace App\States;
+namespace App\States\InformationSystem;
 
-class RepliedKapusdatin extends LetterStatus
+class RepliedKapusdatin extends InformationSystemStatus
 {
     public function label(): string
     {
