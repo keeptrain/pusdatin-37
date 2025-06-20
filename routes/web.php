@@ -6,6 +6,7 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Appearance;
+use App\Livewire\User\Detail;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Letters\Data\Rollback;
 use App\Livewire\Letters\DetailHistory;
@@ -60,7 +61,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware('can:view requests')->group(function () {
         Route::get('history', HistoryLetter::class)->name('history');
-        Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
+        Route::get('permohonan/{type}/{id}', \App\Livewire\Requests\User\Detail::class)->name('detail.request');
     });
 
     Route::get('letter/{id}/review', Review::class)->name('letter.review');

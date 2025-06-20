@@ -267,7 +267,7 @@ class InformationSystemRequest extends Model
 
         return match ($status) {
             'Revisi Kasatpel' => route('is.edit', ['id' => $this->id]),
-            default => route('history.detail', [
+            default => route('detail.request', [
                 'type' => 'information-system',
                 'id' => $this->id
             ]),

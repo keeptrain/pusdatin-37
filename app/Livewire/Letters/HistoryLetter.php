@@ -3,6 +3,7 @@
 namespace App\Livewire\Letters;
 
 use Carbon\Carbon;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\InformationSystemRequest;
@@ -12,6 +13,7 @@ use App\Models\PublicRelationRequest;
 use App\States\PublicRelation\PublicRelationStatus;
 use App\States\InformationSystem\InformationSystemStatus;
 
+#[Title('Daftar Permohonan')]
 class HistoryLetter extends Component
 {
     use WithPagination;
@@ -118,8 +120,8 @@ class HistoryLetter extends Component
     {
         // Mapping tipe ke route
         $routeMapping = [
-            'Sistem Informasi & Data' => "history/information-system/$id",
-            'Kehumasan' => "history/public-relation/$id",
+            'Sistem Informasi & Data' => "permohonan/information-system/$id",
+            'Kehumasan' => "permohonan/public-relation/$id",
         ];
 
         // Validasi tipe

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Livewire\Letters;
+namespace App\Livewire\Requests\User;
 
+use Carbon\Carbon;
 use App\Enums\PublicRelationRequestPart;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -11,10 +12,11 @@ use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
 use App\Models\InformationSystemRequest;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Title;
 
-class DetailHistory extends Component
+#[Title('Detail Permohonan')]
+class Detail extends Component
 {
     use WithFileUploads;
 
