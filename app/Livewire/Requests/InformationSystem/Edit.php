@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Locked;
@@ -11,6 +12,7 @@ use App\Models\Documents\DocumentUpload;
 use App\Models\Documents\UploadVersion;
 use App\Models\InformationSystemRequest;
 
+#[Title('Revisi Permohonan Layanan')]
 class Edit extends Component
 {
     use WithFileUploads;
@@ -134,9 +136,9 @@ class Edit extends Component
                 'variant' => 'success',
                 'message' => $systemRequest->status->toastMessage(),
             ]);
-
-            return $this->redirect("/history/information-system/{$this->systemRequestId}", true);
         });
+
+        $this->redirectRoute('detail.request', ['type' => 'information-system', $this->systemRequestId]);
     }
 
     #[Computed]
