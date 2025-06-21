@@ -90,16 +90,21 @@
 
         @hasrole('administrator')
         <flux:navlist variant="outline">
+            <flux:navlist.group :heading="__('Main')" class="grid">
+                <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+                    wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+            </flux:navlist.group>
             <flux:navlist.group :heading="__('Systems')" class="grid">
-                <flux:navlist.item :href="route('manage.users')" icon="users" :current="request()->routeIs('manage.users')" wire:navigate>
+                <flux:navlist.item :href="route('manage.users')" icon="users"
+                    :current="request()->routeIs('manage.users')" wire:navigate>
                     Users
                 </flux:navlist.item>
-                <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
+                {{-- <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
                     Permissions
                 </flux:navlist.item>
                 <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
                     Seksi
-                </flux:navlist.item>
+                </flux:navlist.item> --}}
             </flux:navlist.group>
         </flux:navlist>
         @endhasrole

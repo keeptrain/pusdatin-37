@@ -91,7 +91,7 @@ class UserForm extends Form
 
         $this->user->syncRoles($this->role);
 
-        return redirect()->route('admin.users');
+        return redirect()->route('manage.users');
 
     }
 

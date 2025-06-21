@@ -87,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
 Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_verifier|pr_verifier|head_verifier']], function () {
     Route::prefix('system')->group(function () {
         Route::get('users', ManageUsers::class)->name('manage.users');
+        Route::get('users/{id}', \App\Livewire\Admin\User\Show::class)->name('user.show');
         Route::get('templates', ManageTemplate::class)->name('manage.templates');
         // Route::get('template/create', [TemplateController::class, 'create'])->name('create.template');
         // Route::post('template/store', [TemplateController::class, 'store'])->name('store.template');
