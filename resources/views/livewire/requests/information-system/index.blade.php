@@ -62,7 +62,7 @@
                                 wire:model.live="selectAll"
                                 class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                         </th>
-                        <th class="px-4 py-2 text-left border-b border-gray-200">#</th>
+                        <th class="px-4 py-2 text-left border-b border-gray-200">No</th>
                         <th class="px-4 py-2 text-left border-b border-gray-200">Penanggung Jawab</th>
                         <th class="px-4 py-2 text-left border-b border-gray-200 judul">Judul</th>
                         <th class="px-4 py-2 text-left border-b border-gray-200 relative">
@@ -127,7 +127,7 @@
                         <td class="px-4 py-3">{{ $item->title }}</td>
                         <td class="px-4 py-3">
                             <flux:notification.status-badge :status="$item->status" />
-                            <span class="hidden status-text">{{ $item->status }}</span>
+
                         </td>
                         <td class="px-4 py-3">{{ $item->kasatpelName($item->current_division) }}</td>
                         <td class="px-4 py-3">{{ $item->createdAtDMY() }}</td>
@@ -215,7 +215,6 @@
     <!-- DataTables v2.3.2 CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.min.css" />
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <!-- Custom CSS -->
@@ -248,8 +247,7 @@
             margin-bottom: 1rem;
         }
 
-        /* Hide status text for DataTables processing */
-        .status-text {
+        dt-column-order {
             display: none !important;
         }
 
