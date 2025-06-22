@@ -185,35 +185,36 @@ trait HasActivities
         }
     }
 
-    public function sendPrRequestNotification()
+    public function sendPrRequestNotification(?array $data = null)
     {
         if (!$this instanceof PublicRelationRequest) {
             return;
         }
 
-        $currentStatusClass = get_class($this->status);
+        $currentStatusClass = $this->status::class;
 
-        $notificationLogicMap = [
+        $callable = match ($currentStatusClass) {
             PromkesComplete::class => function () {
-                $recipients = User::role('head_verifier')->get();
-                if ($recipients->isNotEmpty()) {
-                    Notification::send($recipients, new PublicRelationRequestNotification($this));
-                }
-            },
+                    $recipients = User::role('head_verifier')->get();
+                    if ($recipients->isNotEmpty()) {
+                        Notification::send($recipients, new PublicRelationRequestNotification($this));
+                    }
+                },
             PusdatinQueue::class => function () {
-                $recipients = User::role('pr_verifier')->get();
-                if ($recipients->isNotEmpty()) {
-                    Notification::send($recipients, new PublicRelationRequestNotification($this));
-                }
-            },
-            Completed::class => function () {
-                $recipient = User::findOrFail($this->user_id);
-                $recipient->notify(new PublicRelationRequestNotification($this));
-            }
-        ];
+                    $recipients = User::role('pr_verifier')->get();
+                    if ($recipients->isNotEmpty()) {
+                        Notification::send($recipients, new PublicRelationRequestNotification($this));
+                    }
+                },
+            Completed::class => function () use ($data) {
+                    $recipient = User::findOrFail($this->user_id);
+                    $recipient->notify(new PublicRelationRequestNotification($this, $data));
+                },
+            default => static fn() => null,
+        };
 
-        if (isset($notificationLogicMap[$currentStatusClass])) {
-            $notificationLogicMap[$currentStatusClass]();
+        if (is_callable($callable)) {
+            $callable();
         }
     }
 }
