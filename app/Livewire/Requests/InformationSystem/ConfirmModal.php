@@ -8,6 +8,7 @@ use App\Models\InformationSystemRequest;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
+use App\Enums\InformationSystemRequestPart;
 
 class ConfirmModal extends Component
 {
@@ -150,6 +151,20 @@ class ConfirmModal extends Component
         }
     }
 
+    public function formatRevisionNotes()
+    {
+        $revisionNotes = $this->revisionNotes;
+        $formatted = [];
+
+        foreach ($revisionNotes as $key => $value) {
+            $label = InformationSystemRequestPart::tryFrom($key)->label();
+
+            $formatted[$label] = $value;
+        }
+
+        return $formatted;
+    }
+
     public function save()
     {
         $this->validate();
@@ -161,14 +176,19 @@ class ConfirmModal extends Component
 
             $this->checkRevisionInputForRepliedStatus($systemRequest);
 
-            $systemRequest->transitionStatusFromProcess($this->status);
+            $systemRequest->transitionStatusFromDisposition($this->status);
 
             $systemRequest->refresh();
 
             $systemRequest->logStatus($this->notes);
 
             DB::afterCommit(function () use ($systemRequest) {
-                $systemRequest->sendProcessServiceRequestNotification();
+                $data = [
+                    'title' => $systemRequest->title,
+                    'revision_notes' => $this->formatRevisionNotes(),
+                    'url' => route('is.edit', $systemRequest->id),
+                ];
+                $systemRequest->sendProcessServiceRequestNotification($data);
             });
 
             session()->flash('status', [

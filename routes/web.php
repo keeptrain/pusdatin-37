@@ -29,6 +29,25 @@ Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Route::get('/test-email', function () {
+//     try {
+//         Mail::to('remajamesjid1945@gmail.com')->send(new RevisionMail());
+//         return "Email sedang dikirim!";
+//     } catch (\Exception $e) {
+//         return "Gagal mengirim email: " . $e->getMessage();
+//     }
+// });
+
+// Route::get('/test-email', fn($data) => new RevisionMail($data));
+// Route::get('/test-email', function () {
+//     $data = [
+//         'title' => 'test title',
+//         'revision_notes' => ['Indentifikasi Aplikasi' => 'testnotes', 'SOP' => 'testnotesop'],
+//         'url' => 'https://google.com'
+//     ];
+//     return new RevisionMail($data);
+// });
+
 Route::middleware(['auth'])->group(function () {
     // Information System & Data
     Route::get('/download-sop-and-templates', [DashboardController::class, 'downloadSopAndTemplates'])->name('download.sop-and-templates')->middleware('role:user');
@@ -61,27 +80,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('permohonan', \App\Livewire\Requests\User\ListRequest::class)->name('list.request');
         Route::get('permohonan/{type}/{id}', \App\Livewire\Requests\User\Detail::class)->name('detail.request');
     });
-
-    
-    
-
-    // analytic
-    // Route::get('/letter/{letter}/activity', function (Letter $letter) {
-    //     // Controller atau Closure ini akan memuat view yang me-render komponen Livewire
-    //     return view('components.user.tracking-list', [
-    //         'model' => $letter,
-    //         'modelType' => $letter->getMorphClass(),
-    //         'modelId' => $letter->id,
-    //         'pageTitle' => 'Aktivitas Layanan SI'
-    //     ]);
-    // })->name('letter.activity');
-
-    // Route::prefix('letter/{id}')->group(function() {
-    //     Route::get('detail', [Detail::class])->name('letter.detail');
-    //     Route::get('edit', [Edit::class])->name('letter.edit');
-    //     Route::get('activity', [Edit::class])->name('letter.activity');
-    //     Route::get('chat', [Edit::class])->name('letter.chat');
-    // });
 });
 
 Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_verifier|pr_verifier|head_verifier']], function () {

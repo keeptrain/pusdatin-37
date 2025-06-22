@@ -183,17 +183,17 @@ class InformationSystemRequest extends Model
             ->toArray();
     }
 
-    public function transitionStatusFromProcess($newStatus)
+    public function transitionStatusFromDisposition($newStatus)
     {
         $this->transitionStatusFromString($newStatus);
 
         match ($newStatus) {
-            'approved_kapusdatin' => $this->update(['active_checking' => $this->current_division]),
-            'replied_kapusdatin' => $this->update([
+            'approved_kasatpel' => $this->update(['active_checking' => Division::SI_ID->value]),
+            'replied' => $this->update([
                 'active_revision' => true
             ]),
-            'approved_kasatpel' => $this->update(['active_checking' => Division::HEAD_ID->value]),
-            'replied' => $this->update([
+            'approved_kapusdatin' => $this->update(['active_checking' => $this->current_division]),
+            'replied_kapusdatin' => $this->update([
                 'active_revision' => true
             ]),
             'rejected' => $this->update([

@@ -7,7 +7,6 @@ use Illuminate\Bus\Queueable;
 use App\States\InformationSystem\ApprovedKasatpel;
 use App\States\InformationSystem\Disposition;
 use App\States\InformationSystem\Rejected;
-use App\States\InformationSystem\Replied;
 use App\States\InformationSystem\RepliedKapusdatin;
 use App\Models\InformationSystemRequest;
 use Illuminate\Notifications\Notification;
@@ -54,7 +53,7 @@ class SiServiceRequestNotification extends Notification implements ShouldQueue
             Disposition::class => $this->getContextForDisposition($systemRequest),
             Rejected::class => $this->getContextForRejected($systemRequest),
             ApprovedKasatpel::class => $this->getContextForApprovedKasatpel($systemRequest),
-            Replied::class => $this->getContextForReplied($systemRequest),
+                // Replied::class => $this->getContextForReplied($systemRequest),
             RepliedKapusdatin::class => $this->getContextForReplied($systemRequest),
             default => [],
         };

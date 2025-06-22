@@ -46,10 +46,10 @@ class Replied extends InformationSystemStatus
         $resolveDivision = $this->getDivisionName($division);
 
         if ($resolveDivision == 'Kepala Pusat Dinas Kesehatan') {
-            return "Permohonan layanan memerlukan revisi yang di kirimkan dari {$resolveDivision}, harap di periksa.";
+            return "Permohonan layanan ini memerlukan revisi yang di kirimkan dari {$resolveDivision}, harap di periksa.";
         }
 
-        return "Permohonan layanan memerlukan revisi yang di kirimkan dari Kepala Satuan Pelaksana {$resolveDivision} , harap di periksa.";
+        return "Permohonan layanan ini memerlukan revisi yang di kirimkan dari Kepala Satuan Pelaksana {$resolveDivision} , harap di periksa.";
     }
 
     public function userNotificationMessage(array $context): string

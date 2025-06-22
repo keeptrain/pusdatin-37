@@ -166,9 +166,8 @@ class Notifications extends Component
             $requestable = app($modelClass)->findOrFail($modelId);
 
             if ($modelClass === InformationSystemRequest::class || $modelClass === PublicRelationRequest::class) {
-                // $notification->markAsRead();
-                // Still bug cannot flash error
-                if (!$requestable->active_revision && $requestable->status === Replied::class && auth()->user()->currentUserRoleId() === 7) {
+                $notification->markAsRead();
+                if (!$requestable->active_revision && $requestable->status == Replied::class && auth()->user()->currentUserRoleId() === 7) {
                     $this->flashErrorMessage();
                 } else {
                     $this->redirect($requestable->handleRedirectNotification(auth()->user(), $notification->data['status']), true);
