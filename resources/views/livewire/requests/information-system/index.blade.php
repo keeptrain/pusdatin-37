@@ -4,17 +4,19 @@
         <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan Sistem Informasi & Data') }}</flux:heading>
 
         <!-- Flash Messages -->
-        @if (session('success'))
-        <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-            {{ session('success') }}
-        </div>
-        @endif
+        <div id="flash-messages">
+            @if (session('success'))
+            <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                {{ session('success') }}
+            </div>
+            @endif
 
-        @if (session('error'))
-        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            {{ session('error') }}
+            @if (session('error'))
+            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                {{ session('error') }}
+            </div>
+            @endif
         </div>
-        @endif
 
         <!-- Simplified Filters Section - Only Global Search -->
         <div class="mb-4">
@@ -331,6 +333,23 @@
         .status-header-content button {
             pointer-events: all;
         }
+
+        /* Flash message styling */
+        .flash-message {
+            animation: slideInDown 0.3s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
     @endpush
 
@@ -381,7 +400,8 @@
                     },
                     {
                         targets: 3, // Judul column
-                        className: 'judul'
+                        className: 'judul',
+
                     },
                     {
                         targets: 4, // Status column - disable sorting to prevent conflicts
@@ -422,6 +442,73 @@
                     window.location.href = "{{ url('information-system') }}" + '/' + id;
                 }
             });
+        }
+
+        // Function to show flash messages
+        function showFlashMessage(type, message) {
+            const flashContainer = $('#flash-messages');
+            const alertClass = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+
+            const flashHtml = ` 
+                <div class="mb-4 p-4 ${alertClass} border rounded flash-message">
+                    ${message}
+                </div>
+            `;
+
+            flashContainer.html(flashHtml);
+
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                flashContainer.find('.flash-message').fadeOut();
+            }, 5000);
+        }
+
+        // Function to remove rows from DataTable
+        function removeRowsFromDataTable(deletedIds) {
+            deletedIds.forEach(function(id) {
+                // Find and remove row with the specific data-id
+                const row = dataTable.row($(`tr[data-id="${id}"]`));
+                if (row.length) {
+                    row.remove();
+                }
+            });
+
+            // Redraw table
+            dataTable.draw();
+        }
+
+        // Listen for Livewire events
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('data-deleted', (event) => {
+                const data = event[0];
+                const deletedIds = data.deletedIds;
+                const deletedCount = data.deletedCount;
+
+                // Remove rows from DataTable
+                removeRowsFromDataTable(deletedIds);
+
+                // Show success message
+                showFlashMessage('success', `Data berhasil dihapus sebanyak ${deletedCount} item.`);
+
+                // Update button states and selections
+                updateButtonStates();
+            });
+        });
+
+        // Function to update button states after deletion
+        function updateButtonStates() {
+            // Reset checkboxes and selections
+            $('.row-checkbox').prop('checked', false);
+            $('#selectAllCheckbox').prop('checked', false);
+
+            // Update button text to show 0 selected
+            $('button[wire\\:click="confirmDelete"] span').text('0');
+
+            // Disable delete button
+            $('button[wire\\:click="confirmDelete"]').prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+
+            // Hide cancel selection button
+            $('button[wire\\:click="$set(\'selectedRequests\', [])"]').closest('div').hide();
         }
 
         const defaultStatusOptions = [{

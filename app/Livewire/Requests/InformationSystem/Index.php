@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
+use App\Models\InformationSystemRequest;
 use Livewire\Component;
-use App\Models\Letters\Letter;
 use Illuminate\Support\Facades\DB;
 
 class Index extends Component
@@ -21,8 +21,9 @@ class Index extends Component
     {
         // Load all requests for current user role
         $roleId = auth()->user()->currentUserRoleId();
-        $this->requests = Letter::with(['user:id,name'])
+        $this->requests = InformationSystemRequest::with(['user:id,name'])
             ->filterCurrentDivisionByCurrentUser($roleId)
+            ->orderBy('created_at', 'desc')
             ->get();
     }
 
@@ -30,8 +31,9 @@ class Index extends Component
     {
         // Refresh data setelah delete
         $roleId = auth()->user()->currentUserRoleId();
-        $this->requests = Letter::with(['user:id,name'])
+        $this->requests = InformationSystemRequest::with(['user:id,name'])
             ->filterCurrentDivisionByCurrentUser($roleId)
+            ->orderBy('created_at', 'desc')
             ->get();
     }
 
@@ -72,9 +74,10 @@ class Index extends Component
             DB::beginTransaction();
 
             $deletedCount = count($this->selectedRequests);
+            $deletedIds = $this->selectedRequests; // Simpan ID yang akan dihapus
 
             // Delete selected requests
-            Letter::whereIn('id', $this->selectedRequests)->delete();
+            InformationSystemRequest::whereIn('id', $this->selectedRequests)->delete();
 
             DB::commit();
 
@@ -84,6 +87,12 @@ class Index extends Component
 
             // Refresh data
             $this->refreshData();
+
+            // Emit event ke frontend untuk update DataTable
+            $this->dispatch('data-deleted', [
+                'deletedIds' => $deletedIds,
+                'deletedCount' => $deletedCount
+            ]);
 
             session()->flash('success', 'Data berhasil dihapus sebanyak ' . $deletedCount . ' item.');
         } catch (\Exception $e) {
