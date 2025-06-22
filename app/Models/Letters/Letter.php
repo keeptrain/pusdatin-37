@@ -20,6 +20,7 @@ class Letter extends Model
     use HasActivities, HasFactory, HasStates, SoftDeletes;
 
     protected $table = "letters";
+    protected $with = ['user'];
 
     protected $casts = [
         'status' => LetterStatus::class,
@@ -63,7 +64,7 @@ class Letter extends Model
             'disposition' => \App\States\Disposition::class,
             'replied' => \App\States\Replied::class,
             'approved_kasatpel' => \App\States\ApprovedKasatpel::class,
-            // 'replied_kapusdatin' => \App\States\RepliedKapusdatin::class,
+            'replied_kapusdatin' => \App\States\RepliedKapusdatin::class,
             'approved_kapusdatin' => \App\States\ApprovedKapusdatin::class,
             'process_request' => \App\States\Process::class,
             'completed' => \App\States\Completed::class,

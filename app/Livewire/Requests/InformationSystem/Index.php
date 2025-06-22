@@ -2,180 +2,100 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
-
 use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\Attributes\Title;
-use App\States\LetterStatus;
 use App\Models\Letters\Letter;
-use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class Index extends Component
 {
-    use WithPagination;
+    /** @var \Illuminate\Database\Eloquent\Collection */
+    public $requests;
 
-    public $perPage = 10; // Default per page
+    /** @var array */
+    public $selectedRequests = [];
 
-    public $filterStatus = 'all';
-
-    public array $statuses = [
-        'all' => 'All',
-        'pending' => 'Permohonan Masuk',
-        'disposition' => 'Disposisi',
-        'replied' => 'Revisi Kasatpel',
-        'approved_kasatpel' => 'Disetujui Kasatpel',
-        // 'replied_kapusdatin' => 'Revisi Kapusdatin',
-        'approved_kapusdatin' => 'Disetujui Kapusdatin',
-        'process_request' => 'Proses Permohonan',
-        'completed' => 'Selesai',
-        'rejected' => 'Ditolak',
-    ];
-
-    public array $allowedStatuses = [];
-
-    public array $previousAllowedStatuses = [];
-
-    public array $oldAllowedStatuses = [];
-
-    public $sortBy = 'date_created';
-
-    public $selectedSystemRequests = [];
-
-    public $searchQuery = '';
+    /** @var bool */
+    public $selectAll = false;
 
     public function mount()
     {
-        $this->allowedStatuses = $this->getAllowedStatusesByRole($this->getCurrentRoleId);
+        // Load all requests for current user role
+        $roleId = auth()->user()->currentUserRoleId();
+        $this->requests = Letter::with(['user:id,name'])
+            ->filterCurrentDivisionByCurrentUser($roleId)
+            ->get();
     }
 
-    #[Title('Permohonan SI & Data')]
+    public function refreshData()
+    {
+        // Refresh data setelah delete
+        $roleId = auth()->user()->currentUserRoleId();
+        $this->requests = Letter::with(['user:id,name'])
+            ->filterCurrentDivisionByCurrentUser($roleId)
+            ->get();
+    }
+
     public function render()
     {
-        return view('livewire.requests.information-system.index');
+        return view('livewire.requests.information-system.index', [
+            'requests' => $this->requests
+        ]);
     }
 
-    public function show(int $systemRequestId)
+    public function show(int $requestId)
     {
-        return $this->redirectRoute('is.show', ['id' => $systemRequestId], true);
+        return $this->redirectRoute('is.show', ['id' => $requestId], true);
     }
 
-    #[Computed]
-    public function informationSystemRequests()
+    public function updatedSelectAll($value)
     {
-        return $this->getPaginatedInformationSystem();
-    }
-
-    #[Computed]
-    public function getCurrentRoleId()
-    {
-        return auth()->user()->currentUserRoleId();
-    }
-
-    protected function buildBaseQuery()
-    {
-        return Letter::select('id', 'user_id', 'title', 'current_division', 'status', 'created_at')
-            ->with('user:id,name')
-            ->filterCurrentDivisionByCurrentUser($this->getCurrentRoleId)
-            ->filterByStatuses($this->allowedStatuses);
-    }
-
-    protected function getPaginatedInformationSystem(): LengthAwarePaginator
-    {
-        $query = $this->buildBaseQuery()
-            ->when($this->filterStatus !== 'all', fn($q) => $q->filterByStatus($this->filterStatus))
-            ->when($this->searchQuery, fn($q) => $this->applySearch($q))
-            ->when(
-                $this->sortBy === 'created_at',
-                fn($q) => $q->orderBy('created_at', 'asc'),
-                fn($q) => $q->orderBy(...$this->getSortCriteria())
-            );
-
-        return $query->paginate($this->perPage);
-    }
-
-    protected function applySearch($query)
-    {
-        return $query->where(function ($q) {
-            $q->where('title', 'like', '%' . $this->searchQuery . '%')
-                ->orWhere('current_division', 'like', '%' . $this->searchQuery . '%')
-                ->orWhereHas('user', function ($q) {
-                    $q->where('name', 'like', '%' . $this->searchQuery . '%');
-                });
-        });
-    }
-
-    private function getSortCriteria(): array
-    {
-        return match ($this->sortBy) {
-            'date_created' => ['created_at', 'desc'],
-            'latest_activity' => ['updated_at', 'desc'],
-            default => ['updated_at', 'desc'],
-        };
-    }
-
-    public function getAllowedStatusesByRole($role): array
-    {
-        return LetterStatus::statusesBasedRole($role);
-    }
-
-    public function updatedAllowedStatuses($value): void
-    {
-        // Limit maximum 9 statuses
-        if (count($this->allowedStatuses) > 9) {
-            $this->allowedStatuses = array_slice($this->allowedStatuses, 0, 9);
+        if ($value) {
+            $this->selectedRequests = $this->requests->pluck('id')->toArray();
+        } else {
+            $this->selectedRequests = [];
         }
+    }
 
-        // State before change
-        $oldStatuses = $this->oldAllowedStatuses;
-        $this->oldAllowedStatuses = $this->allowedStatuses;
-
-        $allStatuses = array_keys($this->statuses);
-
-        // Detect change state "all"
-        $wasAllChecked = in_array('all', $oldStatuses);
-        $isAllCheckedNow = in_array('all', $this->allowedStatuses);
-
-        // If user unchecked "all"
-        if ($wasAllChecked && !$isAllCheckedNow) {
-            $this->allowedStatuses = $this->previousAllowedStatuses;
-            $this->previousAllowedStatuses = [];
-        }
-        // If user checked "all"
-        elseif (!$wasAllChecked && $isAllCheckedNow) {
-            $this->previousAllowedStatuses = array_diff($this->allowedStatuses, ['all']);
-            $this->allowedStatuses = array_merge($allStatuses, ['all']);
-        }
-        // If change on status other than "all"
-        else {
-            // If "all" active when other status changed
-            if ($isAllCheckedNow) {
-                $this->allowedStatuses = array_diff($this->allowedStatuses, ['all']);
-            }
-
-            // Check if all status selected
-            $allSelected = empty(array_diff($allStatuses, $this->allowedStatuses));
-
-            if ($allSelected) {
-                $this->allowedStatuses = array_merge($allStatuses, ['all']);
-            }
-        }
-
-        $this->allowedStatuses = array_unique($this->allowedStatuses);
-
-        if (empty($this->allowedStatuses)) {
-            $this->allowedStatuses = $this->getAllowedStatusesByRole($this->getCurrentRoleId);
-        }
+    public function updatedSelectedRequests()
+    {
+        $this->selectAll = count($this->selectedRequests) === $this->requests->count();
     }
 
     public function deleteSelected()
     {
-        DB::transaction(function () {
-            Letter::whereIn('id', $this->selectedSystemRequests)->delete();
-            $this->selectedSystemRequests = [];
-        });
+        if (empty($this->selectedRequests)) {
+            session()->flash('error', 'Tidak ada data yang dipilih untuk dihapus.');
+            return;
+        }
 
-        $this->redirectRoute('is.index', navigate: true);
+        try {
+            DB::beginTransaction();
+
+            $deletedCount = count($this->selectedRequests);
+
+            // Delete selected requests
+            Letter::whereIn('id', $this->selectedRequests)->delete();
+
+            DB::commit();
+
+            // Reset selections
+            $this->selectedRequests = [];
+            $this->selectAll = false;
+
+            // Refresh data
+            $this->refreshData();
+
+            session()->flash('success', 'Data berhasil dihapus sebanyak ' . $deletedCount . ' item.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
+    }
+
+    public function confirmDelete()
+    {
+        $this->dispatch('confirm-delete', [
+            'count' => count($this->selectedRequests)
+        ]);
     }
 }
