@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -12,12 +12,12 @@ return new class extends Migration {
     public function up(): void
     {
         /**
-         * Create the letters table
+         * Create the information_system_requests table
          */
-        Schema::create('letters', function (Blueprint $table) {
+        Schema::create('information_system_requests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('status', 86)->default(Letter::getDefaultStates());
+            $table->string('status', 86)->default(InformationSystemRequest::getDefaultStates());
             $table->string('title', 255);
             $table->string('reference_number', 255);
             $table->integer('active_checking');
@@ -49,19 +49,19 @@ return new class extends Migration {
         });
 
         /**
-         * Create the letter_messages table
+         * Create the system_request_messages table
          */
-        Schema::create('letter_messages', function (Blueprint $table) {
+        Schema::create('request_messages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('letter_id');
+            $table->unsignedBigInteger('request_id');
             $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade');
             $table->text('body');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
-            // Add Foreign Key to Letters Table
-            $table->foreign('letter_id')->references('id')->on('letters')->onDelete('cascade');
+            // Add Foreign Key to Information System Requests Table
+            $table->foreign('request_id')->references('id')->on('information_system_requests')->onDelete('cascade');
         });
     }
 
@@ -70,8 +70,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('letters');
+        Schema::dropIfExists('information_system_requests');
         Schema::dropIfExists('request_status_tracks');
-        Schema::dropIfExists('letter_messages');
+        Schema::dropIfExists('request_messages');
     }
 };

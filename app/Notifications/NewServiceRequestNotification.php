@@ -4,7 +4,7 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -42,7 +42,7 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        // Bisa id Letter atau PublicRelationRequest
+        // Bisa id InformationSystemRequest atau PublicRelationRequest
         $id = $this->request->id;
         $requestObject = get_class($this->request);
         $statusObject = null;
@@ -51,12 +51,7 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
         $userName = User::findOrFail($this->request->user_id)->name;
 
         // Logika spesifik berdasarkan tipe instance request
-        if ($this->request instanceof Letter) {
-            $statusObject = $this->request->status;
-            $messageContext = [
-                'responsible_person' => $userName
-            ];
-        } elseif ($this->request instanceof PublicRelationRequest) {
+        if ($this->request instanceof InformationSystemRequest || $this->request instanceof PublicRelationRequest) {
             $statusObject = $this->request->status;
             $messageContext = [
                 'responsible_person' => $userName
@@ -69,7 +64,7 @@ class NewServiceRequestNotification extends Notification implements ShouldQueue
             ];
         }
 
-        if (is_null($statusObject)) {
+        if ($statusObject === null) {
             return [
                 'id' => $id,
                 'status' => 'invalid_status_object',

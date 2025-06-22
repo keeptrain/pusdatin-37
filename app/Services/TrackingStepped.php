@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Enums\Division;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,28 +11,28 @@ class TrackingStepped
 {
     private static array $stateInstances = [];
 
-    public static function SiDataRequest(Letter $siRequest): array
+    public static function SiDataRequest(InformationSystemRequest $systemRequest): array
     {
-        $statusTrack = $siRequest->requestStatusTrack;
-        $statuses = self::mapStatuses($siRequest, [
-            \App\States\Pending::class,
-            \App\States\Disposition::class,
-            \App\States\ApprovedKasatpel::class,
-            \App\States\ApprovedKapusdatin::class,
-            \App\States\Process::class,
-            \App\States\Completed::class,
-        ], $statusTrack, $siRequest->current_division);
+        $statusTrack = $systemRequest->requestStatusTrack;
+        $statuses = self::mapStatuses($systemRequest, [
+            \App\States\InformationSystem\Pending::class,
+            \App\States\InformationSystem\Disposition::class,
+            \App\States\InformationSystem\ApprovedKasatpel::class,
+            \App\States\InformationSystem\ApprovedKapusdatin::class,
+            \App\States\InformationSystem\Process::class,
+            \App\States\InformationSystem\Completed::class,
+        ], $statusTrack, $systemRequest->current_division);
 
-        if ($siRequest->status instanceof \App\States\Rejected) {
-            $statuses = self::handleRejectedStatus($siRequest, $statuses, $statusTrack);
+        if ($systemRequest->status instanceof \App\States\InformationSystem\Rejected) {
+            $statuses = self::handleRejectedStatus($systemRequest, $statuses, $statusTrack);
         }
 
-        if ($siRequest->status instanceof \App\States\Replied) {
-            $statuses = self::handleRepliedStatus($siRequest, $statuses, $statusTrack);
+        if ($systemRequest->status instanceof \App\States\InformationSystem\Replied) {
+            $statuses = self::handleRepliedStatus($systemRequest, $statuses, $statusTrack);
         }
 
-        if ($siRequest->status instanceof \App\States\RepliedKapusdatin) {
-            $statuses = self::handleRepliedKapusdatinStatus($siRequest, $statuses, $statusTrack);
+        if ($systemRequest->status instanceof \App\States\InformationSystem\RepliedKapusdatin) {
+            $statuses = self::handleRepliedKapusdatinStatus($systemRequest, $statuses, $statusTrack);
         }
 
         return array_values($statuses);
@@ -52,9 +52,9 @@ class TrackingStepped
 
     public static function currentIndex(Model $model, array $statuses): int
     {
-        if ($model instanceof Letter) {
-            $currentStatusLabel = $model->status instanceof \App\States\Rejected
-                ? self::getStateInstance(\App\States\Rejected::class, $model)->label()
+        if ($model instanceof InformationSystemRequest) {
+            $currentStatusLabel = $model->status instanceof \App\States\InformationSystem\Rejected
+                ? self::getStateInstance(\App\States\InformationSystem\Rejected::class, $model)->label()
                 : $model->status->label();
         } else {
             $currentStatusLabel = $model->status->label();
@@ -86,10 +86,10 @@ class TrackingStepped
             ->all();
     }
 
-    private static function handleRejectedStatus(Letter $siRequest, array $statuses, $statusTrack): array
+    private static function handleRejectedStatus(InformationSystemRequest $systemRequest, array $statuses, $statusTrack): array
     {
         $statuses = array_slice($statuses, 0, 2);
-        $rejectedState = self::getStateInstance(\App\States\Rejected::class, $siRequest);
+        $rejectedState = self::getStateInstance(\App\States\InformationSystem\Rejected::class, $systemRequest);
         $rejectedTrack = $statusTrack->firstWhere(
             'action',
             $rejectedState->trackingMessage(Division::HEAD_ID->value)
@@ -104,13 +104,13 @@ class TrackingStepped
         return $statuses;
     }
 
-    private static function handleRepliedStatus(Letter $siRequest, array $statuses, $statusTrack): array
+    private static function handleRepliedStatus(InformationSystemRequest $systemRequest, array $statuses, $statusTrack): array
     {
-        if (in_array($siRequest->active_checking, [Division::SI_ID->value, Division::DATA_ID->value], true)) {
-            $repliedState = self::getStateInstance(\App\States\Replied::class, $siRequest);
+        if (in_array($systemRequest->active_checking, [Division::SI_ID->value, Division::DATA_ID->value], true)) {
+            $repliedState = self::getStateInstance(\App\States\InformationSystem\Replied::class, $systemRequest);
             $repliedTrack = $statusTrack->firstWhere(
                 'action',
-                $repliedState->trackingMessage($siRequest->current_division)
+                $repliedState->trackingMessage($systemRequest->current_division)
             );
 
             array_splice($statuses, 2, 0, [
@@ -125,13 +125,13 @@ class TrackingStepped
         return $statuses;
     }
 
-    private static function handleRepliedKapusdatinStatus(Letter $siRequest, array $statuses, $statusTrack): array
+    private static function handleRepliedKapusdatinStatus(InformationSystemRequest $systemRequest, array $statuses, $statusTrack): array
     {
-        if ($siRequest->active_checking === Division::HEAD_ID->value) {
-            $repliedKapusdatinState = self::getStateInstance(\App\States\RepliedKapusdatin::class, $siRequest);
+        if ($systemRequest->active_checking === Division::HEAD_ID->value) {
+            $repliedKapusdatinState = self::getStateInstance(\App\States\InformationSystem\RepliedKapusdatin::class, $systemRequest);
             $repliedKapusdatinTrack = $statusTrack->firstWhere(
                 'action',
-                $repliedKapusdatinState->trackingMessage($siRequest->current_division)
+                $repliedKapusdatinState->trackingMessage($systemRequest->current_division)
             );
 
             array_splice($statuses, 3, 0, [

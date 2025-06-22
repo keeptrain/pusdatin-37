@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -26,7 +26,7 @@ class LetterExport implements FromCollection, WithHeadings, WithEvents, ShouldAu
 
     public function collection()
     {
-        $query = Letter::query()->with('user');
+        $query = InformationSystemRequest::query()->with('user');
 
         if ($this->startDate) {
             $query->whereDate('created_at', '>=', $this->startDate);
@@ -35,7 +35,7 @@ class LetterExport implements FromCollection, WithHeadings, WithEvents, ShouldAu
             $query->whereDate('created_at', '<=', $this->endDate);
         }
         if ($this->status && $this->status !== 'all') {
-            $stateClass = Letter::resolveStatusClassFromString($this->status);
+            $stateClass = InformationSystemRequest::resolveStatusClassFromString($this->status);
             $query->whereState('status', $stateClass);
         }
 

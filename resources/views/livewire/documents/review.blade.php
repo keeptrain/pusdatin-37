@@ -1,5 +1,5 @@
 <div>
-    <flux:button :href="route('is.show', [$letterId])" 
+    <flux:button :href="route('is.show', [$systemRequestId])" 
         icon="arrow-long-left" variant="subtle">Kembali</flux:button>
 
     <div class="grid grid-cols-2">

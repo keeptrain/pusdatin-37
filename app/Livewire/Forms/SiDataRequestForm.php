@@ -6,7 +6,7 @@ use App\Enums\Division;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Title;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadServices;
 
@@ -65,24 +65,28 @@ class SiDataRequestForm extends Component
     {
         $this->validate();
 
-        DB::transaction(function () use ($fileUploadServices) {
+        $systemRequestId = null;
+
+        DB::transaction(function () use ($fileUploadServices, &$systemRequestId) {
             $validFiles = array_filter($this->files);
 
-            $letter = $this->createLetter();
+            $systemRequest = $this->create();
             $uploads = $fileUploadServices->storeMultiplesFiles($validFiles);
-            $this->insertDocumentUploads($uploads, $letter);
-            $letter->logStatus(null);
+            $this->insertDocumentUploads($uploads, $systemRequest);
+            $systemRequest->logStatus(null);
 
-            // Notifikasi kirim ke kapusdatin
-            $letter->sendNewServiceRequestNotification('head_verifier');
+            // Send notification to head verifier
+            $systemRequest->sendNewServiceRequestNotification('head_verifier');
 
-            return $this->redirect("/history/information-system/$letter->id", true);
+            $systemRequestId = $systemRequest->id;
         });
+
+        $this->redirectRoute('detail.request', ['type' => 'information-system', 'id' => $systemRequestId], true);
     }
 
-    public function createLetter()
+    public function create(): InformationSystemRequest
     {
-        return Letter::create([
+        return InformationSystemRequest::create([
             'user_id' => auth()->user()->id,
             'title' => $this->title,
             'reference_number' => $this->reference_number,

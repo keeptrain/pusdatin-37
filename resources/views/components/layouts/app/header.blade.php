@@ -26,7 +26,7 @@
                 wire:navigate>
                 {{ __('Dashboard') }}
             </flux:navbar.item>
-            <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
+            <flux:navbar.item icon="folder" :href="route('list.request')" :current="request()->routeIs('list.request')"
                 wire:navigate>
                 {{ __('Permohonan') }}
             </flux:navbar.item>
@@ -131,7 +131,7 @@
                 </flux:modal>
                 @endif --}}
 
-                <flux:navlist.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
+                <flux:navlist.item icon="folder" :href="route('list.request')" :current="request()->routeIs('list.request')"
                     wire:navigate>
                     {{ __('Permohonan') }}
                 </flux:navlist.item>

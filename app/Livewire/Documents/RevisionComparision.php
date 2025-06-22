@@ -3,7 +3,7 @@
 namespace App\Livewire\Documents;
 
 use Livewire\Component;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
@@ -19,7 +19,7 @@ class RevisionComparision extends Component
     public function mount(int $id)
     {
         $this->siDataRequestId = $id;
-        $this->siDataRequest = $this->letters();
+        $this->siDataRequest = $this->informationSystemRequests();
     }
 
     #[Title('Perbandingan Versi')]
@@ -28,9 +28,9 @@ class RevisionComparision extends Component
         return view('livewire.documents.revision-comparision');
     }
 
-    public function letters()
+    public function informationSystemRequests()
     {
-        return Letter::with([
+        return InformationSystemRequest::with([
             'documentUploads.activeVersion:id,file_path',
             'documentUploads.versions'
         ])->findOrFail($this->siDataRequestId);

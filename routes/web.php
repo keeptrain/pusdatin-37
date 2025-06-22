@@ -1,15 +1,11 @@
 <?php
 
-use App\Livewire\Letters\Chat;
 use App\Livewire\Documents\Review;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Letters\Data\Rollback;
-use App\Livewire\Letters\DetailHistory;
-use App\Livewire\Letters\HistoryLetter;
 use App\Livewire\Forms\PublicRelationForm;
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Requests\PublicRelation\Show;
@@ -33,6 +29,25 @@ Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Route::get('/test-email', function () {
+//     try {
+//         Mail::to('remajamesjid1945@gmail.com')->send(new RevisionMail());
+//         return "Email sedang dikirim!";
+//     } catch (\Exception $e) {
+//         return "Gagal mengirim email: " . $e->getMessage();
+//     }
+// });
+
+// Route::get('/test-email', fn($data) => new RevisionMail($data));
+// Route::get('/test-email', function () {
+//     $data = [
+//         'title' => 'test title',
+//         'revision_notes' => ['Indentifikasi Aplikasi' => 'testnotes', 'SOP' => 'testnotesop'],
+//         'url' => 'https://google.com'
+//     ];
+//     return new RevisionMail($data);
+// });
+
 Route::middleware(['auth'])->group(function () {
     // Information System & Data
     Route::get('/download-sop-and-templates', [DashboardController::class, 'downloadSopAndTemplates'])->name('download.sop-and-templates')->middleware('role:user');
@@ -45,8 +60,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('information-system/{id}/activity', \App\Livewire\Requests\InformationSystem\Activity::class)->name('is.activity');
         Route::get('information-system/{id}/meeting', Meeting::class)->name('is.meeting');
         Route::get('information-system/{id}/version', RevisionComparision::class)->name('comparison.version');
-        Route::get('letter/{id}/rollback', Rollback::class)->name('letter.rollback');
+        Route::get('information-system/{id}/rollback', \App\Livewire\Requests\InformationSystem\Rollback::class)->name('is.rollback');
+        Route::get('information-system/{id}/review', Review::class)->name('is.review');
     });
+
+    Route::get('request/{id}/chat', \App\Livewire\Requests\Chat::class)->name('request.chat');
 
     // Public Relation
     Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form')->middleware('can:create request');
@@ -59,35 +77,15 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware('can:view requests')->group(function () {
-        Route::get('history', HistoryLetter::class)->name('history');
-        Route::get('history/{type}/{id}', DetailHistory::class)->name('history.detail');
+        Route::get('permohonan', \App\Livewire\Requests\User\ListRequest::class)->name('list.request');
+        Route::get('permohonan/{type}/{id}', \App\Livewire\Requests\User\Detail::class)->name('detail.request');
     });
-
-    Route::get('letter/{id}/review', Review::class)->name('letter.review');
-    Route::get('letter/{id}/chat', Chat::class)->name('letter.chat');
-
-    // analytic
-    // Route::get('/letter/{letter}/activity', function (Letter $letter) {
-    //     // Controller atau Closure ini akan memuat view yang me-render komponen Livewire
-    //     return view('components.user.tracking-list', [
-    //         'model' => $letter,
-    //         'modelType' => $letter->getMorphClass(),
-    //         'modelId' => $letter->id,
-    //         'pageTitle' => 'Aktivitas Layanan SI'
-    //     ]);
-    // })->name('letter.activity');
-
-    // Route::prefix('letter/{id}')->group(function() {
-    //     Route::get('detail', [Detail::class])->name('letter.detail');
-    //     Route::get('edit', [Edit::class])->name('letter.edit');
-    //     Route::get('activity', [Edit::class])->name('letter.activity');
-    //     Route::get('chat', [Edit::class])->name('letter.chat');
-    // });
 });
 
 Route::group(['middleware' => ['auth', 'role:administrator|si_verifier|data_verifier|pr_verifier|head_verifier']], function () {
     Route::prefix('system')->group(function () {
         Route::get('users', ManageUsers::class)->name('manage.users');
+        Route::get('users/{id}', \App\Livewire\Admin\User\Show::class)->name('user.show');
         Route::get('templates', ManageTemplate::class)->name('manage.templates');
         // Route::get('template/create', [TemplateController::class, 'create'])->name('create.template');
         // Route::post('template/store', [TemplateController::class, 'store'])->name('store.template');

@@ -31,7 +31,7 @@
                 <x-menu.dropdown-menu-on-show :systemRequestId="$systemRequestId" />
             </x-slot>
 
-            <livewire:letters.modal-confirmation :systemRequestId="$systemRequestId"
+            <livewire:requests.information-system.confirm-modal :systemRequestId="$systemRequestId"
                 :allowedParts="$this->allowedParts" />
         </div>
     </x-layouts.requests.show>

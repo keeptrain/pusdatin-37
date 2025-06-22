@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -38,6 +39,13 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public $sections = [
+        'kepegawaian' => 'Kepegawaian',
+        'kesehatan' => 'Kesehatan',
+        'tenaga_kesehatan' => 'Tenaga Kesehatan',
+        'umum' => 'Umum',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -49,6 +57,16 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function informationSystemRequests()
+    {
+        return $this->hasMany(InformationSystemRequest::class);
+    }
+
+    public function publicRelationRequests()
+    {
+        return $this->hasMany(PublicRelationRequest::class);
     }
 
     /**
@@ -78,5 +96,28 @@ class User extends Authenticatable
     public static function currentUserRoleId()
     {
         return auth()->user()->roles->pluck('id')->first();
+    }
+
+    public function setSectionAttribute($value)
+    {
+        if (!array_key_exists($value, $this->sections)) {
+            throw new \InvalidArgumentException("Key $value invalid");
+        }
+        $this->attributes['section'] = $value;
+    }
+
+    public function getSectionLabelAttribute()
+    {
+        return $this->sections[$this->section] ?? 'Unknown section';
+    }
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d M Y, H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d M Y, H:i:s');
     }
 }

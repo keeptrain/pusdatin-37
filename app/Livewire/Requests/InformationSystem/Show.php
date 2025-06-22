@@ -3,15 +3,15 @@
 namespace App\Livewire\Requests\InformationSystem;
 
 use Carbon\Carbon;
-use App\States\Process;
-use App\States\Completed;
+use App\States\InformationSystem\Process;
+use App\States\InformationSystem\Completed;
 use Livewire\Component;
 use Livewire\Attributes\Title;
-use App\Models\Letters\Letter;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\InformationSystemRequest;
 use Illuminate\Database\Eloquent\Collection;
 
 class Show extends Component
@@ -19,7 +19,7 @@ class Show extends Component
     #[Locked]
     public int $systemRequestId;
 
-    public Letter $systemRequest;
+    public InformationSystemRequest $systemRequest;
 
     protected ?Collection $tracks = null;
 
@@ -28,7 +28,7 @@ class Show extends Component
     public function mount(int $id)
     {
         $this->systemRequestId = $id;
-        $this->systemRequest = Letter::with(['documentUploads.activeVersion:id,file_path', 'user:id,name,contact,section'])->findOrFail($this->systemRequestId);
+        $this->systemRequest = InformationSystemRequest::with(['documentUploads.activeVersion:id,file_path', 'user:id,name,contact,section'])->findOrFail($this->systemRequestId);
     }
 
     #[Title('Detail Permohonan')]
