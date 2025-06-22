@@ -65,7 +65,9 @@ class SiDataRequestForm extends Component
     {
         $this->validate();
 
-        DB::transaction(function () use ($fileUploadServices) {
+        $systemRequestId = null;
+
+        DB::transaction(function () use ($fileUploadServices, &$systemRequestId) {
             $validFiles = array_filter($this->files);
 
             $systemRequest = $this->create();
@@ -76,11 +78,13 @@ class SiDataRequestForm extends Component
             // Send notification to head verifier
             $systemRequest->sendNewServiceRequestNotification('head_verifier');
 
-            return $this->redirect("/history/information-system/$systemRequest->id", true);
+            $systemRequestId = $systemRequest->id;
         });
+
+        $this->redirectRoute('detail.request', ['type' => 'information-system', 'id' => $systemRequestId], true);
     }
 
-    public function create()
+    public function create(): InformationSystemRequest
     {
         return InformationSystemRequest::create([
             'user_id' => auth()->user()->id,

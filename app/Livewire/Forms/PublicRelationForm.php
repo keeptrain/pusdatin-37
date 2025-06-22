@@ -95,17 +95,21 @@ class PublicRelationForm extends Component
     {
         $this->validate();
 
-        DB::transaction(function () use ($fileUploadServices) {
+        $prId = null;
+
+        DB::transaction(function () use ($fileUploadServices, &$prId) {
             $validFiles = array_filter($this->uploadFile);
 
-            $prData = $this->createPublicRelationForm();
+            $prData = $this->createPublicRelationRequest();
             $prData->logStatus(null);
             $uploads = $fileUploadServices->storeMultiplesFilesPr($validFiles);
             $this->insertDocumentUploads($uploads, $prData);
             $prData->sendNewServiceRequestNotification('promkes_verifier');
 
-            return $this->redirect("/history/public-relation/$prData->id", true);
+            $prId = $prData->id;
         });
+
+        $this->redirectRoute('detail.request', ['type' => 'public-relation', 'id' => $prId]);
     }
 
     public function updatedTarget($value)
@@ -115,7 +119,7 @@ class PublicRelationForm extends Component
         }
     }
 
-    public function createPublicRelationForm()
+    public function createPublicRelationRequest(): PublicRelationRequest
     {
         $target = $this->target === 'other' ? $this->otherTarget : $this->target;
 
