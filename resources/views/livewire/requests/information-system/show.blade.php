@@ -34,5 +34,8 @@
             <livewire:requests.information-system.confirm-modal :systemRequestId="$systemRequestId"
                 :allowedParts="$this->allowedParts" />
         </div>
+        
+        <x-modal.information-system.email-to-user :systemRequest="$systemRequest" />
+
     </x-layouts.requests.show>
 </div>

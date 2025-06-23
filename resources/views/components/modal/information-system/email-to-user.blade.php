@@ -1,0 +1,22 @@
+<flux:modal name="email-modal">
+    <form wire:submit="sendMail" class="md:w-120 space-y-4">
+        <div>
+            <flux:legend>Kirim email</flux:legend>
+            <flux:text>Kepada pemohon {{ $systemRequest->user->name }}</flux:text>
+        </div>
+
+        <flux:checkbox.group wire:model="emailChecked" label="Opsi">
+            <flux:checkbox value="need-nda" label="Permintaan Surat Perjanjian Kerasahasiaan "
+                description="Meminta kepada pemohon untuk segera mengirimkan surat perjanjian kerasahasiaa (NDA)." />
+            <flux:checkbox value="need-update" label="Segera memperbaiki dokumen yang tidak sesuai"
+                description="Meminta kepada pemohon untuk segera memperbaiki dokumen yang tidak sesuai ketentuan." />
+        </flux:checkbox.group>
+
+        <div class="flex justify-end">
+            <flux:button @click="$dispatch('modal-close', { name: 'email-modal' });"></flux:button>
+            <flux:button variant="primary" type="submit">
+                Kirim
+            </flux:button>
+        </div>
+    </form>
+</flux:modal>
