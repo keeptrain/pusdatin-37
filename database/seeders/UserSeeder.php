@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Support\Arr;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
@@ -82,14 +81,13 @@ class UserSeeder extends Seeder
             'kepegawaian' => 'Kepegawaian',
             'kesehatan' => 'Kesehatan',
             'tenaga_kesehatan' => 'Tenaga Kesehatan',
-            'umum' => 'Umum',
         ];
         for ($i = 1; $i <= 5; $i++) {
             $regularUsers = User::create([
                 'name' => 'User' . $i,
                 'email' => 'user' . $i . '@gmail.com',
                 'password' => bcrypt('login'),
-                'section' => Arr::random($sections),
+                'section' => array_rand($sections),
                 'contact' => '08123456789'
 
             ]);

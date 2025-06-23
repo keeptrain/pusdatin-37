@@ -13,7 +13,6 @@
         </flux:checkbox.group>
 
         <div class="flex justify-end">
-            <flux:button @click="$dispatch('modal-close', { name: 'email-modal' });"></flux:button>
             <flux:button variant="primary" type="submit">
                 Kirim
             </flux:button>
