@@ -5,17 +5,17 @@
 
 <div class="mb-6">
     <h4 class="text-gray-500 mb-1">Judul</h4>
-    <p class="text-gray-800">
+    <p class="text-gray-800 md:break-words max-w-[300px]">
         {{ $systemRequest->title }}
     </p>
 </div>
 
-<div class="mb-6">
+{{-- <div class="mb-6">
     <h4 class="text-gray-500 mb-1">Penanggung Jawab</h4>
     <p class="text-gray-800">
         {{ $systemRequest->user->name }}
     </p>
-</div>
+</div> --}}
 
 <div class="mb-6">
     <h4 class="text-gray-500 mb-1">Nomor Surat</h4>
@@ -24,7 +24,7 @@
     </p>
 </div>
 
-<div class="mb-6">
+{{-- <div class="mb-6">
     <h4 class="text-gray-500 mb-1">Kontak</h4>
     <p class="text-gray-800">
         {{ $systemRequest->user->contact }}
@@ -36,7 +36,7 @@
     <p class="text-gray-800">
         {{ $systemRequest->user->section }}
     </p>
-</div>
+</div> --}}
 
 <div class="mb-6">
     <h4 class="text-gray-500 mb-1">Tanggal dibuat</h4>

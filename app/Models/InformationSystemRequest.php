@@ -31,9 +31,9 @@ class InformationSystemRequest extends Model
 
     protected $casts = [
         'status' => InformationSystemStatus::class,
-        'meeting' => 'array',
-        'notes' => 'array',
-        'rating' => 'array'
+        'meetings' => 'json',
+        'notes' => 'json',
+        'rating' => 'json'
     ];
 
     public $fillable = [
@@ -45,7 +45,7 @@ class InformationSystemRequest extends Model
         'current_division',
         'active_revision',
         'need_review',
-        'meeting',
+        'meetings',
         'notes',
         'rating'
     ];
@@ -125,7 +125,7 @@ class InformationSystemRequest extends Model
 
     public function getFormattedMeetingDate(): string
     {
-        $details = $this->meeting; // Array
+        $details = $this->meetings; // Array
         if (isset($details['date']) && !empty($details['date'])) {
             return Carbon::parse($details['date'])->isoFormat('dddd, D MMMM YYYY');
         }
@@ -190,7 +190,7 @@ class InformationSystemRequest extends Model
         $this->transitionStatusFromString($newStatus);
 
         match ($newStatus) {
-            'approved_kasatpel' => $this->update(['active_checking' => Division::SI_ID->value]),
+            'approved_kasatpel' => $this->update(['active_checking' => Division::HEAD_ID->value]),
             'replied' => $this->update([
                 'active_revision' => true
             ]),
@@ -283,7 +283,7 @@ class InformationSystemRequest extends Model
 
     protected function getFormattedMeetingsAttribute()
     {
-        $meetings = $this->meeting;
+        $meetings = $this->meetings;
 
         // $meetings adalah array valid
         $meetingsArray = is_string($meetings) ? json_decode($meetings, true) : $meetings;
@@ -320,7 +320,7 @@ class InformationSystemRequest extends Model
         // Get all meetings from user id
         $allMeetings = self::where('user_id', $userId)
             ->get()
-            ->pluck('meeting')->flatMap(function ($meeting) {
+            ->pluck('meetings')->flatMap(function ($meeting) use ($now) {
                 return $meeting;
             })->filter();
 
