@@ -1,4 +1,4 @@
-<div class="max-w-screen-xl mx-auto px-4 lg:px-0 mb-6">
+<div class="max-w-screen-xl mx-auto lg:px-0 mb-3">
     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <!-- Header: Request ID & Status -->
         <div class="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
