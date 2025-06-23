@@ -124,9 +124,7 @@
 
     </flux:sidebar>
 
-    <div class="max-w-[1440px] mx-auto"> <!--dubungkus max-w biar ga jadi melebar di layar besar -->
-        {{ $slot }}
-    </div>
+    {{ $slot }}
 
     @livewireScripts
     @fluxScripts
