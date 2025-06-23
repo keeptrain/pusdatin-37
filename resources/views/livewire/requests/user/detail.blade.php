@@ -8,6 +8,11 @@
         </div>
     </div>
 
+    @if ($content->status instanceof App\States\PublicRelation\Completed || $content->status instanceof App\States\InformationSystem\Completed)
+        <x-user.rating.alert />
+        <x-user.rating.modal />
+    @endif
+
     @if ($type === 'information-system')
         <div class="py-6">
             <x-user.information-system.card-basic-info :id="$content->id" :created-at="$content->createdAtDMY()"

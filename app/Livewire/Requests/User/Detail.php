@@ -14,6 +14,7 @@ use App\Models\PublicRelationRequest;
 use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
+use Illuminate\Validation\Rule;
 
 #[Title('Detail Permohonan')]
 class Detail extends Component
@@ -26,6 +27,11 @@ class Detail extends Component
     public $type;
 
     public $additionalFile;
+
+    public array $rating = [
+        'value' => null,
+        'comment' => ''
+    ];
 
     public $content;
 
@@ -78,6 +84,36 @@ class Detail extends Component
         });
 
         return array_values($meeting);
+    }
+
+    public function submitRating()
+    {
+        $this->validate([
+            'rating.value' => 'required|numeric|in:1,2,3,4',
+            'rating.comment' => [
+                Rule::requiredIf(fn() => $this->rating['value'] <= 2),
+                'nullable',
+                'string',
+                'max:150',
+            ],
+        ], [
+            'rating.comment.required' => 'Beri kami masukan agar lebih baik lagi :)'
+        ]);
+
+
+        $rating = [
+            $this->rating['value'] => $this->rating['comment'] ?? null,
+        ];
+
+        // dd($rating);
+
+        DB::transaction(function () use ($rating) {
+            $this->content?->update([
+                'rating' => $rating,
+            ]);
+        });
+
+        $this->redirectRoute('detail.request', ['type' => 'public-relation', 'id' => $this->id]);
     }
 
     #[Computed]

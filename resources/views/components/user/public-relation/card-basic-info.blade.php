@@ -44,7 +44,6 @@
                         </div>
                     @endforeach
                 </div>
-
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Tanggal Selesai</p>
                     <p class="mt-1 text-gray-900">{{ ucfirst($prRequest->completed_date) }}</p>
@@ -53,7 +52,7 @@
                     <p class="text-xs font-medium text-gray-500 uppercase">Link Produksi</p>
                     @forelse ($this->linkProductions as $value)
                         <li>
-                            <a href="{{ $value['url'] }}" class="font-semibold text-blue-800">{{ $value['label']}}</a>
+                            <a href="{{ $value['url'] }}" class="font-normal text-blue-800 hover:underline">{{ $value['label']}}</a>
                         </li>
                     @empty
                         <span>-</span>
