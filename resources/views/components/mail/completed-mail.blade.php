@@ -38,8 +38,8 @@
         </ul>
 
         <p style="font-size: 14px; color: #333;">
-            Setelah itu, kami memohon kesediaan Bapak/Ibu untuk segera memberikan rating terhadap pengerjaan permohonan
-            tersebut. Silahkan klik tombol di bawah ini:
+            Setelah itu, kami memohon kesediaan Bapak/Ibu untuk memberikan rating terhadap pengerjaan layanan kami.
+            Silahkan klik tombol di bawah ini:
         </p>
         <a href="{{ $data['rating_link'] }}"
             style="display: inline-block; padding: 5px 10px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 5px;">Berikan
