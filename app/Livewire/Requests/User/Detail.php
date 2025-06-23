@@ -179,20 +179,24 @@ class Detail extends Component
         })->values();
     }
 
+    #[Computed]
+    public function needUploadAdditionalFile(): bool
+    {
+        return $this->uploadedFile->contains(fn($file) => $file['part_number'] === 5);
+    }
+
     public function additionalUploadFile()
     {
         $this->validate([
             'additionalFile' => ['required', 'mimes:pdf']
         ], [
-            'additionalFile.required' => 'Surat perjanjian kerahasiaan harus disisipkan!'
+            'additionalFile.required' => 'Surat perjanjian kerahasiaan harus dilampirkan!'
         ]);
 
         DB::transaction(function () {
-            $hasPartNumber3 = $this->content->documentUploads->contains(function ($documentUpload) {
-                return $documentUpload->part_number == 5;
-            });
+            $hasPartNumber5 = $this->needUploadAdditionalFile;
 
-            if (!$hasPartNumber3) {
+            if (!$hasPartNumber5) {
                 $documentUpload = $this->content->documentUploads()->create([
                     'part_number' => 5,
                     'need_revision' => false,
@@ -219,7 +223,7 @@ class Detail extends Component
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => 'Dokumen pendukung berhasil disisipkan.',
+                'message' => 'Dokumen pendukung berhasil dilampirkan.',
             ]);
 
             return $this->redirect("$this->id", true);
