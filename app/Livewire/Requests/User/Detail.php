@@ -113,7 +113,7 @@ class Detail extends Component
             ]);
         });
 
-        $this->redirectRoute('detail.request', ['type' => 'public-relation', 'id' => $this->id]);
+        $this->redirectRoute('detail.request', ['type' => $this->type, 'id' => $this->id]);
     }
 
     #[Computed]

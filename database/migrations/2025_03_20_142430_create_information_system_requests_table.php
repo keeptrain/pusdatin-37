@@ -26,6 +26,7 @@ return new class extends Migration {
             $table->boolean('need_review')->default(false);
             $table->text('meeting')->nullable();
             $table->text('notes')->nullable();
+            $table->text('rating')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

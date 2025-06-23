@@ -32,7 +32,8 @@ class InformationSystemRequest extends Model
     protected $casts = [
         'status' => InformationSystemStatus::class,
         'meeting' => 'array',
-        'notes' => 'array'
+        'notes' => 'array',
+        'rating' => 'array'
     ];
 
     public $fillable = [
@@ -45,7 +46,8 @@ class InformationSystemRequest extends Model
         'active_revision',
         'need_review',
         'meeting',
-        'notes'
+        'notes',
+        'rating'
     ];
 
     public function user()

@@ -20,6 +20,7 @@ use App\Livewire\Documents\ManageTemplate;
 use App\Livewire\Requests\InformationSystem\Meeting;
 use App\Livewire\Requests\InformationSystem\Edit;
 use App\Livewire\Forms\SiDataRequestForm;
+use App\Livewire\Requests\ShowRatings;
 
 Route::get('/', function () {
     return view('welcome');
@@ -65,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('request/{id}/chat', \App\Livewire\Requests\Chat::class)->name('request.chat');
+    Route::get('ratings', ShowRatings::class)->name('show.ratings');
 
     // Public Relation
     Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form')->middleware('can:create request');
