@@ -45,7 +45,7 @@
                 </div>
 
                 <div>
-                    <p class="text-xs font-medium text-gray-500 uppercase mb-1">File yang di upload</p>
+                    <p class="text-xs font-medium text-gray-500 uppercase mb-1">Dokumen yang di upload</p>
                     <div x-data="{
                         hasPartNumber5: {{ $this->uploadedFile->contains(fn($file) => $file['part_number'] == 5) ? 'true' : 'false' }}
                     }">
@@ -57,7 +57,7 @@
                             </div>
                         @endforeach
 
-                        <template x-if="!hasPartNumber5">
+                        {{-- <template x-if="!hasPartNumber5">
                             <flux:modal.trigger name="upload-modal">
                                 <a x-on:click="$dispatch('modal-show', { name: 'upload-modal' })"
                                     class="flex gap-2 mt-4 text-blue-900 hover:underline cursor-pointer " type="file">
@@ -65,7 +65,7 @@
                                     Upload file pendukung
                                 </a>
                             </flux:modal.trigger>
-                        </template>
+                        </template> --}}
                     </div>
                 </div>
             </div>
@@ -79,5 +79,5 @@
             </div>
         </div>
     </div>
-    <x-modal.additional-file-upload :title="$title" />
+
 </div>
