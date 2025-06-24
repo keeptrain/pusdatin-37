@@ -1,5 +1,6 @@
 <x-layouts.form.request legend="Form Permohonan layanan" nameForm="Sistem Informasi & Data">
     <form x-data="{
+        hasPartNumber5: false,
         activeUploads: 0,
         progress: 0,
         get uploading() {
@@ -62,37 +63,23 @@
 
                         <x-letters.input-file-adapter title="4. Form RFC Pusdatinkes" model="files.4" required />
 
-                        <x-letters.input-file-adapter title="5. Surat perjanjian kerahasiaan" model="files.5"
-                            optional />
-
-                        <div x-data="{ open: false }" class="border-l-2 border-gray-400 bg-gray-50 ">
-                            <div class="p-2 flex justify-between items-center cursor-pointer" @click="open = !open">
-                                <div class="flex items-center">
-                                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                                    </svg>
-                                    <span class="ml-2 text-sm font-medium text-gray-600">Kapan ini dibutuhkan?</span>
-                                </div>
-                                <svg x-show="!open" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                </svg>
-                                <svg x-show="open" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="18 15 12 9 6 15"></polyline>
-                                </svg>
+                        <flux:callout icon="question-mark-circle" variant="secondary" inline class="mt-6">
+                            <flux:callout.heading>Apakah anda sudah memiliki surat perjanjian kerahasiaan (NDA)?
+                            </flux:callout.heading>
+                            <div class="flex items-start">
+                                <flux:checkbox @click="hasPartNumber5 = !hasPartNumber5" />
+                                <flux:callout.text class="ml-2">Ya, saya sudah memiliki surat perjanjian kerahasiaan,
+                                    dan siap untuk di
+                                    kirim.</flux:callout.text>
                             </div>
+                        </flux:callout>
 
-                            <div x-show="open" class="p-3 text-gray-600 border-t border-gray-200">
-                                <p class="text-sm">Jika sudah mendapatkan tanda tangan beserta stempel</p>
+                        <template x-if="hasPartNumber5">
+                            <div class="mt-4">
+                                <x-letters.input-file-adapter title="5. Surat perjanjian kerahasiaan" model="files.5"
+                                    optional />
                             </div>
-                        </div>
+                        </template>
                     </div>
                 </div>
             </section>
