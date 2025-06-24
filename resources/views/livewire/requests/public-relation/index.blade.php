@@ -107,7 +107,6 @@
                         <th class="px-4 py-2 text-left border-b border-gray-200">Bulan Publikasi</th>
                         <th class="px-4 py-2 text-left border-b border-gray-200">Tanggal Selesai</th>
                         <th class="px-4 py-2 text-left border-b border-gray-200">Rencana Publikasi</th>
-                        <th class="px-4 py-2 text-left border-b border-gray-200">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -132,15 +131,7 @@
                         <td class="px-4 py-3">{{ $item->month_publication }}</td>
                         <td class="px-4 py-3">{{ $item->completed_date }}</td>
                         <td class="px-4 py-3">{{ $item->spesificDate() }}</td>
-                        <td class="px-4 py-3">
-                            <div class="flex space-x-2">
-                                <a href="{{ route('pr.rollback', $item->id) }}"
-                                    class="text-blue-600 hover:text-blue-800"
-                                    onclick="event.stopPropagation()">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                            </div>
-                        </td>
+
                     </tr>
                     @endforeach
                 </tbody>
@@ -516,8 +507,8 @@
         }
 
         const defaultStatusOptions = [{
-                value: 'Permohonan Masuk',
-                label: 'Permohonan Masuk'
+                value: 'Usulan Masuk',
+                label: 'Usulan Masuk'
             },
             {
                 value: 'Antrean Promkes',

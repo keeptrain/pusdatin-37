@@ -24,6 +24,7 @@ class PublicRelationRequest extends Model
     use HasActivities, HasStates, SoftDeletes;
 
     protected $table = "public_relation_requests";
+    protected $with = ['user'];
 
     protected $casts = [
         'status' => PublicRelationStatus::class,
