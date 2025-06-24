@@ -2,179 +2,67 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
-use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\Attributes\Title;
 use App\Models\InformationSystemRequest;
-use Livewire\Attributes\Computed;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\LengthAwarePaginator;
-use App\States\InformationSystem\InformationSystemStatus;
+use Illuminate\Database\Eloquent\Builder;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class Index extends Component
+class Index extends DataTableComponent
 {
-    use WithPagination;
+    // Model utama
+    protected $model = InformationSystemRequest::class;
 
-    public $perPage = 10; // Default per page
-
-    public $filterStatus = 'all';
-
-    public array $statuses = [
-        'all' => 'All',
-        'pending' => 'Permohonan Masuk',
-        'disposition' => 'Disposisi',
-        'replied' => 'Revisi Kasatpel',
-        'approved_kasatpel' => 'Disetujui Kasatpel',
-        // 'replied_kapusdatin' => 'Revisi Kapusdatin',
-        'approved_kapusdatin' => 'Disetujui Kapusdatin',
-        'process_request' => 'Proses Permohonan',
-        'completed' => 'Selesai',
-        'rejected' => 'Ditolak',
-    ];
-
-    public array $allowedStatuses = [];
-
-    public array $previousAllowedStatuses = [];
-
-    public array $oldAllowedStatuses = [];
-
-    public $sortBy = 'date_created';
-
-    public $selectedSystemRequests = [];
-
-    public $searchQuery = '';
-
-    public function mount()
+    public function configure(): void
     {
-        $this->allowedStatuses = $this->getAllowedStatusesByRole($this->getCurrentRoleId);
+        $this->setPrimaryKey('id')
+            ->setDefaultSort('created_at', 'desc')
+            ->setPerPage(10)
+            // ➜ Tambahkan ini:
+            ->setTableRowUrl(fn($row) => route('is.show', $row->id))
+            // (opsional) target _self sudah default, bisa di-skip
+            ->setTableRowUrlTarget(fn() => '_self');
     }
 
-    #[Title('Permohonan SI & Data')]
-    public function render()
+    // Query builder untuk ambil data
+    public function builder(): Builder
     {
-        return view('livewire.requests.information-system.index');
+        return InformationSystemRequest::query()
+            ->with('user'); // eager load relasi user bila diperlukan
     }
 
-    public function show(int $systemRequestId)
+    // Definisikan kolom-kolom tabel
+    // ...
+    public function columns(): array
     {
-        return $this->redirectRoute('is.show', ['id' => $systemRequestId], true);
-    }
+        return [
+            Column::make(__('ID'), 'id')
+                ->sortable(),
 
-    #[Computed]
-    public function informationSystemRequests()
-    {
-        return $this->getPaginatedInformationSystem();
-    }
+            Column::make(__('Judul'), 'title')
+                ->searchable()
+                ->sortable()
+                ->format(fn($value, $row) => sprintf(
+                    '<a href="%s" class="block w-full h-full text-blue-600 hover:underline">%s</a>',
+                    route('is.show', $row->id),
+                    e($value)
+                ))
+                ->html(),
+            Column::make(__('Referensi'), 'reference_number')
+                ->searchable()
+                ->sortable(),
 
-    #[Computed]
-    public function getCurrentRoleId()
-    {
-        return auth()->user()->currentUserRoleId();
-    }
+            Column::make(__('Status'), 'status')
+                ->format(fn($value, $row) => $row->status->label() ?? $value)
+                ->sortable(),
 
-    protected function buildBaseQuery()
-    {
-        return InformationSystemRequest::select('id', 'user_id', 'title', 'current_division', 'status', 'created_at')
-            ->with('user:id,name')
-            ->filterCurrentDivisionByCurrentUser($this->getCurrentRoleId)
-            ->filterByStatuses($this->allowedStatuses);
-    }
+            // === UBAH INI ===
+            Column::make(__('Divisi'), 'current_division')
+                ->format(fn($value, $row) => $row->division_label)
+                ->sortable(),
 
-    protected function getPaginatedInformationSystem(): LengthAwarePaginator
-    {
-        $query = $this->buildBaseQuery()
-            ->when($this->filterStatus !== 'all', fn($q) => $q->filterByStatus($this->filterStatus))
-            ->when($this->searchQuery, fn($q) => $this->applySearch($q))
-            ->when(
-                $this->sortBy === 'created_at',
-                fn($q) => $q->orderBy('created_at', 'asc'),
-                fn($q) => $q->orderBy(...$this->getSortCriteria())
-            );
+            Column::make(__('Dibuat pada'), 'created_at')
+                ->sortable(),
 
-        return $query->paginate($this->perPage);
-    }
-
-    protected function applySearch($query)
-    {
-        return $query->where(function ($q) {
-            $q->where('title', 'like', '%' . $this->searchQuery . '%')
-                ->orWhere('current_division', 'like', '%' . $this->searchQuery . '%')
-                ->orWhereHas('user', function ($q) {
-                    $q->where('name', 'like', '%' . $this->searchQuery . '%');
-                });
-        });
-    }
-
-    private function getSortCriteria(): array
-    {
-        return match ($this->sortBy) {
-            'date_created' => ['created_at', 'desc'],
-            'latest_activity' => ['updated_at', 'desc'],
-            default => ['updated_at', 'desc'],
-        };
-    }
-
-    public function getAllowedStatusesByRole($role): array
-    {
-        return InformationSystemStatus::statusesBasedRole($role);
-    }
-
-    public function updatedAllowedStatuses($value): void
-    {
-        // Limit maximum 9 statuses
-        if (count($this->allowedStatuses) > 9) {
-            $this->allowedStatuses = array_slice($this->allowedStatuses, 0, 9);
-        }
-
-        // State before change
-        $oldStatuses = $this->oldAllowedStatuses;
-        $this->oldAllowedStatuses = $this->allowedStatuses;
-
-        $allStatuses = array_keys($this->statuses);
-
-        // Detect change state "all"
-        $wasAllChecked = in_array('all', $oldStatuses);
-        $isAllCheckedNow = in_array('all', $this->allowedStatuses);
-
-        // If user unchecked "all"
-        if ($wasAllChecked && !$isAllCheckedNow) {
-            $this->allowedStatuses = $this->previousAllowedStatuses;
-            $this->previousAllowedStatuses = [];
-        }
-        // If user checked "all"
-        elseif (!$wasAllChecked && $isAllCheckedNow) {
-            $this->previousAllowedStatuses = array_diff($this->allowedStatuses, ['all']);
-            $this->allowedStatuses = array_merge($allStatuses, ['all']);
-        }
-        // If change on status other than "all"
-        else {
-            // If "all" active when other status changed
-            if ($isAllCheckedNow) {
-                $this->allowedStatuses = array_diff($this->allowedStatuses, ['all']);
-            }
-
-            // Check if all status selected
-            $allSelected = empty(array_diff($allStatuses, $this->allowedStatuses));
-
-            if ($allSelected) {
-                $this->allowedStatuses = array_merge($allStatuses, ['all']);
-            }
-        }
-
-        $this->allowedStatuses = array_unique($this->allowedStatuses);
-
-        if (empty($this->allowedStatuses)) {
-            $this->allowedStatuses = $this->getAllowedStatusesByRole($this->getCurrentRoleId);
-        }
-    }
-
-    public function deleteSelected()
-    {
-        DB::transaction(function () {
-            InformationSystemRequest::whereIn('id', $this->selectedSystemRequests)->delete();
-            $this->selectedSystemRequests = [];
-        });
-
-        $this->redirectRoute('is.index', navigate: true);
+        ];
     }
 }
