@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Documents\DocumentUpload;
 use App\Models\Documents\UploadVersion;
 use App\Models\InformationSystemRequest;
+use Illuminate\Support\Facades\Cache;
 
 #[Title('Revisi Permohonan Layanan')]
 class Edit extends Component
@@ -130,6 +131,8 @@ class Edit extends Component
 
             DB::afterCommit(function () use ($systemRequest) {
                 $systemRequest->sendProcessServiceRequestNotification();
+
+                Cache::forget("revision-mail-{$this->systemRequestId}");
             });
 
             session()->flash('status', [

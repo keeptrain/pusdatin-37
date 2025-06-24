@@ -16,7 +16,7 @@ class RevisionMail extends Mailable implements ShouldQueue
     /**
      * Create a new message instance.
      */
-    public function __construct(public $data)
+    public function __construct(public array $data, public string $mode)
     {
     }
 
@@ -25,8 +25,13 @@ class RevisionMail extends Mailable implements ShouldQueue
      */
     public function envelope(): Envelope
     {
+        $subject = match ($this->mode) {
+            'first-time' => "Perlu revisi Permohonan layanan dengan judul {$this->data['title']}",
+            'reminder' => "Segera melakukan revisi Permohonan layanan dengan judul {$this->data['title']}",
+        };
+
         return new Envelope(
-            subject: "Perlu revisi Permohonan layanan dengan judul {$this->data['title']}",
+            subject: $subject,
         );
     }
 

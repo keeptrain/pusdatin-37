@@ -42,7 +42,7 @@ class RevisionRequestNotification extends Notification implements ShouldQueue
         }
 
         try {
-            return new RevisionMail($this->data)->to($notifiable->email);
+            return new RevisionMail($this->data, 'first-time')->to($notifiable->email);
         } catch (\Exception $e) {
             Log::error('Error sending email: ' . $e->getMessage());
         }

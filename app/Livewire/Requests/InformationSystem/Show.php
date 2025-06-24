@@ -15,6 +15,8 @@ use Illuminate\Support\Str;
 use App\Models\InformationSystemRequest;
 use Illuminate\Database\Eloquent\Collection;
 use App\Mail\Requests\InformationSystem\NeedNDAMail;
+use App\Mail\Requests\InformationSystem\RevisionMail;
+use Illuminate\Support\Facades\Cache;
 
 class Show extends Component
 {
@@ -124,8 +126,22 @@ class Show extends Component
             'url' => route('detail.request', ['type' => 'information-system', 'id' => $this->systemRequestId]),
         ];
 
-        if (in_array('need-nda', $this->emailChecked)) {
-            Mail::send(new NeedNDAMail($data)->to($this->systemRequest->user->email));
+        $email = $this->systemRequest->user->email;
+
+        foreach ($this->emailChecked as $emailType) {
+            switch ($emailType) {
+                case 'need-nda':
+                    Mail::send(new NeedNDAMail($data)->to($email));
+                    break;
+
+                case 'reminder-revision':
+                    $revisionMailData = Cache::get("revision-mail-{$this->systemRequestId}");
+                    Mail::send(new RevisionMail($revisionMailData, 'reminder')->to($email));
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         session()->flash('success', 'Email berhasil dikirim');
