@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->string('target');
             $table->text('links')->nullable();
             $table->tinyInteger('active_checking');
-            $table->text('rating')->nullable();
+            $table->json('rating')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
