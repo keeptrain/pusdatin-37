@@ -1,4 +1,4 @@
-<div class="max-w-screen-xl mx-auto px-4 lg:px-0 mb-6">
+<div class="max-w-screen-xl mx-auto lg:px-0 mb-3">
     <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <!-- Header: Request ID & Status -->
         <div class="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -35,16 +35,15 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1">Materi yang di upload</p>
                     @foreach ($this->uploadedFile as $file)
-                        <div class="flex flex-row gap-2">
-                            <x-lucide-circle-check-big class="w-4 text-green-500" />
-                            <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
-                                class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
-                                ?? $file['part_number'] }}
-                            </a>
-                        </div>
+                                    <div class="flex flex-row gap-2">
+                                        <x-lucide-circle-check-big class="w-4 text-green-500" />
+                                        <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
+                                            class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
+                        ?? $file['part_number'] }}
+                                        </a>
+                                    </div>
                     @endforeach
                 </div>
-
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Tanggal Selesai</p>
                     <p class="mt-1 text-gray-900">{{ ucfirst($prRequest->completed_date) }}</p>
@@ -53,7 +52,8 @@
                     <p class="text-xs font-medium text-gray-500 uppercase">Link Produksi</p>
                     @forelse ($this->linkProductions as $value)
                         <li>
-                            <a href="{{ $value['url'] }}" class="font-semibold text-blue-800">{{ $value['label']}}</a>
+                            <a href="{{ $value['url'] }}"
+                                class="font-normal text-blue-800 hover:underline">{{ $value['label']}}</a>
                         </li>
                     @empty
                         <span>-</span>

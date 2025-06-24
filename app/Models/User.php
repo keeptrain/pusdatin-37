@@ -40,6 +40,8 @@ class User extends Authenticatable
     ];
 
     public $sections = [
+        'pusdatin' => 'Pusdatin',
+        'promkes' => 'Promosi Kesehatan',
         'kepegawaian' => 'Kepegawaian',
         'kesehatan' => 'Kesehatan',
         'tenaga_kesehatan' => 'Tenaga Kesehatan',

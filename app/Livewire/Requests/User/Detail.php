@@ -14,6 +14,7 @@ use App\Models\PublicRelationRequest;
 use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
+use Illuminate\Validation\Rule;
 
 #[Title('Detail Permohonan')]
 class Detail extends Component
@@ -26,6 +27,11 @@ class Detail extends Component
     public $type;
 
     public $additionalFile;
+
+    public array $rating = [
+        'value' => null,
+        'comment' => ''
+    ];
 
     public $content;
 
@@ -78,6 +84,36 @@ class Detail extends Component
         });
 
         return array_values($meeting);
+    }
+
+    public function submitRating()
+    {
+        $this->validate([
+            'rating.value' => 'required|numeric|in:1,2,3,4',
+            'rating.comment' => [
+                Rule::requiredIf(fn() => $this->rating['value'] <= 2),
+                'nullable',
+                'string',
+                'max:150',
+            ],
+        ], [
+            'rating.comment.required' => 'Beri kami masukan agar lebih baik lagi :)'
+        ]);
+
+        $rating = [
+            'rating' => $this->rating['value'],
+            'comment' => $this->rating['comment'],
+            'rating_date' => Carbon::now()->toDateTimeString(),
+            'replied_at' => null,
+        ];
+
+        DB::transaction(function () use ($rating) {
+            $this->content?->update([
+                'rating' => $rating,
+            ]);
+        });
+
+        $this->redirectRoute('detail.request', ['type' => $this->type, 'id' => $this->id]);
     }
 
     #[Computed]
@@ -143,20 +179,24 @@ class Detail extends Component
         })->values();
     }
 
+    #[Computed]
+    public function needUploadAdditionalFile(): bool
+    {
+        return $this->uploadedFile->contains(fn($file) => $file['part_number'] === 5);
+    }
+
     public function additionalUploadFile()
     {
         $this->validate([
             'additionalFile' => ['required', 'mimes:pdf']
         ], [
-            'additionalFile.required' => 'Surat perjanjian kerahasiaan harus disisipkan!'
+            'additionalFile.required' => 'Surat perjanjian kerahasiaan harus dilampirkan!'
         ]);
 
         DB::transaction(function () {
-            $hasPartNumber3 = $this->content->documentUploads->contains(function ($documentUpload) {
-                return $documentUpload->part_number == 5;
-            });
+            $hasPartNumber5 = $this->needUploadAdditionalFile;
 
-            if (!$hasPartNumber3) {
+            if (!$hasPartNumber5) {
                 $documentUpload = $this->content->documentUploads()->create([
                     'part_number' => 5,
                     'need_revision' => false,
@@ -183,7 +223,7 @@ class Detail extends Component
 
             session()->flash('status', [
                 'variant' => 'success',
-                'message' => 'Dokumen pendukung berhasil disisipkan.',
+                'message' => 'Dokumen pendukung berhasil dilampirkan.',
             ]);
 
             return $this->redirect("$this->id", true);

@@ -25,7 +25,7 @@ class PublicRelationRequestPolicy
      */
     public function view(User $user, PublicRelationRequest $publicRelationRequest): bool
     {
-        return  $user->can('view pr request');
+        return $user->can('view pr request');
     }
 
     /**

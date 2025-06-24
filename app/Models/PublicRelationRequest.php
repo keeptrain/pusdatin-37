@@ -29,7 +29,8 @@ class PublicRelationRequest extends Model
     protected $casts = [
         'status' => PublicRelationStatus::class,
         'target' => 'array',
-        'links' => 'array'
+        'links' => 'array',
+        'rating' => 'array'
     ];
 
     protected $fillable = [
@@ -40,7 +41,8 @@ class PublicRelationRequest extends Model
         'theme',
         'target',
         'links',
-        'active_checking'
+        'active_checking',
+        'rating'
     ];
 
     public function user()

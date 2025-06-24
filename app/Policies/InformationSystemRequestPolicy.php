@@ -39,11 +39,7 @@ class InformationSystemRequestPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('create request')) {
-            return true;
-        }
-
-        return false;
+        return $user->can('create request');
     }
 
     /**
@@ -195,14 +191,11 @@ class InformationSystemRequestPolicy
         return false;
     }
 
-
     public function actionProcessRequest(User $user, InformationSystemRequest $systemRequest): bool
     {
-        if ($user->can('can process si') && $this->conditionForVerification($systemRequest) && $systemRequest->status instanceof ApprovedKapusdatin) {
-            return true;
-        }
-
-        return false;
+        return ($user->can('can process si') || $user->can('can process data'))
+            && $this->conditionForVerification($systemRequest)
+            && $systemRequest->status instanceof ApprovedKapusdatin;
     }
 
     public function actionCompletedRequest(User $user, InformationSystemRequest $systemRequest): bool

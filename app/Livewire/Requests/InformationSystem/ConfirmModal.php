@@ -4,11 +4,12 @@ namespace App\Livewire\Requests\InformationSystem;
 
 use App\Enums\Division;
 use Livewire\Component;
-use App\Models\InformationSystemRequest;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\DB;
 use App\Enums\InformationSystemRequestPart;
+use Illuminate\Support\Facades\Cache;
+use App\Models\InformationSystemRequest;
 
 class ConfirmModal extends Component
 {
@@ -139,9 +140,9 @@ class ConfirmModal extends Component
                 'variant' => 'success',
                 'message' => $systemRequest->status->toastMessage(),
             ]);
-
-            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
         });
+
+        $this->redirectRoute('is.show', $this->systemRequestId, navigate: true);
     }
 
     public function updatedStatus($value)
@@ -188,6 +189,9 @@ class ConfirmModal extends Component
                     'revision_notes' => $this->formatRevisionNotes(),
                     'url' => route('is.edit', $systemRequest->id),
                 ];
+
+                Cache::rememberForever("revision-mail-{$systemRequest->id}", fn() => $data);
+
                 $systemRequest->sendProcessServiceRequestNotification($data);
             });
 
@@ -195,9 +199,9 @@ class ConfirmModal extends Component
                 'variant' => 'success',
                 'message' => $systemRequest->status->toastMessage(),
             ]);
-
-            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
         });
+
+        $this->redirectRoute('is.show', $this->systemRequestId, navigate: true);
     }
 
     public function getSelectedDivisionId()
@@ -243,9 +247,9 @@ class ConfirmModal extends Component
                 'variant' => 'success',
                 'message' => $systemRequest->status->toastMessage(),
             ]);
-
-            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
         });
+
+        $this->redirectRoute('is.show', $this->systemRequestId, navigate: true);
     }
 
     public function completed()
@@ -267,8 +271,8 @@ class ConfirmModal extends Component
                 'variant' => 'success',
                 'message' => $systemRequest->status->toastMessage(),
             ]);
-
-            $this->redirectRoute('is.show', $systemRequest->id, navigate: true);
         });
+
+        $this->redirectRoute('is.show', $this->systemRequestId, navigate: true);
     }
 }

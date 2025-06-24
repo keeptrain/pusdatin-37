@@ -5,8 +5,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -23,6 +22,7 @@ return new class extends Migration
             $table->string('target');
             $table->text('links')->nullable();
             $table->tinyInteger('active_checking');
+            $table->text('rating')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

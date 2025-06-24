@@ -5,6 +5,7 @@ namespace App\Livewire\Requests\InformationSystem;
 use Carbon\Carbon;
 use App\States\InformationSystem\Process;
 use App\States\InformationSystem\Completed;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Locked;
@@ -13,6 +14,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\InformationSystemRequest;
 use Illuminate\Database\Eloquent\Collection;
+use App\Mail\Requests\InformationSystem\NeedNDAMail;
+use App\Mail\Requests\InformationSystem\RevisionMail;
+use Illuminate\Support\Facades\Cache;
 
 class Show extends Component
 {
@@ -24,6 +28,8 @@ class Show extends Component
     protected ?Collection $tracks = null;
 
     public $notes = '';
+
+    public $emailChecked = [];
 
     public function mount(int $id)
     {
@@ -54,10 +60,10 @@ class Show extends Component
         // Load requestStatusTrack if not loaded
         if ($this->tracks === null) {
             $this->tracks = $this->systemRequest->requestStatusTrack()
-            ->select('statusable_id', 'action', 'created_at')
-            ->orderBy('created_at', 'desc')
-            ->limit(2)
-            ->get();
+                ->select('statusable_id', 'action', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->limit(2)
+                ->get();
         }
 
         // Find first and last track
@@ -110,5 +116,38 @@ class Show extends Component
         });
 
         $systemRequest->load('documentUploads.activeVersion');
+    }
+
+    public function sendMail()
+    {
+        $data = [
+            'title' => $this->systemRequest->title,
+            'created_at' => $this->systemRequest->createdAtDMY(),
+            'url' => route('detail.request', ['type' => 'information-system', 'id' => $this->systemRequestId]),
+        ];
+
+        $email = $this->systemRequest->user->email;
+
+        foreach ($this->emailChecked as $emailType) {
+            switch ($emailType) {
+                case 'need-nda':
+                    Mail::send(new NeedNDAMail($data)->to($email));
+                    break;
+
+                case 'reminder-revision':
+                    $revisionMailData = Cache::get("revision-mail-{$this->systemRequestId}");
+                    Mail::send(new RevisionMail($revisionMailData, 'reminder')->to($email));
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        session()->flash('success', 'Email berhasil dikirim');
+
+        $this->systemRequest->load('documentUploads.activeVersion');
+
+        $this->dispatch('modal-close', name: 'email-modal');
     }
 }

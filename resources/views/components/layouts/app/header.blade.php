@@ -26,8 +26,7 @@
                 wire:navigate>
                 {{ __('Dashboard') }}
             </flux:navbar.item>
-            <flux:navbar.item icon="folder" :href="route('list.request')" :current="request()->routeIs('list.request')"
-                wire:navigate>
+            <flux:navbar.item icon="folder" :href="route('list.request')" :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
                 {{ __('Permohonan') }}
             </flux:navbar.item>
         </flux:navbar>
@@ -113,26 +112,8 @@
                     {{ __('Dashboard') }}
                 </flux:navlist.item>
 
-                {{-- <flux:modal.trigger name="notifications-user">
-                    <flux:navlist.item icon="bell-alert">
-                        <div class="flex items-center justify-between w-full">
-                            <span>{{ __('Notifications') }}</span>
-                            <flux:badge x-text="$store.notifications.count" size="sm" color="lime" :position="'right'"
-                                class="ml-2" />
-                        </div>
-                    </flux:navlist.item>
-                </flux:modal.trigger>
-
-                @if (Route::currentRouteName() == 'dashboard')
-                <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false"
-                    class="md:w-96">
-                    {{--
-                    <livewire:admin.notifications :dashboardUser="false" />
-                </flux:modal>
-                @endif --}}
-
-                <flux:navlist.item icon="folder" :href="route('list.request')" :current="request()->routeIs('list.request')"
-                    wire:navigate>
+                <flux:navlist.item icon="folder" :href="route('list.request')"
+                    :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
                     {{ __('Permohonan') }}
                 </flux:navlist.item>
 
@@ -143,9 +124,7 @@
 
     </flux:sidebar>
 
-    <div class="max-w-[1440px] mx-auto"> <!--dubungkus max-w biar ga jadi melebar di layar besar -->
-        {{ $slot }}
-    </div>
+    {{ $slot }}
 
     @livewireScripts
     @fluxScripts

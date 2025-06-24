@@ -3,21 +3,22 @@
 namespace App\Mail\Requests\InformationSystem;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class RevisionMail extends Mailable implements ShouldQueue
+class NeedNDAMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public array $data, public string $mode)
+    public function __construct(public array $data)
     {
+        //
     }
 
     /**
@@ -25,13 +26,8 @@ class RevisionMail extends Mailable implements ShouldQueue
      */
     public function envelope(): Envelope
     {
-        $subject = match ($this->mode) {
-            'first-time' => "Perlu revisi Permohonan layanan dengan judul {$this->data['title']}",
-            'reminder' => "Segera melakukan revisi Permohonan layanan dengan judul {$this->data['title']}",
-        };
-
         return new Envelope(
-            subject: $subject,
+            subject: 'Permohonan layanan ini membutuhkan dokumen Surat Perjanjian Kerahasiaan (NDA)',
         );
     }
 
@@ -41,10 +37,10 @@ class RevisionMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'components.mail.revision-mail',
+            view: 'components.mail.need-nda-mail',
             with: [
                 'data' => $this->data,
-            ]
+            ],
         );
     }
 
@@ -57,5 +53,4 @@ class RevisionMail extends Mailable implements ShouldQueue
     {
         return [];
     }
-
 }

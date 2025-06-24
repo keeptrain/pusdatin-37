@@ -4,8 +4,8 @@
             {{ __('Upload file pendukung') }}
         </flux:heading>
         <flux:subheading size="lg">
-            {{ __('File ini akan di upload dan di teruskan ke Pusdatin untuk permohonan dengan judul:') }}
-            {{ $title }}
+            {{ __('File ini akan di upload dan di teruskan ke Pusdatin.') }}
+            {{-- {{ $title }} --}}
         </flux:subheading>
         <section>
             <flux:input.file wire:model="additionalFile"></flux:input.file>
@@ -17,7 +17,7 @@
         </section>
         <div class="flex justify-end space-x-2">
             <flux:modal.close>
-                <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
+                <flux:button variant="subtle">{{ __('Cancel') }}</flux:button>
             </flux:modal.close>
 
             <flux:button variant="primary" type="submit">{{ __('Teruskan') }}</flux:button>

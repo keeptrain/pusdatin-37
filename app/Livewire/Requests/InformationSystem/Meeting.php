@@ -50,37 +50,37 @@ class Meeting extends Component
     public function getMeeting()
     {
         // Get information system request by id
-        $siRequest = InformationSystemRequest::select('meeting')->findOrFail($this->siRequestId);
-        $meetings = $siRequest->meeting ?? [];
+        $siRequest = InformationSystemRequest::select('meetings')->findOrFail($this->siRequestId);
+        $meetings = $siRequest->meetings ?? [];
 
         // Get current time
         $now = Carbon::now();
 
         // Add time information to each meeting
-        $meetings = array_map(function ($meeting) use ($now) {
-            $meetingStart = Carbon::parse("{$meeting['date']} {$meeting['start']}");
-            $meetingEnd = Carbon::parse("{$meeting['date']} {$meeting['end']}");
+        $meetings = array_map(function ($meetings) use ($now) {
+            $meetingStart = Carbon::parse("{$meetings['date']} {$meetings['start']}");
+            $meetingEnd = Carbon::parse("{$meetings['date']} {$meetings['end']}");
 
             // Determine meeting status
             if ($now->lt($meetingStart)) {
                 // Meeting has not started
                 $diffInDays = round($now->diffInDays($meetingStart, false));
-                $meeting['status'] = $diffInDays == 0 ? "Hari ini" : "$diffInDays hari lagi";
+                $meetings['status'] = $diffInDays == 0 ? "Hari ini" : "$diffInDays hari lagi";
             } elseif ($now->lte($meetingEnd)) {
                 // Meeting is ongoing
-                $meeting['status'] = "Sedang berlangsung";
+                $meetings['status'] = "Sedang berlangsung";
             } elseif ($now->isSameDay($meetingEnd)) {
                 // Meeting is today but already passed
-                $meeting['status'] = "Hari ini tetapi sudah lewat";
+                $meetings['status'] = "Hari ini tetapi sudah lewat";
             } else {
                 // Meeting is passed (other day)
-                $meeting['status'] = "Sudah lewat";
+                $meetings['status'] = "Sudah lewat";
             }
 
             // Save time difference (optional)
-            $meeting['time_diff'] = $now->diffInDays($meetingStart, false);
+            $meetings['time_diff'] = $now->diffInDays($meetingStart, false);
 
-            return $meeting;
+            return $meetings;
         }, $meetings);
 
         // Sort meeting based on the closest time from now
@@ -129,7 +129,7 @@ class Meeting extends Component
 
         DB::transaction(function () use ($siRequest) {
             // Get existing meetings (if any)
-            $existingMeetings = $siRequest->meeting ?? [];
+            $existingMeetings = $siRequest->meetings ?? [];
 
             // Data meeting baru
             $newMeeting = [
@@ -154,7 +154,7 @@ class Meeting extends Component
 
             // Update meeting column in database
             $siRequest->update([
-                'meeting' => $existingMeetings,
+                'meetings' => $existingMeetings,
             ]);
 
             // Log status dan notifikasi
@@ -173,24 +173,22 @@ class Meeting extends Component
     {
         DB::transaction(function () use ($selectedResultKey) {
             $SiRequest = InformationSystemRequest::findOrFail($this->siRequestId);
-            $meetings = $SiRequest->meeting;
+            $meetings = $SiRequest->meetings;
 
             // Update meeting result for selected key
             $meetings[$selectedResultKey]['result'] = $this->result[$selectedResultKey];
 
             // Save back to database
-            $SiRequest->update(['meeting' => $meetings]);
+            $SiRequest->update(['meetings' => $meetings]);
 
-            // Reset form
-            $this->reset(['selectedResultKey', 'result']);
-
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => 'Hasil meeting berhasil diupdate',
-            ]);
-
-            $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
         });
+
+        session()->flash('status', [
+            'variant' => 'success',
+            'message' => 'Hasil meeting berhasil diupdate',
+        ]);
+
+        $this->dispatch('modal-close', name: "edit-meeting-{$selectedResultKey}-modal");
     }
 
     public function delete($selectedKey)
@@ -198,7 +196,7 @@ class Meeting extends Component
         DB::transaction(function () use ($selectedKey) {
             $SiRequest = InformationSystemRequest::findOrFail($this->siRequestId);
 
-            $meetings = $SiRequest->meeting;
+            $meetings = $SiRequest->meetings;
 
             // Remove element based on key
             unset($meetings[$selectedKey]);
@@ -207,7 +205,7 @@ class Meeting extends Component
             $meetings = array_values($meetings);
 
             // Save back array meeting that has been deleted to model
-            $SiRequest->meeting = $meetings;
+            $SiRequest->meetings = $meetings;
             $SiRequest->save();
         });
     }
