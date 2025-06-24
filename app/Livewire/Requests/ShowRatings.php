@@ -28,18 +28,18 @@ class ShowRatings extends Component
 
     protected function loadContent()
     {
-        $roleId = auth()->user()->roles->pluck('id')->first();
+        $roleId = auth()->user()->currentUserRoleId();
 
         return match ($roleId) {
-            3, 4 => $this->systemRequests(),
+            3, 4 => $this->systemRequests($roleId),
             5 => $this->prRequests(),
             default => abort(404, 'Invalid content type.')
         };
     }
 
-    public function systemRequests()
+    public function systemRequests(int $division)
     {
-        return InformationSystemRequest::select('id', 'user_id', 'title', 'rating')->with('user:id,name,section')->orderBy('updated_at', 'desc');
+        return InformationSystemRequest::select('id', 'user_id','current_division','title', 'rating')->with('user:id,name,section')->where('current_division', $division)->orderBy('updated_at', 'desc');
     }
 
     public function prRequests()
