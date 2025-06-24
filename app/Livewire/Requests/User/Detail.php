@@ -3,7 +3,6 @@
 namespace App\Livewire\Requests\User;
 
 use Carbon\Carbon;
-use App\Enums\PublicRelationRequestPart;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Locked;
@@ -15,6 +14,7 @@ use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Title;
 use Illuminate\Validation\Rule;
+use App\Enums\PublicRelationRequestPart;
 
 #[Title('Detail Permohonan')]
 class Detail extends Component
@@ -84,36 +84,6 @@ class Detail extends Component
         });
 
         return array_values($meeting);
-    }
-
-    public function submitRating()
-    {
-        $this->validate([
-            'rating.value' => 'required|numeric|in:1,2,3,4',
-            'rating.comment' => [
-                Rule::requiredIf(fn() => $this->rating['value'] <= 2),
-                'nullable',
-                'string',
-                'max:150',
-            ],
-        ], [
-            'rating.comment.required' => 'Beri kami masukan agar lebih baik lagi :)'
-        ]);
-
-        $rating = [
-            'rating' => $this->rating['value'],
-            'comment' => $this->rating['comment'],
-            'rating_date' => Carbon::now()->toDateTimeString(),
-            'replied_at' => null,
-        ];
-
-        DB::transaction(function () use ($rating) {
-            $this->content?->update([
-                'rating' => $rating,
-            ]);
-        });
-
-        $this->redirectRoute('detail.request', ['type' => $this->type, 'id' => $this->id]);
     }
 
     #[Computed]
@@ -220,14 +190,14 @@ class Detail extends Component
                     ]);
                 }
             }
-
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => 'Dokumen pendukung berhasil dilampirkan.',
-            ]);
-
-            return $this->redirect("$this->id", true);
         });
+
+        session()->flash('status', [
+            'variant' => 'success',
+            'message' => 'Dokumen pendukung berhasil dilampirkan.',
+        ]);
+
+        $this->redirectRoute('detail.request', ['type' => $this->type, 'id' => $this->id]);
     }
 
     public function downloadFile($typeNumber)
@@ -243,5 +213,35 @@ class Detail extends Component
         }
 
         abort(404, 'Template not found.');
+    }
+
+    public function submitRating()
+    {
+        $this->validate([
+            'rating.value' => 'required|numeric|in:1,2,3,4,5',
+            'rating.comment' => [
+                Rule::requiredIf(fn() => $this->rating['value'] <= 2),
+                'nullable',
+                'string',
+                'max:150',
+            ],
+        ], [
+            'rating.comment.required' => 'Beri kami masukan agar lebih baik lagi :)'
+        ]);
+
+        $rating = [
+            'rating' => $this->rating['value'],
+            'comment' => $this->rating['comment'],
+            'rating_date' => Carbon::now()->toDateTimeString(),
+            'replied_at' => null,
+        ];
+
+        DB::transaction(function () use ($rating) {
+            $this->content?->update([
+                'rating' => $rating,
+            ]);
+        });
+
+        $this->redirectRoute('detail.request', ['type' => $this->type, 'id' => $this->id]);
     }
 }
