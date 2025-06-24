@@ -9,7 +9,7 @@
             </div>
         </div>
 
-        @if ($content->status instanceof App\States\PublicRelation\Completed || $content->status instanceof App\States\InformationSystem\Completed)
+        @if (!isset($content->rating) && ($content->status instanceof \App\States\InformationSystem\Completed || $content->status instanceof \App\States\PublicRelation\Completed))
             <div x-data="{ visible: true }" x-show="visible" x-collapse class="mb-3">
                 <div x-show="visible" x-transition>
                     <flux:callout icon="star" color="sky">
@@ -52,7 +52,6 @@
 
             <x-user.information-system.card-progress-info :status="$content->status" :currentIndex="$this->currentIndex"
                 :statuses="$this->statuses" :activity="$this->activities" :isRejected="$this->isRejected" />
-            {{-- <x-user.tracking-progres :status="$content->status" /> --}}
         @elseif ($type === 'public-relation')
             <x-user.public-relation.card-basic-info :prRequest="$content" />
 

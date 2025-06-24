@@ -100,12 +100,12 @@ class Detail extends Component
             'rating.comment.required' => 'Beri kami masukan agar lebih baik lagi :)'
         ]);
 
-
         $rating = [
-            $this->rating['value'] => $this->rating['comment'] ?? null,
+            'rating' => $this->rating['value'],
+            'comment' => $this->rating['comment'],
+            'rating_date' => Carbon::now()->toDateTimeString(),
+            'replied_at' => null,
         ];
-
-        // dd($rating);
 
         DB::transaction(function () use ($rating) {
             $this->content?->update([

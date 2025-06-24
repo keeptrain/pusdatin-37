@@ -42,39 +42,26 @@
                                             <span class="font-semibold text-gray-900 md:truncate max-w-[300px]"
                                                 title="{{ $item->theme ?? $item->title }}">
                                                 {{ $item->theme ?? $item->title }}
-                                            </span>
                                         </flux:text>
                                     </div>
                                 </div>
 
                                 {{-- Ratings --}}
                                 <div class="md:col-span-4 space-y-2">
-                                    @foreach ($item->rating as $key => $value)
-                                        @php
-                                            $rating = match ($key) {
-                                                1 => 'Bad', 2 => 'Okay', 3 => 'Good', 4 => 'Amazing',
-                                            };
-                                        @endphp
-                                        <div>
-                                            <div class="flex items-center gap-2">
-                                                <x-rating-emoticon :key="$key" />
-                                                <flux:text class="font-semibold text-gray-900">{{ $rating }}</flux:text>
-                                            </div>
-                                            <flux:text class="text-sm text-gray-700 leading-relaxed">
-                                                {{ $value ?: 'Tidak ada komentar tersedia untuk review ini.' }}
-                                            </flux:text>
-                                        </div>
-                                    @endforeach
+                                    <x-rating-emoticon :key="$item->rating['rating']" />
+                                    <flux:text class="text-sm text-gray-700 leading-relaxed">
+                                        {{ $item->rating['comment'] ?: 'Tidak ada komentar tersedia untuk review ini.' }}
+                                    </flux:text>
                                 </div>
 
                                 {{-- Tanggal --}}
                                 <div class="md:col-span-3 flex items-center text-sm text-gray-600">
-                                    {{ \Carbon\Carbon::parse($item->completed_date)->format('d M, Y') }}
+                                    {{ \Carbon\Carbon::parse($item->rating['rating_date'])->format('d M Y , H:i') }}
                                 </div>
 
                                 {{-- Aksi --}}
                                 <div class="md:col-span-2 flex items-center">
-                                    @if ($key <= 2)
+                                    @if ($item->rating['rating'] <= 2)
                                         <flux:button size="sm" variant="ghost">
                                             <x-lucide-reply class="w-4 h-4 text-gray-500" />
                                             <span class="text-gray-500">Balas</span>
