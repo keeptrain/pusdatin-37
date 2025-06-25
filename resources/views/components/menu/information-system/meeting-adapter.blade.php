@@ -1,6 +1,6 @@
-<div class="bg-zinc-50 border rounded-lg p-4">
-    <div class="flex items-center justify-between mb-4">
-        <flux:text size="sm" class="font-medium text-gray-500 uppercase">{{ $meeting['status']}}</flux:text>
+<div class="border rounded-lg overflow-hidden">
+    <div class="flex bg-zinc-50 items-center justify-between px-4 py-2 border-b">
+        <x-menu.information-system.meeting-status :status="$meeting['status']" />
         <flux:dropdown>
             <flux:button variant="ghost" icon="ellipsis-vertical" />
             <flux:menu>
@@ -15,7 +15,7 @@
         </flux:dropdown>
     </div>
 
-    <div class="flex flex-col md:flex-row gap-4">
+    <div class="flex flex-col md:flex-row gap-4 p-4">
         <!-- Left column -->
         <div class="flex-1 space-y-3 min-h-[100px]">
             <div class="flex items-start text-sm space-x-2">
@@ -92,12 +92,13 @@
             </div>
         </div>
     </div>
+
     <flux:modal name="edit-meeting-{{ $key }}-modal" focusable class="md:w-120" size="lg">
         <form wire:submit="updateResultMeeting({{ $key }})">
             <section class="space-y-4">
                 <flux:heading size="lg">Edit hasil meeting</flux:heading>
                 <flux:textarea wire:model="result.{{ $key }}" placeholder="Input disini..." rows="2" />
-                <div class="flex justify-end space-x-2">
+                <div class="flex justify-end items-center space-x-2">
                     <flux:button type="submit" size="sm">Simpan</flux:button>
                 </div>
             </section>
