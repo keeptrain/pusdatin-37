@@ -36,9 +36,20 @@
         </flux:select>
     </div>
 
+    <!-- Iframe Preview -->
+    <template x-if="selectedFile">
+        <div class="h-[700px] bg-gray-100 rounded-xl overflow-hidden">
+            <iframe :src="selectedFile" loading="lazy" class="w-full h-full"></iframe>
+        </div>
+    </template>
+
     <!-- Revision Note -->
+
     <template x-if="selectedPart">
-        <div class="border-l-2 border-amber-500 bg-amber-50 mb-2">
+        <flux:callout variant="warning" icon="exclamation-circle" heading="Catatan sebelumnya: " class="mt-2">
+            <flux:callout.text x-text="revisionNote"></flux:callout.text>
+        </flux:callout>
+        {{-- <div class="border-l-2 border-amber-500 bg-amber-50 mt-2">
             <div class="p-2 bg-amber-50 flex flex-1 items-center">
                 <!-- Icon -->
                 <flux:icon.exclamation-circle class="text-amber-600 dark:text-amber-300 w-5 h-5" />
@@ -49,13 +60,6 @@
                 <!-- Heading -->
                 <flux:subheading size="lg" class="ml-2 text-amber-800" x-text="revisionNote"></flux:subheading>
             </div>
-        </div>
-    </template>
-
-    <!-- Iframe Preview -->
-    <template x-if="selectedFile">
-        <div class="h-[700px] bg-gray-100 rounded-lg overflow-hidden">
-            <iframe :src="selectedFile" loading="lazy" class="w-full h-full"></iframe>
-        </div>
+        </div> --}}
     </template>
 </div>
