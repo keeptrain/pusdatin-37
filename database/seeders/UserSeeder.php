@@ -84,11 +84,11 @@ class UserSeeder extends Seeder
         ];
         for ($i = 1; $i <= 5; $i++) {
             $regularUsers = User::create([
-                'name' => 'User' . $i,
+                'name' => fake()->name(),
                 'email' => 'user' . $i . '@gmail.com',
                 'password' => bcrypt('login'),
                 'section' => array_rand($sections),
-                'contact' => '08123456789'
+                'contact' => fake()->phoneNumber()
 
             ]);
             $regularUsers->assignRole($userRole);
