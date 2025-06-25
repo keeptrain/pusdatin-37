@@ -2,12 +2,17 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
-use Carbon\Carbon;
-use Livewire\Component;
+use App\Enums\Division;
+use App\Mail\Requests\InformationSystem\NewMeeting;
 use App\Models\InformationSystemRequest;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Computed;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
 
 class Meeting extends Component
 {
@@ -44,6 +49,129 @@ class Meeting extends Component
         } elseif ($value === 'online-meet') {
             $this->meeting['link'] = '';
         }
+    }
+
+    public function collectRecipientIds($meetingRecipients, $siDataRequest)
+    {
+        $recipients = [];
+
+        foreach ($meetingRecipients as $recipientType) {
+            switch ($recipientType) {
+                case 'kapusdatin':
+                    // Get all users with role based on division
+                    $kapusdatinUsers = User::role(Division::HEAD_ID)->get(['name', 'email']);
+                    foreach ($kapusdatinUsers as $user) {
+                        $recipients[] = ['name' => $user->name, 'email' => $user->email];
+                    }
+                    break;
+
+                case 'kasatpel':
+                    // Get all users with role based on division
+                    $currentDivision = $siDataRequest->current_division;
+                    $kasatpelUsers = User::role($currentDivision)->get(['name', 'email']);
+                    foreach ($kasatpelUsers as $user) {
+                        $recipients[] = ['name' => $user->name, 'email' => $user->email];
+                    }
+                    break;
+
+                case 'user':
+                    // Get userId
+                    $userId = $siDataRequest->user_id;
+                    if ($userId) {
+                        $user = User::findOrFail($userId);
+                        $recipients[] = ['name' => $user->name, 'email' => $user->email];
+                    }
+                    break;
+            }
+        }
+
+        // Remove duplicate based on email
+        $uniqueRecipients = [];
+        foreach ($recipients as $recipient) {
+            $uniqueRecipients[$recipient['email']] = $recipient;
+        }
+
+        return array_values($uniqueRecipients); // array indexed
+    }
+
+    public function sendMail($systemRequest, $newMeeting)
+    {
+        $recipients = $this->collectRecipientIds($this->meeting['recipients'], $systemRequest);
+        try {
+            foreach ($recipients as $recipient) {
+                $data = array_merge($newMeeting, $recipient, ['title' => $systemRequest->title]);
+                unset($data['result']);
+                Mail::to($data['email'])->send(new NewMeeting($data));
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send mail: ' . $e->getMessage());
+        }
+    }
+
+    public function create()
+    {
+        $rules = [
+            'selectedOption' => 'required|in:in-person,online-meet',
+            'meeting.topic' => 'required|string|max:150',
+            'meeting.date' => 'required|date',
+            'meeting.start' => 'required|date_format:H:i',
+            'meeting.end' => 'required|date_format:H:i|after:meeting.start',
+            'meeting.recipients' => 'required|array|in:kapusdatin,kasatpel,user',
+        ];
+
+        // Add validation based on location or link selection using dynamic array
+        $rules['meeting.' . ($this->selectedOption === 'in-person' ? 'location' : 'link')] =
+            $this->selectedOption === 'in-person'
+            ? 'required|string|max:255'
+            : 'required|url|max:255';
+
+        $this->validate($rules);
+
+        // Find record InformationSystemRequest based on ID
+        $systemRequest = InformationSystemRequest::findOrFail($this->siRequestId);
+
+        DB::transaction(function () use ($systemRequest) {
+            // Get existing meetings (if any)
+            $existingMeetings = $systemRequest->meetings ?? [];
+
+            // Data meeting baru
+            $newMeeting = [
+                'topic' => $this->meeting['topic'],
+                'date' => $this->meeting['date'],
+                'start' => $this->meeting['start'],
+                'end' => $this->meeting['end'],
+                'result' => null,
+            ];
+
+            // Add location or link based on selection
+            if ($this->selectedOption === 'in-person') {
+                $newMeeting['location'] = $this->meeting['location'];
+            } elseif ($this->selectedOption === 'online-meet') {
+                $newMeeting['link'] = $this->meeting['link'];
+                if (!empty($this->meeting['password'])) {
+                    $newMeeting['password'] = $this->meeting['password'];
+                }
+            }
+
+            // Add new meeting to array with incremental key
+            $existingMeetings[] = $newMeeting;
+
+            // Update meeting column in database
+            $systemRequest->update([
+                'meetings' => $existingMeetings,
+            ]);
+
+            DB::afterCommit(function () use ($systemRequest, $newMeeting) {
+                $this->sendMail($systemRequest, $newMeeting);
+            });
+        });
+
+        session()->flash('status', [
+            'variant' => 'success',
+            'message' => 'Meeting berhasil dibuat',
+        ]);
+
+        $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
     }
 
     #[Computed]
@@ -104,69 +232,6 @@ class Meeting extends Component
         });
 
         return $meetings;
-    }
-
-    public function create()
-    {
-        // Validate input
-        $rules = [
-            'selectedOption' => 'required|in:in-person,online-meet',
-            'meeting.date' => 'required|date',
-            'meeting.start' => 'required|date_format:H:i',
-            'meeting.end' => 'required|date_format:H:i|after:meeting.start',
-        ];
-
-        // Add validation based on location or link selection using dynamic array
-        $rules['meeting.' . ($this->selectedOption === 'in-person' ? 'location' : 'link')] =
-            $this->selectedOption === 'in-person'
-            ? 'required|string|max:255'
-            : 'required|url|max:255';
-
-        $this->validate($rules);
-
-        // Find record InformationSystemRequest based on ID
-        $siRequest = InformationSystemRequest::findOrFail($this->siRequestId);
-
-        DB::transaction(function () use ($siRequest) {
-            // Get existing meetings (if any)
-            $existingMeetings = $siRequest->meetings ?? [];
-
-            // Data meeting baru
-            $newMeeting = [
-                'date' => $this->meeting['date'],
-                'start' => $this->meeting['start'],
-                'end' => $this->meeting['end'],
-                'result' => null,
-            ];
-
-            // Add location or link based on selection
-            if ($this->selectedOption === 'in-person') {
-                $newMeeting['location'] = $this->meeting['location'];
-            } elseif ($this->selectedOption === 'online-meet') {
-                $newMeeting['link'] = $this->meeting['link'];
-                if (!empty($this->meeting['password'])) {
-                    $newMeeting['password'] = $this->meeting['password'];
-                }
-            }
-
-            // Add new meeting to array with incremental key
-            $existingMeetings[] = $newMeeting;
-
-            // Update meeting column in database
-            $siRequest->update([
-                'meetings' => $existingMeetings,
-            ]);
-
-            // Log status dan notifikasi
-            // $siRequest->logStatusCustom('Meeting telah dibuat, silahkan cek detailnya.');
-
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => 'Meeting berhasil dibuat',
-            ]);
-
-            $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
-        });
     }
 
     public function updateResultMeeting($selectedResultKey)

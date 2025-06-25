@@ -1,8 +1,8 @@
 <!-- In Person Option -->
 <div @click="selectedOption === 'in-person' ? selectedOption = '' : selectedOption = 'in-person'"
-    x-modelable="selectedOption" {{ $attributes }} :class="selectedOption === 'in-person' ? 'border-blue-500 bg-blue-50' :
+    x-modelable="selectedOption" {{ $attributes }} :class="selectedOption === 'in-person' ? 'border-zinc-300 bg-zinc-50' :
         'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'"
-    class="relative p-4 rounded-lg border cursor-pointer transition-all duration-200">
+    class="relative p-4 rounded-lg border transition-all duration-200">
     <!-- Radio button -->
     <div class="absolute top-4 right-4">
         <div :class="selectedOption === 'in-person' ? 'border-blue-500 bg-blue-500' : 'border-gray-300 bg-white'"
@@ -32,6 +32,7 @@
     </div>
 
     <section @click.stop x-show="selectedOption === 'in-person'" class="space-y-4">
+        <flux:input wire:model="meeting.topic" label="Topik" placeholder="Masukkan topik yang akan dibahas..." />
         <flux:textarea wire:model="meeting.location" label="Lokasi" placeholder="Masukkan lokasi disini..." rows="1" />
         <div>
             <flux:input wire:model="meeting.date" type="date" label="Tanggal" min="{{ now()->toDateString() }}" />
@@ -40,8 +41,18 @@
             <flux:input wire:model="meeting.start" type="time" label="Mulai" />
             <flux:input wire:model="meeting.end" type="time" label="Sampai" />
         </div>
+        <div class="space-y-2">
+            <flux:heading size="lg">Kirim email ke</flux:heading>
+            <flux:checkbox.group wire:model="meeting.recipients">
+                <div class="flex gap-4 *:gap-x-2">
+                    <flux:checkbox value="kapusdatin" label="Kapusdatin" />
+                    <flux:checkbox value="kasatpel" label="Kasatpel" />
+                    <flux:checkbox value="user" label="Pemohon" checked />
+                </div>
+            </flux:checkbox.group>
+        </div>
         <div class="mt-6 flex justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
+            <flux:button type="submit" variant="primary">
                 Buat
             </flux:button>
         </div>
@@ -50,7 +61,7 @@
 
 <!-- Online Meet Option -->
 <div @click="selectedOption === 'online-meet' ? selectedOption = '' : selectedOption = 'online-meet'"
-    x-modelable="selectedOption" {{ $attributes }} :class="selectedOption === 'online-meet' ? 'border-blue-500 bg-blue-50' :
+    x-modelable="selectedOption" {{ $attributes }} :class="selectedOption === 'online-meet' ? 'border-zinc-300 bg-zinc-50' :
         'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'"
     class="relative p-4 rounded-lg border cursor-pointer transition-all duration-200">
     <!-- Radio button -->
@@ -83,6 +94,7 @@
     </div>
 
     <section @click.stop x-show="selectedOption === 'online-meet'" class="space-y-4">
+        <flux:input wire:model="meeting.topic" label="Topik" placeholder="Masukkan topik yang akan dibahas..." />
         <div class="grid grid-cols-2 items-start gap-4">
             <flux:textarea wire:model="meeting.link" label="Link" placeholder="Masukkan link disini..." rows="2"
                 class="w-full" />
@@ -95,8 +107,18 @@
             <flux:input wire:model="meeting.start" type="time" label="Mulai" />
             <flux:input wire:model="meeting.end" type="time" label="Sampai" />
         </div>
+        <div class="space-y-2">
+            <flux:heading size="lg">Kirim email ke</flux:heading>
+            <flux:checkbox.group wire:model="meeting.recipients">
+                <div class="flex gap-4 *:gap-x-2">
+                    <flux:checkbox value="kapusdatin" label="Kapusdatin" />
+                    <flux:checkbox value="kasatpel" label="Kasatpel" />
+                    <flux:checkbox value="user" label="Pemohon" checked />
+                </div>
+            </flux:checkbox.group>
+        </div>
         <div class="flex justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
+            <flux:button type="submit" variant="primary">
                 Buat
             </flux:button>
         </div>

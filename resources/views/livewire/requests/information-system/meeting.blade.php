@@ -10,19 +10,19 @@
                 Rapat baru
             </flux:button>
 
-            <flux:button size="sm" @click="createMeeting = !createMeeting" icon="envelope">
+            {{-- <flux:button size="sm" @click="createMeeting = !createMeeting" icon="envelope">
                 Kirim Email
-            </flux:button>
+            </flux:button> --}}
         </div>
 
         <!-- Form Rapat Baru -->
         <form wire:submit="create" x-show="createMeeting" x-transition.duration.300ms>
-            <div class="mt-3 mb-3">
+            <div class="mt-3 mb-2">
                 {{-- <flux:heading size="lg">Rapat baru</flux:heading> --}}
                 <p class="text-sm text-gray-600">Buat rapat baru berdasarkan opsi yang dipilih</p>
             </div>
 
-            <div class="items-start space-y-2 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-4">
+            <div class="items-start space-y-4 lg:grid lg:grid-cols-2 lg:gap-2 lg:space-y-4">
                 <x-menu.information-system.meeting-options wire:model.live="selectedOption" />
             </div>
         </form>
