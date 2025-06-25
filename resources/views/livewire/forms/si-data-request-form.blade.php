@@ -34,6 +34,16 @@
                         <flux:input label="Seksi/Subbag/Subkel Pengusul"
                             placeholder="{{ ucfirst(auth()->user()->section) }}" disabled />
 
+                        <flux:callout icon="question-mark-circle" variant="secondary" inline class="mt-6">
+                            <flux:callout.heading>Apakah anda sudah memiliki surat perjanjian kerahasiaan (NDA)?
+                            </flux:callout.heading>
+                            <div class="flex items-start">
+                                <flux:checkbox @click="hasPartNumber5 = !hasPartNumber5" />
+                                <flux:callout.text class="ml-2">Ya, saya sudah memiliki dan siap untuk di kirim (silahkan upload surat perjanjian kerahasiaan di bagian 5).
+                                </flux:callout.text>
+                            </div>
+                        </flux:callout>
+
                     </div>
                 </div>
             </section>
@@ -62,17 +72,6 @@
                             required />
 
                         <x-letters.input-file-adapter title="4. Form RFC Pusdatinkes" model="files.4" required />
-
-                        <flux:callout icon="question-mark-circle" variant="secondary" inline class="mt-6">
-                            <flux:callout.heading>Apakah anda sudah memiliki surat perjanjian kerahasiaan (NDA)?
-                            </flux:callout.heading>
-                            <div class="flex items-start">
-                                <flux:checkbox @click="hasPartNumber5 = !hasPartNumber5" />
-                                <flux:callout.text class="ml-2">Ya, saya sudah memiliki surat perjanjian kerahasiaan,
-                                    dan siap untuk di
-                                    kirim.</flux:callout.text>
-                            </div>
-                        </flux:callout>
 
                         <template x-if="hasPartNumber5">
                             <div class="mt-4">
