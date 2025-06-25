@@ -133,13 +133,11 @@ class Notifications extends Component
         auth()->user()->unsetRelation('unreadNotifications');
     }
 
-    public function emitCount(): void
+    public function emitCount()
     {
-        $count = $this->unreadNotifications->count();
+        $hasUnread = $this->unreadNotifications->whereNull('read_at')->exists();
 
-        $this->dispatch('notification-count-updated', [
-            'count' => $count,
-        ]);
+        $this->dispatch('notification-count-updated', hasUnread: $hasUnread);
     }
 
     public function goDetailPage($notificationId)
