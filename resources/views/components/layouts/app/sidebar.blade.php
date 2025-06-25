@@ -14,7 +14,8 @@
     @endphp
     <flux:notification.toast :variant="$variant" :message="$message" />
     @endif
-    <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <flux:sidebar sticky stashable container
+        class="bg-zinc-50 dark:bg-zinc-900 border-r rtl:border-r-0 rtl:border-l border-zinc-200 dark:border-zinc-700">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
         <a href="{{ route('dashboard') }}" class="mr-5 flex items-center space-x-2" wire:navigate>
@@ -27,20 +28,18 @@
                 <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
 
-                <flux:modal.trigger name="notifications-admin">
-                    <flux:navlist variant="outline">
-                        <flux:navlist.group class="grid">
-                            <flux:navlist.item icon="bell-alert">
-                                <div class="flex items-center justify-between w-full">
-                                    <span>{{ __('Notifications') }}</span>
-                                    <flux:badge x-text="$store.notifications.count" size="sm" color="lime"
-                                        :position="'right'" class="ml-2" />
-                                </div>
-                            </flux:navlist.item>
-                        </flux:navlist.group>
-                    </flux:navlist>
-                </flux:modal.trigger>
-
+                <flux:navlist variant="outline">
+                    <flux:modal.trigger name="notifications-admin">
+                        <flux:navlist.item icon="bell">
+                            <div class="flex items-center">
+                                <span>{{ __('Notifications') }}</span>
+                                <div x-show="$store.notifications.hasUnread"
+                                    class="ml-4 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                            </div>
+                        </flux:navlist.item>
+                    </flux:modal.trigger>
+                </flux:navlist>
+                
                 <flux:modal name="notifications-admin" variant="flyout" position="right" :closable="false"
                     class="md:w-96">
                     <livewire:admin.notifications />

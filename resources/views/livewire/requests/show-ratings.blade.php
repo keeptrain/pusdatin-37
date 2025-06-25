@@ -4,11 +4,15 @@
 
     <div class="space-y-4">
         {{-- Header --}}
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <flux:text class="w-full">Total Rating: 205</flux:text>
-            <flux:select size="sm">
-                <flux:select.option value="bulan">Bulan</flux:select.option>
-            </flux:select>
+        <div class="flex flex-1 justify-between items-center">
+            <div class="flex">
+                <flux:text class="w-full">Total Rating: 205</flux:text>
+                {{-- <flux:select size="sm" placeholder="Pilih Bulan">
+                    <flux:select.option value="bulan">Bulan</flux:select.option>
+                    <flux:select.option value="tahun">Januari</flux:select.option>
+                </flux:select> --}}
+            </div>
+            <flux:button wire:click="replyToAllGivesRating" size="sm" icon="inbox-stack">Balas Semua</flux:button>
         </div>
 
         <div>
@@ -16,8 +20,18 @@
                 class="hidden md:grid grid-cols-14 gap-4 p-4 bg-gray-50 border rounded-t-xl text-xs font-medium text-gray-700 uppercase tracking-wide">
                 <div class="col-span-5">Pemohon & Permohonan</div>
                 <div class="col-span-4 flex items-center">
-                    <flux:icon.chevron-up-down class="size-5 mr-2" /> Ratings &
-                    Komentar
+                    <div class="col-span-4 flex items-center">
+                        <button wire:click="sortRating('{{ $sortDirection === 'asc' ? 'desc' : 'asc' }}')"
+                            class="flex items-center uppercase">
+                            <flux:icon.chevron-up-down class="size-5 mr-2 cursor-pointer" />
+                            Ratings & Komentar
+                            @if($sortDirection === 'asc')
+                                <span class="ml-1 text-xs">(↓)</span>
+                            @else
+                                <span class="ml-1 text-xs">(↑)</span>
+                            @endif
+                        </button>
+                    </div>
                 </div>
                 <div class="col-span-3">Tanggal Rating</div>
                 <div class="col-span-2">Aksi</div>
@@ -61,12 +75,10 @@
 
                                 {{-- Aksi --}}
                                 <div class="md:col-span-2 flex items-center">
-                                    @if ($item->rating['rating'] <= 2)
-                                        <flux:button size="sm" variant="ghost">
-                                            <x-lucide-reply class="w-4 h-4 text-gray-500" />
-                                            <span class="text-gray-500">Balas</span>
-                                        </flux:button>
-                                    @endif
+                                    <flux:button
+                                        href="{{ ($item->current_division == 3 || $item->current_division == 5) ? route('is.show', [$item->id]) : route('pr.show', [$item->id]) }}"
+                                        icon="arrow-top-right-on-square" variant="ghost" inset wire:navigate>
+                                    </flux:button>
                                 </div>
                             </div>
                         </div>

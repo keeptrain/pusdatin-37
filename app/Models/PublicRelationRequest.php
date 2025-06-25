@@ -30,7 +30,7 @@ class PublicRelationRequest extends Model
         'status' => PublicRelationStatus::class,
         'target' => 'array',
         'links' => 'array',
-        'rating' => 'array'
+        'rating' => 'json'
     ];
 
     protected $fillable = [
