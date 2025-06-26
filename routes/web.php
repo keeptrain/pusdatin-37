@@ -5,22 +5,23 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Appearance;
+use App\Mail\Requests\InformationSystem\NewMeeting;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Forms\PublicRelationForm;
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Requests\PublicRelation\Show;
 use App\Livewire\Documents\RevisionComparision;
-use App\Http\Controllers\ExportController;
-use App\Http\Controllers\ExportPdf\DataVerifierPdfExportController;
-use App\Http\Controllers\ExportPdf\HeadVerifierPdfExportController;
-use App\Http\Controllers\ExportPdf\PrVerifierPdfExportController;
-use App\Http\Controllers\ExportPdf\SiVerifierPdfExportController;
 use App\Livewire\Admin\Analytic;
 use App\Livewire\Documents\ManageTemplate;
 use App\Livewire\Requests\InformationSystem\Meeting;
 use App\Livewire\Requests\InformationSystem\Edit;
 use App\Livewire\Forms\SiDataRequestForm;
 use App\Livewire\Requests\ShowRatings;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\ExportPdf\DataVerifierPdfExportController;
+use App\Http\Controllers\ExportPdf\HeadVerifierPdfExportController;
+use App\Http\Controllers\ExportPdf\PrVerifierPdfExportController;
+use App\Http\Controllers\ExportPdf\SiVerifierPdfExportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,14 +41,19 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 // });
 
 // Route::get('/test-email', fn($data) => new RevisionMail($data));
-// Route::get('/test-email', function () {
-//     $data = [
-//         'title' => 'test title',
-//         'revision_notes' => ['Indentifikasi Aplikasi' => 'testnotes', 'SOP' => 'testnotesop'],
-//         'url' => 'https://google.com'
-//     ];
-//     return new RevisionMail($data);
-// });
+Route::get('/test-email', function () {
+    $data = [
+        'topic' => 'Test topic',
+        'title' => 'Test title',
+        'date' => '2025-06-25',
+        'start' => '10:00',
+        'end' => '12:00',
+        'name' => 'Gilang',
+        'link' => 'https://google.com',
+        'password' => 'test notesop',
+    ];
+    return new NewMeeting($data, 'create');
+});
 
 Route::middleware(['auth'])->group(function () {
     // Information System & Data
