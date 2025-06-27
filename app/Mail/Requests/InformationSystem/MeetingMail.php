@@ -9,14 +9,14 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewMeeting extends Mailable implements ShouldQueue
+class MeetingMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public array $data)
+    public function __construct(public array $data, public string $mode)
     {
         //
     }
@@ -26,8 +26,14 @@ class NewMeeting extends Mailable implements ShouldQueue
      */
     public function envelope(): Envelope
     {
+        $subject = match ($this->mode) {
+            'create' => "Undangan Rapat: Pembahasan {$this->data['topic']}",
+            'update' => "Update Undangan Rapat: Pembahasan {$this->data['topic']}",
+            'delete' => "Mohon maaf, Undangan Rapat: Pembahasan {$this->data['topic']} dibatalkan",
+            default => "Undangan Rapat: Pembahasan {$this->data['topic']}",
+        };
         return new Envelope(
-            subject: "Undangan Rapat: Pembahasan {$this->data['topic']}",
+            subject: $subject,
         );
     }
 
@@ -37,9 +43,10 @@ class NewMeeting extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'components.mail.new-meeting-mail',
+            view: 'components.mail.meeting-mail',
             with: [
-                'data' => $this->data
+                'data' => $this->data,
+                'mode' => $this->mode
             ]
         );
     }

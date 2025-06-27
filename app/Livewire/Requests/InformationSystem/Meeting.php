@@ -3,7 +3,6 @@
 namespace App\Livewire\Requests\InformationSystem;
 
 use App\Enums\Division;
-use App\Mail\Requests\InformationSystem\NewMeeting;
 use App\Models\InformationSystemRequest;
 use App\Models\User;
 use Carbon\Carbon;
@@ -13,13 +12,15 @@ use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
+use Ramsey\Uuid\Uuid;
+use App\Mail\Requests\InformationSystem\MeetingMail;
 
 class Meeting extends Component
 {
     #[Locked]
-    public $siRequestId;
-
-    public $selectedResultKey;
+    public $systemRequestId;
 
     public $selectedOption = '';
 
@@ -27,15 +28,17 @@ class Meeting extends Component
 
     public $result = [];
 
+    public $selectedResultKey;
+
     public $resultUpdate = [];
 
     public function mount($id)
     {
-        $this->siRequestId = $id;
+        $this->systemRequestId = $id;
 
-        foreach ($this->getMeeting as $key => $meeting) {
+        foreach ($this->getMeeting as $meeting) {
             if (!empty($meeting['result'])) {
-                $this->result[$key] = $meeting['result'];
+                $this->result[$meeting['id']] = $meeting['result'];
             }
         }
     }
@@ -94,14 +97,13 @@ class Meeting extends Component
         return array_values($uniqueRecipients); // array indexed
     }
 
-    public function sendMail($systemRequest, $newMeeting)
+    public function sendMail(array $data, string $emailType)
     {
-        $recipients = $this->collectRecipientIds($this->meeting['recipients'], $systemRequest);
         try {
-            foreach ($recipients as $recipient) {
-                $data = array_merge($newMeeting, $recipient, ['title' => $systemRequest->title]);
-                unset($data['result']);
-                Mail::to($data['email'])->send(new NewMeeting($data));
+            foreach ($data['recipients'] as $recipient) {
+                $emailData = array_merge($data, $recipient);
+                // unset($emailData['result']);
+                // Mail::to($recipient['email'])->send(new MeetingMail($emailData, $emailType));
             }
         } catch (\Exception $e) {
             Log::error('Failed to send mail: ' . $e->getMessage());
@@ -128,7 +130,7 @@ class Meeting extends Component
         $this->validate($rules);
 
         // Find record InformationSystemRequest based on ID
-        $systemRequest = InformationSystemRequest::findOrFail($this->siRequestId);
+        $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
 
         DB::transaction(function () use ($systemRequest) {
             // Get existing meetings (if any)
@@ -136,6 +138,7 @@ class Meeting extends Component
 
             // Data meeting baru
             $newMeeting = [
+                'id' => Str::uuid(),
                 'topic' => $this->meeting['topic'],
                 'date' => $this->meeting['date'],
                 'start' => $this->meeting['start'],
@@ -161,8 +164,18 @@ class Meeting extends Component
                 'meetings' => $existingMeetings,
             ]);
 
-            DB::afterCommit(function () use ($systemRequest, $newMeeting) {
-                $this->sendMail($systemRequest, $newMeeting);
+            // Collect recipients
+            $recipients = $this->collectRecipientIds($this->meeting['recipients'], $systemRequest);
+
+            // Merge data email with recipients, new meeting, and title
+            $dataEmail = array_merge(['recipients' => $recipients], $newMeeting, ['title' => $systemRequest->title]);
+
+            // Get end of day from data new meeting date
+            $diffInDay = Carbon::parse($dataEmail['date'])->endOfDay();
+            Cache::put("email:meeting-{$dataEmail['id']}", $dataEmail, $diffInDay);
+
+            DB::afterCommit(function () use ($dataEmail) {
+                $this->sendMail($dataEmail, 'create');
             });
         });
 
@@ -171,15 +184,15 @@ class Meeting extends Component
             'message' => 'Meeting berhasil dibuat',
         ]);
 
-        $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
+        $this->redirectRoute('is.meeting', ['id' => $this->systemRequestId]);
     }
 
     #[Computed]
     public function getMeeting()
     {
         // Get information system request by id
-        $siRequest = InformationSystemRequest::select('meetings')->findOrFail($this->siRequestId);
-        $meetings = $siRequest->meetings ?? [];
+        $systemRequest = InformationSystemRequest::select('meetings')->findOrFail($this->systemRequestId);
+        $meetings = $systemRequest->meetings ?? [];
 
         // Get current time
         $now = Carbon::now();
@@ -237,15 +250,25 @@ class Meeting extends Component
     public function updateResultMeeting($selectedResultKey)
     {
         DB::transaction(function () use ($selectedResultKey) {
-            $SiRequest = InformationSystemRequest::findOrFail($this->siRequestId);
-            $meetings = $SiRequest->meetings;
+            // Find data InformationSystemRequest
+            $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
+            $meetings = $systemRequest->meetings;
 
-            // Update meeting result for selected key
+            // // Check if $meetings is an array
+            // if (!is_array($meetings)) {
+            //     throw new \Exception('Meetings data is not an array.');
+            // }
+
+            // // Validate $selectedResultKey
+            // if (!is_string($selectedResultKey) || !isset($meetings[$selectedResultKey])) {
+            //     throw new \InvalidArgumentException('Invalid or missing selected result key.');
+            // }
+
+            // Update field 'result' for selected meeting
             $meetings[$selectedResultKey]['result'] = $this->result[$selectedResultKey];
 
-            // Save back to database
-            $SiRequest->update(['meetings' => $meetings]);
-
+            // Save back to database without changing the array structure
+            $systemRequest->update(['meetings' => $meetings]);
         });
 
         session()->flash('status', [
@@ -256,22 +279,36 @@ class Meeting extends Component
         $this->dispatch('modal-close', name: "edit-meeting-{$selectedResultKey}-modal");
     }
 
-    public function delete($selectedKey)
+    public function delete(string $selectedKey)
     {
         DB::transaction(function () use ($selectedKey) {
-            $SiRequest = InformationSystemRequest::findOrFail($this->siRequestId);
+            $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
 
-            $meetings = $SiRequest->meetings;
+            // Remove quotes and slashes from selected key
+            $selectedKey = trim($selectedKey, '"');
+            $selectedKey = stripslashes($selectedKey);
 
-            // Remove element based on key
-            unset($meetings[$selectedKey]);
+            // Get meeting data from cache
+            $getMeetingData = Cache::get("email:meeting-{$selectedKey}");
+            $meetingId = $getMeetingData['id']->toString();
 
-            // Reset index if you want (optional depending on needs)
-            $meetings = array_values($meetings);
+            $filteredMeeting = array_filter(
+                $systemRequest->meetings,
+                fn($meeting) => Uuid::fromString($meeting['id'])->toString() !== $meetingId
+            );
 
-            // Save back array meeting that has been deleted to model
-            $SiRequest->meetings = $meetings;
-            $SiRequest->save();
+            $systemRequest->update([
+                'meetings' => $filteredMeeting,
+            ]);
+
+            $systemRequest->save();
+
+            DB::afterCommit(function () use ($selectedKey, $getMeetingData) {
+                $this->sendMail($getMeetingData, 'delete');
+
+                // Delete cache after send mail based on id (uuid)
+                Cache::forget("email:meeting-{$selectedKey}");
+            });
         });
     }
 }

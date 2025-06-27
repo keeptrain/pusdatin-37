@@ -50,6 +50,12 @@
                     <flux:checkbox value="user" label="Pemohon" checked />
                 </div>
             </flux:checkbox.group>
+            @error('meeting.recipients')
+                <flux:text variant="strong" class="text-red-500 flex font-bold items-center">
+                    <flux:icon.exclamation-triangle />
+                    {{ $message }}
+                </flux:text>
+            @enderror
         </div>
         <div class="mt-6 flex justify-end">
             <flux:button type="submit" variant="primary">

@@ -3,7 +3,7 @@
 
     <flux:heading size="lg" class="p-4">Meeting Permohonan Layanan</flux:heading>
 
-    <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$siRequestId">
+    <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$systemRequestId">
         @unlessrole('head_verifier')
         <div class="flex justify-between mb-4 mt-4">
             <flux:button size="sm" variant="primary" @click="createMeeting = !createMeeting" icon="plus">
@@ -30,8 +30,8 @@
 
         <section class="items-start grid grid-rows-2">
             <div class="space-y-4">
-                @forelse ($this->getMeeting as $key => $value)
-                    <x-menu.information-system.meeting-adapter wire:key="{{ $key }}" :key="$key" :meeting="$value" />
+                @forelse ($this->getMeeting as $meeting)
+                    <x-menu.information-system.meeting-adapter wire:key="{{ $meeting['id'] }}" :meeting="$meeting" />
                 @empty
                     <!-- Empty Meeting -->
                     <div class="flex flex-col items-center p-8">

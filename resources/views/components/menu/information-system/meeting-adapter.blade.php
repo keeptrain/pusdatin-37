@@ -5,11 +5,11 @@
             <flux:button variant="ghost" icon="ellipsis-vertical" />
             <flux:menu>
                 @if (isset($meeting['result']))
-                    <flux:modal.trigger name="edit-meeting-{{ $key }}-modal">
+                    <flux:modal.trigger name="edit-meeting-{{ $meeting['id'] }}-modal">
                         <flux:menu.item icon="pencil-square" class="w-full">Edit</flux:menu.item>
                     </flux:modal.trigger>
                 @endif
-                <flux:menu.item wire:click="delete({{ $key }})" icon="trash" variant="danger">Delete
+                <flux:menu.item wire:click="delete('{{ $meeting['id'] }}')" icon="trash" variant="danger">Delete
                 </flux:menu.item>
             </flux:menu>
         </flux:dropdown>
@@ -55,7 +55,7 @@
             <div class="flex items-center text-sm space-x-2">
                 <flux:icon.calendar class="size-5 text-gray-400" />
                 <flux:subheading size="lg" class="text-gray-800"><span class="text-gray-500">Tanggal:</span>
-                    {{ $meeting['date'] }}
+                    {{ \Carbon\Carbon::parse($meeting['date'])->format('d M Y') }}
                 </flux:subheading>
             </div>
 
@@ -77,9 +77,9 @@
                     <flux:heading size="lg" class="text-gray-500">Hasil meeting: </flux:heading>
                 </div>
                 @if ($meeting['result'] === null)
-                    <form wire:submit="updateResultMeeting({{ $key }})" class="space-y-4">
+                    <form wire:submit="updateResultMeeting('{{ $meeting['id'] }}')" class="space-y-4">
                         <div class="flex justify-between items-end gap-2">
-                            <flux:textarea wire:model="result.{{ $key }}" placeholder="Input disini..." rows="2"
+                            <flux:textarea wire:model="result.{{ $meeting['id'] }}" placeholder="Input disini..." rows="2"
                                 class="w-3/4 mt-3" />
                             <flux:button type="submit" size="sm" class="mr-4">Simpan</flux:button>
                         </div>
@@ -93,11 +93,11 @@
         </div>
     </div>
 
-    <flux:modal name="edit-meeting-{{ $key }}-modal" focusable class="md:w-120" size="lg">
-        <form wire:submit="updateResultMeeting({{ $key }})">
+    <flux:modal name="edit-meeting-{{ $meeting['id'] }}-modal" focusable class="md:w-120" size="lg">
+        <form wire:submit="updateResultMeeting({{ $meeting['id'] }})">
             <section class="space-y-4">
                 <flux:heading size="lg">Edit hasil meeting</flux:heading>
-                <flux:textarea wire:model="result.{{ $key }}" placeholder="Input disini..." rows="2" />
+                <flux:textarea wire:model="result.{{ $meeting['id'] }}" placeholder="Input disini..." rows="2" />
                 <div class="flex justify-end items-center space-x-2">
                     <flux:button type="submit" size="sm">Simpan</flux:button>
                 </div>
