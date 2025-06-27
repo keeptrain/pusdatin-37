@@ -1,0 +1,129 @@
+/* Custom hover styling */
+.judul {
+    max-width: 250px;
+}
+
+#requestsTable tbody tr:hover {
+    background-color: #f9fafb !important;
+}
+
+#requestsTable tbody tr {
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+/* Don't apply cursor pointer to checkbox column */
+#requestsTable tbody tr td:first-child {
+    cursor: default;
+}
+
+/* Filter styling */
+.dt-container .dt-search {
+    display: none;
+}
+
+.dt-container .dt-length {
+    margin-bottom: 1rem;
+}
+
+dt-column-order {
+    display: none !important;
+}
+
+/* Header filter dropdown styling */
+#statusFilterDropdown {
+    right: 0;
+    left: auto;
+    min-width: 250px;
+    max-width: 300px;
+}
+
+/* Ensure dropdown appears above table content */
+#statusFilterDropdown {
+    z-index: 1000;
+}
+
+/* Multi-select dropdown styling */
+.status-checkbox-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.status-checkbox-item:hover {
+    background-color: #f3f4f6;
+}
+
+.status-checkbox-item input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.status-checkbox-item label {
+    cursor: pointer;
+    flex: 1;
+    font-size: 14px;
+    color: #374151;
+}
+
+/* Selected count badge */
+.status-count-badge {
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+/* Icon button styling */
+#statusFilterToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Active filter indicator */
+.filter-active {
+    background-color: #dbeafe !important;
+    color: #3b82f6 !important;
+}
+
+/* Checkbox styling */
+.row-checkbox {
+    transform: scale(1.1);
+}
+
+/* Hide element with x-cloak until Alpine.js loads */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Prevent header click conflicts */
+.status-header-content {
+    pointer-events: none;
+}
+
+.status-header-content button {
+    pointer-events: all;
+}
+
+/* Flash message styling */
+.flash-message {
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
