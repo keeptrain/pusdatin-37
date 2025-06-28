@@ -45,7 +45,7 @@
                             <div class="grid md:grid-cols-14 gap-4">
                                 {{-- Pemohon & Permohonan --}}
                                 <div class="md:col-span-5 flex items-start gap-3">
-                                    <flux:avatar size="lg" src="https://cdn-icons-png.flaticon.com/512/5556/5556468.png"
+                                    <flux:avatar size="lg" :initials="$item->user->initials()"
                                         class="flex-shrink-0" />
                                     <div class="min-w-0">
                                         <flux:legend class="font-normal text-gray-900 text-base md:text-lg">
