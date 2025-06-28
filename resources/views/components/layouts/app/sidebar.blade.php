@@ -31,7 +31,7 @@
                     <flux:modal.trigger name="notifications-admin">
                         <flux:navlist.item icon="bell">
                             <div class="flex items-center">
-                                <span>{{ __('Notifications') }}</span>
+                                <span>{{ __('Notifikasi') }}</span>
                                 <div x-show="$store.notifications.hasUnread"
                                     class="ml-4 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
                             </div>
@@ -48,7 +48,7 @@
         </flux:navlist>
 
         <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Manage')" class="grid">
+            <flux:navlist.group :heading="__('Manajemen')" class="grid">
                 @hasanyrole('head_verifier')
                 <flux:navlist.item :href="route('is.index')" icon="folder-open"
                     :current="request()->routeIs('is.index')" wire:navigate>Layanan SI & Data</flux:navlist.item>
@@ -75,10 +75,10 @@
 
         @unlessrole('administrator|promkes_verifier')
         <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Systems')" class="grid">
+            <flux:navlist.group :heading="__('Sistem')" class="grid">
                 @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier')
                 <flux:navlist.item :href="route('analytic.index')" icon="chart-pie" wire:navigate>
-                    Analytics
+                    Analitik
                 </flux:navlist.item>
                 @endhasanyrole
 
