@@ -4,12 +4,12 @@
         <flux:dropdown>
             <flux:button variant="ghost" icon="ellipsis-vertical" />
             <flux:menu>
-                @if (isset($meeting['result']))
-                    <flux:modal.trigger name="edit-meeting-{{ $meeting['id'] }}-modal">
-                        <flux:menu.item icon="pencil-square" class="w-full">Edit</flux:menu.item>
-                    </flux:modal.trigger>
-                @endif
-                <flux:menu.item wire:click="delete('{{ $meeting['id'] }}')" icon="trash" variant="danger">Delete
+                <flux:menu.item
+                    href="{{ route('is.meeting.edit', ['id' => $systemRequestId, 'meetingId' => $meeting['id']]) }}"
+                    icon="pencil-square" class="w-full">Edit
+                </flux:menu.item>
+                <flux:menu.item wire:click="delete('{{ $meeting['id'] }}')" icon="trash" variant="danger"
+                    :disabled="$meeting['pastEndDate']">Delete
                 </flux:menu.item>
             </flux:menu>
         </flux:dropdown>
@@ -19,32 +19,32 @@
         <!-- Left column -->
         <div class="flex-1 space-y-3 min-h-[100px]">
             <div class="flex items-start text-sm space-x-2">
-                @if (!empty($meeting['location']))
+                @if ($meeting['place']['type'] == 'location')
                     <div class="flex-shrink-0 mt-1">
                         <flux:icon.map-pin class="size-5 text-gray-400" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <flux:subheading size="lg" class="text-gray-500">Lokasi:
-                            <span class="text-gray-800">{{ $meeting['location'] }}</span>
+                            <span class="text-gray-800">{{ $meeting['place']['value'] }}</span>
                         </flux:subheading>
                     </div>
-                @elseif (!empty($meeting['link']))
+                @elseif ($meeting['place']['type'] == 'link')
                     <div class="flex-shrink-0 mt-1">
                         <flux:icon.video-camera class="size-5 text-gray-400" />
                     </div>
                     <div class="flex flex-col flex-1 min-w-0">
                         <div class="flex items-baseline space-x-2">
                             <flux:subheading size="lg" class="text-gray-500">Online meeting:
-                                <a href="{{ $meeting['link'] }}" target="_blank" rel="noopener noreferrer"
+                                <a href="{{ $meeting['place']['value'] }}" target="_blank" rel="noopener noreferrer"
                                     class="text-blue-600 hover:text-blue-800 underline break-all">
                                     Link
                                 </a>
                             </flux:subheading>
                         </div>
-                        @if (!empty($meeting['password']))
+                        @if ($meeting['place']['type'] == 'link' && !empty($meeting['place']['password']))
                             <div class="flex items-baseline mt-1 space-x-2">
                                 <flux:subheading size="lg" class="text-gray-500">Password:
-                                    <span class="text-gray-800 font-mono">{{ $meeting['password'] }}</span>
+                                    <span class="text-gray-800 font-mono">{{ $meeting['place']['password'] }}</span>
                                 </flux:subheading>
                             </div>
                         @endif
@@ -55,7 +55,7 @@
             <div class="flex items-center text-sm space-x-2">
                 <flux:icon.calendar class="size-5 text-gray-400" />
                 <flux:subheading size="lg" class="text-gray-800"><span class="text-gray-500">Tanggal:</span>
-                    {{ \Carbon\Carbon::parse($meeting['date'])->format('d M Y') }}
+                    {{ $meeting['date'] }}
                 </flux:subheading>
             </div>
 
@@ -63,7 +63,7 @@
                 <div class="flex items-center space-x-2">
                     <flux:icon.clock class="size-5 text-gray-400" />
                     <flux:subheading size="lg" class="text-gray-800"><span class="text-gray-500">Waktu:</span>
-                        {{ $meeting['start'] }} - {{ $meeting['end'] }}
+                        {{ $meeting['start_at'] }} - {{ $meeting['end_at'] }}
                     </flux:subheading>
                 </div>
             </div>
@@ -72,19 +72,31 @@
         <!-- Right column -->
         <div class="flex-1 flex items-start text-sm min-h-[100px]">
             <div class="w-full">
-                <div class="flex items-center space-x-2">
-                    <flux:icon.chat-bubble-left-right class="size-5 text-gray-400" />
-                    <flux:heading size="lg" class="text-gray-500">Hasil meeting: </flux:heading>
+                <div class="flex items-start space-x-2">
+                    <flux:icon.clipboard class="size-5 text-gray-400" />
+                    <flux:heading size="lg" class="text-gray-500">Topik: </flux:heading>
+                    <flux:subheading size="lg" class="text-gray-800">{{ $meeting['topic'] }}</flux:subheading>
                 </div>
-                @if ($meeting['result'] === null)
+                @if ($meeting['pastEndDate'] && $meeting['result'] === null)
+                    <div class="flex items-center space-x-2">
+                        <flux:icon.chat-bubble-left-right class="size-5 text-gray-400" />
+                        <flux:heading size="lg" class="text-gray-500">Hasil meeting: </flux:heading>
+                    </div>
                     <form wire:submit="updateResultMeeting('{{ $meeting['id'] }}')" class="space-y-4">
                         <div class="flex justify-between items-end gap-2">
                             <flux:textarea wire:model="result.{{ $meeting['id'] }}" placeholder="Input disini..." rows="2"
                                 class="w-3/4 mt-3" />
+                            @error('result')
+                                <flux:subheading size="lg" class="text-red-500">{{ $message }}</flux:subheading>
+                            @enderror
                             <flux:button type="submit" size="sm" class="mr-4">Simpan</flux:button>
                         </div>
                     </form>
-                @else
+                @elseif ($meeting['pastEndDate'] && $meeting['result'] !== null)
+                    <div class="flex items-center space-x-2">
+                        <flux:icon.chat-bubble-left-right class="size-5 text-gray-400" />
+                        <flux:heading size="lg" class="text-gray-500">Hasil meeting: </flux:heading>
+                    </div>
                     <flux:subheading size="lg" class="text-gray-800 break-words max-h-32 overflow-y-auto">
                         {{ $meeting['result'] }}
                     </flux:subheading>
@@ -92,16 +104,4 @@
             </div>
         </div>
     </div>
-
-    <flux:modal name="edit-meeting-{{ $meeting['id'] }}-modal" focusable class="md:w-120" size="lg">
-        <form wire:submit="updateResultMeeting({{ $meeting['id'] }})">
-            <section class="space-y-4">
-                <flux:heading size="lg">Edit hasil meeting</flux:heading>
-                <flux:textarea wire:model="result.{{ $meeting['id'] }}" placeholder="Input disini..." rows="2" />
-                <div class="flex justify-end items-center space-x-2">
-                    <flux:button type="submit" size="sm">Simpan</flux:button>
-                </div>
-            </section>
-        </form>
-    </flux:modal>
 </div>

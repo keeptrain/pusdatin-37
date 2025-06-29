@@ -15,6 +15,7 @@ use App\Livewire\Admin\Analytic;
 use App\Livewire\Documents\ManageTemplate;
 use App\Livewire\Requests\InformationSystem\Meeting;
 use App\Livewire\Requests\InformationSystem\Edit;
+use App\Livewire\Requests\InformationSystem\EditMeeting;
 use App\Livewire\Forms\SiDataRequestForm;
 use App\Livewire\Requests\ShowRatings;
 use App\Http\Controllers\ExportController;
@@ -69,6 +70,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('information-system/{id}/version', RevisionComparision::class)->name('comparison.version');
         Route::get('information-system/{id}/rollback', \App\Livewire\Requests\InformationSystem\Rollback::class)->name('is.rollback');
         Route::get('information-system/{id}/review', Review::class)->name('is.review');
+        Route::get('information-system/{id}/meeting/{meetingId}/edit', EditMeeting::class)->name('is.meeting.edit');
     });
 
     Route::get('request/{id}/chat', \App\Livewire\Requests\Chat::class)->name('request.chat');

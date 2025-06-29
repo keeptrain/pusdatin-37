@@ -1,10 +1,6 @@
 @props([
     'title' => '',
-    'message' => null
 ])
-<?php
-$logo = $message->embed(storage_path('app/assets/pusdatin-logo.jpg'));
-?>
 <!DOCTYPE html>
 <html>
 
@@ -15,7 +11,7 @@ $logo = $message->embed(storage_path('app/assets/pusdatin-logo.jpg'));
 <body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0;">
     <!-- Header -->
     <div style="padding: 2px; text-align: center;">
-        <img src="{{ $logo }}" alt="Logo" style="width: 300px;">
+        <img src="https://drive.google.com/uc?export=download&id=1BquEEMMDAdfyryH4EFqqB2krum-MzABd" alt="Logo" style="width: 300px;">
     </div>
 
     <!-- Body -->

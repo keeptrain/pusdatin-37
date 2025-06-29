@@ -32,25 +32,25 @@
     </div>
 
     <section @click.stop x-show="selectedOption === 'in-person'" class="space-y-4">
-        <flux:input wire:model="meeting.topic" label="Topik" placeholder="Masukkan topik yang akan dibahas..." />
-        <flux:textarea wire:model="meeting.location" label="Lokasi" placeholder="Masukkan lokasi disini..." rows="1" />
+        <flux:input wire:model="topic" label="Topik" placeholder="Masukkan topik yang akan dibahas..." />
+        <flux:textarea wire:model="place.value" label="Lokasi" placeholder="Masukkan lokasi disini..." rows="1" />
         <div>
-            <flux:input wire:model="meeting.date" type="date" label="Tanggal" min="{{ now()->toDateString() }}" />
+            <flux:input wire:model="date" type="date" label="Tanggal" min="{{ now()->toDateString() }}" />
         </div>
         <div class="grid grid-cols-2 gap-4">
-            <flux:input wire:model="meeting.start" type="time" label="Mulai" />
-            <flux:input wire:model="meeting.end" type="time" label="Sampai" />
+            <flux:input wire:model="startAt" type="time" label="Mulai" />
+            <flux:input wire:model="endAt" type="time" label="Sampai" />
         </div>
         <div class="space-y-2">
             <flux:heading size="lg">Kirim email ke</flux:heading>
-            <flux:checkbox.group wire:model="meeting.recipients">
+            <flux:checkbox.group wire:model="recipients">
                 <div class="flex gap-4 *:gap-x-2">
                     <flux:checkbox value="kapusdatin" label="Kapusdatin" />
-                    <flux:checkbox value="kasatpel" label="Kasatpel" />
-                    <flux:checkbox value="user" label="Pemohon" checked />
+                    <flux:checkbox value="kasatpel" label="Kasatpel" checked disabled/>
+                    <flux:checkbox value="user" label="Pemohon" />
                 </div>
             </flux:checkbox.group>
-            @error('meeting.recipients')
+            @error('recipients')
                 <flux:text variant="strong" class="text-red-500 flex font-bold items-center">
                     <flux:icon.exclamation-triangle />
                     {{ $message }}
@@ -100,26 +100,26 @@
     </div>
 
     <section @click.stop x-show="selectedOption === 'online-meet'" class="space-y-4">
-        <flux:input wire:model="meeting.topic" label="Topik" placeholder="Masukkan topik yang akan dibahas..." />
+        <flux:input wire:model="topic" label="Topik" placeholder="Masukkan topik yang akan dibahas..." />
         <div class="grid grid-cols-2 items-start gap-4">
-            <flux:textarea wire:model="meeting.link" label="Link" placeholder="Masukkan link disini..." rows="2"
+            <flux:textarea wire:model="place.value" label="Link" placeholder="Masukkan link disini..." rows="2"
                 class="w-full" />
-            <flux:input wire:model="meeting.password" label="Password" class="w-1/2" />
+            <flux:input wire:model="place.password" label="Password" class="w-1/2" />
         </div>
         <div>
-            <flux:input wire:model="meeting.date" type="date" label="Tanggal" min="{{ now()->toDateString() }}" />
+            <flux:input wire:model="date" type="date" label="Tanggal" min="{{ now()->toDateString() }}" />
         </div>
         <div class="grid grid-cols-2 gap-4">
-            <flux:input wire:model="meeting.start" type="time" label="Mulai" />
-            <flux:input wire:model="meeting.end" type="time" label="Sampai" />
+            <flux:input wire:model="startAt" type="time" label="Mulai" />
+            <flux:input wire:model="endAt" type="time" label="Sampai" />
         </div>
         <div class="space-y-2">
             <flux:heading size="lg">Kirim email ke</flux:heading>
-            <flux:checkbox.group wire:model="meeting.recipients">
+            <flux:checkbox.group wire:model="recipients">
                 <div class="flex gap-4 *:gap-x-2">
                     <flux:checkbox value="kapusdatin" label="Kapusdatin" />
-                    <flux:checkbox value="kasatpel" label="Kasatpel" />
-                    <flux:checkbox value="user" label="Pemohon" checked />
+                    <flux:checkbox value="kasatpel" label="Kasatpel" checked disabled/>
+                    <flux:checkbox value="user" label="Pemohon" />
                 </div>
             </flux:checkbox.group>
         </div>

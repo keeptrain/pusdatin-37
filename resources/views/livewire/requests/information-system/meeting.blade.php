@@ -9,16 +9,11 @@
             <flux:button size="sm" variant="primary" @click="createMeeting = !createMeeting" icon="plus">
                 Rapat baru
             </flux:button>
-
-            {{-- <flux:button size="sm" @click="createMeeting = !createMeeting" icon="envelope">
-                Kirim Email
-            </flux:button> --}}
         </div>
 
         <!-- Form Rapat Baru -->
         <form wire:submit="create" x-show="createMeeting" x-transition.duration.300ms>
             <div class="mt-3 mb-2">
-                {{-- <flux:heading size="lg">Rapat baru</flux:heading> --}}
                 <p class="text-sm text-gray-600">Buat rapat baru berdasarkan opsi yang dipilih</p>
             </div>
 
@@ -30,8 +25,9 @@
 
         <section class="items-start grid grid-rows-2">
             <div class="space-y-4">
-                @forelse ($this->getMeeting as $meeting)
-                    <x-menu.information-system.meeting-adapter wire:key="{{ $meeting['id'] }}" :meeting="$meeting" />
+                @forelse ($this->getMeetings as $meeting)
+                    <x-menu.information-system.meeting-adapter wire:key="{{ $meeting['id'] }}"
+                        :systemRequestId="$systemRequestId" :meeting="$meeting" />
                 @empty
                     <!-- Empty Meeting -->
                     <div class="flex flex-col items-center p-8">
