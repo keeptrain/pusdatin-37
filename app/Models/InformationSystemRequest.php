@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\States\InformationSystem\InformationSystemStatus;
 use App\States\InformationSystem\RepliedKapusdatin;
+use Illuminate\Support\Collection;
 
 class InformationSystemRequest extends Model
 {
@@ -58,6 +59,11 @@ class InformationSystemRequest extends Model
     public function documentUploads()
     {
         return $this->morphMany(DocumentUpload::class, 'documentable');
+    }
+
+    public function meetings()
+    {
+        return $this->hasMany(MeetingInformationSystemRequest::class, 'request_id', 'id');
     }
 
     public static function resolveStatusClassFromString($statusString)
@@ -310,6 +316,11 @@ class InformationSystemRequest extends Model
 
             return implode("\n", $details); // Newline untuk memisahkan setiap detail
         })->implode("\n\n"); // Dua newline untuk memisahkan setiap meeting
+    }
+
+    public function getNearestMeetingFromCollection(Collection $meetings)
+    {
+        return $meetings->filter(fn($meeting) => $meeting->start_at <= Carbon::now())->sortBy('start_at')->first();
     }
 
     public static function getNearMeetingsByDate()

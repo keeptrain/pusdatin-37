@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class MeetingInformationSystemRequest extends Model
 {
@@ -46,5 +47,20 @@ class MeetingInformationSystemRequest extends Model
     public function setRecipientsAttribute($value)
     {
         $this->attributes['recipients'] = json_encode($value);
+    }
+
+    public function getDateAttribute($value)
+    {
+        return Carbon::parse($this->start_at)->format('d M Y');
+    }
+
+    public function getStartAtTimeAttribute($value)
+    {
+        return Carbon::parse($this->start_at)->format('H:i');
+    }
+
+    public function getEndAtTimeAttribute($value)
+    {
+        return Carbon::parse($this->end_at)->format('H:i');
     }
 }

@@ -1,22 +1,25 @@
 <div class="p-4">
     <!-- Kolom 1: Lokasi/Link + Waktu -->
     <div class=" space-y-2">
-        @if (isset($meeting['location']))
+        @if ($nearestMeeting->place['type'] === 'location')
             <div class="flex items-center">
                 <flux:icon.map-pin class="size-4 mr-2" />
                 <div class="text-gray-900 ">
-                    <p><span class="text-gray-500">Lokasi:</span> {{ $meeting['location'] }}</p>
+                    <p><span class="text-gray-500">Lokasi:</span> {{ $nearestMeeting->place['value'] }}</p>
                 </div>
             </div>
-        @elseif (isset($meeting['link']))
+        @elseif ($nearestMeeting->place['type'] === 'link')
             <div class="flex items-center ">
                 <flux:icon.video-camera class="size-4 mr-2" />
                 <div>
                     <span class="text-gray-500">Online:</span>
-                    <a href="{{ $meeting['link'] }}" target="_blank" rel="noopener noreferrer"
+                    <a href="{{ $nearestMeeting->place['value'] }}" target="_blank" rel="noopener noreferrer"
                         class="text-blue-800 hover:text-blue-800 underline">
                         Link
                     </a>
+                    @if (isset($nearestMeeting->place['password']))
+                        <p class="text-gray-500">Password: {{ $nearestMeeting->place['password'] }}</p>
+                    @endif
                 </div>
             </div>
         @endif
@@ -24,8 +27,8 @@
         <div class="flex items-center">
             <flux:icon.calendar class="size-4 mr-2" />
             <div class="flex text-gray-900">
-                <p>{{ $meeting['date'] }} • </p>
-                <p class="ml-1">{{ $meeting['start'] }} - {{ $meeting['end'] }}</p>
+                <p>{{ $nearestMeeting->date }} • </p>
+                <p class="ml-1">{{ $nearestMeeting->startAtTime }} - {{ $nearestMeeting->endAtTime }}</p>
             </div>
         </div>
         <flux:modal.trigger name="history-meeting">
@@ -38,7 +41,7 @@
         <flux:modal name="history-meeting" class="w-1/2">
             <flux:legend>Riwayat Meeting</flux:legend>
             <div class="space-y-2 mt-4">
-                @foreach ($this->meeting as $value)
+                @foreach ($meetings as $value)
                     <x-user.information-system.meeting-history :meeting="$value" />
                 @endforeach
             </div>
