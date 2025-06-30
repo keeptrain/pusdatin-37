@@ -70,13 +70,15 @@ class RevisionComparision extends Component
 
                 // Group data by version
                 foreach ($versions as $version) {
-                    $groupedVersions->push([
-                        'version' => $version->version ?? null,
-                        'part_number' => $documentUpload->part_number,
-                        'part_number_label' => $documentUpload->part_number_label,
-                        'file_path' => Storage::url($version->file_path),
-                        'revision_note' => $version->revision_note,
-                    ]);
+                    if (!empty($version->file_path)) {
+                        $groupedVersions->push([
+                            'version' => $version->version ?? null,
+                            'part_number' => $documentUpload->part_number,
+                            'part_number_label' => $documentUpload->part_number_label,
+                            'file_path' => Storage::url($version->file_path),
+                            'revision_note' => $version->revision_note,
+                        ]);
+                    }
                 }
             }
         }

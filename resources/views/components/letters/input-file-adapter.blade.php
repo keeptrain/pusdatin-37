@@ -14,7 +14,7 @@
             <span class="ml-2 px-2 py-1 text-xs bg-red-100 text-red-700 rounded-md">Wajib</span>
         @endif
         @if ($optional)
-            <span class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-md">Menyusul</span>
+            <span class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-md">Boleh Menyusul</span>
         @endif
     </h4>
    

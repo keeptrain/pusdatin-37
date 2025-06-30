@@ -1,6 +1,6 @@
 <div>
-    <flux:button :href="route('is.show', [$systemRequestId])" 
-        icon="arrow-long-left" variant="subtle">Kembali</flux:button>
+    <flux:button :href="route('is.show', [$systemRequestId])" icon="arrow-long-left" variant="subtle">Kembali
+    </flux:button>
 
     <div class="grid grid-cols-2">
         <x-documents.current-document title="Sebelum revisi" :mapping="$currentVersions" />
@@ -9,12 +9,17 @@
     </div>
 
     {{-- Comparison Details --}}
-    <div x-data="{ changesChoice: '' }" class="bg-gray-50 border-t border-gray-200 p-4 m-4 space-y-4">
-        <flux:legend>Catatan sebelumnnya</flux:legend>
+    <div x-data="{ changesChoice: '' }" class="bg-gray-50 border border-gray-200 p-4 m-4 space-y-4 rounded-xl">
+        <flux:legend>Catatan sebelumnnya untuk bagian</flux:legend>
 
         <div class="space-y-3">
             @foreach ($latestRevisions as $map)
-                {{-- Modified Content --}}
+                <flux:callout color="indigo" icon="clipboard-document-list" :heading="$map['part_number_label'] . ': '">
+                    <flux:callout.text>
+                        {{ $map['revision_note'] }}
+                    </flux:callout.text>
+                </flux:callout>
+                {{-- Modified Content
                 <div class="bg-white rounded-lg p-3 shadow-sm border border-yellow-100">
                     <div class="flex items-center space-x-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20"
@@ -25,17 +30,17 @@
                         </svg>
                         <div>
                             <p class="text-sm text-gray-700">
-                                <span class="font-semibold text-yellow-600">Untuk bagian {{ $map['part_number_label'] }}:
+                                <span class="font-semibold text-yellow-600">{{ $map['part_number_label'] }}:
                                     {{ $map['revision_note'] }}</span>
                             </p>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             @endforeach
         </div>
 
-        <flux:legend>Terima perubahan</flux:legend>
-        
+        <flux:legend>Terima perubahan?</flux:legend>
+
         <flux:radio.group wire:model="changesChoice">
             <flux:radio value="yes" label="Ya" x-on:click="changesChoice ='ya'" />
             <flux:radio value="no" label="Tidak" x-on:click="changesChoice ='tidak'" />

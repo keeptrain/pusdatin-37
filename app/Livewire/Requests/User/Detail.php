@@ -35,11 +35,16 @@ class Detail extends Component
 
     public $content;
 
+    public $meetings;
+
     public function mount($type, int $id)
     {
         $this->id = $id;
         $this->type = $type;
         $this->loadContent();
+        if (method_exists($this->content, 'meetings')) {
+            $this->meetings = $this->content?->meetings()->get() ?? null;
+        }
     }
 
     protected function loadContent()
@@ -62,28 +67,9 @@ class Detail extends Component
     }
 
     #[Computed]
-    public function meeting()
+    public function nearestMeeting()
     {
-        $meeting = $this->content?->meeting ?? [];
-
-        uasort($meeting, function ($a, $b) {
-            $timeA = Carbon::parse("{$a['date']} {$a['end']}");
-            $timeB = Carbon::parse("{$b['date']} {$b['end']}");
-
-            if ($timeA->isFuture() && $timeB->isFuture()) {
-                return $timeA <=> $timeB;
-            }
-            if ($timeA->isFuture()) {
-                return -1;
-            }
-            if ($timeB->isFuture()) {
-                return 1;
-            }
-
-            return $timeA <=> $timeB;
-        });
-
-        return array_values($meeting);
+        return $this->content?->getNearestMeetingFromCollection($this->meetings);
     }
 
     #[Computed]

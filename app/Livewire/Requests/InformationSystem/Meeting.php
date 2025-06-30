@@ -2,185 +2,209 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
-use Carbon\Carbon;
-use Livewire\Component;
+use App\Enums\Division;
 use App\Models\InformationSystemRequest;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Computed;
+use App\Models\MeetingInformationSystemRequest;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
+use Illuminate\Support\Str;
+use App\Services\MeetingServices;
 
 class Meeting extends Component
 {
     #[Locked]
-    public $siRequestId;
-
-    public $selectedResultKey;
-
+    public $systemRequestId;
     public $selectedOption = '';
-
-    public $meeting = [];
-
+    public $topic = '';
+    public $place = [];
+    public $date = '';
+    public $startAt = '';
+    public $endAt = '';
+    public $recipients = [];
     public $result = [];
 
-    public $resultUpdate = [];
+    public $meetings;
 
-    public function mount($id)
+    public function mount(int $id)
     {
-        $this->siRequestId = $id;
-
-        foreach ($this->getMeeting as $key => $meeting) {
-            if (!empty($meeting['result'])) {
-                $this->result[$key] = $meeting['result'];
-            }
-        }
+        $this->systemRequestId = $id;
+        $this->meetings = MeetingInformationSystemRequest::where('request_id', $this->systemRequestId)->get();
     }
 
     public function updatedSelectedOption($value)
     {
-        $this->reset('meeting');
+        // Reset nilai place
+        $this->place = [];
 
         if ($value === 'in-person') {
-            $this->meeting['location'] = '';
+            $this->place['type'] = 'location';
+            $this->place['value'] = '';
         } elseif ($value === 'online-meet') {
-            $this->meeting['link'] = '';
+            $this->place['type'] = 'link';
+            $this->place['value'] = '';
+            $this->place['password'] = '';
         }
     }
 
-    #[Computed]
-    public function getMeeting()
+    public function handleRecipients(InformationSystemRequest $request): array
     {
-        // Get information system request by id
-        $siRequest = InformationSystemRequest::select('meetings')->findOrFail($this->siRequestId);
-        $meetings = $siRequest->meetings ?? [];
+        return array_map(function ($type) use ($request) {
+            return match ($type) {
+                'kapusdatin' => ['type' => 'role', 'id' => Division::HEAD_ID],
+                'kasatpel' => ['type' => 'role', 'id' => $request->current_division],
+                'user' => ['type' => 'user', 'id' => $request->user_id],
+                default => null,
+            };
+        }, $this->recipients);
+    }
+
+    public function create(MeetingServices $meetingServices)
+    {
+        $rules = [
+            'topic' => 'required|string|max:100',
+            'place' => 'required|array',
+            'place.type' => 'required|string|in:location,link',
+            'date' => 'required|date',
+            'startAt' => 'required|date_format:H:i',
+            'endAt' => 'required|date_format:H:i|after:startAt',
+            'recipients' => 'required|array|in:kapusdatin,kasatpel,user',
+        ];
+
+        // Add validation based on location or link selection using dynamic array
+        if ($this->place['type'] === 'location') {
+            $rules['place.value'] = 'required|string|max:255';
+        } elseif ($this->place['type'] === 'link') {
+            $rules['place.value'] = 'required|url|max:255';
+            $rules['place.password'] = 'nullable|string|max:255';
+        }
+
+        $this->validate($rules);
+
+        DB::transaction(function () use ($meetingServices) {
+            // Get information system request
+            $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
+
+            $meeting = MeetingInformationSystemRequest::create([
+                'id' => Str::uuid(),
+                'request_id' => $this->systemRequestId,
+                'topic' => $this->topic,
+                'place' => $this->place,
+                'start_at' => Carbon::parse("{$this->date} {$this->startAt}"),
+                'end_at' => Carbon::parse("{$this->date} {$this->endAt}"),
+                'recipients' => $this->handleRecipients($systemRequest),
+            ]);
+
+            // Collect recipients
+            $recipients = $meetingServices->collectRecipients($meeting->recipients);
+
+            // Prepare email data
+            $emailData = $meetingServices->prepareEmailData($meeting, $systemRequest, $recipients);
+
+            DB::afterCommit(function () use ($meetingServices, $emailData) {
+                $meetingServices->sendMeetingEmails($emailData, 'create');
+            });
+        });
+
+        session()->flash('status', [
+            'variant' => 'success',
+            'message' => 'Meeting berhasil dibuat',
+        ]);
+
+        // $this->redirectRoute('is.meeting', ['id' => $this->systemRequestId]);
+    }
+
+    #[Computed]
+    public function getMeetings()
+    {
+        // Get all meetings based on request_id
+        $meetings = $this->meetings;
+
+        // If no meetings, return empty array
+        if ($meetings->isEmpty()) {
+            return [];
+        }
 
         // Get current time
         $now = Carbon::now();
 
-        // Add time information to each meeting
-        $meetings = array_map(function ($meetings) use ($now) {
-            $meetingStart = Carbon::parse("{$meetings['date']} {$meetings['start']}");
-            $meetingEnd = Carbon::parse("{$meetings['date']} {$meetings['end']}");
+        // Add time and status information to each meeting
+        $meetings = $meetings->map(function ($meeting) use ($now) {
+            // Parse start and end time of meeting
+            $meetingStart = Carbon::parse($meeting->start_at);
+            $meetingEnd = Carbon::parse($meeting->end_at);
+
+            $place = $meeting->place;
 
             // Determine meeting status
             if ($now->lt($meetingStart)) {
                 // Meeting has not started
                 $diffInDays = round($now->diffInDays($meetingStart, false));
-                $meetings['status'] = $diffInDays == 0 ? "Hari ini" : "$diffInDays hari lagi";
+                $status = $diffInDays == 0 ? "Hari ini" : "$diffInDays hari lagi";
             } elseif ($now->lte($meetingEnd)) {
                 // Meeting is ongoing
-                $meetings['status'] = "Sedang berlangsung";
+                $status = "Sedang berlangsung";
             } elseif ($now->isSameDay($meetingEnd)) {
-                // Meeting is today but already passed
-                $meetings['status'] = "Hari ini tetapi sudah lewat";
+                // Meeting today but already passed
+                $status = "Hari ini tetapi sudah lewat";
             } else {
-                // Meeting is passed (other day)
-                $meetings['status'] = "Sudah lewat";
+                // Meeting already passed (other day)
+                $status = "Sudah lewat";
             }
 
-            // Save time difference (optional)
-            $meetings['time_diff'] = $now->diffInDays($meetingStart, false);
-
-            return $meetings;
-        }, $meetings);
-
-        // Sort meeting based on the closest time from now
-        uasort($meetings, function ($a, $b) use ($now) {
-            $timeA = Carbon::parse("{$a['date']} {$a['end']}");
-            $timeB = Carbon::parse("{$b['date']} {$b['end']}");
-
-            // Prioritize meeting that has not started
-            if ($timeA->isFuture() && $timeB->isFuture()) {
-                return $timeA <=> $timeB; // Both have not started, sort based on closest time
-            }
-            if ($timeA->isFuture()) {
-                return -1; // $a has not started, prioritize higher
-            }
-            if ($timeB->isFuture()) {
-                return 1; // $b has not started, prioritize higher
-            }
-
-            // If both have passed, sort from the oldest to the most recent
-            return $timeA <=> $timeB;
-        });
-
-        return $meetings;
-    }
-
-    public function create()
-    {
-        // Validate input
-        $rules = [
-            'selectedOption' => 'required|in:in-person,online-meet',
-            'meeting.date' => 'required|date',
-            'meeting.start' => 'required|date_format:H:i',
-            'meeting.end' => 'required|date_format:H:i|after:meeting.start',
-        ];
-
-        // Add validation based on location or link selection using dynamic array
-        $rules['meeting.' . ($this->selectedOption === 'in-person' ? 'location' : 'link')] =
-            $this->selectedOption === 'in-person'
-            ? 'required|string|max:255'
-            : 'required|url|max:255';
-
-        $this->validate($rules);
-
-        // Find record InformationSystemRequest based on ID
-        $siRequest = InformationSystemRequest::findOrFail($this->siRequestId);
-
-        DB::transaction(function () use ($siRequest) {
-            // Get existing meetings (if any)
-            $existingMeetings = $siRequest->meetings ?? [];
-
-            // Data meeting baru
-            $newMeeting = [
-                'date' => $this->meeting['date'],
-                'start' => $this->meeting['start'],
-                'end' => $this->meeting['end'],
-                'result' => null,
+            // Add additional attributes to meeting
+            return [
+                'id' => $meeting->id,
+                'topic' => $meeting->topic,
+                'place' => $place,
+                'date' => Carbon::parse($meeting->start_at)->format('d M Y'),
+                'start_at' => Carbon::parse($meeting->start_at)->format('H:i'),
+                'end_at' => Carbon::parse($meeting->end_at)->format('H:i'),
+                'status' => $status,
+                'result' => $meeting->result,
+                'time_diff' => $now->diffInDays($meetingStart, false),
+                'pastEndDate' => $now->gt($meetingEnd),
             ];
+        });
 
-            // Add location or link based on selection
-            if ($this->selectedOption === 'in-person') {
-                $newMeeting['location'] = $this->meeting['location'];
-            } elseif ($this->selectedOption === 'online-meet') {
-                $newMeeting['link'] = $this->meeting['link'];
-                if (!empty($this->meeting['password'])) {
-                    $newMeeting['password'] = $this->meeting['password'];
-                }
+        // Sort meetings based on the nearest time
+        $sortedMeetings = $meetings->sortBy(function ($meeting) use ($now) {
+            $meetingEnd = Carbon::parse($meeting['date']);
+
+            // Prioritize meetings that have not started
+            if ($meetingEnd->isFuture()) {
+                return $meetingEnd->getTimestamp(); // Use timestamp for sorting
             }
 
-            // Add new meeting to array with incremental key
-            $existingMeetings[] = $newMeeting;
-
-            // Update meeting column in database
-            $siRequest->update([
-                'meetings' => $existingMeetings,
-            ]);
-
-            // Log status dan notifikasi
-            // $siRequest->logStatusCustom('Meeting telah dibuat, silahkan cek detailnya.');
-
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => 'Meeting berhasil dibuat',
-            ]);
-
-            $this->redirectRoute('is.meeting', ['id' => $this->siRequestId]);
+            // If the meeting has passed, sort from the most recent
+            return -$meetingEnd->getTimestamp(); // Negatif timestamp untuk meeting lama
         });
+
+        return $sortedMeetings->values()->all();
     }
 
-    public function updateResultMeeting($selectedResultKey)
+    #[Computed]
+    public function isMeetingPastEndDate()
     {
-        DB::transaction(function () use ($selectedResultKey) {
-            $SiRequest = InformationSystemRequest::findOrFail($this->siRequestId);
-            $meetings = $SiRequest->meetings;
+        return now()->gt($this->meetings->end_at);
+    }
 
-            // Update meeting result for selected key
-            $meetings[$selectedResultKey]['result'] = $this->result[$selectedResultKey];
+    public function updateResultMeeting($selectedId)
+    {
+        $meeting = MeetingInformationSystemRequest::findOrFail($selectedId);
 
-            // Save back to database
-            $SiRequest->update(['meetings' => $meetings]);
+        $this->validate([
+            "result.{$selectedId}" => 'required|string|max:255',
+        ]);
 
+        DB::transaction(function () use ($selectedId, $meeting) {
+            $meeting->update([
+                'result' => $this->result[$selectedId],
+            ]);
+
+            $meeting->save();
         });
 
         session()->flash('status', [
@@ -188,25 +212,32 @@ class Meeting extends Component
             'message' => 'Hasil meeting berhasil diupdate',
         ]);
 
-        $this->dispatch('modal-close', name: "edit-meeting-{$selectedResultKey}-modal");
+        $this->redirectRoute('is.meeting', ['id' => $this->systemRequestId]);
     }
 
-    public function delete($selectedKey)
+    public function delete(?string $selectedId, MeetingServices $meetingServices)
     {
-        DB::transaction(function () use ($selectedKey) {
-            $SiRequest = InformationSystemRequest::findOrFail($this->siRequestId);
+        DB::transaction(function () use ($selectedId, $meetingServices) {
+            $meeting = MeetingInformationSystemRequest::findOrFail($selectedId);
 
-            $meetings = $SiRequest->meetings;
+            $systemRequest = InformationSystemRequest::findOrFail($meeting->request_id);
 
-            // Remove element based on key
-            unset($meetings[$selectedKey]);
+            $recipients = $meetingServices->collectRecipients($meeting->recipients);
 
-            // Reset index if you want (optional depending on needs)
-            $meetings = array_values($meetings);
+            $emailData = $meetingServices->prepareEmailData($meeting, $systemRequest, $recipients);
 
-            // Save back array meeting that has been deleted to model
-            $SiRequest->meetings = $meetings;
-            $SiRequest->save();
+            $meeting->delete();
+
+            DB::afterCommit(function () use ($meeting, $meetingServices, $emailData) {
+                $meetingServices->sendMeetingEmails($emailData, 'delete');
+            });
         });
+
+        session()->flash('status', [
+            'variant' => 'success',
+            'message' => 'Meeting berhasil dihapus',
+        ]);
+
+        $this->redirectRoute('is.meeting', ['id' => $this->systemRequestId]);
     }
 }
