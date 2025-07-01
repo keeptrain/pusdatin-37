@@ -432,7 +432,7 @@ class DashboardController extends Controller
         $models = match (auth()->user()->currentUserRoleId()) {
             Division::PR_ID->value, Division::PROMKES_ID->value => [PublicRelationRequest::class],
             Division::SI_ID->value, Division::DATA_ID->value => [InformationSystemRequest::class],
-            Division::HEAD_ID->value => [InformationSystemRequest::class, PublicRelationRequest::class],
+            default => [InformationSystemRequest::class, PublicRelationRequest::class],
         };
 
         $allRatings = collect();
