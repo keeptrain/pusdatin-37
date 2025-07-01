@@ -1,14 +1,15 @@
-<!-- Confirmation Modal Component -->
+<!-- Confirmation Modal -->
 <div x-data="{ 
-    showModal: false,
-    deleteCount: 0,
-    init() {
-        this.$wire.on('confirm-delete', (data) => {
-            this.deleteCount = data[0].count;
-            this.showModal = true;
-        });
-    }
-}"
+      showModal: false,
+      deleteCount: 0,
+      isDeleting: @entangle('isDeleting'),
+      init() {
+          this.$wire.on('confirm-delete', (data) => {
+              this.deleteCount = data[0].count;
+              this.showModal = true;
+          });
+      }
+  }"
     x-show="showModal"
     x-cloak
     class="fixed inset-0 z-50 overflow-y-auto"
@@ -23,8 +24,9 @@
             x-transition:leave="ease-in duration-200"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-            @click="showModal = false"></div>
+            class="fixed inset-0 transition-opacity bg-gray-500"
+            @click="!isDeleting && (showModal = false)"
+            style="opacity:40%"></div>
 
         <!-- Modal Content -->
         <div x-show="showModal"
@@ -50,19 +52,37 @@
             <div class="mb-4">
                 <p class="text-sm text-gray-500">
                     Apakah Anda yakin ingin menghapus <span class="font-semibold text-red-600" x-text="deleteCount"></span> data yang dipilih?
-                    Tindakan ini tidak dapat dibatalkan.
                 </p>
             </div>
 
+            <!-- Loading State dalam Modal -->
+            <div x-show="isDeleting" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    <span class="text-sm text-blue-700">Sedang menghapus data...</span>
+                </div>
+            </div>
+
             <div class="flex gap-3 justify-end">
-                <button @click="showModal = false"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                <button @click="!isDeleting && (showModal = false)"
+                    :disabled="isDeleting"
+                    :class="isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
                     Batal
                 </button>
                 <button wire:click="deleteSelected"
                     @click="showModal = false"
-                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                    Hapus
+                    :disabled="isDeleting"
+                    :class="isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'"
+                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                    <span x-show="!isDeleting">Hapus</span>
+                    <span x-show="isDeleting" class="flex items-center">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Menghapus...
+                    </span>
                 </button>
             </div>
         </div>

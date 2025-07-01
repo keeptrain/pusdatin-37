@@ -17,6 +17,9 @@ class Index extends Component
     /** @var bool */
     public $selectAll = false;
 
+    /** @var bool */
+    public $isDeleting = false;
+
     public function mount()
     {
         // Load all requests for current user role
@@ -56,6 +59,12 @@ class Index extends Component
         } else {
             $this->selectedRequests = [];
         }
+
+        // Dispatch event untuk update checkbox state di frontend
+        $this->dispatch('select-all-updated', [
+            'selectAll' => $value,
+            'selectedIds' => $this->selectedRequests
+        ]);
     }
 
     public function updatedSelectedRequests()
@@ -69,6 +78,10 @@ class Index extends Component
             session()->flash('error', 'Tidak ada data yang dipilih untuk dihapus.');
             return;
         }
+
+        // Set loading state
+        $this->isDeleting = true;
+        $this->dispatch('delete-started');
 
         try {
             DB::beginTransaction();
@@ -95,14 +108,24 @@ class Index extends Component
             ]);
 
             session()->flash('success', 'Data berhasil dihapus sebanyak ' . $deletedCount . ' item.');
+
+            // Reset loading state dan refresh browser setelah delay
+            $this->isDeleting = false;
+            $this->dispatch('delete-completed');
         } catch (\Exception $e) {
             DB::rollback();
+            $this->isDeleting = false;
+            $this->dispatch('delete-error');
             session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
     }
 
     public function confirmDelete()
     {
+        if ($this->isDeleting) {
+            return; // Prevent multiple calls during deletion
+        }
+
         $this->dispatch('confirm-delete', [
             'count' => count($this->selectedRequests)
         ]);
