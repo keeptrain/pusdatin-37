@@ -6,6 +6,13 @@
 
     <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$systemRequestId">
         <div class="flex-1 p-4 md:p-3">
+            <flux:callout icon="user" class="mr-3" variant="secondary">
+                <flux:callout.heading>Penanggung jawab</flux:callout.heading>
+
+                <flux:callout.text>
+                    {{ $systemRequest->user->name }} dari seksi {{ $systemRequest->user->section }} - No. Telp: {{ $systemRequest->user->contact }}
+                </flux:callout.text>
+            </flux:callout>
             <div class="mt-3 mr-3">
                 @foreach ($systemRequest->documentUploads as $fileData)
                     <div x-show="partTab === '{{ $fileData['part_number'] }}'" x-cloak>
@@ -34,7 +41,7 @@
             <livewire:requests.information-system.confirm-modal :systemRequestId="$systemRequestId"
                 :allowedParts="$this->allowedParts" />
         </div>
-        
+
         <x-modal.information-system.email-to-user :systemRequest="$systemRequest" />
 
     </x-layouts.requests.show>
