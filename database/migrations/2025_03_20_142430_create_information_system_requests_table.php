@@ -24,7 +24,6 @@ return new class extends Migration {
             $table->integer('current_division')->nullable();
             $table->boolean('active_revision')->default(false);
             $table->boolean('need_review')->default(false);
-            $table->json('meetings')->nullable();
             $table->json('notes')->nullable();
             $table->json('rating')->nullable();
             $table->timestamps();
