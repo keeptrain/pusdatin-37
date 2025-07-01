@@ -65,7 +65,7 @@
                 <flux:navlist.item :href="route('pr.index')" icon="folder-open"
                     :current="request()->routeIs('pr.index')" wire:navigate>Layanan Kehumasan</flux:navlist.item>
                 @endrole
-                @unlessrole('head_verifier')
+                @unlessrole('head_verifier|promkes_verifier')
                 <flux:navlist.item :href="route('show.ratings')" icon="star"
                     :current="request()->routeIs('show.ratings')" wire:navigate>Penilaian Layanan</flux:navlist.item>
                 @endunlessrole
