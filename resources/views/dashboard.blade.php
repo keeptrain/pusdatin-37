@@ -76,7 +76,7 @@
             </div>
             @endhasanyrole
 
-            <x-dashboard.small-chart icon="star" title="" :data="'4.5 / 5'" label="Rata-rata penilaian layanan"
+            <x-dashboard.small-chart icon="star" title="" :data="$avarageRating" label="Rata-rata penilaian layanan"
                 :widthPercentage="$widthPercentage" />
 
             {{-- <div

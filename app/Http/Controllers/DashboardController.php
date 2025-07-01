@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Enums\Division;
 use App\Services\ZipServices;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +42,7 @@ class DashboardController extends Controller
             'widthPercentage' => $this->calculateWidthPercentage($data['totalServices'], $data['totalPr']),
             'categoryPercentages' => $this->calculateCategoryPercentages($data['totalPr']),
             'statusCounts' => $data['statusCounts'],
+            'avarageRating' => $this->avarageRating(),
             'monthlyLetterData' => $this->getMonthlySystemRequestData($userRoles),
             'monthlySiData' => $monthlySiData,
             'monthlyDataDiv' => $monthlyDataDiv,
@@ -422,5 +424,46 @@ class DashboardController extends Controller
             'months' => $months,
             'letterData' => $data,
         ];
+    }
+
+    public function avarageRating()
+    {
+        // Tentukan model-model berdasarkan role pengguna
+        $models = match (auth()->user()->currentUserRoleId()) {
+            Division::PR_ID->value, Division::PROMKES_ID->value => [PublicRelationRequest::class],
+            Division::SI_ID->value, Division::DATA_ID->value => [InformationSystemRequest::class],
+            Division::HEAD_ID->value => [InformationSystemRequest::class, PublicRelationRequest::class],
+        };
+
+        $allRatings = collect();
+
+        // Iterasi melalui setiap model untuk mengumpulkan rating
+        foreach ($models as $model) {
+            $ratings = $model::whereNotNull('rating')->pluck('rating');
+
+            // Map key rating
+            $mapRatings = $ratings->map(function ($rating) {
+                $data = $rating;
+                return $data['rating'] ?? null;
+            })->filter();
+
+            // Gabungkan rating ke koleksi utama
+            $allRatings = $allRatings->merge($mapRatings);
+        }
+
+        // Jika tidak ada rating, kembalikan "0 / 5"
+        if ($allRatings->isEmpty()) {
+            return '0 / 5';
+        }
+
+        // Hitung total dan rata-rata
+        $totalRating = $allRatings->sum();
+        $countRating = $allRatings->count();
+
+        // Hitung rata-rata
+        $average = $totalRating / $countRating;
+
+        // Format rata-rata sebagai "4.5 / 5"
+        return round($average, 1) . ' / 5';
     }
 }
