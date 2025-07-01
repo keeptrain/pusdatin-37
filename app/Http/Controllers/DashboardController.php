@@ -34,6 +34,7 @@ class DashboardController extends Controller
 
         // Pass data to the view
         return view('dashboard', [
+            'totalUsers' => $this->totalUsers(),
             'label' => $data['label'],
             'totalServices' => $data['totalServices'],
             'totalPr' => $data['totalPr'],
@@ -44,6 +45,11 @@ class DashboardController extends Controller
             'monthlySiData' => $monthlySiData,
             'monthlyDataDiv' => $monthlyDataDiv,
         ]);
+    }
+
+    public function totalUsers()
+    {
+        return User::count('id');
     }
 
     public function getMeetingList()
@@ -191,13 +197,13 @@ class DashboardController extends Controller
     private function getSiDataStatusCounts($currentDivision = null)
     {
         $statusStates = [
-            'pending' => 'App\States\Pending',
-            'disposition' => 'App\States\Disposition',
-            'process' => 'App\States\Process',
-            'replied' => 'App\States\Replied',
-            'approvedKasatpel' => 'App\States\ApprovedKasatpel',
-            'repliedKapusdatin' => 'App\States\RepliedKapusdatin',
-            'approvedKapusdatin' => 'App\States\ApprovedKapusdatin',
+            'pending' => 'App\States\InformationSystem\Pending',
+            'disposition' => 'App\States\InformationSystem\Disposition',
+            'replied' => 'App\States\InformationSystem\Replied',
+            'approvedKasatpel' => 'App\States\InformationSystem\ApprovedKasatpel',
+            'repliedKapusdatin' => 'App\States\InformationSystem\RepliedKapusdatin',
+            'approvedKapusdatin' => 'App\States\InformationSystem\ApprovedKapusdatin',
+            'process' => 'App\States\InformationSystem\Process',
         ];
 
         $query = InformationSystemRequest::select('status', DB::raw('COUNT(*) as total'))
@@ -213,10 +219,10 @@ class DashboardController extends Controller
         return [
             'pending' => $statusCounts[$statusStates['pending']] ?? 0,
             'disposition' => $statusCounts[$statusStates['disposition']] ?? 0,
-            'process' => $statusCounts[$statusStates['process']] ?? 0,
             'replied' => $statusCounts[$statusStates['replied']] ?? 0,
             'approvedKasatpel' => $statusCounts[$statusStates['approvedKasatpel']] ?? 0,
             'repliedKapusdatin' => $statusCounts[$statusStates['repliedKapusdatin']] ?? 0,
+            'process' => $statusCounts[$statusStates['process']] ?? 0,
             'completed' => $statusCounts[$statusStates['approvedKapusdatin']] ?? 0,
         ];
     }

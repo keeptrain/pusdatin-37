@@ -18,43 +18,21 @@
 
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
             <!-- Total Service Requests Overview -->
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
-                <h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200 mb-3">Permohonan Layanan</h3>
-                <p class="flex text-3xl font-bold text-neutral-800 dark:text-white mb-1">{{ $totalServices }}
-                <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">{{ $label }}
-                </p>
-                </p>
+            @hasrole('administrator')
+            <x-dashboard.small-chart icon="user" :data="$totalUsers" label="Total user terdaftar" />
+            @endhasrole
 
-                {{-- <div class="text-sm font-medium text-emerald-600 dark:text-emerald-500 flex items-center mb-5">
-                    <flux:icon.arrow-trending-up class="size-5 mr-2" />
-                    12% from last month
-                </div> --}}
-                <div class="mt-auto">
-                    {{-- <div class="bg-neutral-100 dark:bg-neutral-800 rounded-full h-2 mb-2">
-                        <div class="bg-zinc-700 h-2 rounded-full" style="width: {{ $widthPercentage }}%"></div>
-                    </div> --}}
-                    {{-- <div class="flex justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                        <span>{{ $statusCounts['completed'] }} Selesai</span>
-                        @hasrole('head_verifier')
-                        <span>{{ $statusCounts['pending'] }} {{ $label }}</span>
-                        @elserole('si_verifier|data_verifier')
-                        <span>{{ $statusCounts['disposition'] }} {{ $label }}</span>
-                        @elserole('pr_verifier')
-                        <span>{{ $statusCounts['pusdatinProcess'] }} {{ $label }}</span>
-                        @elserole('promkes_verifier')
-                        <span>{{ $statusCounts['pusdatinProcess'] }} {{ $label }}</span>
-                        @endhasrole
-                    </div> --}}
-                </div>
-            </div>
+            @unlessrole('administrator')
+            <x-dashboard.small-chart icon="folder" title="Permohonan Layanan" :data="$totalServices" :label="$label"
+                :widthPercentage="$widthPercentage" />
+            @endunlessrole
 
             <!-- Request Categories Distribution -->
             @hasanyrole('head_verifier')
             <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
+                class="relative overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
                 <h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200 mb-3">Kategori</h3>
-                <div class="flex-1 flex flex-col justify-center space-y-3">
+                <div class="flex-1 flex flex-col justify-center space-y-1">
                     <div class="flex items-center">
                         <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
                         <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Sistem Informasi</div>
@@ -75,37 +53,38 @@
                     </div>
                 </div>
             </div>
-            {{-- <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
-                <x-dashboard.head-verifier-status-meter :statusCounts="$statusCounts" />
-            </div> --}}
             @endhasanyrole
 
             @hasanyrole('si_verifier|data_verifier')
             <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
+                class="relative overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
                 <x-dashboard.information-system-status-meter :statusCounts="$statusCounts" />
             </div>
             @endhasanyrole
 
             @hasanyrole('pr_verifier')
             <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
+                class="relative overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
                 <x-dashboard.public-relation-status-meter :statusCounts="$statusCounts" />
             </div>
             @endhasanyrole
 
             @hasanyrole('promkes_verifier')
             <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
+                class="relative overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
                 <x-dashboard.public-relation-status-meter :statusCounts="$statusCounts" />
             </div>
             @endhasanyrole
 
-            {{-- <!-- Response Time Metrics -->
-            <div
-                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
-                <x-dashboard.information-system-status-meter :siStatusCounts="$siStatusCounts" />
+            <x-dashboard.small-chart icon="star" title="" :data="'4.5 / 5'" label="Rata-rata penilaian layanan"
+                :widthPercentage="$widthPercentage" />
+
+            {{-- <div
+                class="relative overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
+                <flux:heading size="lg">Penilaian Layanan</flux:heading>
+                <flux:avatar icon="star" size="xl" color="auto" />
+                <x-rating-emoticon />
+
             </div> --}}
         </div>
         <!-- bar chart area -->
@@ -113,7 +92,7 @@
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         @endpush
         @hasanyrole('head_verifier')
-        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 h-64" wire:ignore>
+        <div class=" rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 max-h-80" wire:ignore>
             <flux:heading>Chart Permohonan</flux:heading>
             <canvas id="monthlyLettersChart"></canvas>
             @push('scripts')
@@ -123,7 +102,7 @@
 
                     function initMonthlyChart() {
                         // Data dari DashboardController
-                        const monthlyData = @json($monthlyLetterData ?? ['months' => [], 'informationSystem' => [],'publicRelation' => []]);
+                        const monthlyData = @json($monthlyLetterData ?? ['months' => [], 'informationSystem' => [], 'publicRelation' => []]);
 
                         // Cek apakah element ada
                         const chartElement = document.getElementById('monthlyLettersChart');
@@ -136,7 +115,7 @@
 
                         // Dapatkan context
                         const ctx = chartElement.getContext('2d');
-                        
+
 
                         monthlyChart = new Chart(ctx, {
                             type: 'bar',
