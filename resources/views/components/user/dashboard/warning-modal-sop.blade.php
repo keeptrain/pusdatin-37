@@ -9,7 +9,7 @@
     <div class="fixed inset-0" style="background-color: rgba(0,0,0,0.6);" aria-hidden="true"></div>
 
     {{-- Modal panel --}}
-    <div class="relative z-10 bg-white rounded-lg shadow-xl sm:max-w-lg w-full overflow-hidden">
+    <div class="relative z-10 bg-white rounded-lg shadow-xl sm:max-w-lg w-full max-h-screen overflow-y-auto">
         <div class="p-6 space-y-4">
             <!-- Requirements List -->
             <div class="space-y-4">

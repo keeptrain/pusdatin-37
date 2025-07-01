@@ -82,16 +82,13 @@ function initDataTable() {
 }
 
 function bindCheckboxEvents() {
-    // Handle row clicks (exclude checkbox column and status column)
     $("#requestsTable tbody tr")
         .off("click")
         .on("click", function (e) {
-            // Don't navigate if deleting is in progress
             if (isDeleting) {
                 return;
             }
 
-            // Don't navigate if clicking on checkbox column, status column, or action column
             const clickedColumnIndex = $(e.target).closest("td").index();
             if (
                 clickedColumnIndex === 0 ||
@@ -157,7 +154,6 @@ function disableTableInteractions() {
 function enableTableInteractions() {
     $("#requestsTable").removeClass("table-disabled");
 
-    // Only enable checkboxes if select all is not checked
     if (!$("#selectAllCheckbox").is(":checked")) {
         $(".row-checkbox")
             .prop("disabled", false)

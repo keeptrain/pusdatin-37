@@ -123,7 +123,7 @@ class Index extends Component
     public function confirmDelete()
     {
         if ($this->isDeleting) {
-            return; // Prevent multiple calls during deletion
+            return;
         }
 
         $this->dispatch('confirm-delete', [

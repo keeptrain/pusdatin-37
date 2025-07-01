@@ -1,5 +1,6 @@
 let dataTable;
 let selectedStatuses = [];
+let isDeleting = false;
 
 function initDataTable() {
     // Check if dependencies are loaded
@@ -25,6 +26,16 @@ function initDataTable() {
         responsive: true,
         ordering: true,
         searching: true,
+        language: {
+            sProcessing: "Sedang memproses...",
+            sLengthMenu: "Tampilkan _MENU_ data per halaman",
+            sZeroRecords: "Tidak ditemukan data yang sesuai",
+            sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            sInfoEmpty: "",
+            sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
+            sInfoPostFix: "",
+            sSearch: "Cari:",
+        },
         columnDefs: [
             {
                 targets: 0, // Checkbox column
@@ -33,7 +44,7 @@ function initDataTable() {
                 className: "text-center",
             },
             {
-                targets: 4, // Status column - disable sorting to prevent conflicts
+                targets: 4,
                 orderable: false,
             },
             {
@@ -99,11 +110,13 @@ function updateCustomInfo() {
 }
 
 function bindCheckboxEvents() {
-    // Handle row clicks (exclude checkbox column, status column, and action column)
     $("#prRequestsTable tbody tr")
         .off("click")
         .on("click", function (e) {
-            // Don't navigate if clicking on checkbox column, status column, or action column
+            if (isDeleting) {
+                return;
+            }
+
             const clickedColumnIndex = $(e.target).closest("td").index();
             if (
                 clickedColumnIndex === 0 ||
@@ -121,7 +134,19 @@ function bindCheckboxEvents() {
         });
 }
 
-// Function to show flash messages
+function enableTableInteractions() {
+    $("#requestsTable").removeClass("table-disabled");
+
+    if (!$("#selectAllCheckbox").is(":checked")) {
+        $(".row-checkbox")
+            .prop("disabled", false)
+            .removeClass("checkbox-disabled");
+    }
+
+    $("#selectAllCheckbox").prop("disabled", false);
+    $("#globalSearch").prop("disabled", false);
+    $("#statusFilterToggle").prop("disabled", false);
+}
 function showFlashMessage(type, message) {
     const flashContainer = $("#flash-messages");
     const alertClass =
@@ -140,7 +165,7 @@ function showFlashMessage(type, message) {
     // Auto hide after 5 seconds
     setTimeout(() => {
         flashContainer.find(".flash-message").fadeOut();
-    }, 5000);
+    }, 1000);
 }
 
 // Function to remove rows from DataTable
@@ -155,6 +180,12 @@ function removeRowsFromDataTable(deletedIds) {
 
     // Redraw table
     dataTable.draw();
+}
+function disableTableInteractions() {
+    $("#requestsTable").addClass("table-disabled");
+    $(".row-checkbox, #selectAllCheckbox").prop("disabled", true);
+    $("#globalSearch").prop("disabled", true);
+    $("#statusFilterToggle").prop("disabled", true);
 }
 
 // Listen for Livewire events
@@ -175,6 +206,27 @@ document.addEventListener("livewire:init", () => {
 
         // Update button states and selections
         updateButtonStates();
+    });
+    Livewire.on("select-all-updated", (event) => {
+        const data = event[0];
+        const selectAll = data.selectAll;
+        const selectedIds = data.selectedIds;
+
+        if (selectAll) {
+            // Disable all individual checkboxes when select all is checked
+            $(".row-checkbox")
+                .prop("disabled", true)
+                .addClass("checkbox-disabled");
+        } else {
+            // Enable all individual checkboxes when select all is unchecked
+            $(".row-checkbox")
+                .prop("disabled", false)
+                .removeClass("checkbox-disabled");
+        }
+    });
+    Livewire.on("delete-started", () => {
+        isDeleting = true;
+        disableTableInteractions();
     });
 });
 

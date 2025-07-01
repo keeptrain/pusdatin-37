@@ -21,6 +21,8 @@ class Index extends Component
     /** @var bool */
     public $selectAll = false;
 
+    public $isDeleting = false;
+
     public string $filterStatus = 'all';
 
     public array $statuses = [
@@ -173,6 +175,9 @@ class Index extends Component
             session()->flash('error', 'Tidak ada data yang dipilih untuk dihapus.');
             return;
         }
+        // Set loading state
+        $this->isDeleting = true;
+        $this->dispatch('delete-started');
 
         try {
             DB::beginTransaction();
@@ -199,6 +204,9 @@ class Index extends Component
             ]);
 
             session()->flash('success', 'Data berhasil dihapus sebanyak ' . $deletedCount . ' item.');
+
+            $this->isDeleting = false;
+            $this->dispatch('delete-completed');
         } catch (\Exception $e) {
             DB::rollback();
             session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
@@ -207,6 +215,10 @@ class Index extends Component
 
     public function confirmDelete()
     {
+        if ($this->isDeleting) {
+            return; // Prevent multiple calls during deletion
+        }
+
         $this->dispatch('confirm-delete', [
             'count' => count($this->selectedPrRequest)
         ]);

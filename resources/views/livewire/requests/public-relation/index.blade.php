@@ -6,6 +6,16 @@
         <!-- Flash Messages Component -->
         <x-flash-messages />
 
+        <!-- Loading Overlay -->
+        <div x-data="{ isDeleting: @entangle('isDeleting') }"
+            x-show="isDeleting"
+            x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="text-gray-700 font-medium">Menghapus data...</span>
+            </div>
+        </div>
         <!-- Top Controls Section - Search Bar and Delete Button -->
         <div class="flex justify-between items-center mb-4">
             <!-- Left Side - Action Buttons -->
@@ -13,19 +23,13 @@
                 <button
                     wire:click="confirmDelete"
                     class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    :disabled="@js(empty($selectedPrRequest))"
+                    :disabled="@js(empty($selectedRequests)) || @js($isDeleting)"
                     @disabled(empty($selectedPrRequest))>
 
                     Hapus Data (<span x-text="@js(count($selectedPrRequest))">{{ count($selectedPrRequest) }}</span>)
                 </button>
 
-                @if(!empty($selectedPrRequest))
-                <button
-                    wire:click="$set('selectedPrRequest', [])"
-                    class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
-                    Batal Pilih
-                </button>
-                @endif
+
             </div>
 
             <!-- Right Side - Search Bar -->
@@ -139,6 +143,17 @@
 
         <!-- Custom CSS -->
         <link rel="stylesheet" href="{{ asset('css/public-relation-index.css') }}" />
+        <style>
+            .checkbox-disabled {
+                opacity: 0.5;
+                pointer-events: none;
+            }
+
+            .table-disabled {
+                opacity: 0.7;
+                pointer-events: none;
+            }
+        </style>
         @endpush
 
         @push('scripts')

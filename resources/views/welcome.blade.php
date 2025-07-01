@@ -38,6 +38,7 @@
         <x-user.hero />
         <x-user.service />
         <x-user.cara-kerja />
+        <x-user.faq />
     </div>
 
     <script>
