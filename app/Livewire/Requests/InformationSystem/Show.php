@@ -131,12 +131,12 @@ class Show extends Component
         foreach ($this->emailChecked as $emailType) {
             switch ($emailType) {
                 case 'need-nda':
-                    Mail::send(new NeedNDAMail($data)->to($email));
+                    Mail::to($email)->send(new NeedNDAMail($data));
                     break;
 
                 case 'reminder-revision':
                     $revisionMailData = Cache::get("revision-mail-{$this->systemRequestId}");
-                    Mail::send(new RevisionMail($revisionMailData, 'reminder')->to($email));
+                    Mail::to($email)->send(new RevisionMail($revisionMailData, 'reminder'));
                     break;
 
                 default:
