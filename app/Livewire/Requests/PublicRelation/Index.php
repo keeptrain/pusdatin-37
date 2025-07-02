@@ -89,6 +89,10 @@ class Index extends Component
         } else {
             $this->selectedPrRequest = [];
         }
+        $this->dispatch('select-all-updated', [
+            'selectAll' => $value,
+            'selectedIds' => $this->selectedPrRequest
+        ]);
     }
 
     public function updatedSelectedPrRequest()

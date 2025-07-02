@@ -110,12 +110,10 @@ table.dataTable td.dt-type-date div.dt-column-footer {
     transform: scale(1.1);
 }
 
-/* Hide element with x-cloak until Alpine.js loads */
 [x-cloak] {
     display: none !important;
 }
 
-/* Prevent header click conflicts */
 .status-header-content {
     pointer-events: none;
 }

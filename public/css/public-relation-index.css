@@ -8,13 +8,11 @@
     cursor: pointer;
 }
 
-/* Don't apply cursor pointer to checkbox column and action column */
 #prRequestsTable tbody tr td:first-child,
 #prRequestsTable tbody tr td:last-child {
     cursor: default;
 }
 
-/* Hide default DataTables search and move controls */
 .dt-container .dt-search {
     display: none !important;
 }
@@ -23,7 +21,6 @@
     display: none !important;
 }
 
-/* Custom positioning for DataTables controls */
 .dt-container .dt-info {
     float: left !important;
     clear: none !important;
@@ -36,7 +33,24 @@
     margin-top: 10px;
 }
 
-/* Custom styling for entries per page dropdown */
+dt-column-order {
+    display: none !important;
+}
+.dt-layout-cell.dt-layout-start {
+    display: none !important;
+}
+table.dataTable th.dt-type-numeric div.dt-column-header,
+table.dataTable th.dt-type-numeric div.dt-column-footer,
+table.dataTable th.dt-type-date div.dt-column-header,
+table.dataTable th.dt-type-date div.dt-column-footer,
+table.dataTable td.dt-type-numeric div.dt-column-header,
+table.dataTable td.dt-type-numeric div.dt-column-footer,
+table.dataTable td.dt-type-date div.dt-column-header,
+table.dataTable td.dt-type-date div.dt-column-footer {
+    flex-direction: row !important;
+    gap: 20px;
+}
+
 .custom-entries-control {
     display: flex;
     align-items: center;
@@ -60,7 +74,6 @@ dt-column-order {
     display: none !important;
 }
 
-/* Header filter dropdown styling */
 #statusFilterDropdown {
     right: 0;
     left: auto;
@@ -68,12 +81,10 @@ dt-column-order {
     max-width: 300px;
 }
 
-/* Ensure dropdown appears above table content */
 #statusFilterDropdown {
     z-index: 1000;
 }
 
-/* Multi-select dropdown styling */
 .status-checkbox-item {
     padding: 8px 12px;
     display: flex;
@@ -109,30 +120,25 @@ dt-column-order {
     font-weight: 500;
 }
 
-/* Icon button styling */
 #statusFilterToggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Active filter indicator */
 .filter-active {
     background-color: #dbeafe !important;
     color: #3b82f6 !important;
 }
 
-/* Checkbox styling */
 .row-checkbox {
     transform: scale(1.1);
 }
 
-/* Hide element with x-cloak until Alpine.js loads */
 [x-cloak] {
     display: none !important;
 }
 
-/* Prevent header click conflicts */
 .status-header-content {
     pointer-events: none;
 }
@@ -158,7 +164,6 @@ dt-column-order {
     }
 }
 
-/* Custom table wrapper for better control layout */
 .table-wrapper {
     position: relative;
 }
@@ -177,7 +182,6 @@ dt-column-order {
     color: #6b7280;
 }
 
-/* Custom pagination styling */
 .dt-paging {
     display: flex;
     gap: 4px;

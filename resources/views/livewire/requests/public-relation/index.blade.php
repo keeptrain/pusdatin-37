@@ -21,9 +21,9 @@
             <!-- Left Side - Action Buttons -->
             <div class="flex gap-2">
                 <button
-                    wire:click="confirmDelete"
                     class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    :disabled="@js(empty($selectedRequests)) || @js($isDeleting)"
+                    wire:click="confirmDelete"
+                    :disabled="@js(empty($selectedPrRequest)) || @js($isDeleting)" ✅ FIXED!
                     @disabled(empty($selectedPrRequest))>
 
                     Hapus Data (<span x-text="@js(count($selectedPrRequest))">{{ count($selectedPrRequest) }}</span>)
@@ -53,7 +53,8 @@
                                 type="checkbox"
                                 id="selectAllCheckbox"
                                 wire:model.live="selectAll"
-                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                @disabled($isDeleting)>
                         </th>
                         <th class="px-4 py-2 text-left border-b border-gray-200">No</th>
                         <th class="px-4 py-2 text-left border-b border-gray-200">Tema</th>
@@ -113,7 +114,8 @@
                                 wire:model.live="selectedPrRequest"
                                 value="{{ $item->id }}"
                                 class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 row-checkbox"
-                                onclick="event.stopPropagation()">
+                                onclick="event.stopPropagation()"
+                                @disabled($isDeleting)>
                         </td>
                         <td class="px-4 py-3">{{ $idx + 1 }}</td>
                         <td class="px-4 py-3">{{ $item->theme }}</td>
