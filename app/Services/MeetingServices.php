@@ -4,18 +4,18 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Requests\InformationSystem\MeetingMail;
+use App\Models\MeetingInformationSystemRequest;
 
 class MeetingServices
 {
     public function collectRecipients(array $storedRecipients): array
     {
         return collect($storedRecipients)
-            ->map(function ($recipient) {
-                return $this->getRecipientsByType($recipient['type'], $recipient['id']);
-            })
+            ->map(fn($recipient) => $this->getRecipientsByType($recipient['type'], $recipient['id']))
             ->flatten(1)
             ->unique('email')
             ->values()
@@ -67,4 +67,69 @@ class MeetingServices
             throw $e; // Re-throw if you want to handle in the controller
         }
     }
+
+    public function getUpcomingMeetingsForUser(User $user, int $daysAhead = 3): Collection
+    {
+        $startDate = Carbon::today();
+        $endDate = $startDate->copy()->addDays($daysAhead);
+
+        return MeetingInformationSystemRequest::with(['informationSystemRequest' => fn($query) => $query->where('user_id', $user->id)])
+            ->whereHas('informationSystemRequest', fn($query) => $query->where('user_id', $user->id))
+            ->whereBetween('start_at', [$startDate, $endDate])
+            ->orderBy('start_at')
+            ->orderBy('end_at')
+            ->get()
+            ->groupBy('date')
+            ->map(fn($meetings, $date) => $this->formatDateGroup($meetings, $date));
+    }
+
+    protected function formatDateGroup($meetings, string $date): array
+    {
+        $date = Carbon::parse($date)->locale('id');
+
+        return [
+            'date_number' => $date->day,
+            'date_day' => $date->translatedFormat('l'),
+            'date_month' => $date->translatedFormat('F'),
+            'is_today' => $date->isToday(),
+            'meetings' => $meetings->map(fn($meeting) => $this->formatMeeting($meeting))->values(),
+            'has_meetings' => true
+        ];
+    }
+
+    protected function formatMeeting(MeetingInformationSystemRequest $meeting): array
+    {
+        return [
+            'id' => $meeting->id,
+            'request_id' => $meeting->request_id,
+            'topic' => $meeting->topic,
+            'start' => $meeting->start_time,
+            'end' => $meeting->end_time,
+            'link_location' => [
+                'type' => $meeting->place['type'] ?? null,
+                'value' => $meeting->place['value'] ?? null,
+                'password' => $meeting->password
+            ],
+            'result' => $meeting->result
+        ];
+    }
+
+    public function getEmptyDateSlots(int $daysAhead = 3)
+    {
+        return collect(range(0, $daysAhead - 1))
+            ->map(fn($day) => $this->createEmptyDateSlot(now()->addDays($day)));
+    }
+
+    protected function createEmptyDateSlot(Carbon $date): array
+    {
+        return [
+            'date_number' => $date->day,
+            'date_day' => $date->locale('id')->translatedFormat('l'),
+            'date_month' => $date->locale('id')->translatedFormat('F'),
+            'is_today' => $date->isToday(),
+            'meetings' => [],
+            'has_meetings' => false
+        ];
+    }
+
 }

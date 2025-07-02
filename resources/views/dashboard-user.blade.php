@@ -53,6 +53,7 @@
         <flux:separator class="mt-6" />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- {{ $meetingList }} --}}
             <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
 
             <x-user.dashboard.notifications-list />
