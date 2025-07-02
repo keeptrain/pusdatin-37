@@ -9,6 +9,7 @@ use Livewire\Attributes\Title;
 use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadServices;
+use App\Enums\InformationSystemRequestPart;
 
 #[Title('Form Sistem Informasi & Data')]
 class SiDataRequestForm extends Component
@@ -44,21 +45,18 @@ class SiDataRequestForm extends Component
 
     public function messages()
     {
-        return [
+        $messages = [
             'title.required' => 'Judul harus ada',
             'reference_number.required' => 'Nomor surat harus ada',
-            'files.0.required' => 'Permohonan (nota dinas) harus ada',
-            'files.1.required' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus ada',
-            'files.2.required' => 'SOP Aplikasi SPBE harus ada',
-            'files.3.required' => 'Pakta Integritas Pemanfaatan Aplikasi harus ada',
-            'files.4.required' => 'Form RFC Pusdatinkes harus ada',
-            'files.0.mimes' => 'Permohonan (nota dinas) harus ada',
-            'files.1.mimes' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus berbentuk .pdf',
-            'files.2.mimes' => 'SOP Aplikasi SPBE harus berbentuk .pdf',
-            'files.3.mimes' => 'Pakta Integritas Pemanfaatan Aplikasi harus berbentuk .pdf',
-            'files.4.mimes' => 'Form RFC Pusdatinkes harus berbentuk .pdf',
-            'files.5.mimes' => 'Surat perjanjian kerahasiaan harus berbentuk .pdf',
         ];
+
+        foreach (InformationSystemRequestPart::cases() as $part) {
+            $messages["files.{$part->value}.required"] = "{$part->label()} harus ada";
+            $messages["files.{$part->value}.mimes"] = "{$part->label()} harus berbentuk .pdf";
+            $messages["files.{$part->value}.max"] = "{$part->label()} tidak boleh lebih dari 1MB";
+        }
+
+        return $messages;
     }
 
     public function save(FileUploadServices $fileUploadServices)
