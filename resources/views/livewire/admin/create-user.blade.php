@@ -1,8 +1,8 @@
 <section>
-    <flux:modal name="create-user" :show="$errors->isNotEmpty()" focusable class="max-w-lg">
-        <form wire:submit="save" class="space-y-6" >
+    <flux:modal name="create-user" :show="$errors - > isNotEmpty()" focusable class="max-w-lg">
+        <form wire:submit="save" class="space-y-6">
             <div>
-                <flux:heading size="lg">{{ _('Add user') }}</flux:heading>
+                <flux:heading size="lg">{{ __('Add user') }}</flux:heading>
 
                 <flux:subheading>
                     {{ __('Fill the form.') }}
@@ -15,7 +15,7 @@
             <flux:input wire:model="form.contact" :label="__('Contact')" type="number" />
 
             <flux:input wire:model="form.password" :label="__('Password')" type="password" clearable />
-            
+
             <flux:radio.group wire:model="form.role" label="Role">
                 {{-- <flux:radio name="role" value="administrator" label="Administrator"
                     description="Administrator users can perform any action." disabled />

@@ -19,7 +19,11 @@
         </div>
     </nav>
 
-    <div class="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+    <div>
+        {{ $slot }}
+    </div>
+
+    {{-- <div class="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
         <div class="flex w-full max-w-md flex-col gap-6">
             <div class="flex flex-col gap-6">
                 <div class="rounded-xl bg-white dark:bg-stone-950 dark:border-stone-800 text-stone-800 shadow-xs">
@@ -30,7 +34,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     @fluxScripts
 </body>
 
