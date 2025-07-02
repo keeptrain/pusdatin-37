@@ -24,4 +24,4 @@ yarn-error.log
 /.zed
 .vercel
 pusdatin_37
-/database/seeders/UserSeeder.php
+database/seeders/UserSeeder.php
