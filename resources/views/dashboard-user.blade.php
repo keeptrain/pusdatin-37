@@ -56,7 +56,7 @@
             {{-- {{ $meetingList }} --}}
             <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
 
-            <x-user.dashboard.notifications-list />
+            {{-- <x-user.dashboard.notifications-list /> --}}
         </div>
 
         {{-- <x-user.about-me /> --}}

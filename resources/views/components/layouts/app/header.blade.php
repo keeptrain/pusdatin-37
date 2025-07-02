@@ -38,20 +38,20 @@
                 <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#"
                     :label="__('Search')" />
             </flux:tooltip> --}}
-            @if (Route::currentRouteName() != 'dashboard')
-                <flux:modal.trigger name="notifications-user">
+            @php
+                $hasUnread = auth()->user()->unreadNotifications()->whereNull('read_at')->exists();
+                $icon = $hasUnread ? 'bell-alert' : 'bell';
+            @endphp
+            <flux:modal.trigger name="notifications-user">
+                <flux:tooltip :content="__('Notifikasi')" position="bottom">
+                    <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" :icon="$icon" target="_blank" :iconDot="$hasUnread"
+                        :label="__('Notifikasi')"/>
+                </flux:tooltip>
+            </flux:modal.trigger>
 
-                    <flux:tooltip :content="__('Notifications')" position="bottom">
-                        <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="bell-alert" target="_blank"
-                            :label="__('Notifications')" />
-                    </flux:tooltip>
-
-                </flux:modal.trigger>
-
-                <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false" class="md:w-96">
-                    <livewire:admin.notifications :dashboardUser="false" />
-                </flux:modal>
-            @endif
+            <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false" class="md:w-96">
+                <livewire:admin.notifications :needCount="false" />
+            </flux:modal>
         </flux:navbar>
 
         <!-- Desktop User Menu -->
@@ -111,6 +111,12 @@
                     :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navlist.item>
+
+                <flux:modal.trigger name="notifications-user">
+                    <flux:navlist.item :icon="$icon">
+                        {{ __('Notifikasi') }}
+                    </flux:navlist.item>
+                </flux:modal.trigger>
 
                 <flux:navlist.item icon="folder" :href="route('list.request')"
                     :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>

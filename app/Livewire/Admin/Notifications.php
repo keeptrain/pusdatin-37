@@ -11,16 +11,15 @@ use App\Models\PublicRelationRequest;
 
 class Notifications extends Component
 {
-    public bool $dashboardUser = false;
-
     public $notificationCount = 0;
 
     public array $userTabs = [];
 
-    public function mount(bool $dashboardUser = false)
+    public function mount(bool $needCount = true): void
     {
-        $this->dashboardUser = $dashboardUser;
-        $this->notificationCount = $this->emitCount();
+        if ($needCount) {
+            $this->notificationCount = $this->emitCount();
+        }
         $this->userTabs = $this->tabBaseRoles();
     }
 
