@@ -101,11 +101,19 @@ class Analytic extends Component
             'status' => 'required|string',
         ];
 
+        $messages = [
+            'startAt.required' => 'Tanggal awal wajib diisi.',
+            'endAt.required' => 'Tanggal akhir wajib diisi.',
+            'endAt.after_or_equal' => 'Tanggal akhir harus setelah atau sama dengan tanggal awal.',
+            'status.required' => 'Status wajib diplih.',
+        ];
+
         if (auth()->user()->hasRole('head_verifier')) {
             $rules['service'] = 'required|string|in:all,si,pr';
+            $messages['service.required'] = 'Jenis layanan wajib diplih.';
         }
 
-        $this->validate($rules);
+        $this->validate($rules, $messages);
 
         $this->showModal = true;
     }
@@ -113,10 +121,10 @@ class Analytic extends Component
     // Fungsi reset filter
     public function resetFilters()
     {
-        $this->start_date = null;
-        $this->end_date = null;
+        $this->startAt = null;
+        $this->endAt = null;
         $this->status = null;
-        $this->source = null; // Reset source
+        $this->service = null;
         $this->showModal = false;
     }
 }
