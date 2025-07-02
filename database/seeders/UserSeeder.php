@@ -24,37 +24,37 @@ class UserSeeder extends Seeder
         $admin->assignRole($adminRole);
 
         $headVerifierRole = Role::findByName('head_verifier');
-        $verifikator = User::create([
+        $createHeadVerifier = User::create([
             'name' => 'Kapusdatin',
-            'email' => 'kapusdatin@gmail.com',
+            'email' => 'remajamesjid1945@gmail.com',
             'password' => bcrypt('login'),
             'section' => 'pusdatin',
             'contact' => '08123456789'
         ]);
-        $verifikator->assignRole($headVerifierRole);
+        $createHeadVerifier->assignRole($headVerifierRole);
 
-        $verifikatorRole = Role::findByName('si_verifier');
-        $verifikator = User::create([
+        $verifikatorSiRole = Role::findByName('si_verifier');
+        $createSiVerifier = User::create([
             'name' => 'Kasatpel SI',
-            'email' => 'kasatpel_si@gmail.com',
+            'email' => 'cgilang02@gmail.com',
             'password' => bcrypt('login'),
             'section' => 'pusdatin',
             'contact' => '08123456789'
         ]);
-        $verifikator->assignRole($verifikatorRole);
+        $createSiVerifier->assignRole($verifikatorSiRole);
 
-        $verifikatorRole = Role::findByName('data_verifier');
-        $verifikator = User::create([
+        $verifikatorDataRole = Role::findByName('data_verifier');
+        $createDataVerifier = User::create([
             'name' => 'Kasatpel Data',
             'email' => 'kasatpel_data@gmail.com',
             'password' => bcrypt('login'),
             'section' => 'pusdatin',
             'contact' => '08123456789'
         ]);
-        $verifikator->assignRole($verifikatorRole);
+        $createDataVerifier->assignRole($verifikatorDataRole);
 
-        $verifikatorRole = Role::findByName('pr_verifier');
-        $verifikator = User::create([
+        $verifikatorPrRole = Role::findByName('pr_verifier');
+        $createPrVerifier = User::create([
             'name' => 'Kasatpel Humas',
             'email' => 'kasatpel_humas@gmail.com',
             'password' => bcrypt('login'),
@@ -62,17 +62,17 @@ class UserSeeder extends Seeder
             'contact' => '08123456789'
 
         ]);
-        $verifikator->assignRole($verifikatorRole);
+        $createPrVerifier->assignRole($verifikatorPrRole);
 
-        $verifikatorRole = Role::findByName('promkes_verifier');
-        $verifikator = User::create([
+        $verifikatorPromkesRole = Role::findByName('promkes_verifier');
+        $createPromkesVerifier = User::create([
             'name' => 'Promosi Kesehatan',
             'email' => 'promkes@gmail.com',
             'password' => bcrypt('login'),
             'section' => 'promkes',
             'contact' => '08123456789'
         ]);
-        $verifikator->assignRole($verifikatorRole);
+        $createPromkesVerifier->assignRole($verifikatorPromkesRole);
 
         $userRole = Role::findByName('user');
         $sections = [
@@ -89,9 +89,17 @@ class UserSeeder extends Seeder
                 'password' => bcrypt('login'),
                 'section' => array_rand($sections),
                 'contact' => fake()->phoneNumber()
-
             ]);
             $regularUsers->assignRole($userRole);
         }
+
+        $regularUser = User::create([
+            'name' => fake()->name(),
+            'email' => '19211020@bsi.ac.id',
+            'password' => bcrypt('login'),
+            'section' => array_rand($sections),
+            'contact' => fake()->phoneNumber()
+        ]);
+        $regularUser->assignRole($userRole);
     }
 }
