@@ -2,25 +2,34 @@
 
 namespace App\Services\Dashboard;
 
+
 use Carbon\Carbon;
 use App\Models\User;
+use App\Enums\Division;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use App\Models\PublicRelationRequest;
 use App\Models\InformationSystemRequest;
-use App\Enums\Division;
+use App\Services\MeetingServices;
 
 class AdminDashboardService
 {
+    public function __construct(protected MeetingServices $meetingService)
+    {
+    }
+
     public function render()
     {
         $user = auth()->user();
-        $userRoles = $user->roles()->pluck('id');
+        $adminRoles = $user->roles->pluck('id');
 
-        $data = $this->fetchDashboardData($user, $userRoles);
+        $data = $this->fetchDashboardData($user, $adminRoles);
         $monthlySiData = $this->getMonthlySiVerifierData(now()->year);
         $monthlyDataDiv = $this->getMonthlyDataDiv(now()->year);
+
+        $meetingList = $this->meetingService->getAdminMeetings($user);
+        $todayMeetingCount = $this->meetingService->getTodayMeetingsCount($meetingList);
 
         return view('dashboard', [
             'totalUsers' => $this->totalUsers(),
@@ -31,9 +40,11 @@ class AdminDashboardService
             'categoryPercentages' => $this->calculateCategoryPercentages($data['totalPr']),
             'statusCounts' => $data['statusCounts'],
             'avarageRating' => $this->avarageRating(),
-            'monthlyLetterData' => $this->getMonthlySystemRequestData($userRoles),
+            'monthlyLetterData' => $this->getMonthlySystemRequestData($adminRoles),
             'monthlySiData' => $monthlySiData,
             'monthlyDataDiv' => $monthlyDataDiv,
+            'meetingList' => $meetingList,
+            'todayMeetingCount' => $todayMeetingCount,
         ]);
     }
 

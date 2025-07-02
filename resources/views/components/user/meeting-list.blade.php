@@ -1,7 +1,7 @@
-<div class="mt-6 space-y-4 p-4">
+<div class="space-y-4 p-4">
     {{-- Header total rapat hari ini --}}
     <div class="mb-4">
-        <flux:heading size="xl" class="text-blue-900">
+        <flux:heading size="xl" class="text-testing-100">
             @if ($todayMeetingCount > 0)
                 Hari ini terdapat {{ $todayMeetingCount }} meeting
             @else
@@ -15,13 +15,14 @@
         {{-- Header tanggal --}}
         <div class="flex items-center gap-4">
             {{-- Tanggal --}}
-            <flux:heading size="xl" class="text-5xl {{ $dateGroup['has_meetings'] ? 'text-blue-900' : 'text-gray-300' }}">
+            <flux:heading size="xl"
+                class="text-5xl {{ $dateGroup['has_meetings'] ? 'text-testing-100' : 'text-gray-300' }}">
                 {{ $dateGroup['date_number'] }}
             </flux:heading>
 
             {{-- Hari dan bulan --}}
             <div class="font-medium -space-y-1">
-                <flux:subheading size="xl" class="{{ $dateGroup['has_meetings'] ? 'text-blue-900 ' : 'text-gray-300' }}">
+                <flux:subheading size="xl" class="{{ $dateGroup['has_meetings'] ? 'text-testing-100 ' : 'text-gray-300' }}">
                     {{ $dateGroup['date_day'] }}
                 </flux:subheading>
                 <flux:subheading size="xl" class="{{ $dateGroup['has_meetings'] ? 'text-gray-400' : 'text-gray-300' }}">
@@ -33,16 +34,17 @@
         {{-- Daftar rapat --}}
         @if($dateGroup['has_meetings'])
             @foreach($dateGroup['meetings'] as $meeting)
-                <div class="flex">
+                <div wire:key="meeting-{{ $meeting['id'] }}" class="flex">
                     <div class="w-[65px]"></div> <!-- Offset untuk border start & end -->
-                    <div class="border rounded-lg p-3 bg-zinc-50 flex items-center w-125">
+                    <a href="{{ route('is.show', ['id' => $meeting['request_id']]) }}"
+                        class="border rounded-lg p-3 bg-zinc-50 flex items-center w-125 hover:bg-zinc-100 cursor-pointer" wire:navigate>
                         @if (($meeting['place']['type']) === 'link')
                             <flux:icon.video-camera class="size-12 mr-4 bg-blue-100 text-blue-900 rounded-full p-3" />
                         @elseif(($meeting['place']['type']) === 'location')
                             <flux:icon.map-pin class="size-12 mr-4 bg-amber-100 text-amber-900 rounded-full p-3" />
                         @endif
                         <div class="space-y-0.5">
-                            <flux:text>{{ $meeting['start'] }} - {{ $meeting['end'] }}</flux:text>
+                            <flux:text>{{ $meeting['time'] }}</flux:text>
                             <flux:subheading size="lg" class="text-black text-sm">
                                 @if ($meeting['place']['type'] === 'link')
                                     <flux:link x-data="{
@@ -63,7 +65,6 @@
                                     {{ $meeting['place']['value'] }}
                                 @endif
                             </flux:subheading>
-
                         </div>
                         {{-- <flux:avatar.group class="mt-6">
                             <flux:avatar circle size="md" initials="AB" />
@@ -71,7 +72,7 @@
                             <flux:avatar circle size="md" initials="EF" />
                             <flux:avatar circle size="md" initials="GH" />
                         </flux:avatar.group> --}}
-                    </div>
+                    </a>
                 </div>
             @endforeach
         @endif

@@ -68,70 +68,131 @@ class MeetingServices
         }
     }
 
-    public function getUpcomingMeetingsForUser(User $user, int $daysAhead = 3): Collection
+    public function getUserMeetings(User $user, int $daysAhead = 3): Collection
     {
-        $startDate = Carbon::today();
-        $endDate = $startDate->copy()->addDays($daysAhead);
-
-        return MeetingInformationSystemRequest::with(['informationSystemRequest' => fn($query) => $query->where('user_id', $user->id)])
-            ->whereHas('informationSystemRequest', fn($query) => $query->where('user_id', $user->id))
-            ->whereBetween('start_at', [$startDate, $endDate])
-            ->orderBy('start_at')
-            ->orderBy('end_at')
-            ->get()
-            ->groupBy('date')
-            ->map(fn($meetings, $date) => $this->formatDateGroup($meetings, $date));
+        $meetings = $this->fetchUserMeetings($user, $daysAhead);
+        return $this->prepareMeetingTimeline($meetings, $daysAhead);
     }
 
-    protected function formatDateGroup($meetings, string $date): array
+    public function getAdminMeetings(User $admin, int $daysAhead = 3): Collection
     {
-        $date = Carbon::parse($date)->locale('id');
+        $meetings = $this->fetchAdminMeetings($admin, $daysAhead);
+        return $this->prepareMeetingTimeline($meetings, $daysAhead);
+    }
+
+    protected function fetchUserMeetings(User $user, int $daysAhead): Collection
+    {
+        $dateRange = $this->getDateRange($daysAhead);
+
+        return MeetingInformationSystemRequest::with(['informationSystemRequest' => fn($q) => $q->where('user_id', $user->id)])
+            ->whereHas('informationSystemRequest', fn($q) => $q->where('user_id', $user->id))
+            ->whereBetween('start_at', $dateRange)
+            ->orderBy('start_at')
+            ->get();
+    }
+
+    protected function fetchAdminMeetings(User $admin, int $daysAhead): Collection
+    {
+        $dateRange = $this->getDateRange($daysAhead);
+        $roleId = $admin->currentUserRoleId();
+
+        return MeetingInformationSystemRequest::whereBetween('start_at', $dateRange)
+            ->get()
+            ->filter(fn($meeting) => $this->isMeetingRelevant($meeting, $roleId));
+    }
+
+    protected function prepareMeetingTimeline(Collection $meetings, int $daysAhead): Collection
+    {
+        $grouped = $this->groupAndFormatMeetings($meetings);
+        $emptySlots = $this->generateEmptySlots($daysAhead);
+
+        return $this->mergeTimeline($grouped, $emptySlots);
+    }
+
+    protected function isMeetingRelevant(MeetingInformationSystemRequest $meeting, int $roleId): bool
+    {
+        return collect($meeting->recipients ?? [])->contains(
+            fn($recipient) => $recipient['type'] === 'role' && $recipient['id'] === $roleId
+        );
+    }
+
+    protected function getDateRange(int $daysAhead): array
+    {
+        $start = Carbon::today();
+        return [$start, $start->copy()->addDays($daysAhead)];
+    }
+
+    protected function groupAndFormatMeetings(Collection $meetings): Collection
+    {
+        return $meetings->groupBy(fn($m) => Carbon::parse($m->start_at)->format('Y-m-d'))
+            ->map(fn($dayMeetings, $date) => $this->formatDayGroup($dayMeetings, $date));
+    }
+
+    protected function formatDayGroup(Collection $meetings, string $date): array
+    {
+        $dateObj = Carbon::parse($date)->locale('id');
 
         return [
-            'date_number' => $date->day,
-            'date_day' => $date->translatedFormat('l'),
-            'date_month' => $date->translatedFormat('F'),
-            'is_today' => $date->isToday(),
-            'meetings' => $meetings->map(fn($meeting) => $this->formatMeeting($meeting))->values(),
+            'date_number' => $dateObj->day,
+            'date_day' => $dateObj->translatedFormat('l'),
+            'date_month' => $dateObj->translatedFormat('F'),
+            'is_today' => $dateObj->isToday(),
+            'meetings' => $meetings->map(fn($m) => $this->formatMeeting($m))->values(),
             'has_meetings' => true
         ];
     }
 
     protected function formatMeeting(MeetingInformationSystemRequest $meeting): array
     {
-        $startAt = Carbon::parse($meeting->start_at);
-        $endAt = Carbon::parse($meeting->end_at);
-
         return [
             'id' => $meeting->id,
             'request_id' => $meeting->request_id,
             'topic' => $meeting->topic,
-            'start' => $startAt->format('H:i'),
-            'end' => $endAt->format('H:i'),
+            'time' => $this->formatTimeRange($meeting->start_at, $meeting->end_at),
             'place' => [
                 'type' => $meeting->place['type'] ?? null,
                 'value' => $meeting->place['value'] ?? null,
                 'password' => $meeting->password ?? null,
             ],
-            'result' => $meeting->result
+            'result' => $meeting->result,
+            'recipients' => $meeting->recipients ?? []
         ];
     }
 
-    public function getEmptyDateSlots(int $daysAhead = 3)
+    protected function formatTimeRange(string $start, string $end): string
     {
-        return collect(range(0, $daysAhead - 1))
-            ->map(fn($day) => $this->createEmptyDateSlot(now()->addDays($day)));
+        return Carbon::parse($start)->format('H:i') . ' - ' . Carbon::parse($end)->format('H:i');
     }
 
-    protected function createEmptyDateSlot(Carbon $date): array
+    protected function generateEmptySlots(int $daysAhead): Collection
     {
+        return collect(range(0, $daysAhead - 1))
+            ->map(fn($day) => $this->createEmptySlot(now()->addDays($day)));
+    }
+
+    protected function createEmptySlot(Carbon $date): array
+    {
+        $date->locale('id');
         return [
             'date_number' => $date->day,
-            'date_day' => $date->locale('id')->translatedFormat('l'),
-            'date_month' => $date->locale('id')->translatedFormat('F'),
+            'date_day' => $date->translatedFormat('l'),
+            'date_month' => $date->translatedFormat('F'),
             'is_today' => $date->isToday(),
             'meetings' => [],
             'has_meetings' => false
         ];
+    }
+
+    protected function mergeTimeline(Collection $meetings, Collection $slots): Collection
+    {
+        return $slots->map(function ($slot) use ($meetings) {
+            return $meetings->firstWhere('date_day', $slot['date_day']) ?? $slot;
+        });
+    }
+
+    public function getTodayMeetingsCount(Collection $timeline): int
+    {
+        return $timeline->where('is_today', true)
+            ->sum(fn($day) => count($day['meetings']));
     }
 }

@@ -86,25 +86,27 @@
                 <x-rating-emoticon />
 
             </div> --}}
-    </div>
-    <!-- bar chart area -->
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @endpush
-    @hasanyrole('head_verifier')
-    <x-chart.head-verif :monthlyLetterData="$monthlyLetterData" />
-    @endhasanyrole
-    @hasanyrole('si_verifier')
-    <x-chart.si-verif :monthlySiData="$monthlySiData" />
-    @endhasanyrole
-    @hasanyrole('data_verifier')
-    <x-chart.data-verif :monthlyDataDiv="$monthlyDataDiv" />
-    @endhasanyrole
-    @hasanyrole('pr_verifier|promkes_verifier')
-    <x-chart.pr-verif :monthlyLetterData="$monthlyLetterData" />
-    @endhasanyrole
+        </div>
+        <div class="grid auto-rows-min gap-4 md:grid-cols-2 border rounded-2xl pl-2">
+            <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
+        </div>
+        <!-- bar chart area -->
+        @push('scripts')
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        @endpush
+        @hasanyrole('head_verifier')
+        <x-chart.head-verif :monthlyLetterData="$monthlyLetterData" />
+        @endhasanyrole
+        @hasanyrole('si_verifier')
+        <x-chart.si-verif :monthlySiData="$monthlySiData" />
+        @endhasanyrole
+        @hasanyrole('data_verifier')
+        <x-chart.data-verif :monthlyDataDiv="$monthlyDataDiv" />
+        @endhasanyrole
+        @hasanyrole('pr_verifier|promkes_verifier')
+        <x-chart.pr-verif :monthlyLetterData="$monthlyLetterData" />
+        @endhasanyrole
 
-    <!-- bar chart area -->
+        <!-- bar chart area -->
     </div>
-
 </x-layouts.app>
