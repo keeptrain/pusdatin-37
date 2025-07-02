@@ -228,7 +228,7 @@
     </style>
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-white via-slate-50 to-[#fafcff] p-0">
+<body class="min-h-screen bg-white p-0">
     @if (session('status'))
     @php
     $variant = session('status')['variant'];
@@ -324,11 +324,11 @@
         <livewire:admin.notifications :dashboardUser="false" />
     </flux:modal>
 
-    <!-- Floating Clean Header -->
+    <!-- Floating Header -->
     <div class="floating-navbar">
         <nav class="simple-navbar rounded-2xl shadow-lg">
             <div class="navbar-center-layout">
-                <!-- Logo Section (Left) -->
+                <!-- Bagian Logo -->
                 <div class="flex items-center space-x-2">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#364872] to-slate-600 flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -353,8 +353,8 @@
                     <!-- Ajukan Permohonan with Dropdown -->
                     <div class="dropdown-wrapper relative">
                         <button class="nav-menu-item">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                             </svg>
                             Ajukan Permohonan
                             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,7 +363,7 @@
                         </button>
 
                         <div class="dropdown-menu-glass">
-                            <a href="{{ route('list.request') }}"
+                            <a href="{{ route('si-data.form') }}"
                                 wire:navigate
                                 class="dropdown-item">
                                 <div class="w-8 h-8 rounded-lg bg-blue-500 bg-opacity-20 flex items-center justify-center mr-3">
@@ -377,7 +377,7 @@
                                 </div>
                             </a>
 
-                            <a href="{{ route('list.request') }}"
+                            <a href="{{ route('pr.form') }}"
                                 wire:navigate
                                 class="dropdown-item">
                                 <div class="w-8 h-8 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center mr-3">
@@ -407,14 +407,15 @@
                 <!-- Right Section (User Profile) -->
                 <div class="flex items-center space-x-2">
                     <!-- Notifications -->
-                    @if (Route::currentRouteName() != 'dashboard')
+
                     <flux:modal.trigger name="notifications-user-desktop">
                         <flux:tooltip :content="__('Notifications')" position="bottom">
                             <button class="nav-item-glass h-10 w-10 rounded-xl text-slate-700 dark:text-white flex items-center justify-center relative">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4 4h5c0 5 3 7 3 11v2a1 1 0 11-2 0v-2c0-4-3-6-3-11z"></path>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
                                 </svg>
-                                <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
+
+
                             </button>
                         </flux:tooltip>
                     </flux:modal.trigger>
@@ -422,7 +423,7 @@
                     <flux:modal name="notifications-user-desktop" variant="flyout" position="right" :closable="false" class="md:w-96 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
                         <livewire:admin.notifications :dashboardUser="false" />
                     </flux:modal>
-                    @endif
+
 
                     <!-- User Profile Dropdown -->
                     <flux:dropdown position="bottom" align="end">
@@ -503,7 +504,7 @@
             </div>
         </div>
 
-        <div class="p-4">
+        <div class="p-1">
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')">
                     <flux:navlist.item
@@ -514,31 +515,28 @@
                         {{ __('Home') }}
                     </flux:navlist.item>
 
-                    <!-- Ajukan Permohonan - Expandable -->
                     <flux:navlist.item
-                        icon="plus"
-                        expandable>
-                        {{ __('Ajukan Permohonan') }}
-
-                        <flux:navlist.item
-                            icon="document-text"
-                            :href="route('list.request')"
-                            wire:navigate>
-                            {{ __('SI & Data') }}
-                        </flux:navlist.item>
-
-                        <flux:navlist.item
-                            icon="megaphone"
-                            :href="route('list.request')"
-                            wire:navigate>
-                            {{ __('Kehumasan') }}
-                        </flux:navlist.item>
+                        icon="code-bracket"
+                        :href="route('si-data.form')"
+                        :current="request()->routeIs('si-data.form')"
+                        wire:navigate>
+                        {{ __('Layanan SI & Data') }}
                     </flux:navlist.item>
+
+                    <flux:navlist.item
+                        icon="document-duplicate"
+                        :href="route('pr.form')"
+                        :current="request()->routeIs('pr.form')"
+                        wire:navigate>
+                        {{ __('Layanan Kehumasan') }}
+                    </flux:navlist.item>
+
+
 
                     <flux:navlist.item
                         icon="clock"
                         :href="route('list.request')"
-                        :current="request()->routeIs('list.request') || request()->routeIs('detail.request')"
+                        :current="request()->routeIs('list.request') "
                         wire:navigate>
                         {{ __('Histori Permohonan') }}
                     </flux:navlist.item>

@@ -1,5 +1,5 @@
 {{-- resources/views/components/main-section.blade.php --}}
-<div class="min-h-screen bg-gradient-to-br from-white via-slate-50 to-slate-100 flex items-center justify-center px-4 py-16 relative">
+<div class="min-h-screen bg-white flex items-center justify-center px-4 py-16 relative">
     <div class="max-w-screen mx-auto text-center">
 
         <!-- Badge -->
@@ -13,24 +13,20 @@
         </div>
 
         <!-- Main Heading with Typing Animation -->
-        <div class="mb-6">
-            <h1 class=" font-bold text-gray-900 leading-tight">
-                <span class="block mb-2">
-                    <span id="typing-text" class="text-5xl 2xl:text-7xl"></span>
-                    <span id="cursor" class="animate-pulse text-[#364872]">|</span>
-                </span>
-                <span class="block text-[#364872] text-4xl 2xl:text-5xl">
-                    Ajukan Melalui Jakreq
-                </span>
+        <div class="mb-6 mx-auto flex flex-col justify-center items-center">
+            <h1 class=" font-bold text-gray-900 leading-tight md:text-5xl uppercase mb-2 md:w-[79%]">
+                Portal Layanan UPT PUSDATIN DINAS KESEHATAN
             </h1>
+            <h2 class="block text-[#364872] font-semibold text-4xl 2xl:text-5xl mb-1">
+                Ajukan Melalui Jakreq
+            </h2>
+
         </div>
 
         <!-- Description -->
         <div class="mb-12 max-w-3xl mx-auto">
             <p class="text-[14px] md:text-xl text-gray-600 leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                Portal ini digunakan untuk mengajukan layanan pembuatan aplikasi, permintaan data dan kehumasan. Permintaan akan ditangani sesuai dengan seksi yang anda pilih, pastikan teliti dan membaca saat mengajukan layanan <span class="font-extrabold capitalize">bacalah sop terlebih dahulu sebelum mengirim atau mengajukan layanan.</span>
             </p>
         </div>
 
@@ -49,36 +45,3 @@
 
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const typingElement = document.getElementById('typing-text');
-        const texts = ['Permohonan Sistem Informasi & Data', 'Permohonan Kehumasan'];
-        let currentTextIndex = 0;
-        let currentCharIndex = 0;
-        let isDeleting = false;
-
-        function typeText() {
-            const currentText = texts[currentTextIndex];
-
-            if (isDeleting) {
-                typingElement.textContent = currentText.substring(0, currentCharIndex - 1);
-                currentCharIndex--;
-            } else {
-                typingElement.textContent = currentText.substring(0, currentCharIndex + 1);
-                currentCharIndex++;
-            }
-
-            if (!isDeleting && currentCharIndex === currentText.length) {
-                setTimeout(() => isDeleting = true, 2000);
-            } else if (isDeleting && currentCharIndex === 0) {
-                isDeleting = false;
-                currentTextIndex = (currentTextIndex + 1) % texts.length;
-            }
-
-            setTimeout(typeText, isDeleting ? 50 : 100);
-        }
-
-        typeText();
-    });
-</script>
