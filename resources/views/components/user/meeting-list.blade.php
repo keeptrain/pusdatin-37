@@ -45,25 +45,32 @@
                             <flux:text>{{ $meeting['start'] }} - {{ $meeting['end'] }}</flux:text>
                             <flux:subheading size="lg" class="text-black text-sm">
                                 @if ($meeting['place']['type'] === 'link')
-                                        <flux:link x-data="{
-                                                link: '{{ $meeting['place']['value'] }}',
-                                                isTruncated: false
-                                            }"
-                                            x-init="
-                                                isTruncated = link.length > 50;
-                                            "
-                                            :href="$meeting['place']['value']">
-                                            <span x-text="isTruncated ? link.substring(0, 50) + '...' : link"></span>
-                                        </flux:link>
+                                    <flux:link x-data="{
+                                            link: '{{ $meeting['place']['value'] }}',
+                                            isTruncated: false
+                                        }" x-init="
+                                            isTruncated = link.length > 50;
+                                        " :href="$meeting['place']['value']">
+                                        <span x-text="isTruncated ? link.substring(0, 50) + '...' : link"></span>
+                                    </flux:link>
                                     @if (!empty($meeting['place']['password']))
                                         <flux:text class="font-mono mt-2">Password: {{ $meeting['place']['password']}}</flux:text>
-                                        {{-- <flux:input size="sm" variant="filled" :value="$meeting['place']['password']" readonly copyable /> --}}
+                                        {{--
+                                        <flux:input size="sm" variant="filled" :value="$meeting['place']['password']" readonly copyable />
+                                        --}}
                                     @endif
                                 @else
                                     {{ $meeting['place']['value'] }}
                                 @endif
                             </flux:subheading>
+
                         </div>
+                        {{-- <flux:avatar.group class="mt-6">
+                            <flux:avatar circle size="md" initials="AB" />
+                            <flux:avatar circle size="md" initials="CD" />
+                            <flux:avatar circle size="md" initials="EF" />
+                            <flux:avatar circle size="md" initials="GH" />
+                        </flux:avatar.group> --}}
                     </div>
                 </div>
             @endforeach
