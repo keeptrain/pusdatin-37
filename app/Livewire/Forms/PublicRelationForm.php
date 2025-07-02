@@ -61,8 +61,9 @@ class PublicRelationForm extends Component
     public function messages()
     {
         return [
-            'otherTarget.required' => 'Harus mengisi sasaran other',
-            'uploadFile.0' => 'Membutuhkan file nota dinas',
+            'target.required' => 'Harus memilih sasaran',
+            'mediaType.required' => 'Harus memilih jenis media minimal 1',
+            'uploadFile.0' => 'Untuk mengajukan membutuhkan nota dinas',
             'uploadFile.1' => 'Membutuhkan file untuk materi audio',
             'uploadFile.2' => 'Membutuhkan file untuk materi infografis',
             'uploadFile.3' => 'Membutuhkan file untuk materi poster',
