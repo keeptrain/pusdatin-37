@@ -230,9 +230,10 @@ class InformationSystemRequest extends Model
 
     public function updatedForCompletedReview()
     {
+        $this->status->transitionTo(Disposition::class);
         $this->update([
             'active_revision' => false,
-            'need_review' => false,
+            'need_review' => false
         ]);
     }
 
