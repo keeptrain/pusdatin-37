@@ -11,17 +11,13 @@
     <h4 class="text-sm font-medium text-gray-700">
         {{ $title }}
         @if ($required)
-            <span class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-md">Wajib</span>
+            <span class="ml-2 px-2 py-1 text-xs bg-red-100 text-red-700 rounded-md">Wajib</span>
         @endif
         @if ($optional)
-            <span class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-md">Optional</span>
+            <span class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-md">Boleh Menyusul</span>
         @endif
     </h4>
-    @if ($template)
-    <flux:button wire:click="{{ $filePath }}" size="xs" variant="primary" icon="arrow-down-tray">
-        Download Template
-    </flux:button>
-    @endif
+   
 </div>
 
 <div class="border-2 border-dashed hover:border-zinc-400 

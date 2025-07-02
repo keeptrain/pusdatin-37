@@ -4,7 +4,8 @@ namespace App\Livewire\Admin;
 
 use Carbon\Carbon;
 use Livewire\Component;
-use App\Models\Letters\Letter;
+use App\States\InformationSystem\Replied;
+use App\Models\InformationSystemRequest;
 use Livewire\Attributes\Computed;
 use App\Models\PublicRelationRequest;
 
@@ -14,9 +15,11 @@ class Notifications extends Component
 
     public array $userTabs = [];
 
-    public function mount()
+    public function mount(bool $needCount = true): void
     {
-        $this->notificationCount = $this->emitCount();
+        if ($needCount) {
+            $this->notificationCount = $this->emitCount();
+        }
         $this->userTabs = $this->tabBaseRoles();
     }
 
@@ -32,10 +35,15 @@ class Notifications extends Component
     }
 
     #[Computed]
+    public function unreadNotifications()
+    {
+        return auth()->user()->unreadNotifications();
+    }
+
+    #[Computed]
     public function notifications()
     {
-        $notifications = auth()->user()
-            ->unreadNotifications()
+        $notifications = $this->unreadNotifications
             ->latest()
             ->take(10)
             ->get(['id', 'data', 'created_at']);
@@ -45,16 +53,16 @@ class Notifications extends Component
 
     private function tabBaseRoles()
     {
-        $user = auth()->user();
+        $user = auth()->user()->roles->pluck('name');
         $userTabs = [];
 
-        if ($user->hasRole('head_verifier')) {
+        if ($user->contains('head_verifier')) {
             $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
-        } else if ($user->hasRole('si_verifier|data_verifier')) {
+        } else if ($user->contains('si_verifier|data_verifier')) {
             $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
-        } else if ($user->hasRole('pr_verifier')) {
+        } else if ($user->contains('pr_verifier')) {
             $userTabs = ['all', 'disposisi'];
-        } else if ($user->hasRole('promkes_verifier')) {
+        } else if ($user->contains('promkes_verifier')) {
             $userTabs = ['all'];
         } else {
             $userTabs = ['all', 'revisi', 'disetujui'];
@@ -63,9 +71,9 @@ class Notifications extends Component
         return $userTabs;
     }
 
-    private function prepareNotifications($rawNotifications)
+    private function prepareNotifications($notifications)
     {
-        return collect($rawNotifications)->map(function ($notification) {
+        return collect($notifications)->map(function ($notification) {
             return [
                 'id' => $notification->id,
                 'username' => $notification->data['username'] ?? 'Unknown',
@@ -124,49 +132,59 @@ class Notifications extends Component
         auth()->user()->unsetRelation('unreadNotifications');
     }
 
-    public function emitCount(): void
+    public function emitCount()
     {
-        $count = auth()->user()
-            ->unreadNotifications()
-            ->count();
+        $hasUnread = $this->unreadNotifications->whereNull('read_at')->exists();
 
-        $this->dispatch('notification-count-updated', [
-            'count' => $count,
-        ]);
+        $this->dispatch('notification-count-updated', hasUnread: $hasUnread);
     }
 
     public function goDetailPage($notificationId)
     {
-        // Notification by id
-        $notification = auth()->user()
-            ->unreadNotifications()
-            ->findOrFail($notificationId);
+        // Find notification by id
+        $notification = $this->unreadNotifications->where('id', $notificationId)->first();
 
+        // Check notification data    
         if (!$notification || !isset($notification->data['requestable_type'], $notification->data['requestable_id'])) {
-            return redirect()->route('dashboard')->with('error', 'Notifikasi tidak valid.');
+            return redirect()->route('dashboard')->with('error', 'Notification not found.');
         }
 
         try {
+            // Get model class and id from notification data
             $modelClass = $notification->data['requestable_type'];
             $modelId = $notification->data['requestable_id'];
 
             // Validation modelClass to prevent Injection
-            if (!in_array($modelClass, [Letter::class, PublicRelationRequest::class])) {
-                throw new \InvalidArgumentException("Model class tidak valid.");
+            if (!in_array($modelClass, [InformationSystemRequest::class, PublicRelationRequest::class])) {
+                throw new \InvalidArgumentException("Class model invalid");
             }
 
             // Get requestable data from available container instance
             $requestable = app($modelClass)->findOrFail($modelId);
 
-            if ($modelClass === Letter::class || $modelClass === PublicRelationRequest::class) {
+            if ($modelClass === InformationSystemRequest::class || $modelClass === PublicRelationRequest::class) {
                 $notification->markAsRead();
-                return $this->redirect($requestable->handleRedirectNotification(auth()->user()), true);
+                if (!$requestable->active_revision && $requestable->status == Replied::class && auth()->user()->currentUserRoleId() === 7) {
+                    $this->flashErrorMessage();
+                } else {
+                    $this->redirect($requestable->handleRedirectNotification(auth()->user(), $notification->data['status']), true);
+                }
             } else {
                 abort(404, 'Invalid model class.');
             }
         } catch (\Exception $e) {
-            return redirect()->route('dashboard')->with('error', 'Gagal memuat detail notifikasi: ' . $e->getMessage());
+            return redirect()->route('dashboard')->with('error', 'Failed to load notification: ' . $e->getMessage());
         }
+    }
+
+    public function flashErrorMessage()
+    {
+        session()->flash('status', [
+            'variant' => 'error',
+            'message' => 'Sudah melakukan revisi pada permohonan ini.',
+        ]);
+
+        $this->redirectRoute('dashboard', navigate: true);
     }
 
     public function markAllAsRead()

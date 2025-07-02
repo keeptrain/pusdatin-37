@@ -3,20 +3,20 @@
 namespace App\Livewire\Documents;
 
 use Livewire\Component;
-use App\Models\Letters\Letter;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Documents\DocumentUpload;
 use App\Models\Documents\UploadVersion;
+use App\Models\InformationSystemRequest;
 
 class Review extends Component
 {
     #[Locked]
-    public int $letterId;
+    public int $systemRequestId;
 
-    public $systemRequest;
+    public $informationSystemRequest;
 
     public $currentVersions;
 
@@ -51,17 +51,17 @@ class Review extends Component
 
     public function mount(int $id)
     {
-        $this->letterId = $id;
-        $this->systemRequest = $this->getSystemRequests();
+        $this->systemRequestId = $id;
+        $this->informationSystemRequest = $this->getSystemRequests();
         $this->processVersions();
     }
 
     public function getSystemRequests()
     {
-        return Letter::select('id')->with([
+        return InformationSystemRequest::select('id')->with([
             'documentUploads.activeVersion',
             'documentUploads.versions'
-        ])->findOrFail($this->letterId);
+        ])->findOrFail($this->systemRequestId);
     }
 
     public function save()
@@ -69,7 +69,7 @@ class Review extends Component
         $this->validate();
 
         DB::transaction(function () {
-            $systemRequest = $this->systemRequest;
+            $systemRequest = $this->informationSystemRequest;
 
             $documentUploadsIds = $systemRequest->documentUploads()->pluck('id');
 
@@ -92,11 +92,11 @@ class Review extends Component
                 'message' => 'Berhasil melakukan review'
             ]);
 
-            $this->redirectRoute('is.show', ['id' => $this->letterId]);
+            $this->redirectRoute('is.show', ['id' => $this->systemRequestId]);
         });
     }
 
-    private function changesChoiceYes(Letter $systemRequest, $documentUploadIds)
+    private function changesChoiceYes(InformationSystemRequest $systemRequest, $documentUploadIds)
     {
         // Proses file yang dipilih ($this->partAccepted)
         $selectedDocumentUploads = DocumentUpload::whereIn('part_number', $this->partAccepted)
@@ -157,8 +157,8 @@ class Review extends Component
         $currentVersionsData = new Collection();
         $latestUnapprovedRevisionsData = new Collection();
 
-        if ($this->systemRequest && $this->systemRequest->documentUploads->isNotEmpty()) {
-            foreach ($this->systemRequest->documentUploads as $documentUpload) {
+        if ($this->informationSystemRequest && $this->informationSystemRequest->documentUploads->isNotEmpty()) {
+            foreach ($this->informationSystemRequest->documentUploads as $documentUpload) {
                 if ($documentUpload->hasUnapprovedRevision()) {
                     $latestUnapprovedRevisionsData->push($documentUpload->formatForLatestUnapprovedRevision());
 

@@ -1,29 +1,39 @@
 <div x-data="{ selectedPart: '{{ $mapping->first()['part_number'] ?? null }}' }" class="p-4">
-    <div class="items-center mb-4">
-        <h2 class="text-md font-semibold text-gray-700">{{ $title }}</h2>
+    <div class="mb-4">
+        <flux:heading size="lg">{{ $title }}</flux:heading>
     </div>
 
-    {{-- Selector --}}
-    <div class="flex flex-wrap gap-2 mb-4">
-        @foreach ($mapping as $map)
-            @php $part = $map['part_number']; @endphp
-            <flux:button x-on:click="selectedPart = '{{ $part }}'">
-                {{ $map['part_number_label'] }} 
-            </flux:button>
-        @endforeach
+    {{-- Tabs with hidden scrollbar --}}
+    <div class="bg-white w-full sticky top-0 z-10">
+        <nav class="flex gap-6 overflow-x-auto scrollbar-hide pb-1 items-center">
+            <flux:legend>Bagian:</flux:legend>
+            @foreach ($mapping as $map)
+                <button
+                    type="button"
+                    class="py-2 text-sm font-medium transition-colors duration-200 shrink-0 border-b-2 cursor-pointer"
+                    :class="{
+                        'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-300': selectedPart !== '{{ $map['part_number'] }}',
+                        'border-zinc-800 text-zinc-800': selectedPart === '{{ $map['part_number'] }}'
+                    }"
+                    x-on:click="selectedPart = '{{ $map['part_number'] }}'"
+                >
+                    {{ $map['part_number_label'] }}
+                </button>
+            @endforeach
+        </nav>
     </div>
 
     {{-- PDF Viewer --}}
-    <div class="h-[600px] bg-gray-100 rounded-lg overflow-hidden">
+    <div class="h-[700px] bg-gray-100 overflow-hidden mt-2 rounded-xl">
         @foreach ($mapping as $map)
-            @php
-                $file = $map['file_path'];
-                $part = $map['part_number'];
-            @endphp
-
-            <div x-show="selectedPart === '{{ $part }}'" class="w-full h-full">
-                @if ($file)
-                    <iframe src="{{ asset($file) }}" class="w-full h-full" frameborder="0"></iframe>
+            <div x-show="selectedPart === '{{ $map['part_number'] }}'" class="w-full h-full">
+                @if ($map['file_path'])
+                    <iframe
+                        src="{{ asset($map['file_path']) }}"
+                        class="w-full h-full"
+                        frameborder="0"
+                        loading="lazy"
+                    ></iframe>
                 @else
                     <div class="w-full h-full flex items-center justify-center text-gray-500">
                         File tidak tersedia.
@@ -33,3 +43,14 @@
         @endforeach
     </div>
 </div>
+
+<style>
+    /* Hide scrollbar but keep functionality */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+</style>

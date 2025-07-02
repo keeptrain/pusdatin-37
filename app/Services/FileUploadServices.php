@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Storage;
 
 class FileUploadServices
 {
-    public function generateFileName($file): string
+    public function generateFileName($file, string $type): string
     {
         $dateTime = Carbon::now()->format(format: 'YmdHis');
 
         $nameWithoutExtension = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
-        $fileName = $nameWithoutExtension . '-' . $dateTime . '.pdf';
+        $fileName = "$nameWithoutExtension-$dateTime.$type";
 
         return $fileName;
     }
@@ -24,7 +24,7 @@ class FileUploadServices
             ->sortKeys()
             ->values()
             ->map(function ($file, $index) {
-                $fileName = $this->generateFileName($file);
+                $fileName = $this->generateFileName($file, 'pdf');
 
                 $filePath = Storage::disk('public')->putFileAs('documents', $file, $fileName);
 
@@ -40,7 +40,7 @@ class FileUploadServices
         return collect($uploadedFiles)
             ->sortKeys()
             ->map(function ($file, $mediaType) {
-                $fileName = $this->generateFileName($file);
+                $fileName = $this->generateFileName($file, 'pdf');
 
                 $filePath = Storage::disk('public')->putFileAs('documents', $file, $fileName);
 

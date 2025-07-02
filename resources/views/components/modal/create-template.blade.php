@@ -6,6 +6,7 @@
             </flux:heading>
         </div>
         <flux:input wire:model="name" name="name" label="Nama template" />
+        @unlessrole('pr_verifier')
         <flux:select wire:model="partNumber" label="Bagian template" placeholder="Pilih bagian...">
             <flux:select.option value="1">SPBE</flux:select.option>
             <flux:select.option value="2">SOP</flux:select.option>
@@ -13,7 +14,11 @@
             <flux:select.option value="4">RFC</flux:select.option>
             <flux:select.option value="5">NDA</flux:select.option>
         </flux:select>
+        @endunlessrole
+
         <flux:input wire:model="file" type="file" name="file" label="File template" />
+        <flux:text>File harus berbentuk .doc .docx</flux:text>
+
         <div class="flex justify-end space-x-2">
             <flux:modal.close>
                 <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>

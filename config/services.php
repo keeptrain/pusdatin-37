@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'recaptcha' => [
+        'site_key' => env('GOOGLE_RECAPTCHA_SITE_KEY'),
+        'score_threshold' => 0.5,
+        'secret_key' => env('GOOGLE_RECAPTCHA_SECRET_KEY'),
+    ]
 ];

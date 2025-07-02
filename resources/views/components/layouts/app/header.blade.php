@@ -7,6 +7,13 @@
 </head>
 
 <body class="min-h-screen bg-white dark:bg-zinc-800 p-0">
+    @if (session('status'))
+        @php
+            $variant = session('status')['variant'];
+            $message = session('status')['message'];
+        @endphp
+        <flux:notification.toast :variant="$variant" :message="$message" />
+    @endif
     <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
@@ -19,8 +26,7 @@
                 wire:navigate>
                 {{ __('Dashboard') }}
             </flux:navbar.item>
-            <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
-                wire:navigate>
+            <flux:navbar.item icon="folder" :href="route('list.request')" :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
                 {{ __('Permohonan') }}
             </flux:navbar.item>
         </flux:navbar>
@@ -32,20 +38,20 @@
                 <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#"
                     :label="__('Search')" />
             </flux:tooltip> --}}
-
+            @php
+                $hasUnread = auth()->user()->unreadNotifications()->whereNull('read_at')->exists();
+                $icon = $hasUnread ? 'bell-alert' : 'bell';
+            @endphp
             <flux:modal.trigger name="notifications-user">
-
-                <flux:tooltip :content="__('Notifications')" position="bottom">
-                    <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="bell-alert" target="_blank"
-                        :label="__('Notifications')" />
+                <flux:tooltip :content="__('Notifikasi')" position="bottom">
+                    <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" :icon="$icon" target="_blank" :iconDot="$hasUnread"
+                        :label="__('Notifikasi')"/>
                 </flux:tooltip>
-
             </flux:modal.trigger>
 
             <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false" class="md:w-96">
-                <livewire:admin.notifications />
+                <livewire:admin.notifications :needCount="false" />
             </flux:modal>
-
         </flux:navbar>
 
         <!-- Desktop User Menu -->
@@ -105,10 +111,18 @@
                     :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navlist.item>
-                <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
-                    wire:navigate>
+
+                <flux:modal.trigger name="notifications-user">
+                    <flux:navlist.item :icon="$icon">
+                        {{ __('Notifikasi') }}
+                    </flux:navlist.item>
+                </flux:modal.trigger>
+
+                <flux:navlist.item icon="folder" :href="route('list.request')"
+                    :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
                     {{ __('Permohonan') }}
-                </flux:navbar.item>
+                </flux:navlist.item>
+
             </flux:navlist.group>
         </flux:navlist>
 
@@ -116,9 +130,7 @@
 
     </flux:sidebar>
 
-    <div class="max-w-[1440px] mx-auto"> <!--dubungkus max-w biar ga jadi melebar di layar besar -->
-        {{ $slot }}
-    </div>
+    {{ $slot }}
 
     @livewireScripts
     @fluxScripts

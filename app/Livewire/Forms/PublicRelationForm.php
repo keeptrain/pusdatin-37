@@ -5,12 +5,14 @@ namespace App\Livewire\Forms;
 use Livewire\Component;
 use App\Models\Template;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadServices;
 use App\Models\PublicRelationRequest;
 use Illuminate\Support\Facades\Storage;
 
+#[Title('Form Kehumasan')]
 class PublicRelationForm extends Component
 {
     use WithFileUploads;
@@ -23,7 +25,7 @@ class PublicRelationForm extends Component
 
     public $theme = '';
 
-    public $target = '';
+    public $target = [];
 
     public $otherTarget = '';
 
@@ -59,8 +61,9 @@ class PublicRelationForm extends Component
     public function messages()
     {
         return [
-            'otherTarget.required' => 'Harus mengisi sasaran other',
-            'uploadFile.0' => 'Membutuhkan file nota dinas',
+            'target.required' => 'Harus memilih sasaran',
+            'mediaType.required' => 'Harus memilih jenis media minimal 1',
+            'uploadFile.0' => 'Untuk mengajukan membutuhkan nota dinas',
             'uploadFile.1' => 'Membutuhkan file untuk materi audio',
             'uploadFile.2' => 'Membutuhkan file untuk materi infografis',
             'uploadFile.3' => 'Membutuhkan file untuk materi poster',
@@ -76,7 +79,7 @@ class PublicRelationForm extends Component
         ];
     }
 
-    #[Computed(persist: true, cache:true)]
+    #[Computed(persist: true, cache: true)]
     public function getMonths()
     {
         $model = new PublicRelationRequest();
@@ -93,27 +96,31 @@ class PublicRelationForm extends Component
     {
         $this->validate();
 
-        DB::transaction(function () use ($fileUploadServices) {
+        $prId = null;
+
+        DB::transaction(function () use ($fileUploadServices, &$prId) {
             $validFiles = array_filter($this->uploadFile);
 
-            $prData = $this->createPublicRelationForm();
+            $prData = $this->createPublicRelationRequest();
             $prData->logStatus(null);
-            $uploads = $fileUploadServices->storeMultiplesFilesPr($validFiles, $this->mediaType);
+            $uploads = $fileUploadServices->storeMultiplesFilesPr($validFiles);
             $this->insertDocumentUploads($uploads, $prData);
             $prData->sendNewServiceRequestNotification('promkes_verifier');
 
-            return $this->redirect("/history/public-relation/$prData->id", true);
+            $prId = $prData->id;
         });
+
+        $this->redirectRoute('detail.request', ['type' => 'public-relation', 'id' => $prId]);
     }
 
-    public function updatedOtherTarget($value)
+    public function updatedTarget($value)
     {
-        if ($value && $this->target !== 'other') {
-            $this->target = 'other';
+        if ($value === 'semua_orang') {
+            $this->target = ['semua_orang', 'masyarakat_umum', 'tenaga_kesehatan', 'anak_sekolah'];
         }
     }
 
-    public function createPublicRelationForm()
+    public function createPublicRelationRequest(): PublicRelationRequest
     {
         $target = $this->target === 'other' ? $this->otherTarget : $this->target;
 
@@ -177,7 +184,7 @@ class PublicRelationForm extends Component
         if ($template) {
             $filePath = $template->file_path;
 
-            $fileDownload = Storage::disk('public')->path($filePath);
+            $fileDownload = Storage::disk('local')->path($filePath);
 
             return response()->download($fileDownload);
         }

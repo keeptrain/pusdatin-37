@@ -50,9 +50,18 @@
 
         <x-user.hero-dashboard />
 
-        <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
+        <flux:separator class="mt-6" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {{-- {{ $meetingList }} --}}
+            <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
+
+            {{-- <x-user.dashboard.notifications-list /> --}}
+        </div>
 
         {{-- <x-user.about-me /> --}}
+
+        <flux:separator />
 
         <x-user.cara-kerja bg="bg-none" />
     </div>

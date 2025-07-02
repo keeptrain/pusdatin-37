@@ -2,26 +2,27 @@
 
 namespace App\Trait;
 
-
 use Carbon\Carbon;
 use App\Models\User;
-use App\States\Replied;
-use App\States\Rejected;
-use App\States\Disposition;
-use App\States\ApprovedKasatpel;
-use App\States\ApprovedKapusdatin;
 use Illuminate\Support\Collection;
 use App\Models\PublicRelationRequest;
 use App\States\PublicRelation\Completed;
-use App\Models\Letters\RequestStatusTrack;
+use App\Models\RequestStatusTrack;
+use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\Notification;
 use App\States\PublicRelation\PromkesComplete;
 use App\Notifications\NewServiceRequestNotification;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use App\Notifications\LetterServiceRequestNotification;
+use App\Notifications\SiServiceRequestNotification;
 use App\Notifications\PublicRelationRequestNotification;
+use App\Notifications\RevisionRequestNotification;
 use App\States\PublicRelation\PusdatinQueue;
-use App\States\RepliedKapusdatin;
+use App\States\InformationSystem\RepliedKapusdatin;
+use App\States\InformationSystem\Replied;
+use App\States\InformationSystem\Rejected;
+use App\States\InformationSystem\Disposition;
+use App\States\InformationSystem\ApprovedKasatpel;
+use App\States\InformationSystem\ApprovedKapusdatin;
 
 trait HasActivities
 {
@@ -32,12 +33,13 @@ trait HasActivities
 
     public function getRawRequestStatusTracksRelation(): MorphMany
     {
-        return $this->requestStatusTrack(); // Memanggil relasi yang didefinisikan di trait ini
+        return $this->requestStatusTrack();
     }
 
     public function getGroupedRequestStatusTracks(): Collection
     {
-        $allTracks = $this->requestStatusTrack()->get(['statusable_type', 'statusable_id', 'action', 'notes', 'created_at']); // Memanggil relasi yang didefinisikan di trait ini
+        // Get relation request status track
+        $allTracks = $this->requestStatusTrack;
 
         return $allTracks
             ->sortByDesc('created_at')
@@ -49,7 +51,7 @@ trait HasActivities
 
     public function logStatus(?string $notes)
     {
-        $divisionParamForTrackingMessage = ($this->status instanceof ApprovedKasatpel || $this->status instanceof Process)
+        $divisionParamForTrackingMessage = ($this->status instanceof ApprovedKasatpel || $this->status instanceof Process && $this->status instanceof \App\States\InformationSystem\Completed)
             ? (int) $this->current_division
             : (int) $this->active_checking;
 
@@ -111,97 +113,108 @@ trait HasActivities
         if ($newStatus == Disposition::class) {
             $finalRecipients = User::role($siRequest->current_division)->get();
 
-            // Kirim notifikasi ke setiap roles
+            // Send notification to division
             if ($finalRecipients->isNotEmpty()) {
                 $finalRecipients->each(function ($user) use ($siRequest) {
-                    $user->notify(new LetterServiceRequestNotification($siRequest));
+                    $user->notify(new SiServiceRequestNotification($siRequest));
                 });
             }
         } elseif ($newStatus == Rejected::class) {
             $finalRecipient = User::findOrFail($siRequest->user_id);
 
-            // Kirim notifikasi ke pemohon
-            $finalRecipient->notify(new LetterServiceRequestNotification($siRequest));
+            // Send notification to requestor
+            $finalRecipient->notify(new SiServiceRequestNotification($siRequest));
         }
     }
 
-    public function sendProcessServiceRequestNotification(): void
+    public function sendProcessServiceRequestNotification(?array $data = null)
     {
-        $currentStatusClass = get_class($this->status);
+        if (!$this instanceof InformationSystemRequest) {
+            return;
+        }
 
-        $notificationLogicMap = [
+        $currentStatusClass = $this->status::class;
+
+        $callback = match ($currentStatusClass) {
+            Replied::class => function () use ($data) {
+                    $this->revisionContext($data);
+                },
+            ApprovedKasatpel::class => function (): void {
+                    $recipients = User::role($this->active_checking)->get();
+                    if ($recipients->isNotEmpty()) {
+                        Notification::send($recipients, new SiServiceRequestNotification($this));
+                    }
+                },
             ApprovedKapusdatin::class => function (): void {
-                $recipient = User::role($this->current_division)->get();
-                Notification::send($recipient, new LetterServiceRequestNotification($this));
-            },
-            RepliedKapusdatin::class => function () {
-                if ($this->need_review) {
-                    $recipients = User::role($this->active_checking)->get();
-                    if ($recipients->isNotEmpty()) {
-                        Notification::send($recipients, new LetterServiceRequestNotification($this));
+                    $recipient = User::role($this->current_division)->get();
+                    Notification::send($recipient, new SiServiceRequestNotification($this));
+                },
+            RepliedKapusdatin::class => function (): void {
+                    if ($this->need_review) {
+                        $recipients = User::role($this->active_checking)->get();
+                        if ($recipients->isNotEmpty()) {
+                            Notification::send($recipients, new SiServiceRequestNotification($this));
+                        }
+                    } else {
+                        $recipient = User::findOrFail($this->user_id);
+                        $recipient->notify(new SiServiceRequestNotification($this));
                     }
-                } else {
+                },
+            Rejected::class => function (): void {
                     $recipient = User::findOrFail($this->user_id);
-                    $recipient->notify(new LetterServiceRequestNotification($this));
-                }
-            },
-            ApprovedKasatpel::class => function () {
-                $recipients = User::role($this->active_checking)->get();
-                if ($recipients->isNotEmpty()) {
-                    Notification::send($recipients, new LetterServiceRequestNotification($this));
-                }
-            },
-            Replied::class => function () {
-                if ($this->need_review) {
-                    $recipients = User::role($this->active_checking)->get();
-                    if ($recipients->isNotEmpty()) {
-                        Notification::send($recipients, new LetterServiceRequestNotification($this));
-                    }
-                } else {
-                    $recipient = User::findOrFail($this->user_id);
-                    $recipient->notify(new LetterServiceRequestNotification($this));
-                }
-            },
-            Rejected::class => function () {
-                $recipient = User::findOrFail($this->user_id);
-                $recipient->notify(new LetterServiceRequestNotification($this));
-            }
-        ];
+                    $recipient->notify(new SiServiceRequestNotification($this));
+                },
+            default => static fn() => null,
+        };
 
-        if (isset($notificationLogicMap[$currentStatusClass])) {
-            $notificationLogicMap[$currentStatusClass]();
+        if (is_callable($callback)) {
+            $callback();
         }
     }
 
-    public function sendPrRequestNotification()
+    protected function revisionContext($data)
+    {
+        if ($this->need_review) {
+            $recipients = User::role($this->active_checking)->get();
+            if ($recipients->isNotEmpty()) {
+                Notification::send($recipients, new RevisionRequestNotification($this));
+            }
+        } else {
+            $recipient = User::findOrFail($this->user_id);
+            $recipient->notify(new RevisionRequestNotification($this, $data));
+        }
+    }
+
+    public function sendPrRequestNotification(?array $data = null)
     {
         if (!$this instanceof PublicRelationRequest) {
             return;
         }
 
-        $currentStatusClass = get_class($this->status);
+        $currentStatusClass = $this->status::class;
 
-        $notificationLogicMap = [
+        $callable = match ($currentStatusClass) {
             PromkesComplete::class => function () {
-                $recipients = User::role('head_verifier')->get();
-                if ($recipients->isNotEmpty()) {
-                    Notification::send($recipients, new PublicRelationRequestNotification($this));
-                }
-            },
+                    $recipients = User::role('head_verifier')->get();
+                    if ($recipients->isNotEmpty()) {
+                        Notification::send($recipients, new PublicRelationRequestNotification($this));
+                    }
+                },
             PusdatinQueue::class => function () {
-                $recipients = User::role('pr_verifier')->get();
-                if ($recipients->isNotEmpty()) {
-                    Notification::send($recipients, new PublicRelationRequestNotification($this));
-                }
-            },
-            Completed::class => function () {
-                $recipient = User::findOrFail($this->user_id);
-                $recipient->notify(new PublicRelationRequestNotification($this));
-            }
-        ];
+                    $recipients = User::role('pr_verifier')->get();
+                    if ($recipients->isNotEmpty()) {
+                        Notification::send($recipients, new PublicRelationRequestNotification($this));
+                    }
+                },
+            Completed::class => function () use ($data) {
+                    $recipient = User::findOrFail($this->user_id);
+                    $recipient->notify(new PublicRelationRequestNotification($this, $data));
+                },
+            default => static fn() => null,
+        };
 
-        if (isset($notificationLogicMap[$currentStatusClass])) {
-            $notificationLogicMap[$currentStatusClass]();
+        if (is_callable($callable)) {
+            $callable();
         }
     }
 }

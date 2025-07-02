@@ -4,13 +4,14 @@ namespace App\Livewire\Forms;
 
 use App\Enums\Division;
 use Livewire\Component;
-use App\Models\Template;
 use Livewire\WithFileUploads;
-use App\Models\Letters\Letter;
+use Livewire\Attributes\Title;
+use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\DB;
 use App\Services\FileUploadServices;
-use Illuminate\Support\Facades\Storage;
+use App\Enums\InformationSystemRequestPart;
 
+#[Title('Form Sistem Informasi & Data')]
 class SiDataRequestForm extends Component
 {
     use WithFileUploads;
@@ -44,45 +45,46 @@ class SiDataRequestForm extends Component
 
     public function messages()
     {
-        return [
+        $messages = [
             'title.required' => 'Judul harus ada',
             'reference_number.required' => 'Nomor surat harus ada',
-            'files.0.required' => 'Permohonan (nota dinas) harus ada',
-            'files.1.required' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus ada',
-            'files.2.required' => 'SOP Aplikasi SPBE harus ada',
-            'files.3.required' => 'Pakta Integritas Pemanfaatan Aplikasi harus ada',
-            'files.4.required' => 'Form RFC Pusdatinkes harus ada',
-            'files.0.mimes' => 'Permohonan (nota dinas) harus ada',
-            'files.1.mimes' => 'Dokumen Identifikasi kebutuhan Pembangunan dan Pengembangan Aplikasi SPBE harus berbentuk .pdf',
-            'files.2.mimes' => 'SOP Aplikasi SPBE harus berbentuk .pdf',
-            'files.3.mimes' => 'Pakta Integritas Pemanfaatan Aplikasi harus berbentuk .pdf',
-            'files.4.mimes' => 'Form RFC Pusdatinkes harus berbentuk .pdf',
-            'files.5.mimes' => 'Surat perjanjian kerahasiaan harus berbentuk .pdf',
         ];
+
+        foreach (InformationSystemRequestPart::cases() as $part) {
+            $messages["files.{$part->value}.required"] = "{$part->label()} harus ada";
+            $messages["files.{$part->value}.mimes"] = "{$part->label()} harus berbentuk .pdf";
+            $messages["files.{$part->value}.max"] = "{$part->label()} tidak boleh lebih dari 1MB";
+        }
+
+        return $messages;
     }
 
     public function save(FileUploadServices $fileUploadServices)
     {
         $this->validate();
 
-        DB::transaction(function () use ($fileUploadServices) {
+        $systemRequestId = null;
+
+        DB::transaction(function () use ($fileUploadServices, &$systemRequestId) {
             $validFiles = array_filter($this->files);
 
-            $letter = $this->createLetter();
+            $systemRequest = $this->create();
             $uploads = $fileUploadServices->storeMultiplesFiles($validFiles);
-            $this->insertDocumentUploads($uploads, $letter);
-            $letter->logStatus(null);
+            $this->insertDocumentUploads($uploads, $systemRequest);
+            $systemRequest->logStatus(null);
 
-            // Notifikasi kirim ke kapusdatin
-            $letter->sendNewServiceRequestNotification('head_verifier');
+            // Send notification to head verifier
+            $systemRequest->sendNewServiceRequestNotification('head_verifier');
 
-            return $this->redirect("/history/information-system/$letter->id", true);
+            $systemRequestId = $systemRequest->id;
         });
+
+        $this->redirectRoute('detail.request', ['type' => 'information-system', 'id' => $systemRequestId], true);
     }
 
-    public function createLetter()
+    public function create(): InformationSystemRequest
     {
-        return Letter::create([
+        return InformationSystemRequest::create([
             'user_id' => auth()->user()->id,
             'title' => $this->title,
             'reference_number' => $this->reference_number,
@@ -113,33 +115,5 @@ class SiDataRequestForm extends Component
         }
 
         return $documentVersionId;
-    }
-
-    public function downloadSOP()
-    {
-        $filePath = 'templates/SOP Pembangunan dan Pengembangan Aplikasi Pusdatin.pdf';
-        $disk = 'local';
-
-        if (auth()->user()) {
-            $fileDownload = Storage::disk($disk)->path($filePath);
-            return response()->download($fileDownload);
-        }
-
-        abort(404, 'Template not found.');
-    }
-
-    public function downloadTemplate($typeNumber)
-    {
-        $template = Template::where('part_number', $typeNumber)->where('is_active', '1')->first();
-
-        if (auth()->user() && $template) {
-            $filePath = $template->file_path;
-
-            $fileDownload = Storage::disk('public')->path($filePath);
-
-            return response()->download($fileDownload);
-        }
-
-        abort(404, 'Template not found.');
     }
 }
