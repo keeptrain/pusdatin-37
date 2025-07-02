@@ -99,16 +99,19 @@ class MeetingServices
 
     protected function formatMeeting(MeetingInformationSystemRequest $meeting): array
     {
+        $startAt = Carbon::parse($meeting->start_at);
+        $endAt = Carbon::parse($meeting->end_at);
+
         return [
             'id' => $meeting->id,
             'request_id' => $meeting->request_id,
             'topic' => $meeting->topic,
-            'start' => $meeting->start_time,
-            'end' => $meeting->end_time,
-            'link_location' => [
+            'start' => $startAt->format('H:i'),
+            'end' => $endAt->format('H:i'),
+            'place' => [
                 'type' => $meeting->place['type'] ?? null,
                 'value' => $meeting->place['value'] ?? null,
-                'password' => $meeting->password
+                'password' => $meeting->password ?? null,
             ],
             'result' => $meeting->result
         ];
@@ -131,5 +134,4 @@ class MeetingServices
             'has_meetings' => false
         ];
     }
-
 }
