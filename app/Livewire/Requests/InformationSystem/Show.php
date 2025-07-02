@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Mail\Requests\InformationSystem\NeedNDAMail;
 use App\Mail\Requests\InformationSystem\RevisionMail;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class Show extends Component
 {
@@ -35,6 +36,11 @@ class Show extends Component
     {
         $this->systemRequestId = $id;
         $this->systemRequest = InformationSystemRequest::with(['documentUploads.activeVersion:id,file_path', 'user:id,name,contact,section'])->findOrFail($this->systemRequestId);
+    }
+
+    public function getFileUrl($fileData): string
+    {
+        return asset(Storage::url($fileData->activeVersion->file_path));
     }
 
     #[Title('Detail Permohonan')]
