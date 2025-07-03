@@ -159,7 +159,6 @@ class MeetingServices
 
     protected function formatMeeting(MeetingInformationSystemRequest $meeting): array
     {
-        // dd($meeting->all());
         return [
             'id' => $meeting->id,
             'request_id' => $meeting->request_id,
