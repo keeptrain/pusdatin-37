@@ -1,6 +1,7 @@
 <div class="space-y-4 p-4">
     {{-- Header total rapat hari ini --}}
-    <div class="mb-4">
+    <div class="mb-4 flex items-center space-x-4">
+        {{-- <x-lucide-calendar class="size-7" /> --}}
         <flux:heading size="xl" class="text-testing-100">
             @if ($todayMeetingCount > 0)
                 Hari ini terdapat {{ $todayMeetingCount }} meeting

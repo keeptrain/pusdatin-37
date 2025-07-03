@@ -28,15 +28,15 @@
                 {{ __('Dashboard') }}
             </flux:navbar.item>
             <div class="relative">
-                <flux:navbar.item @mouseenter="openDropdown = true" icon="folder-open" icon:trailing="chevron-down">
+                <flux:navbar.item @mouseenter="openDropdown = true" icon="folder-open" icon:trailing="chevron-down" :current="request()->routeIs('si-data.form') || request()->routeIs('pr.form')">
                     {{ __('Ajukan Permohonan') }}
                 </flux:navbar.item>
                 
                 <!-- Dropdown Menu -->
                 <x-menu.dropdown-menu-on-dashboard-user />
             </div>
-            <flux:navbar.item icon="clock" :href="route('list.request')" :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
-                {{ __('Riwayat Permohonan') }}
+            <flux:navbar.item icon="book-open-text" :href="route('list.request')" :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
+                {{ __('Daftar Permohonan') }}
             </flux:navbar.item>
         </flux:navbar>
 
