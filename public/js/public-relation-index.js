@@ -181,12 +181,6 @@ function removeRowsFromDataTable(deletedIds) {
     // Redraw table
     dataTable.draw();
 }
-function disableTableInteractions() {
-    $("#requestsTable").addClass("table-disabled");
-    $(".row-checkbox, #selectAllCheckbox").prop("disabled", true);
-    $("#globalSearch").prop("disabled", true);
-    $("#statusFilterToggle").prop("disabled", true);
-}
 
 // Listen for Livewire events
 document.addEventListener("livewire:init", () => {
@@ -223,10 +217,6 @@ document.addEventListener("livewire:init", () => {
                 .prop("disabled", false)
                 .removeClass("checkbox-disabled");
         }
-    });
-    Livewire.on("delete-started", () => {
-        isDeleting = true;
-        disableTableInteractions();
     });
 });
 

@@ -59,11 +59,6 @@ function initDataTable() {
 
             // Re-bind checkbox events after table redraw
             bindCheckboxEvents();
-
-            // Apply disabled state if deleting
-            if (isDeleting) {
-                disableTableInteractions();
-            }
         },
     });
 
@@ -144,13 +139,6 @@ function bindCheckboxEvents() {
         });
 }
 
-function disableTableInteractions() {
-    $("#requestsTable").addClass("table-disabled");
-    $(".row-checkbox, #selectAllCheckbox").prop("disabled", true);
-    $("#globalSearch").prop("disabled", true);
-    $("#statusFilterToggle").prop("disabled", true);
-}
-
 function enableTableInteractions() {
     $("#requestsTable").removeClass("table-disabled");
 
@@ -203,12 +191,6 @@ function removeRowsFromDataTable(deletedIds) {
 
 // Listen for Livewire events
 document.addEventListener("livewire:init", () => {
-    // Handle delete started event
-    Livewire.on("delete-started", () => {
-        isDeleting = true;
-        disableTableInteractions();
-    });
-
     // Handle delete error event
     Livewire.on("delete-error", () => {
         isDeleting = false;
