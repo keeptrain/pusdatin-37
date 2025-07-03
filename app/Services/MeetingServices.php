@@ -47,7 +47,7 @@ class MeetingServices
             'date' => $date->format('d M Y'),
             'start' => $date->format('H:i'),
             'end' => Carbon::parse($meeting->end_at)->format('H:i'),
-            'place' => $meeting->place, // Changed from $this->place to $meeting->place
+            'place' => $meeting->place,
             'title' => $systemRequest->title,
         ];
 
@@ -64,7 +64,7 @@ class MeetingServices
             }
         } catch (\Exception $e) {
             Log::error('Failed to send meeting email: ' . $e->getMessage());
-            throw $e; // Re-throw if you want to handle in the controller
+            throw $e;
         }
     }
 
@@ -82,31 +82,46 @@ class MeetingServices
 
     protected function fetchUserMeetings(User $user, int $daysAhead): Collection
     {
-        $dateRange = $this->getDateRange($daysAhead);
-
         return MeetingInformationSystemRequest::with(['informationSystemRequest' => fn($q) => $q->where('user_id', $user->id)])
             ->whereHas('informationSystemRequest', fn($q) => $q->where('user_id', $user->id))
-            ->whereBetween('start_at', $dateRange)
+            ->where('start_at', '>=', now())
             ->orderBy('start_at')
             ->get();
     }
 
     protected function fetchAdminMeetings(User $admin, int $daysAhead): Collection
     {
-        $dateRange = $this->getDateRange($daysAhead);
         $roleId = $admin->currentUserRoleId();
 
-        return MeetingInformationSystemRequest::whereBetween('start_at', $dateRange)
+        return MeetingInformationSystemRequest::where('start_at', '>=', now()) // Get all future meetings
             ->get()
             ->filter(fn($meeting) => $this->isMeetingRelevant($meeting, $roleId));
     }
 
-    protected function prepareMeetingTimeline(Collection $meetings, int $daysAhead): Collection
+    public function prepareMeetingTimeline(Collection $meetings, int $daysAhead = 3): Collection
     {
-        $grouped = $this->groupAndFormatMeetings($meetings);
-        $emptySlots = $this->generateEmptySlots($daysAhead);
+        $groupedMeetings = $this->groupAndFormatMeetings($meetings);
+        $attentionSlots = $this->generateEmptySlots($daysAhead);
 
-        return $this->mergeTimeline($grouped, $emptySlots);
+        // Mark attention period dates
+        $attentionPeriodEnd = now()->addDays($daysAhead);
+
+        // Merge with empty slots for attention period
+        $attentionPeriod = $this->mergeTimeline($groupedMeetings, $attentionSlots)
+            ->map(function ($day) use ($attentionPeriodEnd) {
+                $date = Carbon::parse($day['date_day']);
+                $day['is_attention_period'] = $date->lte($attentionPeriodEnd);
+                return $day;
+            });
+
+        // Add other meetings beyond attention period
+        $otherMeetings = $groupedMeetings->reject(function ($day) use ($attentionPeriodEnd) {
+            return Carbon::parse($day['date_day'])->lte($attentionPeriodEnd);
+        });
+
+        return $attentionPeriod->concat($otherMeetings->values())
+            ->sortBy(fn($day) => Carbon::parse($day['date_day'])->timestamp)
+            ->values();
     }
 
     protected function isMeetingRelevant(MeetingInformationSystemRequest $meeting, int $roleId): bool
@@ -130,7 +145,7 @@ class MeetingServices
 
     protected function formatDayGroup(Collection $meetings, string $date): array
     {
-        $dateObj = Carbon::parse($date)->locale('id');
+        $dateObj = Carbon::parse($date);
 
         return [
             'date_number' => $dateObj->day,
@@ -144,6 +159,7 @@ class MeetingServices
 
     protected function formatMeeting(MeetingInformationSystemRequest $meeting): array
     {
+        // dd($meeting->all());
         return [
             'id' => $meeting->id,
             'request_id' => $meeting->request_id,
@@ -152,7 +168,7 @@ class MeetingServices
             'place' => [
                 'type' => $meeting->place['type'] ?? null,
                 'value' => $meeting->place['value'] ?? null,
-                'password' => $meeting->password ?? null,
+                'password' => $meeting->place['password'] ?? null,
             ],
             'result' => $meeting->result,
             'recipients' => $meeting->recipients ?? []
@@ -172,7 +188,6 @@ class MeetingServices
 
     protected function createEmptySlot(Carbon $date): array
     {
-        $date->locale('id');
         return [
             'date_number' => $date->day,
             'date_day' => $date->translatedFormat('l'),
