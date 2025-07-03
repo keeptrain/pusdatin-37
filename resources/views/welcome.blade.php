@@ -37,7 +37,8 @@
         <x-user.landing-nav />
         <x-user.hero />
         <x-user.service />
-        <x-user.cara-kerja />
+        <x-user.dashboard.cara-kerja />
+        <x-user.dashboard.faq />
     </div>
 
     <script>
