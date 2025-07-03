@@ -59,39 +59,8 @@
 
         <flux:separator />
 
-        <div x-data="{ createDiscussion: false }" class="p-4 border-2 rounded-lg mt-6 ">
-            <div class="space-y-2">
-                <flux:heading size="xl" class="text-testing-100">Apakah kamu mempunyai kendala saat menggunakan layanan
-                    Pusdatin?</flux:heading>
-                <flux:button @click="createDiscussion =! createDiscussion" icon="plus">Buat forum diskusi</flux:button>
-
-                <form x-show="createDiscussion" class="mt-6">
-                    <div class="grid grid-cols-2 items-start gap-4 md:gap-6">
-                        <flux:input label="Topic" placeholder="Topik yang ingin kamu diskusikan" />
-                        <flux:textarea label="Deskripsi" placeholder="Deskripsi masalah yang ingin kamu diskusikan"
-                            rows="2" />
-                    </div>
-
-                    <div class="flex justify-end mt-6">
-                        <flux:button type="submit" variant="primary">Buat</flux:button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="border border-lg border-l mt-6">
-                {{-- <flux:heading size="xl" class="text-testing-100">Forum Diskusi</flux:heading> --}}
-                <!-- Empty State -->
-                <div class="text-center py-6">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada diskusi</h3>
-                </div>
-            </div>
+        <div x-data="{ createDiscussion: false }" class="p-4 border-2 rounded-lg mt-6">
+            <x-user.dashboard.discussion-forum />
         </div>
     </div>
-
 </x-layouts.app>
