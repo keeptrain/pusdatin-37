@@ -1,4 +1,4 @@
-<section class=" md:hidden" x-cloak>
+<section class="lg:hidden" x-cloak>
 
     <x-user.dashboard.service-cards />
 
