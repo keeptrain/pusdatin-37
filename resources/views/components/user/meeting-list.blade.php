@@ -1,12 +1,12 @@
-<div class="space-y-4 p-4">
+<div class="space-y-4 p-2 mb-4">
     {{-- Header total rapat hari ini --}}
     <div class="mb-4 flex items-center space-x-4">
         {{-- <x-lucide-calendar class="size-7" /> --}}
-        <flux:heading size="xl" class="text-testing-100">
+        <flux:heading size="xl" class="flex items-center text-testing-100 text-center gap-2">
             @if ($todayMeetingCount > 0)
-                Hari ini terdapat {{ $todayMeetingCount }} meeting
+                <x-lucide-calendar-days class="size-7" /> Hari ini terdapat {{ $todayMeetingCount }} meeting
             @else
-                Tidak terdapat meeting hari ini
+                <x-lucide-calendar class="size-7" /> Tidak terdapat meeting hari ini
             @endif
         </flux:heading>
     </div>
@@ -36,7 +36,7 @@
         @if($dateGroup['has_meetings'])
             @foreach($dateGroup['meetings'] as $meeting)
                 <div wire:key="meeting-{{ $meeting['id'] }}" class="flex">
-                    <div class="w-[50px]"></div> <!-- Offset untuk border start & end -->
+                    <div class="hidden lg:block lg:w-[50px]"></div> <!-- Offset untuk border start & end -->
                     <div class="border rounded-lg p-3 bg-zinc-50 flex items-center w-full">
                         <!-- Icon -->
                         @if (($meeting['place']['type']) === 'link')
@@ -52,11 +52,10 @@
                             <flux:subheading size="lg" class="text-black text-sm">
                                 @if ($meeting['place']['type'] === 'link')
                                     <flux:link x-data="{
-                                                            link: '{{ $meeting['place']['value'] ?? '' }}',
-                                                            isTruncated: false
-                                                        }" x-init="
-                                                            isTruncated = typeof link === 'string' && link.length > 50;
-                                                        " :href="$meeting['place']['value'] ?? '#'">
+                                        link: '{{ $meeting['place']['value'] ?? '' }}',
+                                        isTruncated: false }" 
+                                        x-init="isTruncated = typeof link === 'string' && link.length > 50;" 
+                                        :href="$meeting['place']['value'] ?? '#'">
                                         <span x-text="isTruncated ? link.substring(0, 50) + '...' : link"></span>
                                     </flux:link>
                                     @if ($meeting['place']['password'])
