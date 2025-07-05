@@ -75,20 +75,23 @@ class ShowRatings extends Component
 
     public function replyToAllGivesRating()
     {
-        $content = $this->loadContent()->get();
+        $contents = $this->loadContent()->get();
         $successCount = 0;
         $failCount = 0;
         $alreadyRepliedCount = 0;
-        $nothingToReply = false;
+        $invalidCount = 0;
+        $totalProcessed = 0;
 
-        foreach ($content as $item) {
-            // Skip jika email tidak ada atau rating tidak valid
+        foreach ($contents as $item) {
+            $totalProcessed++;
+
+            // Skip if rating not valid
             if (empty($item->rating)) {
-                $nothingToReply = true;
+                $invalidCount++;
                 continue;
             }
 
-            // Skip jika sudah pernah dibalas
+            // Skip if already replied
             if (!empty($item->rating['replied_at'])) {
                 $alreadyRepliedCount++;
                 continue;
@@ -97,7 +100,6 @@ class ShowRatings extends Component
             try {
                 Mail::to($item->user->email)->send(new ReplyAssessmentMail($item->rating['rating']));
 
-                // Update hanya replied_at
                 $rating = $item->rating;
                 $rating['replied_at'] = now()->toDateTimeString();
                 $item->rating = $rating;
@@ -110,12 +112,12 @@ class ShowRatings extends Component
             }
         }
 
-        // Prepare status message based on different scenarios
         $message = $this->prepareStatusMessage(
-            $successCount,
-            $failCount,
-            $alreadyRepliedCount,
-            $nothingToReply
+            totalItems: count($contents),
+            successCount: $successCount,
+            failCount: $failCount,
+            alreadyRepliedCount: $alreadyRepliedCount,
+            invalidCount: $invalidCount
         );
 
         session()->flash('status', [
@@ -127,33 +129,32 @@ class ShowRatings extends Component
     }
 
     protected function prepareStatusMessage(
+        int $totalItems,
         int $successCount,
         int $failCount,
         int $alreadyRepliedCount,
-        bool $nothingToReply
+        int $invalidCount
     ): string {
-        $messages = [];
-
-        if ($successCount > 0) {
-            $messages[] = "Berhasil mengirim {$successCount} email.";
-        }
-
-        if ($failCount > 0) {
-            $messages[] = "Gagal mengirim {$failCount} email.";
-        }
-
-        if ($alreadyRepliedCount > 0) {
-            $messages[] = "{$alreadyRepliedCount} email sudah pernah dikirim sebelumnya.";
-        }
-
-        if ($nothingToReply) {
-            $messages[] = "Tidak ada rating lain yang perlu dibalas.";
-        }
-
-        // Special case when nothing was sent
-        if ($successCount === 0 && $failCount === 0 && $alreadyRepliedCount === 0) {
+        // Special case 1: All items were already replied
+        if ($alreadyRepliedCount === $totalItems) {
             return "Semua balasan email telah dikirim sebelumnya.";
         }
+
+        // Special case 2: No valid items to process
+        if ($invalidCount === $totalItems) {
+            return "Tidak ada rating valid yang perlu dibalas.";
+        }
+
+        // Normal cases
+        $messages = [];
+        if ($successCount > 0)
+            $messages[] = "Berhasil mengirim {$successCount} email.";
+        if ($failCount > 0)
+            $messages[] = "Gagal mengirim {$failCount} email.";
+        if ($alreadyRepliedCount > 0)
+            $messages[] = "{$alreadyRepliedCount} sudah pernah dikirim.";
+        if ($invalidCount > 0)
+            $messages[] = "{$invalidCount} data tidak valid.";
 
         return implode(' ', $messages);
     }
