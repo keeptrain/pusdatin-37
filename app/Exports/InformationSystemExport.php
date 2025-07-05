@@ -9,14 +9,10 @@ use App\Models\MeetingInformationSystemRequest;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class InformationSystemExport implements FromCollection, WithHeadings, WithEvents, ShouldAutoSize, WithMapping, WithTitle
+class InformationSystemExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithTitle
 {
     public function __construct(
         public ?string $division,
@@ -40,10 +36,23 @@ class InformationSystemExport implements FromCollection, WithHeadings, WithEvent
         if ($this->endDate) {
             $systemRequests->whereDate('created_at', '<=', $this->endDate);
         }
-        // if ($this->status && $this->status !== 'all') {
-        //     $stateClass = InformationSystemRequest::resolveStatusClassFromString($this->status);
-        //     $systemRequests->whereState('status', $stateClass);
-        // }
+
+        if ($this->status && $this->status !== 'all') {
+            if ($this->status === 'in_process') {
+                $inProcessStatus = InformationSystemRequest::resolveStatusClassFromArray([
+                    'disposition',
+                    'replied',
+                    'approved_kasatpel',
+                    'replied_kapusdatin',
+                    'approved_kapusdatin',
+                    'process_request'
+                ]);
+                $systemRequests->whereIn('status', $inProcessStatus);
+            } else {
+                $resolveStatus = InformationSystemRequest::resolveStatusClassFromString($this->status);
+                $systemRequests->where('status', $resolveStatus);
+            }
+        }
 
         $resultRequests = $systemRequests->get();
 
@@ -93,18 +102,32 @@ class InformationSystemExport implements FromCollection, WithHeadings, WithEvent
         return $map;
     }
 
-    public function headings(): array
+    public function headings(bool $isExcel = true): array
     {
-        $headings = [
-            'Nama Penganggung Jawab',
-            'Seksi',
-            'Email',
-            'Kontak',
-            'Tanggal Pengajuan',
-            'Judul Permohonan',
-            'Nomor Surat',
-            'Status saat ini',
-        ];
+        if ($isExcel) {
+            return [
+                'Nama Penganggung Jawab',
+                'Seksi',
+                'Email',
+                'Kontak',
+                'Tanggal Pengajuan',
+                'Judul Permohonan',
+                'Nomor Surat',
+                'Status saat ini',
+                'Meeting',
+                'Total meeting',
+            ];
+        } else {
+            $headings = [
+                'Nama Penganggung Jawab',
+                'Kontak',
+                'Tanggal Pengajuan',
+                'Judul Permohonan',
+                'Nomor Surat',
+                'Status saat ini',
+                // 'Waktu pemrosesan',
+            ];
+        }
 
         if ($this->division == Division::HEAD_ID->value) {
             $headings[] = 'Kasatpel yang menangani';
@@ -175,28 +198,28 @@ class InformationSystemExport implements FromCollection, WithHeadings, WithEvent
         return "Laporan Permohonan $resolveDivision";
     }
 
-    public function registerEvents(): array
-    {
-        return [
-            AfterSheet::class => function (AfterSheet $event) {
-                $sheet = $event->sheet->getDelegate();
-                $lastColIndex = count($this->headings());
-                $colLetter = Coordinate::stringFromColumnIndex($lastColIndex);
+    // public function registerEvents(): array
+    // {
+    //     return [
+    //         AfterSheet::class => function (AfterSheet $event) {
+    //             $sheet = $event->sheet->getDelegate();
+    //             $lastColIndex = count($this->headings());
+    //             $colLetter = Coordinate::stringFromColumnIndex($lastColIndex);
 
-                // range dari row 1 sampai row 2 di kolom Total Data
-                $range = "{$colLetter}1:{$colLetter}2";
+    //             // range dari row 1 sampai row 2 di kolom Total Data
+    //             $range = "{$colLetter}1:{$colLetter}2";
 
-                // terapkan bold + fill hijau muda
-                $sheet->getStyle($range)->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                    ],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'C6EFCE'],
-                    ],
-                ]);
-            },
-        ];
-    }
+    //             // terapkan bold + fill hijau muda
+    //             $sheet->getStyle($range)->applyFromArray([
+    //                 'font' => [
+    //                     'bold' => true,
+    //                 ],
+    //                 'fill' => [
+    //                     'fillType' => Fill::FILL_SOLID,
+    //                     'startColor' => ['rgb' => 'C6EFCE'],
+    //                 ],
+    //             ]);
+    //         },
+    //     ];
+    // }
 }

@@ -102,8 +102,8 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $item->user->name ?? '—' }}</td>
-                    <td>{{ $item->user->section ?? '—' }}</td>
-                    <td>{{ $item->user->email ?? '—' }}</td>
+                    {{-- <td>{{ $item->user->section ?? '—' }}</td> --}}
+                    {{-- <td>{{ $item->user->email ?? '—' }}</td> --}}
                     <td>{{ $item->user->contact ?? '—' }}</td>
                     <td>{{ $item->request->createdAtDMY() ?? '—' }}</td>
                     <td>{{ $item->request->title ?? '—' }}</td>

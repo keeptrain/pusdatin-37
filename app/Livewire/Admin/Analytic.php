@@ -54,10 +54,10 @@ class Analytic extends Component
         $currentDivisionUser = auth()->user()->currentUserRoleId();
         $fileName = "Daftar Permohonan - " . now() . ".pdf";
 
-        $export = new InformationSystemExport($currentDivisionUser, $this->startAt, $this->endAt);
+        $export = new InformationSystemExport($currentDivisionUser, $this->startAt, $this->endAt, $this->status);
 
         $collection = $export->collection();
-        $headings = $export->headings();
+        $headings = $export->headings(isExcel: false);
         $title = $export->title();
 
         $pdf = Pdf::loadView('components.exports.pdf.information-system', compact('collection', 'title', 'headings'))->setPaper('a3', 'landscape');
@@ -116,15 +116,5 @@ class Analytic extends Component
         $this->validate($rules, $messages);
 
         $this->showModal = true;
-    }
-
-    // Fungsi reset filter
-    public function resetFilters()
-    {
-        $this->startAt = null;
-        $this->endAt = null;
-        $this->status = null;
-        $this->service = null;
-        $this->showModal = false;
     }
 }
