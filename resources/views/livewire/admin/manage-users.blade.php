@@ -50,7 +50,7 @@
 
         <x-slot name="body">
             @foreach ($users as $user)
-                <tr @click="$wire.show({{ $user->id }})" class="hover:bg-zinc-100 cursor-pointer">
+                <tr wire:key="{{ $user->id }}" @click="$wire.show({{ $user->id }})" class="hover:bg-zinc-100 cursor-pointer">
                     <flux:table.row>
                         <div @click.stop class="py-3">
                             <flux:checkbox wire:model.live="selectedUsers" value="{{ $user->id }}" />
@@ -71,6 +71,6 @@
 
     <livewire:admin.create-user />
 
-    <livewire:admin.update-user />
+    {{-- <livewire:admin.update-user /> --}}
 
 </div>

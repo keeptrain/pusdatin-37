@@ -27,9 +27,8 @@ class UpdateUser extends Component
     #[On('update-user')]
     public function open($id)
     {
-        $this->showUpdateModal = true;
-        $this->id = $id;
         $user = User::findOrFail($id);
+        $this->showUpdateModal = true;
         $this->form->setUser($user);
     }
 

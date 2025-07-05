@@ -51,9 +51,6 @@ class Show extends Component
         return User::findOrFail($this->userId);
     }
 
-
-
-
     #[Computed]
     public function requestsOfUser()
     {
@@ -116,6 +113,6 @@ class Show extends Component
     #[Computed]
     public function getSections()
     {
-        return $this->user->sections;
+        return User::getSections();
     }
 }
