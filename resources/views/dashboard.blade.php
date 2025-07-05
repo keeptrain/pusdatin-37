@@ -87,9 +87,11 @@
 
             </div> --}}
         </div>
-        <div class="grid auto-rows-min gap-4 md:grid-cols-2 border rounded-2xl pl-2">
-            <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
-        </div>
+        @unlessrole('administrator')
+            <div class="grid auto-rows-min gap-4 md:grid-cols-2 border rounded-2xl pl-2">
+                <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
+            </div>
+        @endunlessrole
         <!-- bar chart area -->
         @push('scripts')
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
