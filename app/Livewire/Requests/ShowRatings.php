@@ -7,7 +7,6 @@ use Livewire\Attributes\Title;
 use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Livewire\WithPagination;
-use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReplyAssessmentMail;
 
@@ -19,18 +18,28 @@ class ShowRatings extends Component
     public string $sortDirection = 'asc';
     public string $sortField = 'rating';
 
+    // private $contents;
+
     public function mount()
     {
+        // $this->contents = $this->loadContent();
     }
 
     public function render()
     {
-        return view('livewire.requests.show-ratings', [
-            'contents' => $this->loadContent->simplePaginate(10)
-        ]);
+        $contents = $this->loadContent()->simplePaginate(10);
+        $ratingCount = $this->ratingCount($contents);
+
+        return view('livewire.requests.show-ratings', compact('ratingCount', 'contents'));
     }
 
-    #[Computed]
+    protected function ratingCount($loadContent)
+    {
+        return collect($loadContent->items())->filter(function ($item) {
+            return !empty(data_get($item->rating, 'rating'));
+        })->count();
+    }
+
     protected function loadContent()
     {
         $roleId = auth()->user()->currentUserRoleId();
@@ -66,19 +75,22 @@ class ShowRatings extends Component
 
     public function replyToAllGivesRating()
     {
-        $content = $this->loadContent->get();
+        $content = $this->loadContent()->get();
         $successCount = 0;
         $failCount = 0;
+        $alreadyRepliedCount = 0;
+        $nothingToReply = false;
 
         foreach ($content as $item) {
             // Skip jika email tidak ada atau rating tidak valid
-            if (!isset($item->user->email) || !isset($item->rating['rating'])) {
-                $failCount++;
+            if (empty($item->rating)) {
+                $nothingToReply = true;
                 continue;
             }
 
-            // Skip jika sudah pernah dibalas (replied_at sudah ada)
+            // Skip jika sudah pernah dibalas
             if (!empty($item->rating['replied_at'])) {
+                $alreadyRepliedCount++;
                 continue;
             }
 
@@ -92,19 +104,57 @@ class ShowRatings extends Component
                 $item->save();
 
                 $successCount++;
-
             } catch (\Exception $e) {
                 \Log::error("Failed to send email to {$item->user->email}: " . $e->getMessage());
                 $failCount++;
             }
         }
 
+        // Prepare status message based on different scenarios
+        $message = $this->prepareStatusMessage(
+            $successCount,
+            $failCount,
+            $alreadyRepliedCount,
+            $nothingToReply
+        );
+
         session()->flash('status', [
-            'variant' => 'success',
-            'message' => "Berhasil mengirim {$successCount} email. " .
-                ($failCount > 0 ? "{$failCount} gagal dikirim." : ""),
+            'variant' => $successCount > 0 ? 'success' : 'info',
+            'message' => $message,
         ]);
 
         $this->redirectRoute('show.ratings', navigate: true);
+    }
+
+    protected function prepareStatusMessage(
+        int $successCount,
+        int $failCount,
+        int $alreadyRepliedCount,
+        bool $nothingToReply
+    ): string {
+        $messages = [];
+
+        if ($successCount > 0) {
+            $messages[] = "Berhasil mengirim {$successCount} email.";
+        }
+
+        if ($failCount > 0) {
+            $messages[] = "Gagal mengirim {$failCount} email.";
+        }
+
+        if ($alreadyRepliedCount > 0) {
+            $messages[] = "{$alreadyRepliedCount} email sudah pernah dikirim sebelumnya.";
+        }
+
+        if ($nothingToReply) {
+            $messages[] = "Tidak ada rating lain yang perlu dibalas.";
+        }
+
+        // Special case when nothing was sent
+        if ($successCount === 0 && $failCount === 0 && $alreadyRepliedCount === 0) {
+            return "Semua balasan email telah dikirim sebelumnya.";
+        }
+
+        return implode(' ', $messages);
     }
 }
