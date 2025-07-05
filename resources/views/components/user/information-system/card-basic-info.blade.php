@@ -34,7 +34,7 @@
                     <p class="text-xs font-medium text-gray-500 uppercase">Kontak</p>
                     <p class="mt-1 text-gray-900">{{ $systemRequest->user->contact }}</p>
 
-                    @if ($meetings !== null)
+                    @if ($meetings !== null && $meetings->isNotEmpty())
                         {{-- Tampilkan meeting terdekat --}}
                         <p class="text-xs font-medium text-gray-500 uppercase mt-4">Riwayat Meeting</p>
                         <x-user.information-system.meeting-info :nearestMeeting="$this->nearestMeeting"
