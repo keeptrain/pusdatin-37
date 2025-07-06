@@ -86,11 +86,17 @@ class Index extends Component
     {
         $currentRole = auth()->user()->currentUserRoleId();
 
-        $siDivisions = Division::SI_ID->value;
-        $dataDivisions = Division::DATA_ID->value;
-        $prDivisions = Division::PR_ID->value;
+        $headDivision = Division::HEAD_ID->value;
+        $siDivision = Division::SI_ID->value;
+        $dataDivision = Division::DATA_ID->value;
+        $prDivision = Division::PR_ID->value;
 
-        if ($currentRole == $siDivisions || $currentRole == $dataDivisions) {
+        // Head Division can see all discussions
+        if ($currentRole == $headDivision) {
+            return; // No filters applied for head division
+        }
+
+        if ($currentRole == $siDivision || $currentRole == $dataDivision) {
             $query->where(function ($q) use ($currentRole) {
                 $q->whereHasMorph('discussable', [InformationSystemRequest::class], function ($subQuery) use ($currentRole) {
                     $subQuery->where('current_division', $currentRole);
@@ -102,7 +108,7 @@ class Index extends Component
                         ->where('discussable_id', $currentRole);
                 });
             });
-        } elseif ($currentRole == $prDivisions) {
+        } elseif ($currentRole == $prDivision) {
             $query->where(function ($q) use ($currentRole) {
                 $q->whereHasMorph('discussable', [PublicRelationRequest::class]);
 
