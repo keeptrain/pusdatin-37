@@ -54,6 +54,11 @@ class PublicRelationRequest extends Model
         return $this->morphMany(DocumentUpload::class, 'documentable');
     }
 
+    public function discussions()
+    {
+        return $this->morphMany(Discussion::class, 'discussable');
+    }
+
     public static function resolveStatusClassFromString(string $status): string
     {
         return match ($status) {

@@ -48,19 +48,21 @@
             </div>
         </div>
 
+        {{-- Hero Dashboard --}}
         <x-user.hero-dashboard />
 
         <flux:separator class="mt-6" />
 
+        {{-- Meeting List --}}
         <div class="gap-4 mt-4">
-            {{-- {{ $meetingList }} --}}
             <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
         </div>
 
         <flux:separator />
 
-        <div x-data="{ createDiscussion: false }" class="p-4 border-2 rounded-lg mt-6">
-            <x-user.dashboard.discussion-forum />
+        {{-- Discussion List --}}
+        <div x-data="{ createDiscussion: false }" class="p-4 border rounded-lg mt-6">
+            <x-user.dashboard.discussion-forum :requests="$requests" />
         </div>
     </div>
 </x-layouts.app>
