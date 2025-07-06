@@ -7,7 +7,7 @@
     <!-- Main Content -->
     <div class="grid grid-rows-[auto_1fr] h-full">
         <!-- Tabs -->
-        <nav class="border-b border-gray-200 h-[55px] overflow-x-hidden">
+        <nav class="border-b border-gray-200 dark:border-zinc-700 h-[55px] overflow-x-hidden">
             <div class="flex space-x-4 md:space-x-8 px-2 md:px-2 w-max">
                 <x-layouts.requests.tab tab="Overview" active-tab="activeTab" label="Overview" />
                 <x-layouts.requests.tab tab="Activity" active-tab="activeTab" label="Aktivitas" />
@@ -40,7 +40,7 @@
 
             <!-- Right Sidebar - Hidden on mobile unless toggled -->
             @if (isset($rightSidebar))
-                <div class="lg:w-90 lg:border-l lg:border-gray-200 p-4 md:p-6 bg-white"
+                <div class="lg:w-90 lg:border-l lg:border-gray-200 p-4 md:p-6 bg-white dark:bg-zinc-800 dark:border-zinc-700"
                     :class="{ 'hidden lg:block': !mobileDetailsOpen }"
                     x-show="mobileDetailsOpen || window.innerWidth >= 1024"
                     x-transition:enter="transition ease-out duration-200"

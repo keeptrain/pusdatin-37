@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use App\Models\PublicRelationRequest;
+use Illuminate\Support\Facades\Storage;
 
 class Show extends Component
 {
@@ -30,6 +31,11 @@ class Show extends Component
     public function render()
     {
         return view('livewire.requests.public-relation.show');
+    }
+
+    public function getFileUrl($documentUpload): string
+    {
+        return asset(Storage::url($documentUpload->activeVersion->file_path));
     }
 
     #[Computed]

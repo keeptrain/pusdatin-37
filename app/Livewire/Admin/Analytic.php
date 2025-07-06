@@ -2,27 +2,33 @@
 
 namespace App\Livewire\Admin;
 
+use App\Exports\InformationSystemExport;
 use Livewire\Component;
 use Livewire\Attributes\Title;
-use App\Models\InformationSystemRequest;
-use App\Models\PublicRelationRequest;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MultipleSheetExport;
+use App\Exports\PublicRelationExport;
+use App\Enums\Division;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class Analytic extends Component
 {
-    public $start_date;
-    public $end_date;
-    public $status;
-    public $source; // Menambah properti source untuk memilih data (letter/pr)
+    public $startAt = '';
+    public $endAt = '';
+    public $service = '';
+    public $status = '';
 
     public $statusOptions = [
         'all' => 'Semua Status',
-        'pending' => 'Permohonan Masuk',
-        'disposition' => 'Disposisi',
-        'process' => 'Proses',
-        'replied' => 'Revisi Kasatpel',
-        'approved_kasatpel' => 'Disetujui Kasatpel',
-        'replied_kapusdatin' => 'Revisi Kapusdatin',
-        'approved_kapusdatin' => 'Disetujui Kapusdatin',
+        'in_process' => 'Dalam Proses',
+        // 'pending' => 'Permohonan Masuk',
+        // 'disposition' => 'Disposisi',
+        // 'process' => 'Proses',
+        // 'replied' => 'Revisi Kasatpel',
+        // 'approved_kasatpel' => 'Disetujui Kasatpel',
+        // 'replied_kapusdatin' => 'Revisi Kapusdatin',
+        // 'approved_kapusdatin' => 'Disetujui Kapusdatin',
+        'completed' => 'Selesai',
         'rejected' => 'Ditolak',
     ];
 
@@ -43,68 +49,72 @@ class Analytic extends Component
         return view('livewire.admin.analytic');
     }
 
-    public function exportHeadVerifier()
+    public function exportAsPdf($startAt = null, $endAt = null)
     {
-        if (auth()->user()->hasRole('head_verifier')) {
+        $currentDivisionUser = auth()->user()->currentUserRoleId();
+        $fileName = "Daftar Permohonan - " . now() . ".pdf";
 
-            // Ambil data dari Letter atau PR berdasarkan source
-            if ($this->source === 'letter') {
-                $query = InformationSystemRequest::with('user');
-            } elseif ($this->source === 'pr') {
-                $query = PublicRelationRequest::with('user');
-            } else {
-                return; // Jika tidak memilih source, tidak lakukan apa-apa
-            }
+        $export = new InformationSystemExport($currentDivisionUser, $this->startAt, $this->endAt, $this->status);
 
-            // Apply filter berdasarkan start_date dan end_date
-            if ($this->start_date) {
-                $query->whereDate('created_at', '>=', $this->start_date);
-            }
+        $collection = $export->collection();
+        $headings = $export->headings(isExcel: false);
+        $title = $export->title();
 
-            if ($this->end_date) {
-                $query->whereDate('created_at', '<=', $this->end_date);
-            }
+        $pdf = Pdf::loadView('components.exports.pdf.information-system', compact('collection', 'title', 'headings'))->setPaper('a3', 'landscape');
 
-            // Filter berdasarkan status (jika ada)
-            if ($this->status && $this->status !== 'all') {
-                if ($this->source === 'letter') {
-                    $stateClass = InformationSystemRequest::resolveStatusClassFromString($this->status);
-                    $query->whereState('status', $stateClass);
-                } else if ($this->source === 'pr') {
-                    $stateClassPr = PublicRelationRequest::resolveStatusClassFromString($this->status);
-                    $query->whereState('status', $stateClassPr);
-                }
-            }
+        return response()->streamDownload(function () use ($pdf, $fileName, $startAt, $endAt) {
+            echo $pdf->stream($fileName);
+        }, $fileName);
+    }
 
-            // Ambil data yang sudah difilter
-            $data = $query->get();
+    public function exportAsExcel($startAt = null, $endAt = null)
+    {
+        $currentDivisionUser = auth()->user()->currentUserRoleId();
+        $fileName = "Daftar Permohonan - " . now() . ".xlsx";
 
-            // Siapkan data untuk view export
-            $exportData = [
-                'data' => $data,
-                'startDate' => $this->start_date,
-                'endDate' => $this->end_date,
-                'status' => $this->status,
-            ];
+        $exportBasedRole = match ($currentDivisionUser) {
+            Division::HEAD_ID->value => $this->exportFilterService($currentDivisionUser, $fileName),
+            Division::SI_ID->value, Division::DATA_ID->value => Excel::download(new InformationSystemExport($currentDivisionUser, $this->startAt, $this->endAt), $fileName),
+            Division::PR_ID->value => Excel::download(new PublicRelationExport($currentDivisionUser, $this->startAt, $this->endAt), $fileName),
+            default => null,
+        };
 
-            // Trigger modal export atau download
-            $this->showModal = true; // Anda bisa menambahkan logic export di sini
+        return $exportBasedRole;
+    }
+
+    protected function exportFilterService($currentDivisionUser, $fileName)
+    {
+        if ($this->service !== 'all') {
+            return match ($this->service) {
+                'si' => Excel::download(new InformationSystemExport($currentDivisionUser, $this->startAt, $this->endAt), $fileName),
+                'pr' => Excel::download(new PublicRelationExport($currentDivisionUser, $this->startAt, $this->endAt), $fileName),
+                default => Excel::download(new MultipleSheetExport($currentDivisionUser, $this->startAt, $this->endAt), $fileName),
+            };
         }
     }
 
-    // Fungsi apply filter untuk role lainnya
-    public function applyFilters()
+    public function customFilters()
     {
-        $this->showModal = true;
-    }
+        $rules = [
+            'startAt' => 'required',
+            'endAt' => 'required|after_or_equal:startAt',
+            'status' => 'required|string',
+        ];
 
-    // Fungsi reset filter
-    public function resetFilters()
-    {
-        $this->start_date = null;
-        $this->end_date = null;
-        $this->status = null;
-        $this->source = null; // Reset source
-        $this->showModal = false;
+        $messages = [
+            'startAt.required' => 'Tanggal awal wajib diisi.',
+            'endAt.required' => 'Tanggal akhir wajib diisi.',
+            'endAt.after_or_equal' => 'Tanggal akhir harus setelah atau sama dengan tanggal awal.',
+            'status.required' => 'Status wajib diplih.',
+        ];
+
+        if (auth()->user()->hasRole('head_verifier')) {
+            $rules['service'] = 'required|string|in:all,si,pr';
+            $messages['service.required'] = 'Jenis layanan wajib diplih.';
+        }
+
+        $this->validate($rules, $messages);
+
+        $this->showModal = true;
     }
 }

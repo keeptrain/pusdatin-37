@@ -100,6 +100,18 @@ class User extends Authenticatable
         return auth()->user()->roles->pluck('id')->first();
     }
 
+    public static function getSections()
+    {
+        return [
+            'pusdatin' => 'Pusdatin',
+            'promkes' => 'Promosi Kesehatan',
+            'kepegawaian' => 'Kepegawaian',
+            'kesehatan' => 'Kesehatan',
+            'tenaga_kesehatan' => 'Tenaga Kesehatan',
+            'umum' => 'Umum',
+        ];
+    }
+
     public function setSectionAttribute($value)
     {
         if (!array_key_exists($value, $this->sections)) {

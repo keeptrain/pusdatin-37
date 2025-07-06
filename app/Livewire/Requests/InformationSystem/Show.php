@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Mail\Requests\InformationSystem\NeedNDAMail;
 use App\Mail\Requests\InformationSystem\RevisionMail;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class Show extends Component
 {
@@ -35,6 +36,11 @@ class Show extends Component
     {
         $this->systemRequestId = $id;
         $this->systemRequest = InformationSystemRequest::with(['documentUploads.activeVersion:id,file_path', 'user:id,name,contact,section'])->findOrFail($this->systemRequestId);
+    }
+
+    public function getFileUrl($fileData): string
+    {
+        return asset(Storage::url($fileData->activeVersion->file_path));
     }
 
     #[Title('Detail Permohonan')]
@@ -131,12 +137,12 @@ class Show extends Component
         foreach ($this->emailChecked as $emailType) {
             switch ($emailType) {
                 case 'need-nda':
-                    Mail::send(new NeedNDAMail($data)->to($email));
+                    Mail::to($email)->send(new NeedNDAMail($data));
                     break;
 
                 case 'reminder-revision':
                     $revisionMailData = Cache::get("revision-mail-{$this->systemRequestId}");
-                    Mail::send(new RevisionMail($revisionMailData, 'reminder')->to($email));
+                    Mail::to($email)->send(new RevisionMail($revisionMailData, 'reminder'));
                     break;
 
                 default:

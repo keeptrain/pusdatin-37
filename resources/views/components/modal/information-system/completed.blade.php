@@ -5,12 +5,15 @@
         <flux:subheading
             x-text="mode === 'process' ? 'Permohonan ini siap untuk di proses' : 'Apakah Anda yakin ingin menyelesaikan permohonan ini?'">
         </flux:subheading>
+        @error('hasPartNumber5')
+            <flux:error :message="$message" />
+        @enderror
     </section>
 
     <div class="flex justify-end space-x-2 mt-6">
         <!-- Tombol Batal -->
         <flux:modal.close>
-            <flux:button variant="ghost" @click="mode = null">{{ __('Batal') }}</flux:button>
+            <flux:button variant="subtle" @click="mode = null">{{ __('Batal') }}</flux:button>
         </flux:modal.close>
 
         <!-- Tombol Proses/Selesaikan -->

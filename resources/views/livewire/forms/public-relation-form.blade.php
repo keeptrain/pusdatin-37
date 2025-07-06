@@ -57,11 +57,11 @@
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 class="space-y-6 border border-gray-200 rounded-lg p-4">
 
-                <flux:checkbox.group label="Sasaran">
-                    <flux:checkbox label="Masyarakat Umum" value="masyarakat_umum" wire:model.live="target" />
-                    <flux:checkbox label="Tenaga Kesehatan" value="tenaga_kesehatan" wire:model.live="target" />
-                    <flux:checkbox label="Anak Sekolah" value="anak_sekolah" wire:model.live="target" />
-                    <flux:checkbox label="Semua orang" value="semua_orang" wire:model.live="target" />
+                <flux:checkbox.group wire:model.live="target" label="Sasaran">
+                    <flux:checkbox label="Masyarakat Umum" value="masyarakat_umum" />
+                    <flux:checkbox label="Tenaga Kesehatan" value="tenaga_kesehatan" />
+                    <flux:checkbox label="Anak Sekolah" value="anak_sekolah" />
+                    <flux:checkbox label="Semua orang" value="semua_orang" />
                     {{-- <div class="flex items-center">
                         <flux:checkbox label="Other:" value="other" />
                         <!-- Input Field for "Other" -->

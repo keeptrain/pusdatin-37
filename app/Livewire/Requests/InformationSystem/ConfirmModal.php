@@ -28,6 +28,8 @@ class ConfirmModal extends Component
 
     public $revisionNotes = [];
 
+    public bool $hasPartNumber5 = false;
+
     public function rules()
     {
         $rules = [
@@ -254,25 +256,45 @@ class ConfirmModal extends Component
 
     public function completed()
     {
-        DB::transaction(function () {
-            $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
+        try {
+            DB::transaction(function () {
+                $systemRequest = InformationSystemRequest::with([
+                    'documentUploads' => function ($query) {
+                        $query->select('document_upload_version_id', 'documentable_id', 'part_number');
+                    }
+                ])->findOrFail($this->systemRequestId);
 
-            $systemRequest->status->transitionTo(\App\States\InformationSystem\Completed::class);
+                // Check part number 5
+                $hasPartNumber5 = $systemRequest->documentUploads()->where('part_number', InformationSystemRequestPart::NON_DISCLOSURE_AGREEMENT->value)->exists();
 
-            $systemRequest->refresh();
+                if ($hasPartNumber5) {
+                    // Add error to error bag
+                    $this->addError('hasPartNumber5', InformationSystemRequestPart::NON_DISCLOSURE_AGREEMENT->label() . ' belum diunggah oleh pemohon');
+                    return;
+                }
 
-            $systemRequest->logStatus(null);
+                $systemRequest->status->transitionTo(\App\States\InformationSystem\Completed::class);
+                $systemRequest->refresh();
+                $systemRequest->logStatus(null);
 
-            DB::afterCommit(function () use ($systemRequest) {
-                $systemRequest->sendProcessServiceRequestNotification();
+                DB::afterCommit(function () use ($systemRequest) {
+                    $systemRequest->sendProcessServiceRequestNotification();
+                });
+
+                session()->flash('status', [
+                    'variant' => 'success',
+                    'message' => $systemRequest->status->toastMessage(),
+                ]);
             });
+        } catch (\Exception $e) {
+            // Tangani exception jika terjadi error dalam transaksi
+            $this->addError('error', 'An error occurred: ' . $e->getMessage());
+            return;
+        }
 
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => $systemRequest->status->toastMessage(),
-            ]);
-        });
-
-        $this->redirectRoute('is.show', $this->systemRequestId, navigate: true);
+        // Redirect hanya jika tidak ada error
+        if (!$this->getErrorBag()->has('hasPartNumber5')) {
+            $this->redirectRoute('is.show', $this->systemRequestId, navigate: true);
+        }
     }
 }

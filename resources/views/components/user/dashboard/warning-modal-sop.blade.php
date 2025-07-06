@@ -2,8 +2,8 @@
 <div x-show="openModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
     x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-50 flex items-start justify-center px-4 sm:px-6 mt-20" aria-labelledby="modal-title"
-    role="dialog" aria-modal="true">
+    class="fixed inset-0 z-50 flex items-start justify-center px-4 sm:px-6 mt-20 overflow-y-auto" aria-labelledby="modal-title"
+    role="dialog" aria-modal="true" x-cloak>
 
     {{-- Background overlay --}}
     <div class="fixed inset-0" style="background-color: rgba(0,0,0,0.6);" aria-hidden="true"></div>

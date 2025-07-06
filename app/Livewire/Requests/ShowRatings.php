@@ -7,7 +7,6 @@ use Livewire\Attributes\Title;
 use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Livewire\WithPagination;
-use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReplyAssessmentMail;
 
@@ -19,18 +18,28 @@ class ShowRatings extends Component
     public string $sortDirection = 'asc';
     public string $sortField = 'rating';
 
+    // private $contents;
+
     public function mount()
     {
+        // $this->contents = $this->loadContent();
     }
 
     public function render()
     {
-        return view('livewire.requests.show-ratings', [
-            'contents' => $this->loadContent->simplePaginate(10)
-        ]);
+        $contents = $this->loadContent()->simplePaginate(10);
+        $ratingCount = $this->ratingCount($contents);
+
+        return view('livewire.requests.show-ratings', compact('ratingCount', 'contents'));
     }
 
-    #[Computed]
+    protected function ratingCount($loadContent)
+    {
+        return collect($loadContent->items())->filter(function ($item) {
+            return !empty(data_get($item->rating, 'rating'));
+        })->count();
+    }
+
     protected function loadContent()
     {
         $roleId = auth()->user()->currentUserRoleId();
@@ -66,45 +75,87 @@ class ShowRatings extends Component
 
     public function replyToAllGivesRating()
     {
-        $content = $this->loadContent->get();
+        $contents = $this->loadContent()->get();
         $successCount = 0;
         $failCount = 0;
+        $alreadyRepliedCount = 0;
+        $invalidCount = 0;
+        $totalProcessed = 0;
 
-        foreach ($content as $item) {
-            // Skip jika email tidak ada atau rating tidak valid
-            if (!isset($item->user->email) || !isset($item->rating['rating'])) {
-                $failCount++;
+        foreach ($contents as $item) {
+            $totalProcessed++;
+
+            // Skip if rating not valid
+            if (empty($item->rating)) {
+                $invalidCount++;
                 continue;
             }
 
-            // Skip jika sudah pernah dibalas (replied_at sudah ada)
+            // Skip if already replied
             if (!empty($item->rating['replied_at'])) {
+                $alreadyRepliedCount++;
                 continue;
             }
 
             try {
                 Mail::to($item->user->email)->send(new ReplyAssessmentMail($item->rating['rating']));
 
-                // Update hanya replied_at
                 $rating = $item->rating;
                 $rating['replied_at'] = now()->toDateTimeString();
                 $item->rating = $rating;
                 $item->save();
 
                 $successCount++;
-
             } catch (\Exception $e) {
                 \Log::error("Failed to send email to {$item->user->email}: " . $e->getMessage());
                 $failCount++;
             }
         }
 
+        $message = $this->prepareStatusMessage(
+            totalItems: count($contents),
+            successCount: $successCount,
+            failCount: $failCount,
+            alreadyRepliedCount: $alreadyRepliedCount,
+            invalidCount: $invalidCount
+        );
+
         session()->flash('status', [
-            'variant' => 'success',
-            'message' => "Berhasil mengirim {$successCount} email. " .
-                ($failCount > 0 ? "{$failCount} gagal dikirim." : ""),
+            'variant' => $successCount > 0 ? 'success' : 'info',
+            'message' => $message,
         ]);
 
         $this->redirectRoute('show.ratings', navigate: true);
+    }
+
+    protected function prepareStatusMessage(
+        int $totalItems,
+        int $successCount,
+        int $failCount,
+        int $alreadyRepliedCount,
+        int $invalidCount
+    ): string {
+        // Special case 1: All items were already replied
+        if ($alreadyRepliedCount === $totalItems) {
+            return "Semua balasan email telah dikirim sebelumnya.";
+        }
+
+        // Special case 2: No valid items to process
+        if ($invalidCount === $totalItems) {
+            return "Tidak ada rating valid yang perlu dibalas.";
+        }
+
+        // Normal cases
+        $messages = [];
+        if ($successCount > 0)
+            $messages[] = "Berhasil mengirim {$successCount} email.";
+        if ($failCount > 0)
+            $messages[] = "Gagal mengirim {$failCount} email.";
+        if ($alreadyRepliedCount > 0)
+            $messages[] = "{$alreadyRepliedCount} sudah pernah dikirim.";
+        if ($invalidCount > 0)
+            $messages[] = "{$invalidCount} data tidak valid.";
+
+        return implode(' ', $messages);
     }
 }

@@ -231,9 +231,10 @@ class InformationSystemRequest extends Model
 
     public function updatedForCompletedReview()
     {
+        $this->status->transitionTo(Disposition::class);
         $this->update([
             'active_revision' => false,
-            'need_review' => false,
+            'need_review' => false
         ]);
     }
 
@@ -322,77 +323,5 @@ class InformationSystemRequest extends Model
     public function getNearestMeetingFromCollection(Collection $meetings)
     {
         return $meetings->filter(fn($meeting) => $meeting->start_at <= Carbon::now())->sortBy('start_at')->first();
-    }
-
-    public static function getNearMeetingsByDate()
-    {
-        $now = Carbon::now();
-        $userId = auth()->id();
-
-        // Get all meetings from user id
-        $allMeetings = self::where('user_id', $userId)
-            ->get()
-            ->pluck('meetings')->flatMap(function ($meeting) use ($now) {
-                return $meeting;
-            })->filter();
-
-        // Filter meeting in 3 days ahead
-        $filteredMeetings = $allMeetings->filter(function ($meeting) use ($now) {
-            if (!isset($meeting['date']))
-                return false;
-            $meetingDate = Carbon::parse($meeting['date'])->startOfDay();
-            $todayStart = $now->copy()->startOfDay();
-            $twoDaysLater = $todayStart->copy()->addDays(2)->endOfDay();
-
-            return $meetingDate->between($todayStart, $twoDaysLater);
-        });
-
-        // Group by date
-        $groupedMeetings = $filteredMeetings->groupBy('date')->map(function ($meetings, $date) {
-            $dateCarbon = Carbon::parse($date)->locale('id');
-
-            return [
-                'date_number' => $dateCarbon->day,
-                'date_day' => $dateCarbon->translatedFormat('l'),
-                'date_month' => $dateCarbon->translatedFormat('F'),
-                'is_today' => $dateCarbon->isToday(),
-                'meetings' => collect($meetings)->map(function ($meeting) {
-                    $password = $meeting['password'] ?? null;
-
-                    return [
-                        'start' => $meeting['start'],
-                        'end' => $meeting['end'],
-                        'link_location' => [
-                            'type' => isset($meeting['link']) ? 'link' : (isset($meeting['location']) ? 'location' : null),
-                            'value' => $meeting['link'] ?? $meeting['location'] ?? null,
-                            'password' => $password, // Tambahkan password jika ada
-                        ],
-                    ];
-                })->sortBy('start')->values()->all(),
-                'has_meetings' => $meetings->isNotEmpty(),
-            ];
-        });
-
-        // Generate 3 days nearest (today + 2 days ahead)
-        $datesToCheck = [
-            $now->copy()->format('Y-m-d'),
-            $now->copy()->addDay()->format('Y-m-d'),
-            $now->copy()->addDays(2)->format('Y-m-d'),
-        ];
-
-        // Merge with a date that does not have a meeting
-        $result = collect($datesToCheck)->map(function ($date) use ($groupedMeetings) {
-            $dateParse = Carbon::parse($date);
-            return $groupedMeetings[$date] ?? [
-                'date_number' => $dateParse->day,
-                'date_day' => $dateParse->locale('id')->translatedFormat('l'),
-                'date_month' => $dateParse->locale('id')->translatedFormat('F'),
-                'is_today' => $dateParse->isToday(),
-                'meetings' => [],
-                'has_meetings' => false,
-            ];
-        })->values();
-
-        return $result;
     }
 }

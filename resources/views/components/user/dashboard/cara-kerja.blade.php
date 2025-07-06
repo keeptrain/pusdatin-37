@@ -5,12 +5,12 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-16 text-center">
             <h2 class="text-3xl font-bold text-center mb-5 relative 
-     after:content-[''] after:absolute after:bottom-[-0.5rem] after:left-1/2 
-     after:w-16 after:h-1 after:bg-[#364872] after:rounded-full 
-     after:transform after:-translate-x-1/2">Cara Kerja</h2>
-            <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+            after:content-[''] after:absolute after:bottom-[-0.5rem] after:left-1/2 
+            after:w-16 after:h-1 after:bg-[#364872] after:rounded-full 
+            after:transform after:-translate-x-1/2">Cara Kerja</h2>
+            {{-- <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
                 Proses pengajuan permintaan layanan yang sederhana dan efisien untuk memenuhi kebutuhan Anda.
-            </p>
+            </p> --}}
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

@@ -3,7 +3,7 @@
 
     <flux:heading size="xl" level="1" class="p-4">{{ __('Detail User') }}</flux:heading>
 
-    <div class="max-w-screen-xl mx-auto px-4 lg:px-0 mb-6">
+    <div class="max-w-screen-xl mb-6 ml-4">
         <div class="p-6 border border-gray-200 rounded-lg overflow-hidden space-y-4">
             <!-- Header: Request ID & Status -->
             <div class="flex flex-col md:flex-row md:items-center space-x-4">

@@ -21,21 +21,6 @@
         </p>
     </section>
 
-    <h4 class="text-gray-500 mb-1">Penanggung Jawab</h4>
-    <p class="text-gray-800">
-        {{ $publicRelation->user->name }}
-    </p>
-
-    <h4 class="text-gray-500 mb-1">Kontak</h4>
-    <p class="text-gray-800">
-        {{ $publicRelation->user->contact }}
-    </p>
-
-    <h4 class="text-gray-500 mb-1">Seksi</h4>
-    <p class="text-gray-800">
-        {{ ucwords($publicRelation->user->section) }}
-    </p>
-
     <h4 class="text-gray-500 mb-1">Bulan Publikasi</h4>
     <p class="text-gray-800">
         {{ $publicRelation->month_publication }}

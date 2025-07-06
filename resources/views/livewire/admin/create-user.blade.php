@@ -1,8 +1,8 @@
 <section>
     <flux:modal name="create-user" :show="$errors->isNotEmpty()" focusable class="max-w-lg">
-        <form wire:submit="save" class="space-y-6" >
+        <form wire:submit="save" class="space-y-6">
             <div>
-                <flux:heading size="lg">{{ _('Add user') }}</flux:heading>
+                <flux:heading size="lg">{{ __('Add user') }}</flux:heading>
 
                 <flux:subheading>
                     {{ __('Fill the form.') }}
@@ -11,13 +11,18 @@
 
             <flux:input wire:model="form.name" :label="__('Name')" type="name" />
             <flux:input wire:model="form.email" :label="__('Email')" type="email" />
-            <flux:input wire:model="form.section" :label="__('Section')" type="text" />
+            <flux:select wire:model="form.section" label="Seksi" placeholder="Pilih seksi" required>
+                @foreach ($this->getSections as $key => $section)
+                    <option value="{{ $key }}">{{ $section }}</option>
+                @endforeach
+            </flux:select>
             <flux:input wire:model="form.contact" :label="__('Contact')" type="number" />
 
             <flux:input wire:model="form.password" :label="__('Password')" type="password" clearable />
-            
+
             <flux:radio.group wire:model="form.role" label="Role">
-                {{-- <flux:radio name="role" value="administrator" label="Administrator"
+                {{--
+                <flux:radio name="role" value="administrator" label="Administrator"
                     description="Administrator users can perform any action." disabled />
                 <flux:radio name="role" value="verifikator" label="Verifikator"
                     description="Verifikator users have the ability to read, create, and update." /> --}}

@@ -1,44 +1,72 @@
-<h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200 mb-3">Status Permohonan</h3>
-<div class="flex-1 flex flex-col justify-center space-y-3">
-    @hasrole('promkes_verifier')
-    <div class="flex items-center">
-        <div class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
-        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Permohonan Masuk</div>
-        <div class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['pending'] }}
+<flux:heading size="lg" class="mb-3">Status Permohonan</flux:heading>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Kolom Kiri -->
+    <div class="flex flex-col space-y-2">
+        @hasrole('promkes_verifier')
+        <div class="flex items-center">
+            <div class="w-2 h-2 rounded-full bg-zinc-400  mr-2"></div>
+            <flux:text>
+                Permohonan Masuk:
+                <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['pending'] }}</span>
+            </flux:text>
         </div>
-    </div>
-    <div class="flex items-center">
-        <div class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></div>
-        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Antrean Promkes</div>
-        <div class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['promkesQueue'] }}
+        <div class="flex items-center">
+            <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
+            <flux:text>
+                Antrean Promkes:
+                <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['promkesQueue'] }}</span>
+            </flux:text>
         </div>
-    </div>
-    <div class="flex items-center">
-        <div class="w-2 h-2 rounded-full bg-teal-700 mr-2"></div>
-        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Selesai Kurasi</div>
-        <div class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['promkesCompleted'] }}
+        <div class="flex items-center">
+            <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
+            <flux:text>
+                Selesai Kurasi:
+                <span
+                    class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['promkesCompleted'] }}</span>
+            </flux:text>
         </div>
-    </div>
-    @endhasrole
-    @hasrole('pr_verifier')
-    <div class="flex items-center">
-        <div class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
-        <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Antrean Pusdatin</div>
-        <div class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['pusdatinQueue'] }}
+        @endhasrole
+        @hasrole('pr_verifier')
+        <div class="flex items-center">
+            <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
+            <flux:text>
+                Antrean Pusdatin:
+                <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['pusdatinQueue'] }}</span>
+            </flux:text>
         </div>
-    </div>
-    <div class="flex items-center">
-        <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
-        <div class="flex-1 text-sm text-neutral-6005 dark:text-neutral-300">Proses Pusdatin</div>
-        <div class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['pusdatinProcess'] }}
+        <div class="flex items-center">
+            <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
+            <flux:text>
+                Proses Pusdatin:
+                <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['pusdatinProcess'] }}</span>
+            </flux:text>
         </div>
-    </div>
-    <div class="flex items-center">
-        <div class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
-        <div class="flex-1 text-sm text-neutral-6005 dark:text-neutral-300">Permohonan Selesai</div>
-        <div class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['completed'] }}
+        <div class="flex items-center">
+            <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
+            <flux:text>
+                Permohonan Selesai:
+                <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['completed'] }}</span>
+            </flux:text>
         </div>
+        @endhasrole
     </div>
-    @endhasrole
 
+    {{-- <!-- Kolom Kanan -->
+    <div class="flex flex-col space-y-2">
+        <div class="flex items-center">
+            <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
+            <flux:text>
+                Disetujui Kasatpel:
+                <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['approvedKasatpel']
+                    }}</span>
+            </flux:text>
+        </div>
+        <div class="flex items-center">
+            <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
+            <flux:text>
+                Proses:
+                <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['process'] }}</span>
+            </flux:text>
+        </div>
+    </div> --}}
 </div>
