@@ -1,4 +1,4 @@
-<div class="space-y-4 p-2 mb-4">
+<div class="space-y-4 p-2 mb-4 mt-3">
     {{-- Header total rapat hari ini --}}
     <div class="mb-4 flex items-center space-x-4">
         {{-- <x-lucide-calendar class="size-7" /> --}}
@@ -52,9 +52,9 @@
                             <flux:subheading size="lg" class="text-black text-sm">
                                 @if ($meeting['place']['type'] === 'link')
                                     <flux:link x-data="{
-                                        link: '{{ $meeting['place']['value'] ?? '' }}',
-                                        isTruncated: false }" 
-                                        x-init="isTruncated = typeof link === 'string' && link.length > 50;" 
+                                                        link: '{{ $meeting['place']['value'] ?? '' }}',
+                                                        isTruncated: false }"
+                                        x-init="isTruncated = typeof link === 'string' && link.length > 50;"
                                         :href="$meeting['place']['value'] ?? '#'">
                                         <span x-text="isTruncated ? link.substring(0, 50) + '...' : link"></span>
                                     </flux:link>
