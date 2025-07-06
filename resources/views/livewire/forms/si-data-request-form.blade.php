@@ -60,22 +60,22 @@
                             Kelengkapan Dokumen
                         </h3>
 
-                        <x-letters.input-file-adapter title="Permohonan (nota dinas)" model="files.0" required />
+                        <x-layouts.form.input-file title="Permohonan (nota dinas)" model="files.0" required />
 
                         <!-- File Upload -->
-                        <x-letters.input-file-adapter title="1. Dokumen Identifikasi Aplikasi" model="files.1"
+                        <x-layouts.form.input-file title="1. Dokumen Identifikasi Aplikasi" model="files.1"
                             required />
 
-                        <x-letters.input-file-adapter title="2. SOP Aplikasi" model="files.2" required />
+                        <x-layouts.form.input-file title="2. SOP Aplikasi" model="files.2" required />
 
-                        <x-letters.input-file-adapter title="3. Pakta Integritas Implementasi" model="files.3"
+                        <x-layouts.form.input-file title="3. Pakta Integritas Implementasi" model="files.3"
                             required />
 
-                        <x-letters.input-file-adapter title="4. Form RFC Pusdatinkes" model="files.4" required />
+                        <x-layouts.form.input-file title="4. Form RFC Pusdatinkes" model="files.4" required />
 
                         <template x-if="hasPartNumber5">
                             <div class="mt-4">
-                                <x-letters.input-file-adapter title="5. Surat perjanjian kerahasiaan" model="files.5"
+                                <x-layouts.form.input-file title="5. Surat perjanjian kerahasiaan" model="files.5"
                                     optional />
                             </div>
                         </template>

@@ -103,7 +103,7 @@
                 </h3>
 
                 <div>
-                    <x-letters.input-file-adapter title="Permohonan (nota dinas)" model="uploadFile.0" required />
+                    <x-layouts.form.input-file title="Permohonan (nota dinas)" model="uploadFile.0" required />
                 </div>
 
                 <div class="p-2 bg-amber-100  items-center rounded-lg">
@@ -133,63 +133,63 @@
 
                     <template x-if="selectedMediaType.includes('1')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Audio" model="uploadFile.1" required />
+                            <x-layouts.form.input-file title="Materi Audio" model="uploadFile.1" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('2')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Infographics" model="uploadFile.2" required />
+                            <x-layouts.form.input-file title="Materi Infographics" model="uploadFile.2" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('3')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Poster" model="uploadFile.3" required />
+                            <x-layouts.form.input-file title="Materi Poster" model="uploadFile.3" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('4')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Video" model="uploadFile.4" required />
+                            <x-layouts.form.input-file title="Materi Video" model="uploadFile.4" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('5')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Bumper" model="uploadFile.5" required />
+                            <x-layouts.form.input-file title="Materi Bumper" model="uploadFile.5" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('6')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Backdrop Kegiatan" model="uploadFile.6"
+                            <x-layouts.form.input-file title="Materi Backdrop Kegiatan" model="uploadFile.6"
                                 required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('7')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Spanduk" model="uploadFile.7" required />
+                            <x-layouts.form.input-file title="Materi Spanduk" model="uploadFile.7" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('8')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Roll banner" model="uploadFile.8" required />
+                            <x-layouts.form.input-file title="Materi Roll banner" model="uploadFile.8" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('9')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Sertifikat" model="uploadFile.9" required />
+                            <x-layouts.form.input-file title="Materi Sertifikat" model="uploadFile.9" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('10')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Press Release" model="uploadFile.10" required />
+                            <x-layouts.form.input-file title="Materi Press Release" model="uploadFile.10" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('11')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Artikel" model="uploadFile.11" required />
+                            <x-layouts.form.input-file title="Materi Artikel" model="uploadFile.11" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('12')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Peliputan" model="uploadFile.12" required />
+                            <x-layouts.form.input-file title="Materi Peliputan" model="uploadFile.12" required />
                         </div>
                     </template>
                 </section>
