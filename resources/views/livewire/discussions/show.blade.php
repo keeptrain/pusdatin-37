@@ -16,8 +16,8 @@
         </div>
         <flux:subheading>Pembahasan: {{ $discussion->body }}</flux:subheading>
 
-        <div class="flex lg:flex-row flex-col justify-between items-center gap-2">
-            <flux:text>Lampiran awal: </flux:text>
+        <div class="flex lg:flex-row flex-col justify-between items-center">
+            <flux:text>Lampiran: <x-discussions.attachments-list /></flux:text>
             <flux:text>Tanggal dibuat: {{ $discussion->firstCreatedAt }}</flux:text>
         </div>
     </div>
@@ -36,14 +36,14 @@
                     <div class="flex flex-col space-y-1 w-full">
                         <div class="flex items-center justify-between">
                             <flux:text class="font-semibold">{{ $reply->user->name }}</flux:text>
-
                             {{-- <flux:text>Lampiran</flux:text> --}}
                         </div>
 
                         <flux:text class="text-xs">menjawab {{ $reply->created_at->diffForHumans() }}</flux:text>
                         <div>
-                            <p class="text-gray-700">{{ $reply->body }}</p>
+                            <flux:legend>{{ $reply->body }}</flux:legend>
                         </div>
+                        <x-discussions.attachments-list />
                     </div>
                 @endif
 
@@ -56,9 +56,10 @@
                             </a>
                         </div>
                         <flux:text class="text-xs">menjawab {{ $reply->created_at->diffForHumans() }}</flux:text>
-                        <div>
-                            <p class="text-gray-700">{{ $reply->body }}</p>
+                        <div class="flex justify-between space-y-1">
+                            <flux:legend>{{ $reply->body }}</flux:legend>
                         </div>
+                        <x-discussions.attachments-list />
                     </div>
                 @endif
             </div>
