@@ -44,11 +44,11 @@ function initDataTable() {
                 className: "text-center",
             },
             {
-                targets: 4,
+                targets: 4, // Status column
                 orderable: false,
             },
             {
-                targets: -1, // Last column (Actions)
+                targets: -1, // Last column
                 orderable: false,
                 searchable: false,
             },
@@ -61,13 +61,14 @@ function initDataTable() {
 
             // Update custom info text
             updateCustomInfo();
+
+            // Re-apply checkbox states after redraw
+            reapplyCheckboxStates();
         },
     });
 
-    // Global search functionality
-    $("#globalSearch").on("keyup", function () {
-        dataTable.search(this.value).draw();
-    });
+    // Global search functionality - IMPORTANT: Setup search AFTER table initialization
+    setupGlobalSearch();
 
     // Initialize status filter in header
     initHeaderStatusFilter();
@@ -75,24 +76,41 @@ function initDataTable() {
     // Initial checkbox binding
     bindCheckboxEvents();
 
-    // Add custom entries per page control
+    // Add custom entries control
     addCustomEntriesControl();
 }
 
+function setupGlobalSearch() {
+    // Remove any existing event handlers first
+    $("#globalSearch").off("keyup");
+
+    // Setup new handler
+    $("#globalSearch").on("keyup", function () {
+        if (dataTable) {
+            dataTable.search(this.value).draw();
+        }
+    });
+}
+
 function addCustomEntriesControl() {
+    // Check if control already exists
+    if ($(".custom-entries-control").length > 0) {
+        return;
+    }
+
     // Add custom entries control before the table
     const entriesControl = `
-                <div class="custom-entries-control">
-                    <label for="customEntriesSelect">Show</label>
-                    <select id="customEntriesSelect">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                    <label>entries per page</label>
-                </div>
-            `;
+        <div class="custom-entries-control">
+            <label for="customEntriesSelect">Show</label>
+            <select id="customEntriesSelect">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <label>entries per page</label>
+        </div>
+    `;
 
     // Insert before the table
     $("#prRequestsTable").before(entriesControl);
@@ -109,35 +127,80 @@ function updateCustomInfo() {
     // DataTables will handle the default info display
 }
 
+function reapplyCheckboxStates() {
+    // Reapply select all checkbox state
+    const selectAllChecked = $("#selectAllCheckbox").prop("checked");
+    if (selectAllChecked) {
+        $(".row-checkbox")
+            .prop("checked", true)
+            .prop("disabled", true)
+            .addClass("checkbox-disabled");
+    }
+}
+
 function bindCheckboxEvents() {
-    $("#prRequestsTable tbody tr")
-        .off("click")
-        .on("click", function (e) {
-            if (isDeleting) {
-                return;
-            }
+    // Remove existing handlers to prevent duplicates
+    $("#prRequestsTable tbody tr").off("click");
+    $("#selectAllCheckbox").off("change");
+    $(".row-checkbox").off("change");
 
-            const clickedColumnIndex = $(e.target).closest("td").index();
-            if (
-                clickedColumnIndex === 0 ||
-                clickedColumnIndex === 4 ||
-                clickedColumnIndex === 8
-            ) {
-                return;
-            }
+    // Row click handler
+    $("#prRequestsTable tbody tr").on("click", function (e) {
+        if (isDeleting) {
+            return;
+        }
 
-            const id = $(this).data("id");
-            if (id) {
-                window.location.href =
-                    "{{ url('public-relation') }}" + "/" + id;
-            }
-        });
+        const clickedColumnIndex = $(e.target).closest("td").index();
+        if (
+            clickedColumnIndex === 0 ||
+            clickedColumnIndex === 4 ||
+            clickedColumnIndex === 8
+        ) {
+            return;
+        }
+
+        const id = $(this).data("id");
+        if (id) {
+            window.location.href = "{{ url('public-relation') }}" + "/" + id;
+        }
+    });
+
+    // Select all checkbox handler
+    $("#selectAllCheckbox").on("change", function () {
+        const isChecked = $(this).prop("checked");
+
+        if (isChecked) {
+            // Check all checkboxes and disable them
+            $(".row-checkbox")
+                .prop("checked", true)
+                .prop("disabled", true)
+                .addClass("checkbox-disabled");
+        } else {
+            // Uncheck all checkboxes and enable them
+            $(".row-checkbox")
+                .prop("checked", false)
+                .prop("disabled", false)
+                .removeClass("checkbox-disabled");
+        }
+    });
+
+    // Individual checkbox handler
+    $(".row-checkbox").on("change", function () {
+        const totalCheckboxes = $(".row-checkbox").length;
+        const checkedCheckboxes = $(".row-checkbox:checked").length;
+
+        if (checkedCheckboxes === totalCheckboxes && totalCheckboxes > 0) {
+            $("#selectAllCheckbox").prop("checked", true);
+        } else {
+            $("#selectAllCheckbox").prop("checked", false);
+        }
+    });
 }
 
 function enableTableInteractions() {
-    $("#requestsTable").removeClass("table-disabled");
+    $("#prRequestsTable").removeClass("table-disabled");
 
-    if (!$("#selectAllCheckbox").is(":checked")) {
+    if (!$("#selectAllCheckbox").prop("checked")) {
         $(".row-checkbox")
             .prop("disabled", false)
             .removeClass("checkbox-disabled");
@@ -147,6 +210,7 @@ function enableTableInteractions() {
     $("#globalSearch").prop("disabled", false);
     $("#statusFilterToggle").prop("disabled", false);
 }
+
 function showFlashMessage(type, message) {
     const flashContainer = $("#flash-messages");
     const alertClass =
@@ -155,17 +219,17 @@ function showFlashMessage(type, message) {
             : "bg-red-100 border-red-400 text-red-700";
 
     const flashHtml = ` 
-                <div class="mb-4 p-4 ${alertClass} border rounded flash-message">
-                    ${message}
-                </div>
-            `;
+        <div class="mb-4 p-4 ${alertClass} border rounded flash-message">
+            ${message}
+        </div>
+    `;
 
     flashContainer.html(flashHtml);
 
     // Auto hide after 5 seconds
     setTimeout(() => {
         flashContainer.find(".flash-message").fadeOut();
-    }, 1000);
+    }, 5000);
 }
 
 // Function to remove rows from DataTable
@@ -184,6 +248,24 @@ function removeRowsFromDataTable(deletedIds) {
 
 // Listen for Livewire events
 document.addEventListener("livewire:init", () => {
+    // Handle confirm delete button click
+    Livewire.on("confirm-delete", (event) => {
+        const deleteButton = $('button[wire\\:click="confirmDelete"]');
+        const originalText = deleteButton.html();
+
+        // Disable button and show loading state
+        deleteButton
+            .prop("disabled", true)
+            .html(
+                '<span class="inline-flex items-center"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading...</span>'
+            );
+
+        // Re-enable button after modal shows (typically after a short delay)
+        setTimeout(() => {
+            deleteButton.prop("disabled", false).html(originalText);
+        }, 500);
+    });
+
     Livewire.on("data-deleted", (event) => {
         const data = event[0];
         const deletedIds = data.deletedIds;
@@ -201,22 +283,34 @@ document.addEventListener("livewire:init", () => {
         // Update button states and selections
         updateButtonStates();
     });
+
     Livewire.on("select-all-updated", (event) => {
         const data = event[0];
         const selectAll = data.selectAll;
         const selectedIds = data.selectedIds;
 
         if (selectAll) {
-            // Disable all individual checkboxes when select all is checked
+            // Check and disable all individual checkboxes when select all is checked
             $(".row-checkbox")
+                .prop("checked", true)
                 .prop("disabled", true)
                 .addClass("checkbox-disabled");
         } else {
-            // Enable all individual checkboxes when select all is unchecked
+            // Uncheck and enable all individual checkboxes when select all is unchecked
             $(".row-checkbox")
+                .prop("checked", false)
                 .prop("disabled", false)
                 .removeClass("checkbox-disabled");
         }
+    });
+
+    Livewire.on("delete-started", () => {
+        isDeleting = true;
+    });
+
+    Livewire.on("delete-completed", () => {
+        isDeleting = false;
+        enableTableInteractions();
     });
 });
 
@@ -234,10 +328,8 @@ function updateButtonStates() {
         .prop("disabled", true)
         .addClass("opacity-50 cursor-not-allowed");
 
-    // Hide cancel selection button
-    $("button[wire\\:click=\"$set('selectedPrRequest', [])\"]")
-        .closest("div")
-        .hide();
+    // Enable all checkboxes again
+    $(".row-checkbox").prop("disabled", false).removeClass("checkbox-disabled");
 }
 
 const defaultStatusOptions = [
@@ -413,7 +505,9 @@ function updateFilterButtonVisual() {
 
 function applyStatusFilter() {
     // Simply redraw the table - the custom search function will handle the filtering
-    dataTable.draw();
+    if (dataTable) {
+        dataTable.draw();
+    }
 }
 
 // Initialize on various events

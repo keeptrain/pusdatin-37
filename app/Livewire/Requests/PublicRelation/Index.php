@@ -179,70 +179,56 @@ class Index extends Component
             session()->flash('error', 'Tidak ada data yang dipilih untuk dihapus.');
             return;
         }
-        // Set loading state
+
+        $this->performDelete();
+    }
+
+    private function performDelete()
+    {
         $this->isDeleting = true;
         $this->dispatch('delete-started');
 
         try {
-            DB::beginTransaction();
-
             $deletedCount = count($this->selectedPrRequest);
-            $deletedIds = $this->selectedPrRequest; // Simpan ID yang akan dihapus
+            $deletedIds = $this->selectedPrRequest;
 
-            // Delete selected requests
-            PublicRelationRequest::whereIn('id', $this->selectedPrRequest)->delete();
+            DB::transaction(function () use ($deletedIds) {
+                // Hapus data dari database
+                PublicRelationRequest::whereIn('id', $deletedIds)->delete();
+            });
 
-            DB::commit();
+            // Reset selections setelah berhasil delete
+            $this->resetSelections();
 
-            // Reset selections
-            $this->selectedPrRequest = [];
-            $this->selectAll = false;
+            // Flash message
+            session()->flash('success', "Data berhasil dihapus sebanyak {$deletedCount} item.");
 
-            // Refresh data
-            $this->refreshData();
-
-            // Emit event ke frontend untuk update DataTable
-            $this->dispatch('data-deleted', [
-                'deletedIds' => $deletedIds,
-                'deletedCount' => $deletedCount
+            // Dispatch event untuk auto refresh halaman
+            $this->dispatch('delete-success-refresh', [
+                'deletedCount' => $deletedCount,
+                'message' => "Data berhasil dihapus sebanyak {$deletedCount} item."
             ]);
-
-            session()->flash('success', 'Data berhasil dihapus sebanyak ' . $deletedCount . ' item.');
-
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+            $this->dispatch('delete-error');
+        } finally {
             $this->isDeleting = false;
             $this->dispatch('delete-completed');
-        } catch (\Exception $e) {
-            DB::rollback();
-            session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
+    }
+
+    private function resetSelections()
+    {
+        $this->selectedPrRequest = [];
+        $this->selectAll = false;
     }
 
     public function confirmDelete()
     {
-        if ($this->isDeleting) {
-            return; // Prevent multiple calls during deletion
-        }
+        if ($this->isDeleting) return;
 
         $this->dispatch('confirm-delete', [
             'count' => count($this->selectedPrRequest)
         ]);
-    }
-
-    // Update search query and refresh data
-    public function updatedSearchQuery()
-    {
-        $this->loadData();
-    }
-
-    // Update filter status and refresh data
-    public function updatedFilterStatus()
-    {
-        $this->loadData();
-    }
-
-    // Update sort by and refresh data
-    public function updatedSortBy()
-    {
-        $this->loadData();
     }
 }

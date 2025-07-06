@@ -8,59 +8,39 @@ use Illuminate\Support\Facades\DB;
 
 class Index extends Component
 {
-    /** @var \Illuminate\Database\Eloquent\Collection */
-    public $requests;
-
-    /** @var array */
     public $selectedRequests = [];
-
-    /** @var bool */
     public $selectAll = false;
-
-    /** @var bool */
     public $isDeleting = false;
-
-    public function mount()
-    {
-        // Load all requests for current user role
-        $roleId = auth()->user()->currentUserRoleId();
-        $this->requests = InformationSystemRequest::with(['user:id,name'])
-            ->filterCurrentDivisionByCurrentUser($roleId)
-            ->orderBy('created_at', 'desc')
-            ->get();
-    }
-
-    public function refreshData()
-    {
-        // Refresh data setelah delete
-        $roleId = auth()->user()->currentUserRoleId();
-        $this->requests = InformationSystemRequest::with(['user:id,name'])
-            ->filterCurrentDivisionByCurrentUser($roleId)
-            ->orderBy('created_at', 'desc')
-            ->get();
-    }
 
     public function render()
     {
+        // Load data fresh setiap render
+        $roleId = auth()->user()->currentUserRoleId();
+        $requests = InformationSystemRequest::with(['user:id,name'])
+            ->filterCurrentDivisionByCurrentUser($roleId)
+            ->latest()
+            ->get();
+
         return view('livewire.requests.information-system.index', [
-            'requests' => $this->requests
+            'requests' => $requests
         ]);
     }
 
     public function show(int $requestId)
     {
-        return $this->redirectRoute('is.show', ['id' => $requestId], true);
+        return $this->redirect(route('is.show', $requestId), navigate: true);
     }
 
     public function updatedSelectAll($value)
     {
         if ($value) {
-            $this->selectedRequests = $this->requests->pluck('id')->toArray();
+            $roleId = auth()->user()->currentUserRoleId();
+            $currentRequests = InformationSystemRequest::filterCurrentDivisionByCurrentUser($roleId)->get();
+            $this->selectedRequests = $currentRequests->pluck('id')->toArray();
         } else {
             $this->selectedRequests = [];
         }
 
-        // Dispatch event untuk update checkbox state di frontend
         $this->dispatch('select-all-updated', [
             'selectAll' => $value,
             'selectedIds' => $this->selectedRequests
@@ -69,7 +49,9 @@ class Index extends Component
 
     public function updatedSelectedRequests()
     {
-        $this->selectAll = count($this->selectedRequests) === $this->requests->count();
+        $roleId = auth()->user()->currentUserRoleId();
+        $totalRequests = InformationSystemRequest::filterCurrentDivisionByCurrentUser($roleId)->count();
+        $this->selectAll = count($this->selectedRequests) === $totalRequests;
     }
 
     public function deleteSelected()
@@ -79,52 +61,52 @@ class Index extends Component
             return;
         }
 
-        // Set loading state
+        $this->performDelete();
+    }
+
+    private function performDelete()
+    {
         $this->isDeleting = true;
         $this->dispatch('delete-started');
 
         try {
-            DB::beginTransaction();
-
             $deletedCount = count($this->selectedRequests);
-            $deletedIds = $this->selectedRequests; // Simpan ID yang akan dihapus
+            $deletedIds = $this->selectedRequests;
 
-            // Delete selected requests
-            InformationSystemRequest::whereIn('id', $this->selectedRequests)->delete();
+            DB::transaction(function () use ($deletedIds) {
+                // Hapus data dari database
+                InformationSystemRequest::whereIn('id', $deletedIds)->delete();
+            });
 
-            DB::commit();
+            // Reset selections setelah berhasil delete
+            $this->resetSelections();
 
-            // Reset selections
-            $this->selectedRequests = [];
-            $this->selectAll = false;
+            // Flash message
+            session()->flash('success', "Data berhasil dihapus sebanyak {$deletedCount} item.");
 
-            // Refresh data
-            $this->refreshData();
-
-            // Emit event ke frontend untuk update DataTable
-            $this->dispatch('data-deleted', [
-                'deletedIds' => $deletedIds,
-                'deletedCount' => $deletedCount
+            // Dispatch event untuk auto refresh halaman
+            $this->dispatch('delete-success-refresh', [
+                'deletedCount' => $deletedCount,
+                'message' => "Data berhasil dihapus sebanyak {$deletedCount} item."
             ]);
-
-            session()->flash('success', 'Data berhasil dihapus sebanyak ' . $deletedCount . ' item.');
-
-            // Reset loading state dan refresh browser setelah delay
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+            $this->dispatch('delete-error');
+        } finally {
             $this->isDeleting = false;
             $this->dispatch('delete-completed');
-        } catch (\Exception $e) {
-            DB::rollback();
-            $this->isDeleting = false;
-            $this->dispatch('delete-error');
-            session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
+    }
+
+    private function resetSelections()
+    {
+        $this->selectedRequests = [];
+        $this->selectAll = false;
     }
 
     public function confirmDelete()
     {
-        if ($this->isDeleting) {
-            return;
-        }
+        if ($this->isDeleting) return;
 
         $this->dispatch('confirm-delete', [
             'count' => count($this->selectedRequests)

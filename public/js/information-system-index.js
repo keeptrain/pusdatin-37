@@ -1,467 +1,357 @@
-let dataTable;
-let selectedStatuses = [];
-let isDeleting = false;
-
-function initDataTable() {
-    // Check if dependencies are loaded
-    if (typeof $ === "undefined" || typeof DataTable === "undefined") {
-        setTimeout(initDataTable, 100);
-        return;
-    }
-
-    // Destroy existing table
-    if (DataTable.isDataTable("#requestsTable")) {
-        new DataTable("#requestsTable").destroy();
-    }
-
-    // Initialize DataTable v2
-    dataTable = new DataTable("#requestsTable", {
-        layout: {
-            topEnd: {
-                search: {
-                    placeholder: "Search...",
+class InformationSystemDataTable {
+    constructor() {
+        this.dataTable = null;
+        this.selectedStatuses = [];
+        this.isDeleting = false;
+        this.config = {
+            defaultStatusOptions: [
+                { value: "Permohonan Masuk", label: "Permohonan Masuk" },
+                { value: "Didisposisikan", label: "Didisposisikan" },
+                { value: "Revisi Kasatpel", label: "Revisi Kasatpel" },
+                { value: "Revisi Kapusdatin", label: "Revisi Kapusdatin" },
+                { value: "Disetujui Kasatpel", label: "Disetujui Kasatpel" },
+                {
+                    value: "Disetujui Kapusdatin",
+                    label: "Disetujui Kapusdatin",
                 },
+                { value: "Proses Permohonan", label: "Proses Permohonan" },
+                { value: "Permohonan Selesai", label: "Permohonan Selesai" },
+                { value: "Ditolak", label: "Ditolak" },
+            ],
+            tableConfig: {
+                layout: {
+                    topEnd: {
+                        search: { placeholder: "Search..." },
+                    },
+                },
+                pageLength: 10,
+                responsive: true,
+                ordering: true,
+                searching: true,
+                language: {
+                    sProcessing: "Sedang memproses...",
+                    sLengthMenu: "Tampilkan _MENU_ data per halaman",
+                    sZeroRecords: "Tidak ditemukan data yang sesuai",
+                    sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    sInfoEmpty: "",
+                    sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
+                    sInfoPostFix: "",
+                    sSearch: "Cari:",
+                },
+                columnDefs: [
+                    {
+                        targets: 0, // Checkbox column
+                        orderable: false,
+                        searchable: false,
+                        className: "text-center",
+                    },
+                    {
+                        targets: 1, // Checkbox column
+                        orderable: true,
+                        searchable: false,
+                        className: "text-center",
+                    },
+                    { targets: 3, className: "judul" },
+                    {
+                        targets: 4,
+                        orderable: false,
+                        searchable: false,
+                    },
+                ],
+                drawCallback: () => this.onTableDraw(),
             },
-        },
-        pageLength: 10,
-        responsive: true,
-        ordering: true,
-        searching: true,
-        language: {
-            sProcessing: "Sedang memproses...",
-            sLengthMenu: "Tampilkan _MENU_ data per halaman",
-            sZeroRecords: "Tidak ditemukan data yang sesuai",
-            sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            sInfoEmpty: "",
-            sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
-            sInfoPostFix: "",
-            sSearch: "Cari:",
-        },
-
-        columnDefs: [
-            {
-                targets: 0, // Checkbox column
-                orderable: false,
-                searchable: false,
-                className: "text-center",
-            },
-            {
-                targets: 3, // Judul column
-                className: "judul",
-            },
-            {
-                targets: 4, // Status column - disable sorting to prevent conflicts
-                orderable: false,
-            },
-        ],
-        drawCallback: function () {
-            $("#requestsTable tbody tr").addClass("hover:bg-gray-50");
-
-            // Re-bind checkbox events after table redraw
-            bindCheckboxEvents();
-        },
-    });
-
-    // Global search functionality
-    $("#globalSearch").on("keyup", function () {
-        if (!isDeleting) {
-            dataTable.search(this.value).draw();
-        }
-    });
-
-    // Initialize status filter in header
-    initHeaderStatusFilter();
-
-    // Initial checkbox binding
-    bindCheckboxEvents();
-}
-
-function bindCheckboxEvents() {
-    $("#requestsTable tbody tr")
-        .off("click")
-        .on("click", function (e) {
-            if (isDeleting) {
-                return;
-            }
-
-            const clickedColumnIndex = $(e.target).closest("td").index();
-            if (
-                clickedColumnIndex === 0 ||
-                clickedColumnIndex === 4 ||
-                clickedColumnIndex === 7
-            ) {
-                return;
-            }
-
-            const id = $(this).data("id");
-            if (id) {
-                // Using dynamic URL construction
-                const baseUrl = window.location.origin;
-                window.location.href = baseUrl + "/information-system/" + id;
-            }
-        });
-
-    // Handle select all checkbox behavior
-    $("#selectAllCheckbox")
-        .off("change")
-        .on("change", function () {
-            const isChecked = $(this).is(":checked");
-
-            if (isChecked) {
-                // When select all is checked, check all individual checkboxes and disable them
-                $(".row-checkbox")
-                    .prop("checked", true)
-                    .prop("disabled", true)
-                    .addClass("checkbox-disabled");
-            } else {
-                // When select all is unchecked, uncheck all individual checkboxes and enable them
-                $(".row-checkbox")
-                    .prop("checked", false)
-                    .prop("disabled", false)
-                    .removeClass("checkbox-disabled");
-            }
-        });
-
-    // Handle individual checkbox changes
-    $(".row-checkbox")
-        .off("change")
-        .on("change", function () {
-            // If this checkbox is being unchecked and select all was checked, uncheck select all and enable all
-            if (
-                !$(this).is(":checked") &&
-                $("#selectAllCheckbox").is(":checked")
-            ) {
-                $("#selectAllCheckbox").prop("checked", false);
-                $(".row-checkbox")
-                    .prop("disabled", false)
-                    .removeClass("checkbox-disabled");
-            }
-        });
-}
-
-function enableTableInteractions() {
-    $("#requestsTable").removeClass("table-disabled");
-
-    if (!$("#selectAllCheckbox").is(":checked")) {
-        $(".row-checkbox")
-            .prop("disabled", false)
-            .removeClass("checkbox-disabled");
+        };
     }
 
-    $("#selectAllCheckbox").prop("disabled", false);
-    $("#globalSearch").prop("disabled", false);
-    $("#statusFilterToggle").prop("disabled", false);
-}
+    init() {
+        this.waitForDependencies(() => {
+            this.initializeDataTable();
+            this.bindCustomEvents();
+            this.initializeStatusFilter();
+        });
+    }
 
-// Function to show flash messages
-function showFlashMessage(type, message) {
-    const flashContainer = $("#flash-messages");
-    const alertClass =
-        type === "success"
-            ? "bg-green-100 border-green-400 text-green-700"
-            : "bg-red-100 border-red-400 text-red-700";
-
-    const flashHtml = ` 
-        <div class="mb-4 p-4 ${alertClass} border rounded flash-message">
-            ${message}
-        </div>
-    `;
-
-    flashContainer.html(flashHtml);
-
-    // Auto hide after 5 seconds
-    setTimeout(() => {
-        flashContainer.find(".flash-message").fadeOut();
-    }, 1000);
-}
-
-// Function to remove rows from DataTable
-function removeRowsFromDataTable(deletedIds) {
-    deletedIds.forEach(function (id) {
-        // Find and remove row with the specific data-id
-        const row = dataTable.row($(`tr[data-id="${id}"]`));
-        if (row.length) {
-            row.remove();
+    waitForDependencies(callback) {
+        if (typeof $ === "undefined" || typeof DataTable === "undefined") {
+            setTimeout(() => this.waitForDependencies(callback), 100);
+            return;
         }
-    });
+        callback();
+    }
 
-    // Redraw table
-    dataTable.draw();
-}
-
-// Listen for Livewire events
-document.addEventListener("livewire:init", () => {
-    // Handle delete error event
-    Livewire.on("delete-error", () => {
-        isDeleting = false;
-        enableTableInteractions();
-    });
-
-    // Handle select all updated event
-    Livewire.on("select-all-updated", (event) => {
-        const data = event[0];
-        const selectAll = data.selectAll;
-        const selectedIds = data.selectedIds;
-
-        if (selectAll) {
-            // Disable all individual checkboxes when select all is checked
-            $(".row-checkbox")
-                .prop("disabled", true)
-                .addClass("checkbox-disabled");
-        } else {
-            // Enable all individual checkboxes when select all is unchecked
-            $(".row-checkbox")
-                .prop("disabled", false)
-                .removeClass("checkbox-disabled");
+    initializeDataTable() {
+        if (DataTable.isDataTable("#requestsTable")) {
+            new DataTable("#requestsTable").destroy();
         }
-    });
 
-    Livewire.on("data-deleted", (event) => {
-        const data = event[0];
-        const deletedIds = data.deletedIds;
-        const deletedCount = data.deletedCount;
-
-        // Remove rows from DataTable
-        removeRowsFromDataTable(deletedIds);
-
-        // Show success message
-        showFlashMessage(
-            "success",
-            `Data berhasil dihapus sebanyak ${deletedCount} item.`
+        this.dataTable = new DataTable(
+            "#requestsTable",
+            this.config.tableConfig
         );
+        this.setupCustomSearch();
+    }
 
-        // Update button states and selections
-        updateButtonStates();
+    setupCustomSearch() {
+        $("#globalSearch")
+            .off("input.customsearch")
+            .on("input.customsearch", (e) => {
+                this.dataTable.search(e.target.value).draw();
+            });
+
+        $.fn.dataTable.ext.search.push((settings, data, dataIndex) => {
+            if (this.selectedStatuses.length === 0) return true;
+            const row = settings.aoData[dataIndex].nTr;
+            const rowStatus = $(row).data("status");
+            return this.selectedStatuses.includes(rowStatus);
+        });
+    }
+
+    onTableDraw() {
+        this.bindRowNavigation();
+    }
+
+    bindCustomEvents() {
+        this.bindLivewireEvents();
+
+        this.bindCheckboxEventsMinimal();
+    }
+
+    bindRowNavigation() {
+        $("#requestsTable tbody tr")
+            .off("click.rownav")
+            .on("click.rownav", (e) => {
+                const columnIndex = $(e.target).closest("td").index();
+                if (columnIndex === 0 || columnIndex === 4) return;
+
+                if (this.isDeleting) return;
+
+                const id = $(e.currentTarget).data("id");
+                if (id) {
+                    window.location.href = `${window.location.origin}/information-system/${id}`;
+                }
+            });
+    }
+
+    bindCheckboxEventsMinimal() {
+        if (!$("#selectAllCheckbox").data("custom-bound")) {
+            $("#selectAllCheckbox")
+                .on("change.selectallminimal", (e) => {
+                    const isChecked = e.target.checked;
+                    $(".row-checkbox").prop("checked", isChecked);
+                })
+                .data("custom-bound", true);
+        }
+
+        $(document)
+            .off("change.checkboxminimal")
+            .on("change.checkboxminimal", ".row-checkbox", (e) => {
+                e.stopPropagation();
+
+                const total = $(".row-checkbox").length;
+                const checked = $(".row-checkbox:checked").length;
+                $("#selectAllCheckbox").prop("checked", checked === total);
+            });
+    }
+
+    bindLivewireEvents() {
+        // Hanya bind sekali
+        if (this.livewireEventsBound) return;
+
+        document.addEventListener("livewire:init", () => {
+            Livewire.on("delete-error", () => {
+                this.isDeleting = false;
+                this.hideProcessingMessage();
+            });
+
+            Livewire.on("select-all-updated", (event) => {
+                // MINIMAL update - hanya checkbox state
+                const { selectAll } = event[0];
+                $(".row-checkbox").prop("checked", selectAll);
+                $("#selectAllCheckbox").prop("checked", selectAll);
+            });
+
+            Livewire.on("data-deleted-reinit", () => {
+                this.handleDataDeletedReinit();
+            });
+
+            Livewire.on("delete-started", () => {
+                this.isDeleting = true;
+                this.showProcessingMessage();
+            });
+
+            Livewire.on("delete-completed", () => {
+                this.isDeleting = false;
+                this.hideProcessingMessage();
+            });
+        });
+
+        this.livewireEventsBound = true;
+    }
+
+    handleDataDeletedReinit() {
+        // Re-initialize setelah data berubah
+        setTimeout(() => {
+            this.initializeDataTable();
+
+            // Reset filter tanpa mengganggu DataTable
+            this.selectedStatuses = [];
+            this.updateFilterButtonVisual();
+            $("#globalSearch").val("");
+        }, 100);
+    }
+
+    showProcessingMessage() {
+        $("#processing-overlay").remove(); // Remove existing
+        const overlay = `
+            <div id="processing-overlay" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                <div class="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span class="text-gray-700">Menghapus data...</span>
+                </div>
+            </div>
+        `;
+        $("body").append(overlay);
+    }
+
+    hideProcessingMessage() {
+        $("#processing-overlay").fadeOut(300, function () {
+            $(this).remove();
+        });
+    }
+
+    // Status Filter - ISOLASI COMPLETE dari DataTable events
+    initializeStatusFilter() {
+        this.populateStatusCheckboxes();
+        this.bindStatusFilterEventsIsolated();
+    }
+
+    populateStatusCheckboxes() {
+        const container = $("#statusCheckboxContainer");
+        container.empty();
+
+        this.config.defaultStatusOptions.forEach((opt, idx) => {
+            container.append(`
+                <div class="status-checkbox-item">
+                    <input type="checkbox" id="status_${idx}" class="status-checkbox" value="${opt.value}">
+                    <label for="status_${idx}">${opt.label}</label>
+                </div>
+            `);
+        });
+    }
+
+    bindStatusFilterEventsIsolated() {
+        // COMPLETELY ISOLATED - menggunakan namespace yang unik
+
+        // Toggle dropdown
+        $(document)
+            .off("click.statusfilterunique")
+            .on("click.statusfilterunique", "#statusFilterToggle", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+
+                const dropdown = $("#statusFilterDropdown");
+                dropdown.toggleClass("hidden");
+            });
+
+        // Close dropdown
+        $(document)
+            .off("click.statuscloseunique")
+            .on("click.statuscloseunique", "#closeStatusFilter", (e) => {
+                e.stopPropagation();
+                $("#statusFilterDropdown").addClass("hidden");
+            });
+
+        // Status checkbox changes
+        $(document)
+            .off("change.statuscheckboxunique")
+            .on("change.statuscheckboxunique", ".status-checkbox", () => {
+                this.updateSelectedStatuses();
+                this.applyStatusFilter();
+            });
+
+        // Select/Clear all
+        $(document)
+            .off("click.selectallstatusunique")
+            .on("click.selectallstatusunique", "#selectAllStatus", (e) => {
+                e.preventDefault();
+                $(".status-checkbox").prop("checked", true);
+                this.updateSelectedStatuses();
+                this.applyStatusFilter();
+            });
+
+        $(document)
+            .off("click.clearallstatusunique")
+            .on("click.clearallstatusunique", "#clearAllStatus", (e) => {
+                e.preventDefault();
+                $(".status-checkbox").prop("checked", false);
+                this.updateSelectedStatuses();
+                this.applyStatusFilter();
+            });
+
+        // Outside click
+        $(document)
+            .off("click.outsidestatusunique")
+            .on("click.outsidestatusunique", (e) => {
+                if (
+                    !$(e.target).closest(
+                        "#statusFilterToggle, #statusFilterDropdown"
+                    ).length
+                ) {
+                    $("#statusFilterDropdown").addClass("hidden");
+                }
+            });
+
+        // Prevent close on inside click
+        $(document)
+            .off("click.insidestatusunique")
+            .on("click.insidestatusunique", "#statusFilterDropdown", (e) => {
+                e.stopPropagation();
+            });
+    }
+
+    updateSelectedStatuses() {
+        this.selectedStatuses = [];
+        $(".status-checkbox:checked").each((_, checkbox) => {
+            this.selectedStatuses.push($(checkbox).val());
+        });
+        this.updateFilterButtonVisual();
+    }
+
+    updateFilterButtonVisual() {
+        const filterButton = $("#statusFilterToggle");
+        const count = this.selectedStatuses.length;
+
+        filterButton.find(".filter-indicator").remove();
+
+        if (count > 0) {
+            filterButton.addClass("filter-active");
+            filterButton.append(
+                `<span class="filter-indicator absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${count}</span>`
+            );
+        } else {
+            filterButton.removeClass("filter-active");
+        }
+    }
+
+    applyStatusFilter() {
+        this.dataTable.draw();
+    }
+}
+
+const informationSystemTable = new InformationSystemDataTable();
+
+const initEvents = ["DOMContentLoaded", "livewire:navigated", "livewire:load"];
+initEvents.forEach((event) => {
+    document.addEventListener(event, () => informationSystemTable.init());
+});
+
+document.addEventListener("livewire:init", () => {
+    Livewire.on("data-updated", () => {
+        informationSystemTable.initializeDataTable();
     });
 });
 
-// Function to update button states after deletion
-function updateButtonStates() {
-    // Reset checkboxes and selections
-    $(".row-checkbox")
-        .prop("checked", false)
-        .prop("disabled", false)
-        .removeClass("checkbox-disabled");
-    $("#selectAllCheckbox").prop("checked", false);
-
-    // Update button text to show 0 selected
-    $('button[wire\\:click="confirmDelete"] span').text("0");
-
-    // Disable delete button
-    $('button[wire\\:click="confirmDelete"]')
-        .prop("disabled", true)
-        .addClass("opacity-50 cursor-not-allowed");
-
-    // Hide cancel selection button
-    $("button[wire\\:click=\"$set('selectedRequests', [])\"]")
-        .closest("div")
-        .hide();
-}
-
-const defaultStatusOptions = [
-    {
-        value: "Permohonan Masuk",
-        label: "Permohonan Masuk",
-    },
-    {
-        value: "Didisposisikan",
-        label: "Didisposisikan",
-    },
-    {
-        value: "Revisi Kasatpel",
-        label: "Revisi Kasatpel",
-    },
-    {
-        value: "Revisi Kapusdatin",
-        label: "Revisi Kapusdatin",
-    },
-    {
-        value: "Disetujui Kasatpel",
-        label: "Disetujui Kasatpel",
-    },
-    {
-        value: "Disetujui Kapusdatin",
-        label: "Disetujui Kapusdatin",
-    },
-    {
-        value: "Proses Permohonan",
-        label: "Proses Permohonan",
-    },
-    {
-        value: "Permohonan Selesai",
-        label: "Permohonan Selesai",
-    },
-    {
-        value: "Ditolak",
-        label: "Ditolak",
-    },
-];
-
-function initHeaderStatusFilter() {
-    // Populate checkbox options
-    const container = $("#statusCheckboxContainer");
-    container.empty();
-
-    defaultStatusOptions.forEach((opt, idx) => {
-        container.append(`
-            <div class="status-checkbox-item">
-                <input type="checkbox" id="status_${idx}" class="status-checkbox" value="${opt.value}">
-                <label for="status_${idx}">${opt.label}</label>
-            </div>
-        `);
-    });
-
-    // Add custom search function for status filtering
-    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-        // If no status filter selected, show all rows
-        if (selectedStatuses.length === 0) {
-            return true;
-        }
-
-        // Get the status from the row data (assuming status is in column index 4)
-        const row = settings.aoData[dataIndex].nTr;
-        const rowStatus = $(row).data("status");
-
-        // Return true if the row status matches any of the selected statuses
-        return selectedStatuses.includes(rowStatus);
-    });
-
-    // Toggle dropdown visibility when clicking the filter icon
-    $(document).on("click", "#statusFilterToggle", function (e) {
-        if (isDeleting) return;
-
-        e.stopPropagation();
-        e.preventDefault();
-
-        const dropdown = $("#statusFilterDropdown");
-        const isVisible = !dropdown.hasClass("hidden");
-
-        // Close all other dropdowns first
-        $(".dropdown-menu").addClass("hidden");
-
-        if (isVisible) {
-            dropdown.addClass("hidden");
-        } else {
-            dropdown.removeClass("hidden");
-
-            // Position the dropdown correctly
-            positionDropdown();
-        }
-    });
-
-    // Close dropdown when clicking the close button
-    $(document).on("click", "#closeStatusFilter", function (e) {
-        e.stopPropagation();
-        $("#statusFilterDropdown").addClass("hidden");
-    });
-
-    // Close dropdown when clicking outside
-    $(document).on("click", function (e) {
-        if (
-            !$(e.target).closest("#statusFilterToggle, #statusFilterDropdown")
-                .length
-        ) {
-            $("#statusFilterDropdown").addClass("hidden");
-        }
-    });
-
-    // Prevent dropdown from closing when clicking inside it
-    $(document).on("click", "#statusFilterDropdown", function (e) {
-        e.stopPropagation();
-    });
-
-    // Handle checkbox changes
-    $(document).on("change", ".status-checkbox", function () {
-        if (!isDeleting) {
-            updateSelectedStatuses();
-            applyStatusFilter();
-        }
-    });
-
-    // Select All functionality
-    $(document).on("click", "#selectAllStatus", function (e) {
-        if (isDeleting) return;
-
-        e.preventDefault();
-        $(".status-checkbox").prop("checked", true);
-        updateSelectedStatuses();
-        applyStatusFilter();
-    });
-
-    // Clear All functionality
-    $(document).on("click", "#clearAllStatus", function (e) {
-        if (isDeleting) return;
-
-        e.preventDefault();
-        $(".status-checkbox").prop("checked", false);
-        updateSelectedStatuses();
-        applyStatusFilter();
-    });
-}
-
-function positionDropdown() {
-    const toggle = $("#statusFilterToggle");
-    const dropdown = $("#statusFilterDropdown");
-
-    if (toggle.length && dropdown.length) {
-        const toggleOffset = toggle.offset();
-        const toggleHeight = toggle.outerHeight();
-        const toggleWidth = toggle.outerWidth();
-
-        // Position dropdown relative to the toggle button
-        dropdown.css({
-            position: "absolute",
-            top: "100%",
-            right: "0",
-            left: "auto",
-        });
-    }
-}
-
-function updateSelectedStatuses() {
-    selectedStatuses = [];
-    $(".status-checkbox:checked").each(function () {
-        selectedStatuses.push($(this).val());
-    });
-
-    updateFilterButtonVisual();
-}
-
-function updateFilterButtonVisual() {
-    const filterButton = $("#statusFilterToggle");
-    const count = selectedStatuses.length;
-
-    if (count > 0) {
-        filterButton.addClass("filter-active");
-        // Optionally add a badge or indicator
-        if (!filterButton.find(".filter-indicator").length) {
-            filterButton.append(
-                '<span class="filter-indicator absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">' +
-                    count +
-                    "</span>"
-            );
-        } else {
-            filterButton.find(".filter-indicator").text(count);
-        }
-    } else {
-        filterButton.removeClass("filter-active");
-        filterButton.find(".filter-indicator").remove();
-    }
-}
-
-function applyStatusFilter() {
-    // Simply redraw the table - the custom search function will handle the filtering
-    if (!isDeleting) {
-        dataTable.draw();
-    }
-}
-
-// Initialize on various events
-document.addEventListener("DOMContentLoaded", initDataTable);
-document.addEventListener("livewire:navigated", initDataTable);
-document.addEventListener("livewire:load", initDataTable);
-
-// jQuery ready fallback
+// jQuery fallback
 if (typeof $ !== "undefined") {
-    $(document).ready(initDataTable);
+    $(document).ready(() => informationSystemTable.init());
 }

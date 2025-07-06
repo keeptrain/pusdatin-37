@@ -50,7 +50,9 @@ table.dataTable td.dt-type-date div.dt-column-footer {
     flex-direction: row !important;
     gap: 20px;
 }
-
+.custom-entries-control {
+    display: none !important;
+}
 .custom-entries-control {
     display: flex;
     align-items: center;
@@ -211,4 +213,24 @@ dt-column-order {
 .dt-paging .dt-paging-button.disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.checkbox-disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+}
+
+.checkbox-disabled:checked {
+    background-color: #3b82f6;
+}
+
+/* Loading button animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
 }
