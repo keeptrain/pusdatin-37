@@ -11,8 +11,7 @@
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center">
                     <a href="/" class="flex items-center">
-                        <span
-                            class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#364872] to-[#697AA4]">Pusdatin</span>
+                        <x-app-logo />
                     </a>
                 </div>
             </div>

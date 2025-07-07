@@ -20,7 +20,7 @@
             <div class="relative z-10 flex flex-col gap-5">
                 <a class="flex flex-col items-center gap-2 font-medium">
                     <span class="flex h-10 w-10 items-center justify-center rounded-full">
-                        <x-lucide-log-in class="w-5 h-5" />
+                        <x-lucide-log-in class="w-8 h-8" />
                     </span>
                 </a>
 
