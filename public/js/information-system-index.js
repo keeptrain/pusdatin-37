@@ -2,7 +2,6 @@ class InformationSystemDataTable {
     constructor() {
         this.dataTable = null;
         this.selectedStatuses = [];
-        this.isDeleting = false;
         this.config = {
             defaultStatusOptions: [
                 { value: "Permohonan Masuk", label: "Permohonan Masuk" },
@@ -46,14 +45,14 @@ class InformationSystemDataTable {
                         className: "text-center",
                     },
                     {
-                        targets: 1, // Checkbox column
+                        targets: 1, // No column
                         orderable: true,
                         searchable: false,
                         className: "text-center",
                     },
                     { targets: 3, className: "judul" },
                     {
-                        targets: 4,
+                        targets: 4, // Status column
                         orderable: false,
                         searchable: false,
                     },
@@ -66,7 +65,7 @@ class InformationSystemDataTable {
     init() {
         this.waitForDependencies(() => {
             this.initializeDataTable();
-            this.bindCustomEvents();
+            this.bindBasicEvents();
             this.initializeStatusFilter();
         });
     }
@@ -92,12 +91,14 @@ class InformationSystemDataTable {
     }
 
     setupCustomSearch() {
+        // Global search
         $("#globalSearch")
             .off("input.customsearch")
             .on("input.customsearch", (e) => {
                 this.dataTable.search(e.target.value).draw();
             });
 
+        // Status filtering
         $.fn.dataTable.ext.search.push((settings, data, dataIndex) => {
             if (this.selectedStatuses.length === 0) return true;
             const row = settings.aoData[dataIndex].nTr;
@@ -110,20 +111,18 @@ class InformationSystemDataTable {
         this.bindRowNavigation();
     }
 
-    bindCustomEvents() {
+    bindBasicEvents() {
+        this.bindCheckboxEvents();
         this.bindLivewireEvents();
-
-        this.bindCheckboxEventsMinimal();
     }
 
     bindRowNavigation() {
+        // Row click untuk navigasi
         $("#requestsTable tbody tr")
             .off("click.rownav")
             .on("click.rownav", (e) => {
                 const columnIndex = $(e.target).closest("td").index();
-                if (columnIndex === 0 || columnIndex === 4) return;
-
-                if (this.isDeleting) return;
+                if (columnIndex === 0 || columnIndex === 4) return; // Skip checkbox & status column
 
                 const id = $(e.currentTarget).data("id");
                 if (id) {
@@ -132,10 +131,10 @@ class InformationSystemDataTable {
             });
     }
 
-    bindCheckboxEventsMinimal() {
+    bindCheckboxEvents() {
         if (!$("#selectAllCheckbox").data("custom-bound")) {
             $("#selectAllCheckbox")
-                .on("change.selectallminimal", (e) => {
+                .on("change.selectall", (e) => {
                     const isChecked = e.target.checked;
                     $(".row-checkbox").prop("checked", isChecked);
                 })
@@ -143,8 +142,8 @@ class InformationSystemDataTable {
         }
 
         $(document)
-            .off("change.checkboxminimal")
-            .on("change.checkboxminimal", ".row-checkbox", (e) => {
+            .off("change.checkbox")
+            .on("change.checkbox", ".row-checkbox", (e) => {
                 e.stopPropagation();
 
                 const total = $(".row-checkbox").length;
@@ -154,75 +153,24 @@ class InformationSystemDataTable {
     }
 
     bindLivewireEvents() {
-        // Hanya bind sekali
+        // Minimal Livewire events - hanya yang essential
         if (this.livewireEventsBound) return;
 
         document.addEventListener("livewire:init", () => {
-            Livewire.on("delete-error", () => {
-                this.isDeleting = false;
-                this.hideProcessingMessage();
-            });
-
+            // Update checkbox state saat Livewire update
             Livewire.on("select-all-updated", (event) => {
-                // MINIMAL update - hanya checkbox state
                 const { selectAll } = event[0];
                 $(".row-checkbox").prop("checked", selectAll);
                 $("#selectAllCheckbox").prop("checked", selectAll);
-            });
-
-            Livewire.on("data-deleted-reinit", () => {
-                this.handleDataDeletedReinit();
-            });
-
-            Livewire.on("delete-started", () => {
-                this.isDeleting = true;
-                this.showProcessingMessage();
-            });
-
-            Livewire.on("delete-completed", () => {
-                this.isDeleting = false;
-                this.hideProcessingMessage();
             });
         });
 
         this.livewireEventsBound = true;
     }
 
-    handleDataDeletedReinit() {
-        // Re-initialize setelah data berubah
-        setTimeout(() => {
-            this.initializeDataTable();
-
-            // Reset filter tanpa mengganggu DataTable
-            this.selectedStatuses = [];
-            this.updateFilterButtonVisual();
-            $("#globalSearch").val("");
-        }, 100);
-    }
-
-    showProcessingMessage() {
-        $("#processing-overlay").remove(); // Remove existing
-        const overlay = `
-            <div id="processing-overlay" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-                <div class="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
-                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                    <span class="text-gray-700">Menghapus data...</span>
-                </div>
-            </div>
-        `;
-        $("body").append(overlay);
-    }
-
-    hideProcessingMessage() {
-        $("#processing-overlay").fadeOut(300, function () {
-            $(this).remove();
-        });
-    }
-
-    // Status Filter - ISOLASI COMPLETE dari DataTable events
     initializeStatusFilter() {
         this.populateStatusCheckboxes();
-        this.bindStatusFilterEventsIsolated();
+        this.bindStatusFilterEvents();
     }
 
     populateStatusCheckboxes() {
@@ -239,59 +187,57 @@ class InformationSystemDataTable {
         });
     }
 
-    bindStatusFilterEventsIsolated() {
-        // COMPLETELY ISOLATED - menggunakan namespace yang unik
-
+    bindStatusFilterEvents() {
         // Toggle dropdown
         $(document)
-            .off("click.statusfilterunique")
-            .on("click.statusfilterunique", "#statusFilterToggle", (e) => {
+            .off("click.statusfilter")
+            .on("click.statusfilter", "#statusFilterToggle", (e) => {
                 e.stopPropagation();
                 e.preventDefault();
-
                 const dropdown = $("#statusFilterDropdown");
                 dropdown.toggleClass("hidden");
             });
 
         // Close dropdown
         $(document)
-            .off("click.statuscloseunique")
-            .on("click.statuscloseunique", "#closeStatusFilter", (e) => {
+            .off("click.statusclose")
+            .on("click.statusclose", "#closeStatusFilter", (e) => {
                 e.stopPropagation();
                 $("#statusFilterDropdown").addClass("hidden");
             });
 
-        // Status checkbox changes
+        // Status checkbox
         $(document)
-            .off("change.statuscheckboxunique")
-            .on("change.statuscheckboxunique", ".status-checkbox", () => {
+            .off("change.statuscheckbox")
+            .on("change.statuscheckbox", ".status-checkbox", () => {
                 this.updateSelectedStatuses();
                 this.applyStatusFilter();
             });
 
-        // Select/Clear all
+        // Select all statuses
         $(document)
-            .off("click.selectallstatusunique")
-            .on("click.selectallstatusunique", "#selectAllStatus", (e) => {
+            .off("click.selectallstatus")
+            .on("click.selectallstatus", "#selectAllStatus", (e) => {
                 e.preventDefault();
                 $(".status-checkbox").prop("checked", true);
                 this.updateSelectedStatuses();
                 this.applyStatusFilter();
             });
 
+        // Clear all statuses
         $(document)
-            .off("click.clearallstatusunique")
-            .on("click.clearallstatusunique", "#clearAllStatus", (e) => {
+            .off("click.clearallstatus")
+            .on("click.clearallstatus", "#clearAllStatus", (e) => {
                 e.preventDefault();
                 $(".status-checkbox").prop("checked", false);
                 this.updateSelectedStatuses();
                 this.applyStatusFilter();
             });
 
-        // Outside click
+        // Close dropdown jika klik diluar areanya
         $(document)
-            .off("click.outsidestatusunique")
-            .on("click.outsidestatusunique", (e) => {
+            .off("click.outsidestatus")
+            .on("click.outsidestatus", (e) => {
                 if (
                     !$(e.target).closest(
                         "#statusFilterToggle, #statusFilterDropdown"
@@ -301,10 +247,9 @@ class InformationSystemDataTable {
                 }
             });
 
-        // Prevent close on inside click
         $(document)
-            .off("click.insidestatusunique")
-            .on("click.insidestatusunique", "#statusFilterDropdown", (e) => {
+            .off("click.insidestatus")
+            .on("click.insidestatus", "#statusFilterDropdown", (e) => {
                 e.stopPropagation();
             });
     }
@@ -345,13 +290,6 @@ initEvents.forEach((event) => {
     document.addEventListener(event, () => informationSystemTable.init());
 });
 
-document.addEventListener("livewire:init", () => {
-    Livewire.on("data-updated", () => {
-        informationSystemTable.initializeDataTable();
-    });
-});
-
-// jQuery fallback
 if (typeof $ !== "undefined") {
     $(document).ready(() => informationSystemTable.init());
 }
