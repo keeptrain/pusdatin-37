@@ -44,12 +44,12 @@
                         </h3>
 
                         <div x-data="{
-                                    activeUploads: 0,
-                                    progress: 0,
-                                    get uploading() {
-                                        return this.activeUploads > 0;
-                                    }
-                                }" x-on:livewire-upload-start="activeUploads++"
+                                activeUploads: 0,
+                                progress: 0,
+                                get uploading() {
+                                    return this.activeUploads > 0;
+                                }
+                            }" x-on:livewire-upload-start="activeUploads++"
                             x-on:livewire-upload-finish="activeUploads--" x-on:livewire-upload-error="activeUploads--"
                             x-on:livewire-upload-cancel="activeUploads--"
                             x-on:livewire-upload-progress="progress = $event.detail.progress" class="space-y-6">
@@ -57,7 +57,7 @@
                             @foreach ($systemRequest->documentUploads as $documentUpload)
                                 @if ($documentUpload->need_revision)
                                     <section>
-                                        <x-letters.input-file-adapter :title="$documentUpload->part_number_label"
+                                        <x-layouts.form.input-file :title="$documentUpload->part_number_label"
                                             model="revisedFiles.{{ $documentUpload->part_number }}" required />
                                         @foreach ($documentUpload->load('versions')->versions->where('is_resolved', false) as $revision)
                                             <x-letters.warning-note :note="$revision->revision_note" />

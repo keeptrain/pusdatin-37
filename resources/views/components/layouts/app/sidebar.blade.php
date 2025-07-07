@@ -34,12 +34,12 @@
                             <div class="flex items-center">
                                 <span>{{ __('Notifikasi') }}</span>
                                 <div x-show="$store.notifications.hasUnread"
-                                    class="ml-4 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                                    class="ml-4 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" wire:cloak></div>
                             </div>
                         </flux:navlist.item>
                     </flux:modal.trigger>
                 </flux:navlist>
-                
+
                 <flux:modal name="notifications-admin" variant="flyout" position="right" :closable="false"
                     class="md:w-96">
                     <livewire:admin.notifications />
@@ -66,6 +66,8 @@
                 <flux:navlist.item :href="route('pr.index')" icon="folder-open"
                     :current="request()->routeIs('pr.index')" wire:navigate>Layanan Kehumasan</flux:navlist.item>
                 @endrole
+                <flux:navlist.item :href="route('discussions')" icon="chat-bubble-left-right"
+                    :current="request()->routeIs('discussions')" wire:navigate>Forum Diskusi</flux:navlist.item>
                 @unlessrole('head_verifier|promkes_verifier')
                 <flux:navlist.item :href="route('show.ratings')" icon="star"
                     :current="request()->routeIs('show.ratings')" wire:navigate>Penilaian Layanan</flux:navlist.item>

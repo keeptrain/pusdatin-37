@@ -67,6 +67,11 @@ class InformationSystemRequest extends Model
         return $this->hasMany(MeetingInformationSystemRequest::class, 'request_id', 'id');
     }
 
+    public function discussions()
+    {
+        return $this->morphMany(Discussion::class, 'discussable');
+    }
+
     public static function resolveStatusClassFromString($statusString)
     {
         return match ($statusString) {
