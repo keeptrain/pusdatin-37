@@ -23,27 +23,29 @@ class Index extends Component
     public string $mode = 'view';
     public $requests;
 
-    protected $user;
-    // protected $siDivisions;
-    // protected $prDivisions;
-    // protected $allDivisions;
+    public string $search = '';
+    public $isClosed = '';
+    public $discussableType = '';
 
     #[Title("Forum Diskusi")]
     public function render()
     {
-        $discussions = $this->loadDiscussions()->paginate(5);
+        $query = $this->loadDiscussions();
+
+        $query->when($this->isClosed === 'completed', function ($query) {
+            $query->whereNotNull('closed_at');
+        })
+            ->when($this->discussableType === 'yes', function ($query) {
+                $query->whereHasMorph('discussable', [InformationSystemRequest::class, PublicRelationRequest::class]);
+            });
+
+        $discussions = $query->paginate(5);
 
         return view('livewire.discussions.index', compact('discussions'));
     }
 
     public function mount()
     {
-        // $this->perPage = $perPage ?? 10;
-        $this->user = auth()->user();
-
-        // $this->siDivisions = [Division::SI_ID->value, Division::DATA_ID->value];
-        // $this->prDivisions = [Division::PR_ID->value, Division::PROMKES_ID->value];
-        // $this->allDivisions = array_merge($this->siDivisions, $this->prDivisions);
     }
 
     public function create()
@@ -129,5 +131,11 @@ class Index extends Component
                 });
             });
         }
+    }
+
+    public function refreshPage()
+    {
+        // dd($this->isClosed);
+        $this->dispatch('modal-close', name: 'filter-discussion-modal');
     }
 }

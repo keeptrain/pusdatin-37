@@ -4,6 +4,33 @@
         <flux:heading size="xl" class="">Forum Diskusi</flux:heading>
     </div>
     <flux:heading size="lg" level="2" class="mb-6">{{ __('Daftar diskusi dari para pemohon.') }}</flux:heading>
+
+    <div class="flex justify-between space-x-2">
+        <flux:input wire:model.blur="search" size="sm" icon="magnifying-glass" placeholder="Cari diskusi..." />
+
+        <flux:button @click="$dispatch('modal-show', { name: 'filter-discussion-modal' });" size="sm" icon="eye">
+            Filter</flux:button>
+    </div>
+
+    <flux:modal name="filter-discussion-modal" class="w-full max-w-md">
+        <form wire:submit="refreshPage" class="space-y-4">
+            <flux:legend>Filter Diskusi</flux:legend>
+
+            <flux:select wire:model="discussableType" label="Kategori diskusi" placeholder="Pilih kategori">
+                <option value="yes">Terkait permohonan</option>
+                <option value="no">Tidak terkait</option>
+            </flux:select>
+
+            <flux:radio.group wire:model="isClosed" label="Status diskusi">
+                <flux:radio label="Telah selesai" value="completed" />
+                <flux:radio label="Belum selesai" value="ongoing" />
+            </flux:radio.group>
+
+            <div class="flex justify-end">
+                <flux:button type="submit" size="sm">Terapkan</flux:button>
+            </div>
+        </form>
+    </flux:modal>
     @endunlessrole
 
     @role('user')

@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->text('body');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('parent_id')->nullable()->constrained('discussions')->onDelete('cascade');
+            $table->dateTime('closed_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
