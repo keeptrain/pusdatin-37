@@ -17,8 +17,7 @@
         "maatwebsite/excel": "^3.1",
         "mallardduck/blade-lucide-icons": "^1.23",
         "spatie/laravel-model-states": "^2.11",
-        "spatie/laravel-permission": "^6.17",
-        "yajra/laravel-datatables-oracle": "^12.4"
+        "spatie/laravel-permission": "^6.17"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
