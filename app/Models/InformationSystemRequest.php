@@ -28,6 +28,7 @@ class InformationSystemRequest extends Model
 {
     use HasActivities, HasFactory, HasStates, SoftDeletes;
 
+    protected $with = ['user'];
     protected $table = "information_system_requests";
 
     protected $casts = [

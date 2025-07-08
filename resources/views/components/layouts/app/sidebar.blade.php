@@ -3,15 +3,16 @@
 
 <head>
     @include('partials.head')
+    @stack('styles')
 </head>
 
 <body class="min-h-screen bg-white dark:bg-zinc-800">
     @if (session('status'))
-        @php
-            $variant = session('status')['variant'];
-            $message = session('status')['message'];
-        @endphp
-        <flux:notification.toast :variant="$variant" :message="$message" />
+    @php
+    $variant = session('status')['variant'];
+    $message = session('status')['message'];
+    @endphp
+    <flux:notification.toast :variant="$variant" :message="$message" />
     @endif
     <flux:sidebar sticky stashable container
         class="bg-zinc-50 dark:bg-zinc-900 border-r rtl:border-r-0 rtl:border-l border-zinc-200 dark:border-zinc-700">
@@ -211,6 +212,7 @@
     {{ $slot }}
 
     @fluxScripts
+    @livewireScripts
     @stack('scripts')
 
 </body>

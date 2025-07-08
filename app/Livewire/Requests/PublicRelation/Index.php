@@ -4,21 +4,22 @@ namespace App\Livewire\Requests\PublicRelation;
 
 use Carbon\Carbon;
 use Livewire\Attributes\Title;
-use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\PublicRelationRequest;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
 use App\States\PublicRelation\PublicRelationStatus;
 
 class Index extends Component
 {
-    use WithPagination;
+    public $selectedPrRequest = [];
+    public $selectAll = false;
+    public $isDeleting = false;
 
-    public int $perPage = 10; // Default per page
 
     public string $filterStatus = 'all';
+    public string $sortBy = 'date_created';
+    public string $searchQuery = '';
 
     public array $statuses = [
         'all' => 'All',
@@ -30,21 +31,37 @@ class Index extends Component
         'completed' => 'Selesai',
     ];
 
-    public array $allowedStatuses = [];
-
-    public array $previousAllowedStatuses = [];
-
-    public array $oldAllowedStatuses = [];
-
-    public string $sortBy = 'date_created';
-
-    public array $selectedPrRequest = [];
-
-    public string $searchQuery = '';
-
-    public function mount()
+    #[Title('Permohonan Kehumasan')]
+    public function render()
     {
-        $this->allowedStatuses = $this->getAllowedStatusesByRole();
+        return view('livewire.requests.public-relation.index', [
+            'publicRelations' => $this->publicRelations,
+            'allowedStatuses' => $this->allowedStatuses
+        ]);
+    }
+
+
+    #[Computed]
+    public function publicRelations()
+    {
+        return PublicRelationRequest::select('id', 'user_id', 'completed_date', 'month_publication', 'theme', 'status')
+            ->with('user:id,name')
+            ->filterByStatuses($this->allowedStatuses)
+            ->when($this->filterStatus !== 'all', fn($q) => $q->filterByStatus($this->filterStatus))
+            ->when($this->searchQuery, fn($q) => $this->applySearch($q))
+            ->when(
+                $this->sortBy === 'completed_date',
+                fn($q) => $q->orderBy('completed_date', 'asc'),
+                fn($q) => $q->orderBy(...$this->getSortCriteria())
+            )
+            ->get();
+    }
+
+
+    #[Computed]
+    public function allowedStatuses()
+    {
+        return PublicRelationStatus::statusesBasedRole(auth()->user());
     }
 
     public function show(int $id): void
@@ -52,44 +69,94 @@ class Index extends Component
         $this->redirectRoute('pr.show', $id, navigate: true);
     }
 
-    #[Title('Permohonan Kehumasan')]
-    public function render(): object
+    public function updatedSelectAll($value)
     {
-        return view('livewire.requests.public-relation.index');
+        if ($value) {
+            $this->selectedPrRequest = $this->publicRelations->pluck('id')->toArray();
+        } else {
+            $this->selectedPrRequest = [];
+        }
+
+        $this->dispatch('select-all-updated', [
+            'selectAll' => $value,
+            'selectedIds' => $this->selectedPrRequest
+        ]);
     }
 
-    #[Computed]
-    public function publicRelations(): LengthAwarePaginator
+    public function updatedSelectedPrRequest()
     {
-        return $this->getPaginatedPublicRelations();
+        $this->selectAll = count($this->selectedPrRequest) === $this->publicRelations->count();
     }
 
-    protected function buildBaseQuery()
+
+    public function updatedSearchQuery()
     {
-        return PublicRelationRequest::select('id', 'user_id', 'completed_date', 'month_publication', 'theme', 'status')
-            ->with('user:id,name')
-            ->filterByStatuses($this->allowedStatuses);
+        // Auto refresh data saat search berubah (jika diperlukan)
+        // Data akan otomatis ter-update karena menggunakan computed property
     }
 
-    protected function getPaginatedPublicRelations(): LengthAwarePaginator
+    public function updatedFilterStatus()
     {
-        $query = $this->buildBaseQuery()
-            ->when($this->filterStatus !== 'all', fn($q) => $q->filterByStatus($this->filterStatus))
-            ->when($this->searchQuery, fn($q) => $this->applySearch($q))
-            ->when(
-                $this->sortBy === 'completed_date',
-                fn($q) => $q->orderBy('completed_date', 'asc'),
-                fn($q) => $q->orderBy(...$this->getSortCriteria())
-            );
-
-        return $query->paginate($this->perPage);
+        // Auto refresh data saat filter berubah
+        // Data akan otomatis ter-update karena menggunakan computed property
     }
 
-    public function stringMonthPublicationToNumber($searchQuery)
+    public function deleteSelected()
+    {
+        if (empty($this->selectedPrRequest)) {
+            session()->flash('error', 'Tidak ada data yang dipilih untuk dihapus.');
+            return;
+        }
+
+        $this->performDelete();
+    }
+
+    private function performDelete()
+    {
+        $this->isDeleting = true;
+
+        try {
+            $deletedCount = count($this->selectedPrRequest);
+            $deletedIds = $this->selectedPrRequest;
+
+            DB::transaction(function () use ($deletedIds) {
+                PublicRelationRequest::whereIn('id', $deletedIds)->delete();
+            });
+
+            // Reset state
+            $this->resetSelections();
+            session()->flash('success', "Data berhasil dihapus sebanyak {$deletedCount} item.");
+            $this->dispatch('delete-success-refresh', [
+                'deletedCount' => $deletedCount,
+                'message' => "Data berhasil dihapus sebanyak {$deletedCount} item."
+            ]);
+        } catch (\Exception $e) {
+            session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        } finally {
+            $this->isDeleting = false;
+        }
+    }
+
+    private function resetSelections()
+    {
+        $this->selectedPrRequest = [];
+        $this->selectAll = false;
+    }
+
+    public function confirmDelete()
+    {
+        if ($this->isDeleting) return;
+
+        $this->dispatch('confirm-delete', [
+            'count' => count($this->selectedPrRequest)
+        ]);
+    }
+
+    // Helper methods
+    private function stringMonthPublicationToNumber($searchQuery)
     {
         $monthValue = null;
 
-        // If input is month name
         foreach (range(1, 12) as $monthNumber) {
             $monthName = Carbon::create(null, $monthNumber)->locale('id')->isoFormat('MMMM');
             if (str_contains(strtolower($monthName), $searchQuery)) {
@@ -98,7 +165,6 @@ class Index extends Component
             }
         }
 
-        // If input is number
         if (is_numeric($searchQuery) && $searchQuery >= 1 && $searchQuery <= 12) {
             $monthValue = (int) $searchQuery;
         }
@@ -119,88 +185,11 @@ class Index extends Component
         });
     }
 
-
-    protected function getCacheKey(): string
-    {
-        return sprintf(
-            'public-relations-%s-%s-%s-%s-%s',
-            $this->filterStatus,
-            $this->searchQuery,
-            $this->sortBy,
-            $this->perPage,
-            $this->getPage()
-        );
-    }
-
-    public function getAllowedStatusesByRole(): array
-    {
-        return PublicRelationStatus::statusesBasedRole(auth()->user());
-    }
-
-    public function updatedAllowedStatuses($value): void
-    {
-        // Limit maximum 7 statuses
-        if (count($this->allowedStatuses) > 7) {
-            $this->allowedStatuses = array_slice($this->allowedStatuses, 0, 7);
-        }
-
-        // State before change
-        $oldStatuses = $this->oldAllowedStatuses;
-        $this->oldAllowedStatuses = $this->allowedStatuses;
-
-        $allStatuses = array_keys($this->statuses);
-
-        // Detect change state "all"
-        $wasAllChecked = in_array('all', $oldStatuses);
-        $isAllCheckedNow = in_array('all', $this->allowedStatuses);
-
-        // If user unchecked "all"
-        if ($wasAllChecked && !$isAllCheckedNow) {
-            $this->allowedStatuses = $this->previousAllowedStatuses;
-            $this->previousAllowedStatuses = [];
-        }
-        // If user checked "all"
-        elseif (!$wasAllChecked && $isAllCheckedNow) {
-            $this->previousAllowedStatuses = array_diff($this->allowedStatuses, ['all']);
-            $this->allowedStatuses = array_merge($allStatuses, ['all']);
-        }
-        // If change on status other than "all"
-        else {
-            // If "all" active when other status changed
-            if ($isAllCheckedNow) {
-                $this->allowedStatuses = array_diff($this->allowedStatuses, ['all']);
-            }
-
-            // Check if all status selected
-            $allSelected = empty(array_diff($allStatuses, $this->allowedStatuses));
-
-            if ($allSelected) {
-                $this->allowedStatuses = array_merge($allStatuses, ['all']);
-            }
-        }
-
-        $this->allowedStatuses = array_unique($this->allowedStatuses);
-
-        if (empty($this->allowedStatuses)) {
-            $this->allowedStatuses = $this->getAllowedStatusesByRole();
-        }
-    }
-
     private function getSortCriteria(): array
     {
         return match ($this->sortBy) {
             'date_created' => ['created_at', 'desc'],
             default => ['updated_at', 'desc'],
         };
-    }
-
-    public function deleteSelected(): void
-    {
-        DB::transaction(function () {
-            PublicRelationRequest::whereIn('id', $this->selectedPrRequest)->delete();
-            $this->selectedPrRequest = [];
-        });
-
-        $this->redirectRoute('pr.index', navigate: true);
     }
 }

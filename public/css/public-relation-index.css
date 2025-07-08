@@ -1,0 +1,236 @@
+/* Custom hover styling */
+#prRequestsTable tbody tr:hover {
+    background-color: #f9fafb !important;
+}
+
+#prRequestsTable tbody tr {
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+#prRequestsTable tbody tr td:first-child,
+#prRequestsTable tbody tr td:last-child {
+    cursor: default;
+}
+
+.dt-container .dt-search {
+    display: none !important;
+}
+
+.dt-container .dt-length {
+    display: none !important;
+}
+
+.dt-container .dt-info {
+    float: left !important;
+    clear: none !important;
+    margin-top: 10px;
+}
+
+.dt-container .dt-paging {
+    float: right !important;
+    clear: none !important;
+    margin-top: 10px;
+}
+
+dt-column-order {
+    display: none !important;
+}
+.dt-layout-cell.dt-layout-start {
+    display: none !important;
+}
+table.dataTable th.dt-type-numeric div.dt-column-header,
+table.dataTable th.dt-type-numeric div.dt-column-footer,
+table.dataTable th.dt-type-date div.dt-column-header,
+table.dataTable th.dt-type-date div.dt-column-footer,
+table.dataTable td.dt-type-numeric div.dt-column-header,
+table.dataTable td.dt-type-numeric div.dt-column-footer,
+table.dataTable td.dt-type-date div.dt-column-header,
+table.dataTable td.dt-type-date div.dt-column-footer {
+    flex-direction: row !important;
+    gap: 20px;
+}
+.custom-entries-control {
+    display: none !important;
+}
+.custom-entries-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.custom-entries-control select {
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.custom-entries-control label {
+    font-size: 14px;
+    color: #374151;
+}
+
+dt-column-order {
+    display: none !important;
+}
+
+#statusFilterDropdown {
+    right: 0;
+    left: auto;
+    min-width: 250px;
+    max-width: 300px;
+}
+
+#statusFilterDropdown {
+    z-index: 1000;
+}
+
+.status-checkbox-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.status-checkbox-item:hover {
+    background-color: #f3f4f6;
+}
+
+.status-checkbox-item input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.status-checkbox-item label {
+    cursor: pointer;
+    flex: 1;
+    font-size: 14px;
+    color: #374151;
+}
+
+/* Selected count badge */
+.status-count-badge {
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+#statusFilterToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-active {
+    background-color: #dbeafe !important;
+    color: #3b82f6 !important;
+}
+
+.row-checkbox {
+    transform: scale(1.1);
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.status-header-content {
+    pointer-events: none;
+}
+
+.status-header-content button {
+    pointer-events: all;
+}
+
+/* Flash message styling */
+.flash-message {
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.table-wrapper {
+    position: relative;
+}
+
+.table-controls-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.entries-info {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.dt-paging {
+    display: flex;
+    gap: 4px;
+}
+
+.dt-paging .dt-paging-button {
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    background-color: white;
+    color: #374151;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.dt-paging .dt-paging-button:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.dt-paging .dt-paging-button.current {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.dt-paging .dt-paging-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.checkbox-disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+}
+
+.checkbox-disabled:checked {
+    background-color: #3b82f6;
+}
+
+/* Loading button animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}

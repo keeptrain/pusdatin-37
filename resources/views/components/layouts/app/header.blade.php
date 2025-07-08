@@ -8,11 +8,11 @@
 
 <body x-data="dashboard" class="min-h-screen bg-white dark:bg-zinc-800 p-0">
     @if (session('status'))
-        @php
-            $variant = session('status')['variant'];
-            $message = session('status')['message'];
-        @endphp
-        <flux:notification.toast :variant="$variant" :message="$message" />
+    @php
+    $variant = session('status')['variant'];
+    $message = session('status')['message'];
+    @endphp
+    <flux:notification.toast :variant="$variant" :message="$message" />
     @endif
 
     <flux:header sticky container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
@@ -31,7 +31,7 @@
                 <flux:navbar.item @mouseenter="openDropdown = true" icon="folder-open" icon:trailing="chevron-down" :current="request()->routeIs('si-data.form') || request()->routeIs('pr.form')">
                     {{ __('Ajukan Permohonan') }}
                 </flux:navbar.item>
-                
+
                 <!-- Dropdown Menu -->
                 <x-menu.dropdown-menu-on-dashboard-user />
             </div>
@@ -44,8 +44,8 @@
 
         <flux:navbar class="mr-1.5 space-x-0.5 py-0!">
             @php
-                $hasUnread = auth()->user()->unreadNotifications()->whereNull('read_at')->exists();
-                $icon = $hasUnread ? 'bell-alert' : 'bell';
+            $hasUnread = auth()->user()->unreadNotifications()->whereNull('read_at')->exists();
+            $icon = $hasUnread ? 'bell-alert' : 'bell';
             @endphp
             <flux:modal.trigger name="notifications-user">
                 <flux:tooltip :content="__('Notifikasi')" position="bottom">
@@ -141,41 +141,7 @@
 
     @livewireScripts
     @fluxScripts
-    <script>
-        document.addEventListener('livewire:init', () => {
-            Alpine.data('dashboard', () => ({
-                openDropdown: false,
-                openModal: false,
-                hasReadSOP: false,
-                sopConfirmed: false,
-
-                init() {
-                    this.hasReadSOP = sessionStorage.getItem('read_sop') === 'true';
-                },
-
-                handleSIDataRequest() {
-                    this.hasReadSOP
-                        ? Livewire.navigate('{{ route('si-data.form') }}')
-                        : this.openModal = true;
-                },
-
-                handlePRRequest() {
-                    Livewire.navigate('{{ route('pr.form') }}');
-                },
-
-                confirmReadSOP() {
-                    sessionStorage.setItem('read_sop', 'true');
-                    this.hasReadSOP = true;
-                    Livewire.navigate('{{ route('si-data.form') }}');
-                },
-
-                closeModal() {
-                    this.openModal = false;
-                    this.sopConfirmed = false;
-                },
-            }));
-        });
-    </script>
+    <script src="{{ asset('js/header.js') }}"></script>
 </body>
 
 </html>

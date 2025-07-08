@@ -1,0 +1,144 @@
+.judul {
+    max-width: 250px;
+}
+
+#requestsTable tbody tr:hover {
+    background-color: #f9fafb !important;
+}
+
+#requestsTable tbody tr {
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+#requestsTable tbody tr td:first-child {
+    cursor: default;
+}
+
+.dt-container .dt-search {
+    display: none;
+}
+
+.dt-container .dt-length {
+    margin-bottom: 1rem;
+}
+
+dt-column-order {
+    display: none !important;
+}
+.dt-layout-cell.dt-layout-start {
+    display: none !important;
+}
+table.dataTable th.dt-type-numeric div.dt-column-header,
+table.dataTable th.dt-type-numeric div.dt-column-footer,
+table.dataTable th.dt-type-date div.dt-column-header,
+table.dataTable th.dt-type-date div.dt-column-footer,
+table.dataTable td.dt-type-numeric div.dt-column-header,
+table.dataTable td.dt-type-numeric div.dt-column-footer,
+table.dataTable td.dt-type-date div.dt-column-header,
+table.dataTable td.dt-type-date div.dt-column-footer {
+    flex-direction: row !important;
+}
+table.dataTable th.dt-type-numeric,
+table.dataTable th.dt-type-date,
+table.dataTable td.dt-type-numeric,
+table.dataTable td.dt-type-date {
+    text-align: left !important;
+}
+.checkbox-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.table-disabled {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+#statusFilterDropdown {
+    right: 0;
+    left: auto;
+    min-width: 250px;
+    max-width: 300px;
+}
+
+#statusFilterDropdown {
+    z-index: 1000;
+}
+
+.status-checkbox-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.status-checkbox-item:hover {
+    background-color: #f3f4f6;
+}
+
+.status-checkbox-item input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.status-checkbox-item label {
+    cursor: pointer;
+    flex: 1;
+    font-size: 14px;
+    color: #374151;
+}
+
+.status-count-badge {
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+#statusFilterToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-active {
+    background-color: #dbeafe !important;
+    color: #3b82f6 !important;
+}
+
+.row-checkbox {
+    transform: scale(1.1);
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.status-header-content {
+    pointer-events: none;
+}
+
+.status-header-content button {
+    pointer-events: all;
+}
+
+.flash-message {
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
