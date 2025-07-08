@@ -10,22 +10,27 @@ use App\Livewire\Forms\DiscussionForm;
 use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Livewire\WithPagination;
-use Livewire\Attributes\Computed;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\User;
 
 class Index extends Component
 {
     use WithPagination;
 
-    // public int $perPage = null;
+    public int $perPage;
 
     public DiscussionForm $form;
-    public string $mode = 'view';
     public $requests;
+    private User $user;
 
     public string $search = '';
     public $isClosed = '';
     public $discussableType = '';
+
+    public function mount(int $perPage = 5)
+    {
+        $this->perPage = $perPage;
+        $this->user = auth()->user();
+    }
 
     #[Title("Forum Diskusi")]
     public function render()
@@ -39,13 +44,9 @@ class Index extends Component
                 $query->whereHasMorph('discussable', [InformationSystemRequest::class, PublicRelationRequest::class]);
             });
 
-        $discussions = $query->paginate(5);
+        $discussions = $query->paginate($this->perPage);
 
         return view('livewire.discussions.index', compact('discussions'));
-    }
-
-    public function mount()
-    {
     }
 
     public function create()
@@ -74,7 +75,7 @@ class Index extends Component
                     }
                     );
             },
-            'replies'
+            'replies',
         ])
             ->whereNull('parent_id')
             ->latest();
@@ -86,7 +87,7 @@ class Index extends Component
 
     protected function applyDiscussionFilters($query)
     {
-        $currentRole = auth()->user()->currentUserRoleId();
+        $currentRole = $this->user->currentUserRoleId();
 
         $headDivision = Division::HEAD_ID->value;
         $siDivision = Division::SI_ID->value;
@@ -122,7 +123,7 @@ class Index extends Component
             });
         } else {
             $query->where(function ($q) use ($currentRole) {
-                $q->where('user_id', auth()->user()->id);
+                $q->where('user_id', $this->user->id);
 
                 // Add Role-based discussions in the same query context
                 $q->orWhere(function ($roleQuery) use ($currentRole) {
@@ -135,7 +136,7 @@ class Index extends Component
 
     public function refreshPage()
     {
-        // dd($this->isClosed);
         $this->dispatch('modal-close', name: 'filter-discussion-modal');
+        // $this->dispatch('discussion-updated');
     }
 }

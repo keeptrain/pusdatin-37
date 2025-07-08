@@ -117,8 +117,8 @@
                 </div>
             </div>
         @endforelse
-        {{ $discussions->links() }}
+
+        {{-- Pagination --}}
+        {{ $discussions->links(data: ['scrollTo' => false]) }}
     </div>
-
-
 </div>
