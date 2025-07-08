@@ -6,8 +6,16 @@
     @include('partials.head')
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800 p-0">
-    <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+<body x-data="dashboard" class="min-h-screen bg-white dark:bg-zinc-800 p-0">
+    @if (session('status'))
+        @php
+            $variant = session('status')['variant'];
+            $message = session('status')['message'];
+        @endphp
+        <flux:notification.toast :variant="$variant" :message="$message" />
+    @endif
+
+    <flux:header sticky container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
         <a href="{{ route('dashboard') }}" class="ml-2 mr-5 flex items-center space-x-2 lg:ml-0" wire:navigate>
@@ -19,33 +27,36 @@
                 wire:navigate>
                 {{ __('Dashboard') }}
             </flux:navbar.item>
-            <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
-                wire:navigate>
-                {{ __('Permohonan') }}
+            <div class="relative">
+                <flux:navbar.item @mouseenter="openDropdown = true" icon="folder-open" icon:trailing="chevron-down" :current="request()->routeIs('si-data.form') || request()->routeIs('pr.form')">
+                    {{ __('Ajukan Permohonan') }}
+                </flux:navbar.item>
+                
+                <!-- Dropdown Menu -->
+                <x-menu.dropdown-menu-on-dashboard-user />
+            </div>
+            <flux:navbar.item icon="book-open-text" :href="route('list.request')" :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
+                {{ __('Daftar Permohonan') }}
             </flux:navbar.item>
         </flux:navbar>
 
         <flux:spacer />
 
         <flux:navbar class="mr-1.5 space-x-0.5 py-0!">
-            {{-- <flux:tooltip :content="__('Search')" position="bottom">
-                <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#"
-                    :label="__('Search')" />
-            </flux:tooltip> --}}
-
+            @php
+                $hasUnread = auth()->user()->unreadNotifications()->whereNull('read_at')->exists();
+                $icon = $hasUnread ? 'bell-alert' : 'bell';
+            @endphp
             <flux:modal.trigger name="notifications-user">
-
-                <flux:tooltip :content="__('Notifications')" position="bottom">
-                    <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" icon="bell-alert" target="_blank"
-                        :label="__('Notifications')" />
+                <flux:tooltip :content="__('Notifikasi')" position="bottom">
+                    <flux:navbar.item class="h-10 max-lg:hidden [&>div>svg]:size-5" :icon="$icon" target="_blank" :iconDot="$hasUnread"
+                        :label="__('Notifikasi')" />
                 </flux:tooltip>
-
             </flux:modal.trigger>
 
             <flux:modal name="notifications-user" variant="flyout" position="right" :closable="false" class="md:w-96">
-                <livewire:admin.notifications />
+                <livewire:admin.notifications :needCount="false" />
             </flux:modal>
-
         </flux:navbar>
 
         <!-- Desktop User Menu -->
@@ -105,10 +116,18 @@
                     :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navlist.item>
-                <flux:navbar.item icon="folder" :href="route('history')" :current="request()->routeIs('history')"
-                    wire:navigate>
+
+                <flux:modal.trigger name="notifications-user">
+                    <flux:navlist.item :icon="$icon">
+                        {{ __('Notifikasi') }}
+                    </flux:navlist.item>
+                </flux:modal.trigger>
+
+                <flux:navlist.item icon="folder" :href="route('list.request')"
+                    :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
                     {{ __('Permohonan') }}
-                </flux:navbar.item>
+                </flux:navlist.item>
+
             </flux:navlist.group>
         </flux:navlist>
 
@@ -116,12 +135,47 @@
 
     </flux:sidebar>
 
-    <div class="max-w-[1440px] mx-auto"> <!--dubungkus max-w biar ga jadi melebar di layar besar -->
-        {{ $slot }}
-    </div>
+    <x-user.dashboard.warning-modal-sop />
+
+    {{ $slot }}
 
     @livewireScripts
     @fluxScripts
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Alpine.data('dashboard', () => ({
+                openDropdown: false,
+                openModal: false,
+                hasReadSOP: false,
+                sopConfirmed: false,
+
+                init() {
+                    this.hasReadSOP = sessionStorage.getItem('read_sop') === 'true';
+                },
+
+                handleSIDataRequest() {
+                    this.hasReadSOP
+                        ? Livewire.navigate('{{ route('si-data.form') }}')
+                        : this.openModal = true;
+                },
+
+                handlePRRequest() {
+                    Livewire.navigate('{{ route('pr.form') }}');
+                },
+
+                confirmReadSOP() {
+                    sessionStorage.setItem('read_sop', 'true');
+                    this.hasReadSOP = true;
+                    Livewire.navigate('{{ route('si-data.form') }}');
+                },
+
+                closeModal() {
+                    this.openModal = false;
+                    this.sopConfirmed = false;
+                },
+            }));
+        });
+    </script>
 </body>
 
 </html>

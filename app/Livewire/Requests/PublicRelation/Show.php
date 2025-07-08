@@ -4,9 +4,11 @@ namespace App\Livewire\Requests\PublicRelation;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use App\Models\PublicRelationRequest;
+use Illuminate\Support\Facades\Storage;
 
 class Show extends Component
 {
@@ -23,6 +25,17 @@ class Show extends Component
         $this->publicRelation = PublicRelationRequest::with([
             'documentUploads.activeVersion'
         ])->findOrFail($this->publicRelationId);
+    }
+
+    #[Title('Detail Permohonan')]
+    public function render()
+    {
+        return view('livewire.requests.public-relation.show');
+    }
+
+    public function getFileUrl($documentUpload): string
+    {
+        return asset(Storage::url($documentUpload->activeVersion->file_path));
     }
 
     #[Computed]

@@ -10,7 +10,6 @@ class UploadVersion extends Model
 
     protected $fillable = [
         'document_upload_version_id',
-        // 'part_number',
         'file_path',
         'version',
         'revision_note',

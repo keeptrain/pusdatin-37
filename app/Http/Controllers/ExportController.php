@@ -21,12 +21,12 @@ class ExportController extends Controller
         $start  = $request->query('start_date');
         $end    = $request->query('end_date');
         $status = $request->query('status');
-        $source = $request->query('source'); // 'letter' atau 'pr'
+        $source = $request->query('source'); // 'information_system_request' atau 'public_relation_request'
 
-        if ($source === 'letter') {
+        if ($source === 'information_system_request') {
             $export = new LetterExport($start, $end, $status);
             $file   = 'List Data Permohonan Sistem Informasi dan Permintaan Data.xlsx';
-        } elseif ($source === 'pr') {
+        } elseif ($source === 'public_relation_request') {
             $export = new PrExport($start, $end, $status);
             $file   = 'List Data Kehumasan.xlsx';
         } else {

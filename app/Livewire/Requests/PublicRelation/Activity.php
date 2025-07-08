@@ -27,7 +27,7 @@ class Activity extends Component
     private function loadPrRequest()
     {
         try {
-            $this->prRequestInstance = PublicRelationRequest::findOrFail($this->prRequestId);
+            $this->prRequestInstance = PublicRelationRequest::with('requestStatusTrack:statusable_id,statusable_type,action,created_at')->findOrFail($this->prRequestId);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             abort(404, 'Public Relation Request not found.');
         }

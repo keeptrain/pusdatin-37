@@ -15,12 +15,12 @@
         </flux:button>
     </flux:modal.trigger>
 @elsecan('viewReviewSiStep1', $systemRequest)
-    <flux:button href="{{ route('letter.review', [$systemRequestId]) }}" variant="primary" type="click"
+    <flux:button href="{{ route('is.review', [$systemRequestId]) }}" variant="primary" type="click"
         icon="viewfinder-circle" class="w-full" wire:navigate>
         {{ __('Review') }}
     </flux:button>
 @elsecan('viewReviewDataStep1', $systemRequest)
-    <flux:button href="{{ route('letter.review', [$systemRequestId]) }}" variant="primary" type="click"
+    <flux:button href="{{ route('is.review', [$systemRequestId]) }}" variant="primary" type="click"
         icon="viewfinder-circle" class="w-full" wire:navigate>
         {{ __('Review') }}
     </flux:button>
@@ -30,7 +30,7 @@
             Verifikasi</flux:button>
     </flux:modal.trigger>
 @elsecan('viewReviewStep2', $systemRequest)
-    <flux:button href="{{ route('letter.review', [$systemRequestId]) }}" variant="primary" type="click"
+    <flux:button href="{{ route('is.review', [$systemRequestId]) }}" variant="primary" type="click"
         icon="viewfinder-circle" class="w-full" wire:navigate>
         {{ __('Review') }}
     </flux:button>

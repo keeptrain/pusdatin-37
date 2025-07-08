@@ -42,7 +42,6 @@
 
         <!-- Meeting Options -->
         <div class="grid grid-rows-1 md:grid-rows-2 gap-2">
-            <flux:menu.cards-with-icon wire:model="selectedOption" />
 
             @error('selectedOption')
                 <span class="text-xs text-red-500">{{ $message }}</span>

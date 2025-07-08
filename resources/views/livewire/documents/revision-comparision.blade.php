@@ -5,8 +5,8 @@
 
     <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$siDataRequestId">
         {{-- Comparison Container --}}
-        @if ($this->checkAvailableAnyVersions())
-            <div class="grid lg:grid-cols-2 gap-0 divide-x divide-gray-200">
+        @if ($this->checkAvailableAnyVersions)
+            <div class="grid lg:grid-cols-2 gap-0 lg:divide-x divide-gray-200">
                 <x-documents.current-document title="Versi saat ini" :mapping="$this->currentVersion()" />
                 <x-documents.any-document-versions title="Versi lain" :anyVersions="$this->anyVersions()" />
             </div>

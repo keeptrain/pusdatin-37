@@ -6,6 +6,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Livewire\Forms\admin\UserForm;
+use Livewire\Attributes\Title;
 
 class ManageUsers extends Component
 {
@@ -19,6 +20,7 @@ class ManageUsers extends Component
 
     public $selectedUsers = [];
 
+    #[Title('Daftar User')]
     public function render()
     {
         return view('livewire.admin.manage-users', [
@@ -30,6 +32,11 @@ class ManageUsers extends Component
     {
         return User::with('roles')
             ->paginate($this->perPage);
+    }
+
+    public function show(int $id)
+    {
+        $this->redirectRoute('user.show', ['id' => $id]);
     }
 
     public function createPage()

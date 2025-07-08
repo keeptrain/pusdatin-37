@@ -13,7 +13,8 @@
         @endphp
         <flux:notification.toast :variant="$variant" :message="$message" />
     @endif
-    <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <flux:sidebar sticky stashable container
+        class="bg-zinc-50 dark:bg-zinc-900 border-r rtl:border-r-0 rtl:border-l border-zinc-200 dark:border-zinc-700">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
         <a href="{{ route('dashboard') }}" class="mr-5 flex items-center space-x-2" wire:navigate>
@@ -26,19 +27,17 @@
                 <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
 
-                <flux:modal.trigger name="notifications-admin">
-                    <flux:navlist variant="outline">
-                        <flux:navlist.group class="grid">
-                            <flux:navlist.item icon="bell-alert">
-                                <div class="flex items-center justify-between w-full">
-                                    <span>{{ __('Notifications') }}</span>
-                                    <flux:badge x-text="$store.notifications.count" size="sm" color="lime"
-                                        :position="'right'" class="ml-2" />
-                                </div>
-                            </flux:navlist.item>
-                        </flux:navlist.group>
-                    </flux:navlist>
-                </flux:modal.trigger>
+                <flux:navlist variant="outline">
+                    <flux:modal.trigger name="notifications-admin">
+                        <flux:navlist.item icon="bell">
+                            <div class="flex items-center">
+                                <span>{{ __('Notifikasi') }}</span>
+                                <div x-show="$store.notifications.hasUnread"
+                                    class="ml-4 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" wire:cloak></div>
+                            </div>
+                        </flux:navlist.item>
+                    </flux:modal.trigger>
+                </flux:navlist>
 
                 <flux:modal name="notifications-admin" variant="flyout" position="right" :closable="false"
                     class="md:w-96">
@@ -49,7 +48,7 @@
         </flux:navlist>
 
         <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Manage')" class="grid">
+            <flux:navlist.group :heading="__('Manajemen')" class="grid">
                 @hasanyrole('head_verifier')
                 <flux:navlist.item :href="route('is.index')" icon="folder-open"
                     :current="request()->routeIs('is.index')" wire:navigate>Layanan SI & Data</flux:navlist.item>
@@ -66,16 +65,22 @@
                 <flux:navlist.item :href="route('pr.index')" icon="folder-open"
                     :current="request()->routeIs('pr.index')" wire:navigate>Layanan Kehumasan</flux:navlist.item>
                 @endrole
+                <flux:navlist.item :href="route('discussions')" icon="chat-bubble-left-right"
+                    :current="request()->routeIs('discussions')" wire:navigate>Forum Diskusi</flux:navlist.item>
+                @unlessrole('head_verifier|promkes_verifier')
+                <flux:navlist.item :href="route('show.ratings')" icon="star"
+                    :current="request()->routeIs('show.ratings')" wire:navigate>Penilaian Layanan</flux:navlist.item>
+                @endunlessrole
             </flux:navlist.group>
         </flux:navlist>
         @endunlessrole
 
         @unlessrole('administrator|promkes_verifier')
         <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Systems')" class="grid">
+            <flux:navlist.group :heading="__('Sistem')" class="grid">
                 @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier')
                 <flux:navlist.item :href="route('analytic.index')" icon="chart-pie" wire:navigate>
-                    Analytics
+                    Analitik
                 </flux:navlist.item>
                 @endhasanyrole
 
@@ -90,16 +95,21 @@
 
         @hasrole('administrator')
         <flux:navlist variant="outline">
+            <flux:navlist.group :heading="__('Main')" class="grid">
+                <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+                    wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+            </flux:navlist.group>
             <flux:navlist.group :heading="__('Systems')" class="grid">
-                <flux:navlist.item :href="route('manage.users')" icon="users" :current="request()->routeIs('manage.users')" wire:navigate>
+                <flux:navlist.item :href="route('manage.users')" icon="users"
+                    :current="request()->routeIs('manage.users')" wire:navigate>
                     Users
                 </flux:navlist.item>
-                <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
+                {{-- <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
                     Permissions
                 </flux:navlist.item>
                 <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
                     Seksi
-                </flux:navlist.item>
+                </flux:navlist.item> --}}
             </flux:navlist.group>
         </flux:navlist>
         @endhasrole

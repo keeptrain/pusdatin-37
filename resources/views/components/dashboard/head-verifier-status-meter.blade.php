@@ -3,16 +3,14 @@
     <div class="flex-1 flex flex-col justify-center space-y-3 overflow-y-scroll">
         <div class="flex items-center">
             <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-            <a href="{{ route('letter.table') }}"
-                class="flex-1 text-sm text-neutral-600 dark:text-neutral-300 hover:underline">Menunggu Review
+            <a class="flex-1 text-sm text-neutral-600 dark:text-neutral-300 hover:underline">Menunggu Review
                 Kapusdatin</a>
             <div class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['approvedKasatpel'] }}
             </div>
         </div>
         <div class="flex items-center">
             <div class="w-2 h-2 rounded-full bg-orange-500 mr-2"></div>
-            <a href="{{ route('letter.table') }}"
-                class="flex-1 text-sm text-neutral-600 dark:text-neutral-300 hover:underline">Revisi Kapusdatin</a>
+            <a class="flex-1 text-sm text-neutral-600 dark:text-neutral-300 hover:underline">Revisi Kapusdatin</a>
             <div class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['repliedKapusdatin'] }}
             </div>
         </div>

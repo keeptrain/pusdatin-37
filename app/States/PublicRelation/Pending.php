@@ -8,7 +8,7 @@ class Pending extends PublicRelationStatus
 {
     public function label(): String
     {
-        return "Permohonan Masuk";
+        return "Usulan Masuk";
     }
 
     public function color(): string

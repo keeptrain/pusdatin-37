@@ -32,12 +32,13 @@ class UserForm extends Form
             'email' => [
                 'required',
                 'string',
+                'lowercase',
                 'email',
                 'max:255',
                 $this->id ? Rule::unique('users', 'email')->ignore($this->id) : 'unique:users,email'
             ],
-            'section' => ['required', 'string', 'max:255'],
-            'contact' => ['required', 'string', 'max:255'],
+            'section' => ['required', 'string', 'max:100'],
+            'contact' => ['required', 'string', 'max:16'],
             'password' => $this->id
                 ? ['nullable']
                 : ['required', 'string', 'min:8', 'max:46'],
@@ -70,11 +71,15 @@ class UserForm extends Form
     {
         $this->validate();
 
-        $this->user = User::create(
-            $this->all()
-        );
+        try {
+            $this->user = User::create(
+                $this->all()
+            );
 
-        $this->user->assignRole($this->role);
+            $this->user->assignRole($this->role);
+        } catch (\Exception $e) {
+            throw $e;
+        }
 
         $this->reset();
     }
@@ -91,7 +96,7 @@ class UserForm extends Form
 
         $this->user->syncRoles($this->role);
 
-        return redirect()->route('admin.users');
+        return redirect()->route('manage.users');
 
     }
 

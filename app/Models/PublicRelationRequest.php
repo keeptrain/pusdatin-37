@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\Division;
-use App\Enums\PublicRelationRequestPart;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
-use App\Trait\HasActivities;
 use IntlDateFormatter;
+use App\Trait\HasActivities;
 use Spatie\ModelStates\HasStates;
+use App\Enums\PublicRelationRequestPart;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Documents\DocumentUpload;
 use App\States\PublicRelation\Completed;
 use Illuminate\Database\Eloquent\Builder;
+use App\States\PublicRelation\Pending;
 use App\States\PublicRelation\PromkesQueue;
 use App\States\PublicRelation\PusdatinQueue;
 use App\States\PublicRelation\PromkesComplete;
@@ -21,13 +21,15 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class PublicRelationRequest extends Model
 {
-    use HasActivities, HasStates;
+    use HasActivities, HasStates, SoftDeletes;
 
     protected $table = "public_relation_requests";
 
     protected $casts = [
         'status' => PublicRelationStatus::class,
-        'links' => 'array'
+        'target' => 'array',
+        'links' => 'array',
+        'rating' => 'json'
     ];
 
     protected $fillable = [
@@ -38,7 +40,8 @@ class PublicRelationRequest extends Model
         'theme',
         'target',
         'links',
-        'active_checking'
+        'active_checking',
+        'rating'
     ];
 
     public function user()
@@ -51,16 +54,33 @@ class PublicRelationRequest extends Model
         return $this->morphMany(DocumentUpload::class, 'documentable');
     }
 
-    public static function resolveStatusClassFromString($statusString)
+    public function discussions()
     {
-        return match ($statusString) {
+        return $this->morphMany(Discussion::class, 'discussable');
+    }
+
+    public static function resolveStatusClassFromString(string $status): string
+    {
+        return match ($status) {
             'all' => 'All',
+            'permohonan_masuk' => Pending::class,
             'antrian_promkes' => PromkesQueue::class,
             'kurasi_promkes' => PromkesComplete::class,
             'antrian_pusdatin' => PusdatinQueue::class,
             'proses_pusdatin' => PusdatinProcess::class,
             'completed' => Completed::class,
+            default => 'All',
         };
+    }
+
+    public static function resolveStatusClassFromArray(array $statuses): array
+    {
+        return array_map(fn($status) => static::resolveStatusClassFromString($status), $statuses);
+    }
+
+    public function resolveLinkLabel($key)
+    {
+        return PublicRelationRequestPart::tryFrom($key)->label() ?? 'Link Media Tidak Dikenal';
     }
 
     public function getCompletedDateAttribute($value)
@@ -68,9 +88,14 @@ class PublicRelationRequest extends Model
         return Carbon::parse($value)->format('d F Y');
     }
 
-    public function getCreatedAtAttribute($value)
+    public function getSpesificDateAttribute($value)
     {
         return Carbon::parse($value)->format('d F Y');
+    }
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d F Y, H:i');
     }
 
     public function publicationPlan()
@@ -85,7 +110,12 @@ class PublicRelationRequest extends Model
 
     public function getTargetAttribute($value)
     {
-        return Str::headline($value);
+        $arrayData = json_decode($value, true) ?? []; // 'true' for array associative, ?? [] for fallback
+
+        return array_map(
+            fn($item) => is_string($item) ? ucwords(str_replace('_', ' ', $item)) : $item,
+            $arrayData
+        );
     }
 
     public function getMonthPublicationAttribute($value)
@@ -96,10 +126,10 @@ class PublicRelationRequest extends Model
             IntlDateFormatter::NONE,
             null,
             null,
-            'MMMM' // Format untuk nama bulan penuh
+            'MMMM' // Format for full month name
         );
 
-        // Konversi angka bulan menjadi nama bulan dalam bahasa Indonesia
+        // Convert month number to full month name in Indonesian
         return $formatter->format(mktime(0, 0, 0, $value, 1)) ?? 'Bulan Tidak Diketahui';
     }
 
@@ -113,21 +143,6 @@ class PublicRelationRequest extends Model
         return Carbon::parse($this->spesific_Date)->format('d F');
     }
 
-    public function scopeFilterByRole(Builder $query,  $role)
-    {
-        // Jika role tidak diberikan, kembalikan query tanpa filter
-        if (empty($role)) {
-            return $query;
-        }
-
-        // Filter berdasarkan role
-        match ($role) {
-            Division::PROMKES_ID->value => $query->whereIn('status', ['App\States\PublicRelation\Pending', 'App\States\PublicRelation\PromkesQueue', 'App\States\PublicRelation\PromkesComplete']),
-            Division::HEAD_ID->value => $query->whereIn('status', ['App\States\PublicRelation\PromkesComplete', 'App\States\PublicRelation\PusdatinQueue']),
-            Division::PR_ID->value => $query->whereIn('status', ['App\States\PublicRelation\PusdatinQueue', 'App\States\PublicRelation\PusdatinProcess', 'App\States\PublicRelation\Completed']),
-        };
-    }
-
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder
     {
         $resolveStatus = static::resolveStatusClassFromString($filterStatus);
@@ -137,6 +152,16 @@ class PublicRelationRequest extends Model
         }
 
         return $query;
+    }
+
+    public function scopeFilterByStatuses(Builder $query, ?array $filterStatuses): Builder
+    {
+        $resolveStatuses = static::resolveStatusClassFromArray($filterStatuses);
+        if (empty($filterStatuses)) {
+            return $query;
+        }
+
+        return $query->whereIn('status', $resolveStatuses);
     }
 
     public function transitionStatusToPromkesComplete()
@@ -170,10 +195,10 @@ class PublicRelationRequest extends Model
         ]);
     }
 
-    public function handleRedirectNotification($user)
+    public function handleRedirectNotification($user, $status)
     {
-        if ($user->hasRole('user')) {
-            return route('history.detail', [
+        if ($user->roles->pluck('name')->contains('user')) {
+            return route('detail.request', [
                 'type' => 'public-relation',
                 'id' => $this->id
             ]);
@@ -185,12 +210,12 @@ class PublicRelationRequest extends Model
     {
         $links = $this->links;
 
-        // Pastikan $links adalah array valid
+        //$links valid array
         $linksArray = is_string($links) ? json_decode($links, true) : $links;
 
         $separator = $needHyperLink ? "<br><br>" : "\n";
 
-        // Format setiap isi array links
+        // Format every element in array
         return collect($linksArray)->map(function ($link, $index) use ($needHyperLink) {
             $mediaLabel = PublicRelationRequestPart::tryFrom($index)?->label() ?? 'Media Tidak Dikenal';
             $mediaHyperLink = "<a href=\"$link\" target=\"_blank\">$link</a>";
@@ -199,7 +224,6 @@ class PublicRelationRequest extends Model
                 return "Media $mediaLabel: $link";
             }
 
-            // Label media dan link sebagai hyperlink aktif
             return "Media $mediaLabel: $mediaHyperLink";
         })->implode($separator);
     }

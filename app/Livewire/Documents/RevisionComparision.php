@@ -3,10 +3,10 @@
 namespace App\Livewire\Documents;
 
 use Livewire\Component;
-use App\Models\Letters\Letter;
+use App\Models\InformationSystemRequest;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class RevisionComparision extends Component
@@ -19,13 +19,19 @@ class RevisionComparision extends Component
     public function mount(int $id)
     {
         $this->siDataRequestId = $id;
-        $this->siDataRequest = $this->letters();
+        $this->siDataRequest = $this->informationSystemRequests();
     }
 
-    public function letters()
+    #[Title('Perbandingan Versi')]
+    public function render()
     {
-        return Letter::with([
-            'documentUploads.activeVersion',
+        return view('livewire.documents.revision-comparision');
+    }
+
+    public function informationSystemRequests()
+    {
+        return InformationSystemRequest::with([
+            'documentUploads.activeVersion:id,file_path',
             'documentUploads.versions'
         ])->findOrFail($this->siDataRequestId);
     }
@@ -39,9 +45,9 @@ class RevisionComparision extends Component
     #[Computed]
     public function currentVersion()
     {
-        $currentVersionsData = new Collection();
+        $currentVersionsData = collect();
 
-        if ($this->siDataRequest && $this->siDataRequest->documentUploads->isNotEmpty()) {
+        if ($this->siDataRequest->documentUploads->isNotEmpty()) {
             foreach ($this->siDataRequest->documentUploads as $documentUpload) {
                 $currentVersionsData->push($documentUpload->formatForCurrentVersion());
             }
@@ -55,37 +61,38 @@ class RevisionComparision extends Component
     {
         $groupedVersions = collect();
 
-        if ($this->siDataRequest && $this->siDataRequest->documentUploads->isNotEmpty()) {
+        if ($this->siDataRequest->documentUploads->isNotEmpty()) {
             foreach ($this->siDataRequest->documentUploads as $documentUpload) {
-                // Ambil ID versi aktif
+                // Get active version ID
                 $activeVersionId = $documentUpload->activeVersion?->id;
 
-                // Filter versi yang tidak aktif
-                $versions = $documentUpload->versions->filter(function ($version) use ($activeVersionId) {
-                    return $version->id !== $activeVersionId;
-                });
+                $versions = $documentUpload->versions->reject(fn($version) => $version->id === $activeVersionId);
 
-                // Kelompokkan data berdasarkan version
+                // Group data by version
                 foreach ($versions as $version) {
-                    $groupedVersions->push([
-                        'version' => $version->version ?? null,
-                        'part_number' => $documentUpload->part_number,
-                        'part_number_label' => $documentUpload->part_number_label,
-                        'file_path' => Storage::url($version->file_path),
-                    ]);
+                    if (!empty($version->file_path)) {
+                        $groupedVersions->push([
+                            'version' => $version->version ?? null,
+                            'part_number' => $documentUpload->part_number,
+                            'part_number_label' => $documentUpload->part_number_label,
+                            'file_path' => Storage::url($version->file_path),
+                            'revision_note' => $version->revision_note,
+                        ]);
+                    }
                 }
             }
         }
 
-        // Kelompokkan data berdasarkan version
-        return $groupedVersions->groupBy('version')->map(function ($group) {
+        // Group by version
+        return $groupedVersions->sortBy('version')->groupBy('version')->map(function ($group) {
             return [
-                'version' => $group->first()['version'], // Pastikan mengakses array
+                'version' => $group->first()['version'],
                 'details' => $group->map(function ($item) {
                     return [
                         'part_number' => $item['part_number'],
                         'part_number_label' => $item['part_number_label'],
                         'file_path' => $item['file_path'],
+                        'revision_note' => $item['revision_note'],
                     ];
                 })->values(),
             ];

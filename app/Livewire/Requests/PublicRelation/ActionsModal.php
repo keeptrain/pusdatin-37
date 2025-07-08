@@ -9,6 +9,7 @@ use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use App\Models\PublicRelationRequest;
 use App\States\PublicRelation\PromkesQueue;
+use App\Enums\PublicRelationRequestPart;
 
 class ActionsModal extends Component
 {
@@ -38,9 +39,9 @@ class ActionsModal extends Component
                 'variant' => 'success',
                 'message' => $prRequest->status->toastMessage(),
             ]);
-
-            $this->redirect("$prRequest->id", true);
         });
+
+        $this->redirectRoute('pr.show', $prRequest->id, navigate: true);
     }
 
     #[Computed]
@@ -102,9 +103,9 @@ class ActionsModal extends Component
                 'variant' => 'success',
                 'message' => $prRequest->status->toastMessage(),
             ]);
-
-            $this->redirectRoute('pr.show', $prRequest->id, navigate: true);
         });
+
+        $this->redirectRoute('pr.show', $prRequest->id, navigate: true);
     }
 
     public function queuePusdatin()
@@ -128,9 +129,9 @@ class ActionsModal extends Component
                 'variant' => 'success',
                 'message' => $prRequest->status->toastMessage(),
             ]);
-
-            $this->redirectRoute('pr.show', $prRequest->id, navigate: true);
         });
+
+        $this->redirectRoute('pr.show', $prRequest->id, navigate: true);
     }
 
     public function processPusdatin()
@@ -154,9 +155,22 @@ class ActionsModal extends Component
                 'variant' => 'success',
                 'message' => $prRequest->status->toastMessage(),
             ]);
-
-            $this->redirectRoute('pr.show', $prRequest->id, navigate: true);
         });
+
+        $this->redirectRoute('pr.show', $this->publicRelationId, navigate: true);
+    }
+
+    #[Computed]
+    public function linkProductions()
+    {
+        return collect($this->mediaLinks)->map(function ($url, $key) {
+            $label = PublicRelationRequestPart::tryFrom((int) $key)?->label() ?? 'Unknown';
+
+            return [
+                'label' => $label,
+                'url' => $url,
+            ];
+        })->values();
     }
 
     public function completed()
@@ -169,9 +183,23 @@ class ActionsModal extends Component
             $dynamicRules["mediaLinks.{$documentUpload->part_number}"] = ['required', 'url'];
         }
 
-        $this->validate($dynamicRules, [
-            'mediaLinks.1.required' => 'Diperlukan'
-        ]);
+        $this->validate(
+            $dynamicRules,
+            [
+                'mediaLinks.1' => 'Link audio di perlukan',
+                'mediaLinks.2' => 'Link infografis di perlukan',
+                'mediaLinks.3' => 'Link poster di perlukan',
+                'mediaLinks.4' => 'Link media di perlukan',
+                'mediaLinks.5' => 'Link bumper di perlukan',
+                'mediaLinks.6' => 'Link backdrop kegiatan di perlukan',
+                'mediaLinks.7' => 'Link spanduk di perlukan',
+                'mediaLinks.8' => 'Link roll banner di perlukan',
+                'mediaLinks.9' => 'Link sertifikat di perlukan',
+                'mediaLinks.10' => 'Link press release di perlukan',
+                'mediaLinks.11' => 'Link artikel di perlukan',
+                'mediaLinks.12' => 'Link peliputan di perlukan',
+            ]
+        );
 
         $this->authorize('completedRequest', $prRequest);
 
@@ -183,16 +211,16 @@ class ActionsModal extends Component
             $prRequest->logStatus(null);
 
             DB::afterCommit(function () use ($prRequest) {
-                $prRequest->sendPrRequestNotification();
+                $prRequest->sendPrRequestNotification($this->formatForNotificationMail($prRequest));
             });
 
             session()->flash('status', [
                 'variant' => 'success',
                 'message' => $prRequest->status->toastMessage(),
             ]);
-
-            $this->redirectRoute('pr.show', $prRequest->id, navigate: true);
         });
+
+        $this->redirectRoute('pr.show', $this->publicRelationId, navigate: true);
     }
 
     private function checkCurationFileUpload($prRequest)
@@ -227,11 +255,24 @@ class ActionsModal extends Component
         }
     }
 
-    public function linksToArray()
+    public function formatForNotificationMail($prRequest)
     {
+        $mediaLinks = $this->mediaLinks;
+        $targets = $prRequest->target;
+        $formatted = [];
+
+        foreach ($mediaLinks as $key => $value) {
+            $label = PublicRelationRequestPart::tryFrom($key)->label();
+
+            $formatted[$label] = $value;
+        }
+
         return [
-            'media_type' => '',
-            'link' => ''
+            'theme' => $prRequest->theme,
+            'target' => implode(',', $targets),
+            'completed_date' => $prRequest->completed_date,
+            'media' => $formatted,
+            'rating_link' => route('detail.request', ['type' => 'public_relation', 'id' => $prRequest->id]),
         ];
     }
 }

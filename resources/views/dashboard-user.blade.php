@@ -38,23 +38,31 @@
                     <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
                         <!-- Conditionally render sun or moon icon -->
                         <template x-if="!isNight">
-                            <flux:icon.sun class="size-10" />
+                            <x-lucide-sun class="size-10" />
                         </template>
                         <template x-if="isNight">
-                            <flux:icon.moon class="size-10" x-if="isNight" />
+                            <x-lucide-moon class="size-10" />
                         </template>
                     </div>
                 </div>
             </div>
         </div>
 
+        {{-- Hero Dashboard --}}
         <x-user.hero-dashboard />
 
-        <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
+        <flux:separator class="mt-6" />
 
-        {{-- <x-user.about-me /> --}}
+        {{-- Meeting List --}}
+        <div class="gap-4 mt-4">
+            <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
+        </div>
 
-        <x-user.cara-kerja bg="bg-none" />
+        <flux:separator />
+
+        {{-- Discussion List --}}
+        <div x-data="{ createDiscussion: false }" class="p-4 border rounded-lg mt-6">
+            <x-user.dashboard.discussion-forum :requests="$requests" />
+        </div>
     </div>
-
 </x-layouts.app>

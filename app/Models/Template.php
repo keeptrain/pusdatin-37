@@ -13,7 +13,14 @@ class Template extends Model
         'name',
         'part_number',
         'file_path',
+        'mime_type',
         'is_active'
+    ];
+
+    protected $resolveMimeTypes = [
+        'pdf' => 'application/pdf',
+        'doc' => 'application/msword',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
 
     public function getPartNumberLabelAttribute()
@@ -52,5 +59,14 @@ class Template extends Model
         }
 
         return $query->whereIn('part_number', [1, 2, 3, 4, 5]);
+    }
+
+    public static function getActiveInformationSystemFilePath()
+    {
+        return self::select('file_path', 'mime_type', 'part_number')
+            ->orderBy('part_number', 'asc')
+            ->whereIn('part_number', [1, 2, 3, 4, 5])
+            ->where('is_active', true)
+            ->get();
     }
 }

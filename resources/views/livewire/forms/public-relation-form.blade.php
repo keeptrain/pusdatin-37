@@ -1,7 +1,16 @@
 <x-layouts.form.request legend="Form Permohonan layanan" nameForm="Kehumasan">
 
     <!-- Section 1: Basic information -->
-    <form wire:submit="save" class="space-y-6 mt-6">
+    <form x-data="{
+        activeUploads: null,
+        selectedMediaType: $wire.mediaType,
+        uploadedFiles: { },
+        otherValue: false,
+        progress: 0,
+        get uploading() {
+            return this.activeUploads > 0;
+        }
+        }" wire:submit="save" class="space-y-6 mt-6">
         <div class="grid lg:grid-cols-2 gap-4">
             <section>
                 <div class="border border-gray-200 rounded-lg p-4">
@@ -43,34 +52,26 @@
             </section>
 
             <!-- Section 2: Document Upload -->
-            <div x-data="{
-                activeUploads: null,
-                selectedMediaType: $wire.mediaType,
-                uploadedFiles: { },
-                otherValue: false,
-                progress: 0,
-                    get uploading() {
-                        return this.activeUploads > 0;
-                    }
-                }" x-on:livewire-upload-start="activeUploads++" x-on:livewire-upload-finish="activeUploads--"
+            <div x-on:livewire-upload-start="activeUploads++" x-on:livewire-upload-finish="activeUploads--"
                 x-on:livewire-upload-error="activeUploads--" x-on:livewire-upload-cancel="activeUploads--"
                 x-on:livewire-upload-progress="progress = $event.detail.progress"
                 class="space-y-6 border border-gray-200 rounded-lg p-4">
 
-                <flux:radio.group wire:model="target" label="Sasaran">
-                    <flux:radio label="Masyarakat Umum" value="masyarakat_umum" />
-                    <flux:radio label="Tenaga Kesehatan" value="tenaga_kesehatan" />
-                    <flux:radio label="Anak Sekolah" value="anak_sekolah" />
-                    <div class="flex items-center">
-                        <flux:radio label="Other:" value="other" />
+                <flux:checkbox.group wire:model.live="target" label="Sasaran">
+                    <flux:checkbox label="Masyarakat Umum" value="masyarakat_umum" />
+                    <flux:checkbox label="Tenaga Kesehatan" value="tenaga_kesehatan" />
+                    <flux:checkbox label="Anak Sekolah" value="anak_sekolah" />
+                    <flux:checkbox label="Semua orang" value="semua_orang" />
+                    {{-- <div class="flex items-center">
+                        <flux:checkbox label="Other:" value="other" />
                         <!-- Input Field for "Other" -->
-                        <input type="text"
+                        <input type="text" wire:model.blur="otherTarget"
                             class="ml-2 border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 px-1 w-60" />
-                    </div>
+                    </div> --}}
                     @error('otherTarget')
                         <flux:text class="text-md text-red-500">{{ $message }}</flux:text>
                     @enderror
-                </flux:radio.group>
+                </flux:checkbox.group>
 
                 <flux:checkbox.group wire:model="mediaType" label="Jenis Media yang Diusulkan"
                     x-model="selectedMediaType">
@@ -102,7 +103,7 @@
                 </h3>
 
                 <div>
-                    <x-letters.input-file-adapter title="Permohonan (nota dinas)" model="uploadFile.0" required />
+                    <x-layouts.form.input-file title="Permohonan (nota dinas)" model="uploadFile.0" required />
                 </div>
 
                 <div class="p-2 bg-amber-100  items-center rounded-lg">
@@ -132,63 +133,63 @@
 
                     <template x-if="selectedMediaType.includes('1')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Audio" model="uploadFile.1" required />
+                            <x-layouts.form.input-file title="Materi Audio" model="uploadFile.1" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('2')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Infographics" model="uploadFile.2" required />
+                            <x-layouts.form.input-file title="Materi Infographics" model="uploadFile.2" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('3')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Poster" model="uploadFile.3" required />
+                            <x-layouts.form.input-file title="Materi Poster" model="uploadFile.3" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('4')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Video" model="uploadFile.4" required />
+                            <x-layouts.form.input-file title="Materi Video" model="uploadFile.4" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('5')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Bumper" model="uploadFile.5" required />
+                            <x-layouts.form.input-file title="Materi Bumper" model="uploadFile.5" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('6')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Backdrop Kegiatan" model="uploadFile.6"
+                            <x-layouts.form.input-file title="Materi Backdrop Kegiatan" model="uploadFile.6"
                                 required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('7')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Spanduk" model="uploadFile.7" required />
+                            <x-layouts.form.input-file title="Materi Spanduk" model="uploadFile.7" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('8')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Roll banner" model="uploadFile.8" required />
+                            <x-layouts.form.input-file title="Materi Roll banner" model="uploadFile.8" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('9')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Sertifikat" model="uploadFile.9" required />
+                            <x-layouts.form.input-file title="Materi Sertifikat" model="uploadFile.9" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('10')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Press Release" model="uploadFile.10" required />
+                            <x-layouts.form.input-file title="Materi Press Release" model="uploadFile.10" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('11')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Artikel" model="uploadFile.11" required />
+                            <x-layouts.form.input-file title="Materi Artikel" model="uploadFile.11" required />
                         </div>
                     </template>
                     <template x-if="selectedMediaType.includes('12')">
                         <div>
-                            <x-letters.input-file-adapter title="Materi Peliputan" model="uploadFile.12" required />
+                            <x-layouts.form.input-file title="Materi Peliputan" model="uploadFile.12" required />
                         </div>
                     </template>
                 </section>
@@ -196,11 +197,11 @@
         </div>
 
         <div class="flex flex-row justify-between mt-4">
-            <flux:button type="button" :href="route('letter')" wire:navigate>
+            <flux:button type="button" :href="route('dashboard')" wire:navigate>
                 {{ __('Cancel') }}
             </flux:button>
 
-            <flux:button type="submit" variant="primary">
+            <flux:button type="submit" variant="primary" x-bind:disabled="uploading">
                 {{ __('Ajukan') }}
             </flux:button>
         </div>
