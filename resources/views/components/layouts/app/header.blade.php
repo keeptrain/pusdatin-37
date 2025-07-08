@@ -2,11 +2,17 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 
 <head>
+    <script>
+        window.routes = {
+            'si-data.form': "{{ route('si-data.form') }}",
+            'pr.form': "{{ route('pr.form') }}"
+        };
+    </script>
     @livewireStyles
     @include('partials.head')
 </head>
 
-<body x-data="dashboard" class="min-h-screen bg-white dark:bg-zinc-800 p-0">
+<body class="min-h-screen bg-white dark:bg-zinc-800 p-0">
     @if (session('status'))
     @php
     $variant = session('status')['variant'];
@@ -15,7 +21,7 @@
     <flux:notification.toast :variant="$variant" :message="$message" />
     @endif
 
-    <flux:header sticky container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <flux:header x-data="header" sticky container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
         <a href="{{ route('dashboard') }}" class="ml-2 mr-5 flex items-center space-x-2 lg:ml-0" wire:navigate>
@@ -129,7 +135,7 @@
                 </flux:navlist.item>
 
             </flux:navlist.group>
-        </flux:navlist>
+        </flux:navlist>x
 
         <flux:spacer />
 
@@ -141,7 +147,6 @@
 
     @livewireScripts
     @fluxScripts
-    <script src="{{ asset('js/header.js') }}"></script>
 </body>
 
 </html>
