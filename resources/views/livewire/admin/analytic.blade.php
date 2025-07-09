@@ -1,27 +1,21 @@
 <div>
-    <div wire:loading wire:target="exportAsPdf" class="fixed inset-0 z-100 flex items-center justify-center"
-        style="background-color: rgba(0, 0, 0, 0.5);">
-        <div class="bg-white rounded-lg  mt-[48vh] mx-auto p-4 shadow-lg w-fit">
-            <span class="text-base font-medium text-gray-700">
-                Sedang membuat PDF ...
-            </span>
+    <!-- Full page overlay loading -->
+    {{-- <div wire:loading.delay wire:target="exportAsPdf, exportAsExcel">
+        <div class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5);">
+            <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                <i class="fas fa-spinner fa-spin fa-3x text-blue-500 mb-4"></i>
+                <h2 class="text-xl font-semibold">Generating Report</h2>
+                <p class="mt-2">Harap tunggu sedang menyiapkan file laporan...</p>
+            </div>
         </div>
-    </div>
-    <div wire:loading wire:target="exportAsExcel" class="fixed inset-0 z-100 flex items-center justify-center"
-        style="background-color: rgba(0, 0, 0, 0.5);">
-        <div class="bg-white rounded-lg  mt-[48vh] mx-auto p-4 shadow-lg w-fit">
-            <span class="text-base font-medium text-gray-700">
-                Sedang membuat Excel ...
-            </span>
-        </div>
-    </div>
+    </div> --}}
+
     <div class="space-y-6">
         <div class="flex flex-col gap-4">
             <flux:heading size="xl" level="1" class="text-color-testing-100">
                 <span>Laporan Analitik</span>
             </flux:heading>
-            <flux:text class="text-base">Export data dalam format pdf atau excel</flux:text>
-
+            {{-- <flux:text class="text-base">Export data dalam format pdf atau excel</flux:text> --}}
             <flux:separator variant="subtle" />
         </div>
 

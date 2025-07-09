@@ -67,7 +67,7 @@ class Analytic extends Component
         }, $fileName);
     }
 
-    public function exportAsExcel($startAt = null, $endAt = null)
+    public function exportAsExcel()
     {
         $currentDivisionUser = auth()->user()->currentUserRoleId();
         $fileName = "Daftar Permohonan - " . now() . ".xlsx";
