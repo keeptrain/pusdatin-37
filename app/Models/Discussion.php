@@ -79,6 +79,47 @@ class Discussion extends Model
         };
     }
 
+    public function scopeWithDiscussableDetails($query)
+    {
+        return $query->with([
+            'discussable' => function ($query) {
+                $query->when(
+                    $query->getModel() instanceof InformationSystemRequest,
+                    fn($q) => $q->select('id', 'title')
+                )->when(
+                        $query->getModel() instanceof PublicRelationRequest,
+                        fn($q) => $q->select('id', 'theme')
+                    );
+            }
+        ]);
+    }
+
+    public function scopeWithAttachmentCounts($query)
+    {
+        return $query->withCount('attachments')
+            ->with(['replies' => fn($q) => $q->latest()->withCount('attachments')]);
+    }
+
+    public function scopeApplySort($query, $sortType)
+    {
+        return match ($sortType) {
+            'Diskusi terbaru' => $query->withMax('replies as latest_reply_date', 'created_at')
+                ->orderByDesc('latest_reply_date')
+                ->orderByDesc('created_at'),
+            'Update terbaru' => $query->orderByDesc('created_at'),
+            default => $query->orderByDesc('created_at')
+        };
+    }
+
+    public function scopeApplySearch($query, $searchTerm)
+    {
+        return $query->when(
+            $searchTerm,
+            fn($q) =>
+            $q->where('body', 'like', '%' . $searchTerm . '%')
+        );
+    }
+
     public function getDiscussableContextAttribute()
     {
         return match ($this->discussable_type) {

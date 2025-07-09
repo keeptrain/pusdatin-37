@@ -3,6 +3,7 @@
 namespace App\Livewire\Discussions;
 
 use App\Enums\Division;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Models\Discussion;
@@ -11,7 +12,6 @@ use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Livewire\WithPagination;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
-use Livewire\Attributes\On;
 
 class Index extends Component
 {
@@ -20,14 +20,13 @@ class Index extends Component
     public int $perPage;
 
     public DiscussionForm $form;
-    public $requests;
+    public Collection $requests;
 
     public string $search = '';
-    public $sort = 'Update terbaru';
-    public $status = 'open';
-    public $discussableType = '';
-
-    public $imagesUpload = [];
+    public string $sort = 'Update terbaru';
+    public string $status = 'open';
+    public string $discussableType = '';
+    public array $imagesUpload = [];
 
     public function mount(int $perPage = 5)
     {
@@ -55,19 +54,6 @@ class Index extends Component
         }
     }
 
-    // #[On('upload-images')]
-    public function dispatchImages($path)
-    {
-        // $this->form->images = $path;
-    }
-
-    #[On('removeUploaded')]
-    public function removeUpload($index)
-    {
-        // unset($this->form->images[$index]);
-        // $this->form->images = array_values($this->form->images);
-    }
-
     public function create()
     {
         try {
@@ -79,33 +65,12 @@ class Index extends Component
 
     public function loadDiscussions()
     {
-        $query = Discussion::with([
-            'discussable' => function ($query) {
-                $query->when(
-                    $query->getModel() instanceof InformationSystemRequest,
-                    fn($q) => $q->select('id', 'title')
-                )->when(
-                        $query->getModel() instanceof PublicRelationRequest,
-                        fn($q) => $q->select('id', 'theme')
-                    );
-            },
-            'replies' => fn($q) => $q->latest()->withCount('attachments')
-        ])
-            ->withCount('attachments')
-            ->root();
-
-        // Apply sorting
-        $query->when($this->sort != 'Update terbaru', function ($q) {
-            $q->withMax('replies as latest_reply_date', 'created_at')
-                ->orderByDesc('latest_reply_date')
-                ->orderByDesc('created_at'); // Fallback if no replies
-        })->when($this->sort != 'Diskusi terbaru', function ($q) {
-            $q->orderByDesc('created_at');
-        });
-
-        // Apply filters
-        $query->when($this->status, fn($q) => $q->status($this->status))
-            ->when($this->search, fn($q) => $q->where('body', 'like', '%' . $this->search . '%'));
+        $query = Discussion::withDiscussableDetails()
+            ->withAttachmentCounts()
+            ->root()
+            ->status($this->status)
+            ->applySort($this->sort)
+            ->applySearch($this->search);
 
         $this->applyDiscussionFilters($query);
 
@@ -170,11 +135,6 @@ class Index extends Component
     {
         $this->dispatch('modal-close', name: 'filter-discussion-modal');
         $this->resetPage();
-    }
-
-    public function updatedAttachments()
-    {
-        dd('test');
     }
 
     public function removeTemporaryImage($index)
