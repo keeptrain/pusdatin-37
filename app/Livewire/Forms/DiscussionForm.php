@@ -22,10 +22,50 @@ class DiscussionForm extends Form
     #[Validate('required_if:discussableType,no|string|in:si,data,pr')]
     public $kasatpel = '';
 
+    #[Validate(['attachments.*' => 'image|max:1024'])]
+    public $attachments = [];
+
     #[Validate('required|string')]
     public $body = '';
 
     public $replyStates = [];
+
+    public function attachments(Discussion $discussion, ?int $discussionId)
+    {
+        // if (isset($this->replyStates[$discussionId]['attachments'])) {
+        //     foreach ($this->replyStates[$discussionId]['attachments'] as $image) {
+        //         $path = $image->store('attachments/discussions');
+
+        //         $discussion->attachments()->create([
+        //             'user_id' => auth()->user()->id,
+        //             'disk' => 'public',
+        //             'path' => $path,
+        //             'original_filename' => $image->getClientOriginalName(),
+        //             'mime_type' => $image->getMimeType(),
+        //         ]);
+        //     }
+        // };
+
+        if (isset($this->attachments)) {
+            foreach ($this->attachments as $image) {
+                $path = $image->store('attachments/discussions');
+                $discussion->attachments()->create(attributes: [
+                    'user_id' => auth()->user()->id,
+                    'disk' => 'public',
+                    'path' => $path,
+                    'original_filename' => $image->getClientOriginalName(),
+                    'mime_type' => $image->getMimeType(),
+                ]);
+            }
+        }
+        ;
+    }
+
+    public function removeAttachments($index)
+    {
+        unset($this->attachments[$index]);
+        $this->attachments = array_values($this->attachments);
+    }
 
     public function store()
     {
@@ -34,12 +74,14 @@ class DiscussionForm extends Form
         DB::transaction(function () {
             $discussable = $this->resolveDiscussable();
 
-            Discussion::create([
+            $discussion = Discussion::create([
                 'user_id' => auth()->user()->id,
                 'body' => $this->body,
                 'discussable_type' => $discussable[0],
                 'discussable_id' => $discussable[1],
             ]);
+
+            $this->attachments($discussion, null);
 
             DB::afterCommit(function () {
                 $this->reset();
@@ -67,18 +109,20 @@ class DiscussionForm extends Form
 
     public function storeReply(int $discussionId)
     {
-        // $this->validateOnly("replyStates.$discussionId.body", 'required|string|max:1000', $discussionId);
         DB::transaction(function () use ($discussionId) {
             $discussion = Discussion::findOrFail($discussionId);
-            Discussion::create([
+            $discussion = Discussion::create([
                 'user_id' => auth()->user()->id,
                 'body' => $this->replyStates[$discussionId]['body'],
                 'discussable_type' => $discussion->discussable_type,
                 'discussable_id' => $discussion->discussable_id,
                 'parent_id' => $discussionId,
             ]);
+
+            $this->attachments($discussion, $discussionId);
+
             DB::afterCommit(function () use ($discussion) {
-                $this->reset('replyStates');
+                $this->reset();
             });
         });
     }

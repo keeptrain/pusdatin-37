@@ -1,12 +1,8 @@
-@php
-    $backPage = auth()->user()->hasRole('user') ? 'dashboard' : 'discussions';
-@endphp
-
 <div class="flex flex-col -ml-2">
     <!-- Header -->
     <div class="flex justify-between items-center">
-        <flux:button :href="route($backPage)" icon="arrow-long-left" variant="subtle">Kembali</flux:button>
-        <flux:button icon="check" variant="subtle">Selesaikan diskusi</flux:button>
+        <flux:button :href="route($routeBack)" icon="arrow-long-left" variant="subtle">Kembali</flux:button>
+        <flux:button wire:click="statusDiscussion">{{ $status }}</flux:button>
     </div>
     <header class="p-3 space-y-2">
         <div class="flex justify-between lg:flex-row flex-col items-center">
@@ -17,9 +13,13 @@
         <div class="flex lg:flex-row flex-col items-center">
             <flux:subheading>Pembahasan: {{ $discussion->body }}</flux:subheading>
         </div>
-
         <div class="flex lg:flex-row flex-col justify-between items-center">
-            <flux:text>Lampiran: <x-discussions.attachments-list /></flux:text>
+            @if ($firstAttachments->isNotEmpty())
+                <div class="flex items-center gap-2">
+                    <flux:text>Lampiran:</flux:text>
+                    <x-discussions.attachments-list :attachments="$firstAttachments" />
+                </div>
+            @endif
             <flux:text>Tanggal dibuat: {{ $discussion->firstCreatedAt }}</flux:text>
         </div>
     </header>
@@ -45,7 +45,7 @@
                         <div>
                             <flux:legend>{{ $reply->body }}</flux:legend>
                         </div>
-                        <x-discussions.attachments-list />
+                        <x-discussions.attachments-list :attachments="$reply->attachments" />
                     </div>
                 @endif
 
@@ -61,7 +61,9 @@
                         <div class="flex justify-between space-y-1">
                             <flux:legend>{{ $reply->body }}</flux:legend>
                         </div>
-                        <x-discussions.attachments-list />
+                        <div class="flex items-center gap-2">
+                            <x-discussions.attachments-list :attachments="$reply->attachments" />
+                        </div>
                     </div>
                 @endif
             </div>
@@ -78,12 +80,22 @@
     <!-- Form Input Diskusi -->
     <footer class="px-4 py-3">
         <form wire:submit="reply" x-ref="replyForm" class="space-y-2">
-            <div class="flex flex-col space-y-2">
-                <flux:input.file multiple />
+            <div x-data="{ 
+                uploading: false, 
+                progress: 0
+            }" x-on:livewire-upload-start="uploading = true; progress = 0"
+                x-on:livewire-upload-finish="uploading = false; progress = 0"
+                x-on:livewire-upload-error="uploading = false; progress = 0"
+                x-on:livewire-upload-progress="progress = $event.detail.progress" class="flex flex-col space-y-2">
+                <x-layouts.form.input-multiple-file :form="$form" :discussionId="$discussionId" />
+
                 <flux:textarea wire:model="form.replyStates.{{ $discussionId }}.body" placeholder="Tulis balasan..."
                     rows="2"
                     class="w-full p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <flux:text size="sm">*Untuk file selain gambar, tolong upload menggunakan
+                    google drive lalu sisipkan link pada kolom di atas.</flux:text>
             </div>
+
             <div class="flex justify-end items-center">
                 <flux:button type="submit" variant="primary" icon:trailing="paper-airplane">
                     Kirim

@@ -22,15 +22,14 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
-        Schema::create('attachments', function (Blueprint $table) {
+        Schema::create('discussion_attachments', function (Blueprint $table) {
             $table->id();
-            $table->morphs('attachable');
+            $table->foreignId('discussion_id')->constrained('discussions', 'id')->onDelete('cascade');
             $table->foreignId('user_id')->constrained();
             $table->string('disk');
             $table->string('path');
             $table->string('original_filename');
             $table->string('mime_type');
-            $table->unsignedBigInteger('size');
             $table->timestamps();
         });
     }

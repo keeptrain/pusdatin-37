@@ -18,8 +18,8 @@ use App\Livewire\Requests\InformationSystem\Edit;
 use App\Livewire\Requests\InformationSystem\EditMeeting;
 use App\Livewire\Forms\SiDataRequestForm;
 use App\Livewire\Requests\ShowRatings;
-use App\Livewire\Requests\Discussions;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\FileController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -39,19 +39,19 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 // });
 
 // Route::get('/test-email', fn($data) => new RevisionMail($data));
-Route::get('/test-email', function () {
-    $data = [
-        'topic' => 'Test topic',
-        'title' => 'Test title',
-        'date' => '2025-06-25',
-        'start' => '10:00',
-        'end' => '12:00',
-        'name' => 'Gilang',
-        'link' => 'https://google.com',
-        'password' => 'test notesop',
-    ];
-    return new NewMeeting($data, 'create');
-});
+// Route::get('/test-email', function () {
+//     $data = [
+//         'topic' => 'Test topic',
+//         'title' => 'Test title',
+//         'date' => '2025-06-25',
+//         'start' => '10:00',
+//         'end' => '12:00',
+//         'name' => 'Gilang',
+//         'link' => 'https://google.com',
+//         'password' => 'test notesop',
+//     ];
+//     return new NewMeeting($data, 'create');
+// });
 
 Route::middleware(['auth'])->group(function () {
     // Information System & Data
@@ -74,6 +74,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('ratings', ShowRatings::class)->name('show.ratings');
     Route::get('discussions', \App\Livewire\Discussions\Index::class)->name('discussions');
     Route::get('discussion/{id}', \App\Livewire\Discussions\Show::class)->name('discussion.show');
+    Route::get('/file-viewer/{fileId}', [FileController::class, 'show'], )->name('file.viewer');
 
     // Public Relation
     Route::get('form/public-relation', PublicRelationForm::class)->name('pr.form')->middleware('can:create request');

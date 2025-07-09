@@ -4,33 +4,6 @@
         <flux:heading size="xl" class="">Forum Diskusi</flux:heading>
     </div>
     <flux:heading size="lg" level="2" class="mb-6">{{ __('Daftar diskusi dari para pemohon.') }}</flux:heading>
-
-    <div class="flex justify-between space-x-2">
-        <flux:input wire:model.blur="search" size="sm" icon="magnifying-glass" placeholder="Cari diskusi..." />
-
-        <flux:button @click="$dispatch('modal-show', { name: 'filter-discussion-modal' });" size="sm" icon="eye">
-            Filter</flux:button>
-    </div>
-
-    <flux:modal name="filter-discussion-modal" class="w-full max-w-md">
-        <form wire:submit="refreshPage" class="space-y-4">
-            <flux:legend>Filter Diskusi</flux:legend>
-
-            <flux:select wire:model="discussableType" label="Kategori diskusi" placeholder="Pilih kategori">
-                <option value="yes">Terkait permohonan</option>
-                <option value="no">Tidak terkait</option>
-            </flux:select>
-
-            <flux:radio.group wire:model="isClosed" label="Status diskusi">
-                <flux:radio label="Telah selesai" value="completed" />
-                <flux:radio label="Belum selesai" value="ongoing" />
-            </flux:radio.group>
-
-            <div class="flex justify-end">
-                <flux:button type="submit" size="sm">Terapkan</flux:button>
-            </div>
-        </form>
-    </flux:modal>
     @endunlessrole
 
     @role('user')
@@ -74,6 +47,16 @@
             </div>
         </div>
 
+        <div x-data="{ 
+            uploading: false, 
+            progress: 0
+        }" x-on:livewire-upload-start="uploading = true; progress = 0"
+            x-on:livewire-upload-finish="uploading = false; progress = 0"
+            x-on:livewire-upload-error="uploading = false; progress = 0"
+            x-on:livewire-upload-progress="progress = $event.detail.progress">
+            <x-layouts.form.input-multiple-file :form="$form" />
+        </div>
+
         <flux:textarea wire:model="form.body" label="Deskripsi"
             placeholder="Deskripsikan masalah yang ingin kamu diskusikan..." rows="2" />
 
@@ -86,6 +69,7 @@
     @endrole
 
     <div class="space-y-4 mt-6">
+        <x-discussions.filter-area :sort="$sort" />
         @forelse ($discussions as $discussion)
             <x-discussions.list :discussion="$discussion" />
         @empty

@@ -10,26 +10,28 @@ use App\Livewire\Forms\DiscussionForm;
 use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Livewire\WithPagination;
-use App\Models\User;
+use Livewire\Features\SupportFileUploads\WithFileUploads;
+use Livewire\Attributes\On;
 
 class Index extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public int $perPage;
 
     public DiscussionForm $form;
     public $requests;
-    private User $user;
 
     public string $search = '';
-    public $isClosed = '';
+    public $sort = 'Update terbaru';
+    public $status = 'open';
     public $discussableType = '';
+
+    public $imagesUpload = [];
 
     public function mount(int $perPage = 5)
     {
         $this->perPage = $perPage;
-        $this->user = auth()->user();
     }
 
     #[Title("Forum Diskusi")]
@@ -37,16 +39,33 @@ class Index extends Component
     {
         $query = $this->loadDiscussions();
 
-        $query->when($this->isClosed === 'completed', function ($query) {
-            $query->whereNotNull('closed_at');
-        })
-            ->when($this->discussableType === 'yes', function ($query) {
-                $query->whereHasMorph('discussable', [InformationSystemRequest::class, PublicRelationRequest::class]);
-            });
+        $query->when($this->discussableType === 'yes', function ($query) {
+            $query->whereHasMorph('discussable', [InformationSystemRequest::class, PublicRelationRequest::class]);
+        });
 
         $discussions = $query->paginate($this->perPage);
 
         return view('livewire.discussions.index', compact('discussions'));
+    }
+
+    public function updatedImagesUpload($value)
+    {
+        foreach ($this->imagesUpload as $image) {
+            $this->form->attachments[] = $image;
+        }
+    }
+
+    // #[On('upload-images')]
+    public function dispatchImages($path)
+    {
+        // $this->form->images = $path;
+    }
+
+    #[On('removeUploaded')]
+    public function removeUpload($index)
+    {
+        // unset($this->form->images[$index]);
+        // $this->form->images = array_values($this->form->images);
     }
 
     public function create()
@@ -62,23 +81,31 @@ class Index extends Component
     {
         $query = Discussion::with([
             'discussable' => function ($query) {
-                // Memuat kolom berdasarkan jenis model yang terkait
                 $query->when(
                     $query->getModel() instanceof InformationSystemRequest,
-                    function ($q) {
-                    $q->select('id', 'title'); // Untuk InformationSystem
-                }
+                    fn($q) => $q->select('id', 'title')
                 )->when(
                         $query->getModel() instanceof PublicRelationRequest,
-                        function ($q) {
-                        $q->select('id', 'theme'); // Untuk PublicRelation
-                    }
+                        fn($q) => $q->select('id', 'theme')
                     );
             },
-            'replies',
+            'replies' => fn($q) => $q->latest()->withCount('attachments')
         ])
-            ->whereNull('parent_id')
-            ->latest();
+            ->withCount('attachments')
+            ->root();
+
+        // Apply sorting
+        $query->when($this->sort != 'Update terbaru', function ($q) {
+            $q->withMax('replies as latest_reply_date', 'created_at')
+                ->orderByDesc('latest_reply_date')
+                ->orderByDesc('created_at'); // Fallback if no replies
+        })->when($this->sort != 'Diskusi terbaru', function ($q) {
+            $q->orderByDesc('created_at');
+        });
+
+        // Apply filters
+        $query->when($this->status, fn($q) => $q->status($this->status))
+            ->when($this->search, fn($q) => $q->where('body', 'like', '%' . $this->search . '%'));
 
         $this->applyDiscussionFilters($query);
 
@@ -87,7 +114,7 @@ class Index extends Component
 
     protected function applyDiscussionFilters($query)
     {
-        $currentRole = $this->user->currentUserRoleId();
+        $currentRole = auth()->user()->currentUserRoleId();
 
         $headDivision = Division::HEAD_ID->value;
         $siDivision = Division::SI_ID->value;
@@ -123,7 +150,7 @@ class Index extends Component
             });
         } else {
             $query->where(function ($q) use ($currentRole) {
-                $q->where('user_id', $this->user->id);
+                $q->where('user_id', auth()->user()->id);
 
                 // Add Role-based discussions in the same query context
                 $q->orWhere(function ($roleQuery) use ($currentRole) {
@@ -134,9 +161,24 @@ class Index extends Component
         }
     }
 
+    public function sortToggle()
+    {
+        $this->sort = $this->sort == 'Update terbaru' ? 'Diskusi terbaru' : 'Update terbaru';
+    }
+
     public function refreshPage()
     {
         $this->dispatch('modal-close', name: 'filter-discussion-modal');
-        // $this->dispatch('discussion-updated');
+        $this->resetPage();
+    }
+
+    public function updatedAttachments()
+    {
+        dd('test');
+    }
+
+    public function removeTemporaryImage($index)
+    {
+        $this->form->removeAttachments($index);
     }
 }

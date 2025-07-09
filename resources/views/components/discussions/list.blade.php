@@ -26,8 +26,12 @@
             <div class="flex items-center space-x-2 text-sm text-gray-500">
                 <x-lucide-message-square class="w-4 h-4" />
                 <span>{{ count($discussion['replies']) }} balasan</span>
-                <x-lucide-paperclip class="w-4 h-4" />
-                <span>200 lampiran</span>
+                <x-lucide-image class="w-4 h-4" />
+                <span>{{ $discussion->attachments_count + $discussion->replies->sum('attachments_count') }} gambar</span>
+                @if (!empty($discussion->replies->last()->created_at))
+                    <x-lucide-clock class="w-4 h-4" />
+                    <span>{{ $discussion->replies->last()->created_at->format('d M Y - H:i') }}</span>
+                @endif
             </div>
             <flux:button :href="route('discussion.show', $discussion->id)"
                 size="sm" variant="ghost" icon:trailing="arrow-top-right-on-square">Lihat diskusi</flux:button>

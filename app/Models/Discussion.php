@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\Enums\Division;
+use Illuminate\Database\Eloquent\Builder;
 
 class Discussion extends Model
 {
@@ -16,6 +17,7 @@ class Discussion extends Model
         'body',
         'user_id',
         'parent_id',
+        'closed_at'
     ];
 
     protected $softDelete = true;
@@ -42,6 +44,17 @@ class Discussion extends Model
             ->orderBy('created_at');
     }
 
+    public function attachments()
+    {
+        return $this->hasMany(DiscussionAttachment::class);
+    }
+
+    public function repliesWithAttachments()
+    {
+        return $this->hasMany(Discussion::class, 'parent_id')
+            ->with('attachments');
+    }
+
     public function getFirstCreatedAtAttribute()
     {
         return Carbon::parse($this->created_at)->format('d M Y H:i');
@@ -57,6 +70,15 @@ class Discussion extends Model
         return $query->whereNotNull('parent_id');
     }
 
+    public function scopeStatus(Builder $query, string $status)
+    {
+        return match ($status) {
+            'closed' => $query->whereNotNull('closed_at'),
+            'open' => $query->whereNull('closed_at'),
+            default => $query
+        };
+    }
+
     public function getDiscussableContextAttribute()
     {
         return match ($this->discussable_type) {
@@ -64,5 +86,15 @@ class Discussion extends Model
             PublicRelationRequest::class => 'Kehumasan - ' . $this->discussable->theme,
             default => 'Tidak terkait permohonan - Kasatpel ' . Division::tryFrom($this->discussable_id)->label(),
         };
+    }
+
+    public function close(): void
+    {
+        $this->update(['closed_at' => now()]);
+    }
+
+    public function reopen(): void
+    {
+        $this->update(['closed_at' => null]);
     }
 }
