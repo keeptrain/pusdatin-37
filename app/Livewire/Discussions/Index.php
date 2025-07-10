@@ -3,6 +3,7 @@
 namespace App\Livewire\Discussions;
 
 use App\Enums\Division;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -63,7 +64,7 @@ class Index extends Component
         }
     }
 
-    public function loadDiscussions()
+    public function loadDiscussions(): Builder
     {
         $query = Discussion::withDiscussableDetails()
             ->withAttachmentCounts()
@@ -77,7 +78,7 @@ class Index extends Component
         return $query;
     }
 
-    protected function applyDiscussionFilters($query)
+    protected function applyDiscussionFilters(Builder $query)
     {
         $currentRole = auth()->user()->currentUserRoleId();
 

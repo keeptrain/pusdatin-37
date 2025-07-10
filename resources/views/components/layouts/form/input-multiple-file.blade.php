@@ -1,7 +1,6 @@
 @props([
 'discussionId' => null,
 'form' => null,
-'replyStates' => []
 ])
 
 <div class="space-y-2">
@@ -49,9 +48,9 @@
     @endif
 
     @error('form.attachments')
-        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        <flux:error :message="$message" />
     @enderror
     @error('form.attachments.*')
-        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        <flux:error :message="$message" />
     @enderror
 </div>

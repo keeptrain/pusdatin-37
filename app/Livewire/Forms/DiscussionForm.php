@@ -10,6 +10,7 @@ use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DiscussionForm extends Form
 {
@@ -30,35 +31,36 @@ class DiscussionForm extends Form
 
     public $replyStates = [];
 
+    public function messages()
+    {
+        return [
+            'discussableType.required' => 'Harap pilih jenis diskusi.',
+            'discussableType.in' => 'Jenis diskusi tidak valid.',
+            'discussableId.required_if' => 'Harap pilih diskusi terkait.',
+            'discussableId.string' => 'Diskusi terkait harus berupa teks.',
+            'kasatpel.required_if' => 'Harap pilih kasatpel.',
+            'kasatpel.in' => 'Kasatpel tidak valid.',
+            'attachments.*.image' => 'File harus berupa gambar.',
+            'attachments.*.max' => 'Ukuran gambar tidak boleh lebih dari 1MB.',
+            'body.required' => 'Harap masukkan pesan diskusi.',
+            'body.string' => 'Pesan diskusi harus berupa teks.'
+        ];
+    }
+
     public function attachments(Discussion $discussion, ?int $discussionId)
     {
-        // if (isset($this->replyStates[$discussionId]['attachments'])) {
-        //     foreach ($this->replyStates[$discussionId]['attachments'] as $image) {
-        //         $path = $image->store('attachments/discussions');
-
-        //         $discussion->attachments()->create([
-        //             'user_id' => auth()->user()->id,
-        //             'disk' => 'public',
-        //             'path' => $path,
-        //             'original_filename' => $image->getClientOriginalName(),
-        //             'mime_type' => $image->getMimeType(),
-        //         ]);
-        //     }
-        // };
-
         if (isset($this->attachments)) {
             foreach ($this->attachments as $image) {
                 $path = $image->store('attachments/discussions');
                 $discussion->attachments()->create(attributes: [
                     'user_id' => auth()->user()->id,
-                    'disk' => 'public',
+                    'disk' => 'local',
                     'path' => $path,
                     'original_filename' => $image->getClientOriginalName(),
                     'mime_type' => $image->getMimeType(),
                 ]);
             }
         }
-        ;
     }
 
     public function removeAttachments($index)
@@ -107,23 +109,46 @@ class DiscussionForm extends Form
         };
     }
 
-    public function storeReply(int $discussionId)
+    public function storeReply(int $parentId)
     {
-        DB::transaction(function () use ($discussionId) {
-            $discussion = Discussion::findOrFail($discussionId);
-            $discussion = Discussion::create([
+        DB::transaction(function () use (&$parentId) {
+            $discussionParent = Discussion::findOrFail($parentId);
+            $reply = Discussion::create([
                 'user_id' => auth()->user()->id,
-                'body' => $this->replyStates[$discussionId]['body'],
-                'discussable_type' => $discussion->discussable_type,
-                'discussable_id' => $discussion->discussable_id,
-                'parent_id' => $discussionId,
+                'body' => $this->replyStates[$parentId]['body'],
+                'discussable_type' => $discussionParent->discussable_type,
+                'discussable_id' => $discussionParent->discussable_id,
+                'parent_id' => $parentId,
             ]);
 
-            $this->attachments($discussion, $discussionId);
+            $this->attachments($reply, $parentId);
 
-            DB::afterCommit(function () use ($discussion) {
+            DB::afterCommit(function () use ($reply) {
                 $this->reset();
             });
+        });
+    }
+
+    public function deleteReply(int $replyId)
+    {
+        DB::transaction(function () use (&$replyId) {
+            $reply = Discussion::findOrFail($replyId);
+
+            if ($reply->user_id == auth()->user()->id) {
+                Storage::delete($reply->attachments->pluck('path'));
+                $reply->delete();
+            }
+        });
+    }
+
+    public function deleteDiscussion(int $discussionId)
+    {
+        DB::transaction(function () use (&$discussionId) {
+            $discussion = Discussion::findOrFail($discussionId);
+
+            if ($discussion->user_id == auth()->user()->id) {
+                $discussion->delete();
+            }
         });
     }
 }

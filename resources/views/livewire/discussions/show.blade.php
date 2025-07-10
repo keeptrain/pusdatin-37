@@ -1,26 +1,40 @@
-<div class="flex flex-col -ml-2">
+<div class="flex flex-col">
     <!-- Header -->
     <div class="flex justify-between items-center">
         <flux:button :href="route($routeBack)" icon="arrow-long-left" variant="subtle">Kembali</flux:button>
-        <flux:button wire:click="statusDiscussion">{{ $status }}</flux:button>
+        <flux:dropdown align="bottom" offset="-25" gap="2">
+            <flux:button variant="ghost" icon="ellipsis-vertical">Aksi</flux:button>
+
+            <flux:menu>
+                <flux:menu.item wire:click="statusDiscussion" icon="pencil-square">{{ $status }}</flux:menu.item>
+                <flux:menu.item wire:click="deleteDiscussion" icon="trash" variant="danger">Hapus</flux:menu.item>
+            </flux:menu>
+        </flux:dropdown>
     </div>
     <header class="p-3 space-y-2">
         <div class="flex justify-between lg:flex-row flex-col items-center">
-            <flux:heading size="xl">Diskusi</flux:heading>
+            {{-- <flux:heading size="lg">Diskusi</flux:heading> --}}
             <x-discussions.badge :status="$discussion->discussable_type" :label="$discussion->discussableContext"
                 :id="$discussion->discussable_id" class="flex-shrink-0" />
         </div>
         <div class="flex lg:flex-row flex-col items-center">
-            <flux:subheading>Pembahasan: {{ $discussion->body }}</flux:subheading>
+            <flux:heading size="xl">Pembahasan: {{ $discussion->body }}</flux:heading>
         </div>
-        <div class="flex lg:flex-row flex-col justify-between items-center">
+        <div class="flex lg:flex-row flex-col items-center">
             @if ($firstAttachments->isNotEmpty())
                 <div class="flex items-center gap-2">
                     <flux:text>Lampiran:</flux:text>
                     <x-discussions.attachments-list :attachments="$firstAttachments" />
                 </div>
             @endif
+        </div>
+        <div class="space-y-2">
+            @php
+                use Carbon\Carbon;
+                $closedAt = Carbon::parse($discussion->closed_at)->format('d M Y H:i') ?? '-';
+            @endphp
             <flux:text>Tanggal dibuat: {{ $discussion->firstCreatedAt }}</flux:text>
+            <flux:text>Tanggal selesai: {{ $discussion->closed_at ? $closedAt : '-' }}</flux:text>
         </div>
     </header>
     <flux:separator />
@@ -91,7 +105,8 @@
 
                 <flux:textarea wire:model="form.replyStates.{{ $discussionId }}.body" placeholder="Tulis balasan..."
                     rows="2"
-                    class="w-full p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    class="w-full p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required />
                 <flux:text size="sm">*Untuk file selain gambar, tolong upload menggunakan
                     google drive lalu sisipkan link pada kolom di atas.</flux:text>
             </div>

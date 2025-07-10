@@ -17,17 +17,13 @@ class FileController extends Controller
         // Missing authorization
 
         try {
-            $document = DiscussionAttachment::findOrFail($fileId);
-            $path = $document->path;
-            $disk = Storage::disk('local');
-            if (!$disk->exists($path)) {
-                abort(404);
+            $attachment = DiscussionAttachment::findOrFail($fileId);
+
+            if (!Storage::exists($attachment->path) && !$attachment->isImage()) {
+                return abort(404);
             }
 
-            // return Storage::disk('local')->response($path);
-
-            // Using response to open in new tab
-            return response()->file($disk->path($path));
+            return response()->file($attachment->getUrl());
         } catch (\Throwable $th) {
             throw $th;
         }

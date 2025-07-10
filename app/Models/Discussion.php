@@ -60,6 +60,11 @@ class Discussion extends Model
         return Carbon::parse($this->created_at)->format('d M Y H:i');
     }
 
+    public function getParentClosedAtAttribute()
+    {
+        return Carbon::parse($this->closed_at)->format('d M Y H:i');
+    }
+
     public function scopeRoot($query)
     {
         return $query->whereNull('parent_id');
@@ -79,7 +84,7 @@ class Discussion extends Model
         };
     }
 
-    public function scopeWithDiscussableDetails($query)
+    public function scopeWithDiscussableDetails(Builder $query)
     {
         return $query->with([
             'discussable' => function ($query) {
@@ -94,7 +99,7 @@ class Discussion extends Model
         ]);
     }
 
-    public function scopeWithAttachmentCounts($query)
+    public function scopeWithAttachmentCounts(Builder $query)
     {
         return $query->withCount('attachments')
             ->with(['replies' => fn($q) => $q->latest()->withCount('attachments')]);

@@ -7,7 +7,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 use App\Models\Discussion;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Livewire\WithFileUploads;
 
 
@@ -72,18 +71,21 @@ class Show extends Component
     public function deleteReply(int $replyId)
     {
         try {
-            DB::transaction(function () use ($replyId) {
-                $reply = Discussion::findOrFail($replyId);
-
-                if ($reply->user_id == auth()->user()->id) {
-                    Storage::delete($reply->attachments->pluck('path'));
-                    $reply->delete();
-                }
-            });
+            $this->form->deleteReply($replyId);
         } catch (\Throwable $th) {
             throw $th;
         }
     }
+
+    public function deleteDiscussion()
+    {
+        try {
+            $this->form->deleteDiscussion($this->discussionId);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
     public function currentStatus($discussion)
     {
         $discussion->closed_at ? $this->status = 'Buka diskusi' : $this->status = 'Selesaikan diskusi';
@@ -96,8 +98,15 @@ class Show extends Component
                 $discussion = Discussion::findOrFail($this->discussionId);
                 $discussion->closed_at ? $discussion->reopen() : $discussion->close();
 
-                $this->currentStatus($discussion);
+                DB::afterCommit(function () use ($discussion) {
+                    $this->currentStatus($discussion);
+                });
             });
+            // session()->flash('status', [
+            //     'variant' => 'success',
+            //     'message' => 'Diskusi berhasil di selesaikan',
+            // ]);
+            $this->redirectRoute('discussion.show', $this->discussionId, navigate: true);
         } catch (\Throwable $th) {
             throw $th;
         }
