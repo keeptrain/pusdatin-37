@@ -1,4 +1,5 @@
 <x-layouts.app :title="__('Dashboard')">
+    <x-user.dashboard.warning-modal-sop />
     <!-- Welcome Section -->
     <div x-data="{
         greeting: '',

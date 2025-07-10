@@ -3,6 +3,7 @@
 namespace App\Models\Documents;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class UploadVersion extends Model
 {
@@ -18,6 +19,21 @@ class UploadVersion extends Model
 
     public function documentUpload()
     {
-        return $this->hasOne(DocumentUpload::class,'document_upload_version_id');
+        return $this->hasOne(DocumentUpload::class, 'document_upload_version_id');
+    }
+
+    public function getUrl()
+    {
+        $disk = Storage::disk('public');
+        $filePath = $disk->url($this->file_path);
+
+        return $filePath;
+    }
+    
+    public function markAsResolved()
+    {
+        $this->update([
+            'is_resolved' => true,
+        ]);
     }
 }

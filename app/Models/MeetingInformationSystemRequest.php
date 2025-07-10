@@ -29,37 +29,37 @@ class MeetingInformationSystemRequest extends Model
         return $this->belongsTo(InformationSystemRequest::class, 'request_id', 'id');
     }
 
-    public function getPlaceAttribute($value)
+    public function getPlaceAttribute(string $value): array
     {
         return json_decode($value, true);
     }
 
-    public function setPlaceAttribute($value)
+    public function setPlaceAttribute(array $value)
     {
         $this->attributes['place'] = json_encode($value);
     }
 
-    public function getRecipientsAttribute($value)
+    public function getRecipientsAttribute(string $value): array
     {
         return json_decode($value, true);
     }
 
-    public function setRecipientsAttribute($value)
+    public function setRecipientsAttribute(array $value)
     {
         $this->attributes['recipients'] = json_encode($value);
     }
 
-    public function getDateAttribute($value)
+    public function getDateAttribute()
     {
         return Carbon::parse($this->start_at)->format('d M Y');
     }
 
-    public function getStartAtTimeAttribute($value)
+    public function getStartAtTimeAttribute()
     {
         return Carbon::parse($this->start_at)->format('H:i');
     }
 
-    public function getEndAtTimeAttribute($value)
+    public function getEndAtTimeAttribute()
     {
         return Carbon::parse($this->end_at)->format('H:i');
     }

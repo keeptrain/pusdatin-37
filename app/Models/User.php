@@ -112,10 +112,10 @@ class User extends Authenticatable
         ];
     }
 
-    public function setSectionAttribute($value)
+    public function setSectionAttribute(string $value)
     {
         if (!array_key_exists($value, $this->sections)) {
-            throw new \InvalidArgumentException("Key $value invalid");
+            throw new \InvalidArgumentException("Section $value invalid");
         }
         $this->attributes['section'] = $value;
     }
