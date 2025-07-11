@@ -1,8 +1,13 @@
+/* Styling khusus untuk kolom "judul" */
 .judul {
-    max-width: 250px;
+    max-width: 10px;
 }
 
-#requestsTable tbody tr:hover {
+#requestsTable th:nth-child(1) { width: 20%; }
+#requestsTable th:nth-child(2) { width: 100px; }
+#requestsTable th:nth-child(3) { width: 30%; }
+
+/* #requestsTable tbody tr:hover {
     background-color: #f9fafb !important;
 }
 
@@ -13,9 +18,9 @@
 
 #requestsTable tbody tr td:first-child {
     cursor: default;
-}
+} */
 
-.dt-container .dt-search {
+/* .dt-container .dt-search {
     display: none;
 }
 
@@ -28,8 +33,8 @@ dt-column-order {
 }
 .dt-layout-cell.dt-layout-start {
     display: none !important;
-}
-table.dataTable th.dt-type-numeric div.dt-column-header,
+} */
+/* table.dataTable th.dt-type-numeric div.dt-column-header,
 table.dataTable th.dt-type-numeric div.dt-column-footer,
 table.dataTable th.dt-type-date div.dt-column-header,
 table.dataTable th.dt-type-date div.dt-column-footer,
@@ -141,4 +146,4 @@ table.dataTable td.dt-type-date {
         transform: translateY(0);
         opacity: 1;
     }
-}
+} */

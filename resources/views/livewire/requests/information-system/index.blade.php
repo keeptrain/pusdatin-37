@@ -1,104 +1,56 @@
-<div>
-    <div class="lg:p-3">
-        <flux:heading size="xl" level="1">{{ __('Daftar') }}</flux:heading>
-        <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan Sistem Informasi & Data') }}</flux:heading>
-        <x-flash-messages />
+<div x-data="prRequestsTable" class="lg:p-3">
+    <flux:heading size="xl" level="1">{{ __('Daftar') }}</flux:heading>
+    <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan Sistem Informasi & Data') }}
+    </flux:heading>
+    <x-flash-messages />
 
-        <div class="flex justify-between items-center mb-4">
-            <div class="flex gap-2">
-                <button
-                    wire:click="confirmDelete"
-                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    :disabled="@js(empty($selectedRequests)) || @js($isDeleting)"
-                    @disabled(empty($selectedRequests) || $isDeleting)>
-                    Hapus Data (<span x-text="@js(count($selectedRequests))">{{ count($selectedRequests) }}</span>)
-                </button>
-            </div>
+    <div class="flex justify-between items-center mb-4">
+        <flux:button x-on:click="$dispatch('modal-show', { name: 'confirm-deletion' }); test()" icon="trash"
+            x-bind:disabled="selectedDataId.length === 0">Hapus data <span x-text="selectedDataId.length"></span>
+        </flux:button>
 
-            <div class="flex-shrink-0">
-                <div class="flex-1">
-                    <input
-                        type="text"
-                        id="globalSearch"
-                        placeholder="Search..."
-                        class="px-3 py-2 border border-gray-300 rounded shadow-sm w-full max-w-md" />
-                </div>
+        <div class="flex-shrink-0">
+            <div class="flex-1">
+                <input type="text" id="globalSearch" placeholder="Search..."
+                    class="px-3 py-2 border border-gray-300 rounded shadow-sm w-full max-w-md" />
             </div>
         </div>
+    </div>
 
-        <!-- DataTables Table dengan wire:ignore -->
-        <div wire:ignore>
-            <table id="requestsTable" class="min-w-full bg-white border border-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-2 text-left border-b border-gray-200 w-12">
-                            <input
-                                type="checkbox"
-                                id="selectAllCheckbox"
-                                wire:model.live="selectAll"
-                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        </th>
-                        <th class="px-4 py-2 text-left border-b border-gray-200">No</th>
-                        <th class="px-4 py-2 text-left border-b border-gray-200">Penanggung Jawab</th>
-                        <th class="px-4 py-2 text-left border-b border-gray-200 judul">Judul</th>
-                        <th class="px-4 py-2 text-left border-b border-gray-200 relative">
-                            <div class="flex items-center justify-between">
-                                <span>Status</span>
-                                <button type="button" id="statusFilterToggle"
-                                    class="ml-2 p-1 hover:bg-gray-200 rounded transition-colors">
-                                    <flux:icon.adjustments-vertical class="size-5 text-gray-600 hover:text-gray-800" />
-                                </button>
-                            </div>
-
-                            <!-- Status Filter Dropdown -->
-                            <div
-                                id="statusFilterDropdown"
-                                class="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 hidden max-h-64 overflow-y-auto min-w-64">
-                                <!-- Filter Status Label -->
-                                <div class="px-3 py-2 border-b border-gray-200 bg-gray-50">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700" id="statusFilterText">Filter Status</span>
-                                        <button type="button" id="closeStatusFilter" class="text-gray-400 hover:text-gray-600">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Select All / Clear All -->
-                                <div class="px-3 py-2 border-b border-gray-200 bg-gray-50">
-                                    <div class="flex gap-2">
-                                        <button type="button" id="selectAllStatus" class="text-xs text-blue-600 hover:text-blue-800">Select All</button>
-                                        <span class="text-gray-400">|</span>
-                                        <button type="button" id="clearAllStatus" class="text-xs text-gray-600 hover:text-gray-800">Clear All</button>
-                                    </div>
-                                </div>
-
-                                <!-- Status Options -->
-                                <div id="statusCheckboxContainer" class="py-1">
-                                    <!-- Container untuk status checkboxes -->
-                                </div>
-                            </div>
-                        </th>
-                        <th class="px-4 py-2 text-left border-b border-gray-200">Kasatpel</th>
-                        <th class="px-4 py-2 text-left border-b border-gray-200">Tanggal Permohonan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($requests as $idx => $item)
-                    <tr class="border-b border-gray-200 transition-colors duration-200 hover:bg-gray-50"
-                        data-status="{{ $item->status->label() }}"
-                        data-id="{{$item->id}}">
-                        <td class="px-4 py-3">
-                            <input
-                                type="checkbox"
-                                wire:model.live="selectedRequests"
-                                value="{{ $item->id }}"
+    <!-- DataTables Table dengan wire:ignore -->
+    <div wire:ignore>
+        <table id="requestsTable" class="border border-zinc-200 stripe" style="width: 100%;">
+            <thead id="requestsTableHeader" class="bg-gray-50 text-sm uppercase">
+                <tr>
+                    <th class="table-header">
+                        {{-- <input type="checkbox" id="selectAllCheckbox" wire:model.live="selectAll"
+                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"> --}}
+                    </th>
+                    <th class="table-header">Penanggung Jawab</th>
+                    <th class="table-header">Judul</th>
+                    <th wire:key="{{ rand() }}" class="table-header relative">
+                        <div class="flex items-center justify-between">
+                            <span>Status</span>
+                            <button type="button" id="statusFilterToggle"
+                                class="ml-2 p-1 hover:bg-gray-200 rounded transition-colors">
+                                <flux:icon.adjustments-vertical class="size-5 text-gray-600 hover:text-gray-800" />
+                            </button>
+                        </div>
+                        <x-layouts.table.filter-status />
+                    </th>
+                    <th class="table-header">Kasatpel</th>
+                    <th class="table-header">Diajukan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($requests as $idx => $item)
+                    <tr wire:key="{{ $item->id }}" x-on:click="Livewire.navigate('{{ route('is.show', $item->id) }}')"
+                        data-status="{{ $item->status->label() }}" data-id="{{$item->id}}" class="border-b">
+                        <td @click.stop class="px-4 py-3">
+                            <input type="checkbox" value="{{ $item->id }}" x-model="selectedDataId"
                                 class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 row-checkbox"
                                 onclick="event.stopPropagation()">
                         </td>
-                        <td class="px-4 py-3">{{ $idx + 1 }}</td>
                         <td class="px-4 py-3">{{ $item->user->name }}</td>
                         <td class="px-4 py-3">{{ $item->title }}</td>
                         <td class="px-4 py-3">
@@ -107,32 +59,22 @@
                         <td class="px-4 py-3">{{ $item->kasatpelName($item->current_division) }}</td>
                         <td class="px-4 py-3">{{ $item->createdAtDMY() }}</td>
                     </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <x-delete-confirmation-modal />
+                @endforeach
+            </tbody>
+        </table>
     </div>
 
-    @once
-    @push('styles')
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.min.css" />
+    <x-modal.delete-selected :selectedRequests="$selectedDataId" />
+
+    @pushonce('styles')
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/information-system-index.css') }}" />
-    @endpush
+    @endpushonce
 
-    @push('scripts')
-    <!-- DataTables v2.3.2 JS -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-
+    @pushonce('scripts')
+    <!-- Custom JS -->
     <script src="{{ asset('js/information-system-index.js') }}"></script>
-    @endpush
-    @endonce
+    @endpushonce
+
+    <script src="{{ asset('js/test-alpine.js') }}"></script>
 </div>

@@ -3,16 +3,22 @@
 
 <head>
     @include('partials.head')
+    @once
+        <!-- DataTables v2.3.2 CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css" />
+        {{--
+        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.min.css" /> --}}
+    @endonce
     @stack('styles')
 </head>
 
 <body class="min-h-screen bg-white dark:bg-zinc-800">
     @if (session('status'))
-    @php
-    $variant = session('status')['variant'];
-    $message = session('status')['message'];
-    @endphp
-    <flux:notification.toast :variant="$variant" :message="$message" />
+        @php
+            $variant = session('status')['variant'];
+            $message = session('status')['message'];
+        @endphp
+        <flux:notification.toast :variant="$variant" :message="$message" />
     @endif
     <flux:sidebar sticky stashable container
         class="bg-zinc-50 dark:bg-zinc-900 border-r rtl:border-r-0 rtl:border-l border-zinc-200 dark:border-zinc-700">
@@ -213,8 +219,14 @@
 
     @fluxScripts
     @livewireScripts
+    @once
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+        {{--
+        <script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script> --}}
+    @endonce
     @stack('scripts')
-
 </body>
 
 </html>

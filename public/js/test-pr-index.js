@@ -1,11 +1,19 @@
-// 1. Regular DataTable initialization (works with wire:navigate)
-function initializeInformationSystemTable() {
-    if (typeof $ === undefined || typeof DataTable === undefined) {
-        setTimeout(initializeInformationSystemTable, 100);
+// 1. DataTable initialization with proper cleanup
+function initializePrRequestsTable() {
+    // Check if dependencies are loaded
+    if (typeof $ === undefined || typeof $.fn.DataTable === undefined) {
+        setTimeout(initializePrRequestsTable, 100);
         return;
     }
 
-    const dataTable = $("#requestsTable").DataTable({
+    // Cleanup any existing DataTable instance
+    if ($.fn.dataTable.isDataTable("#prRequestsTable")) {
+        // console.log('DataTable masih ada', $.fn.dataTable.isDataTable("#prRequestsTable"));
+        // $.fn.dataTable.destroy();
+    }
+
+    // Initialize new DataTable instance
+    const dataTable = $('#prRequestsTable').DataTable({
         layout: {
             topStart: null,
             topEnd: null,
@@ -32,26 +40,23 @@ function initializeInformationSystemTable() {
                 targets: 0, // Checkbox column
                 orderable: false,
                 searchable: false,
-                width: "5%",
             },
             {
-                targets: 2,
-                className: "judul",
+                targets: 2, // Theme column
+                width: "20%",
             },
             {
-                targets: 3, // Status column
+                targets: 4, // Status column
                 orderable: false,
-                searchable: true,
             },
         ],
         initComplete: function () {
-            console.log('DataTable initialized');
-        },
+            // console.log('DataTable initialized');
+        }
     });
 
     setupGlobalSearch(dataTable);
     setupStatusFilter(dataTable);
-
 }
 
 function setupGlobalSearch(dataTable) {
@@ -88,20 +93,34 @@ function statusFilterAction() {
     $("#clearAllStatus").on("click", function () {
         $(".statusCheckbox").prop("checked", false);
     });
-
 }
 
 function populateStatusCheckboxes() {
     const defaultStatusOptions = [
-        { value: "Permohonan Masuk", label: "Permohonan Masuk" },
-        { value: "Didisposisikan", label: "Didisposisikan" },
-        { value: "Revisi Kasatpel", label: "Revisi Kasatpel" },
-        { value: "Revisi Kapusdatin", label: "Revisi Kapusdatin" },
-        { value: "Disetujui Kasatpel", label: "Disetujui Kasatpel" },
-        { value: "Disetujui Kapusdatin", label: "Disetujui Kapusdatin" },
-        { value: "Proses Permohonan", label: "Proses Permohonan" },
-        { value: "Permohonan Selesai", label: "Permohonan Selesai" },
-        { value: "Ditolak", label: "Ditolak" },
+        {
+            value: "Usulan Masuk",
+            label: "Usulan Masuk",
+        },
+        {
+            value: "Antrean Promkes",
+            label: "Antrean Promkes",
+        },
+        {
+            value: "Kurasi Promkes",
+            label: "Kurasi Promkes",
+        },
+        {
+            value: "Antrean Pusdatin",
+            label: "Antrean Pusdatin",
+        },
+        {
+            value: "Proses Pusdatin",
+            label: "Proses Pusdatin",
+        },
+        {
+            value: "Selesai",
+            label: "Selesai",
+        },
     ];
 
     const container = $("#statusCheckboxContainer");
@@ -123,7 +142,7 @@ function bindStasusFilterEvents(dataTable) {
             return $(el).val();
         });
 
-        dataTable.column(3).search(selectedStatuses.join("|"), true, false).draw();
+        dataTable.column(4).search(selectedStatuses.join("|"), true, false).draw();
     });
 }
 
@@ -139,14 +158,16 @@ function clearAllStatus() {
     });
 }
 
-// 3. Livewire events
+// Livewire navigation events
 document.addEventListener("livewire:navigating", () => {
-    if ($.fn.dataTable.isDataTable("#requestsTable")) {
-        $('#requestsTable').DataTable().destroy(true);
+    if ($.fn.dataTable.isDataTable("#prRequestsTable")) {
+        $('#prRequestsTable').DataTable().destroy(true);
     }
 });
 
-// 4. Manual initialization if jQuery is already loaded
+// Manual initialization when jQuery is ready
 if (typeof $ !== undefined) {
-    $(document).ready(() => initializeInformationSystemTable());
+    $(document).ready(() => {
+        initializePrRequestsTable();
+    });
 }

@@ -9,7 +9,7 @@ use Livewire\Attributes\Computed;
 
 class Index extends Component
 {
-    public $selectedRequests = [];
+    public $selectedDataId = [];
     public $selectAll = false;
     public $isDeleting = false;
 
@@ -19,7 +19,6 @@ class Index extends Component
             'requests' => $this->requests
         ]);
     }
-
 
     #[Computed]
     public function requests()
@@ -41,28 +40,28 @@ class Index extends Component
     {
         if ($value) {
             // Gunakan computed property yang sudah ada
-            $this->selectedRequests = $this->requests->pluck('id')->toArray();
+            $this->selectedDataId = $this->requests->pluck('id')->toArray();
         } else {
-            $this->selectedRequests = [];
+            $this->selectedDataId = [];
         }
 
         // Hanya dispatch yang essential untuk sync checkbox
         $this->dispatch('select-all-updated', [
             'selectAll' => $value,
-            'selectedIds' => $this->selectedRequests
+            'selectedIds' => $this->selectedDataId
         ]);
     }
 
-    public function updatedSelectedRequests()
+    public function updatedSelectedDataId()
     {
         // Gunakan computed property
-        $this->selectAll = count($this->selectedRequests) === $this->requests->count();
+        $this->selectAll = count($this->selectedDataId) === $this->requests->count();
     }
 
     public function deleteSelected()
     {
         // Validation
-        if (empty($this->selectedRequests)) {
+        if (empty($this->selectedDataId)) {
             session()->flash('error', 'Tidak ada data yang dipilih untuk dihapus.');
             return;
         }
@@ -75,8 +74,8 @@ class Index extends Component
         $this->isDeleting = true;
 
         try {
-            $deletedCount = count($this->selectedRequests);
-            $deletedIds = $this->selectedRequests;
+            $deletedCount = count($this->selectedDataId);
+            $deletedIds = $this->selectedDataId;
 
             DB::transaction(function () use ($deletedIds) {
                 InformationSystemRequest::whereIn('id', $deletedIds)->delete();
@@ -84,10 +83,7 @@ class Index extends Component
             $this->resetSelections();
             session()->flash('success', "Data berhasil dihapus sebanyak {$deletedCount} item.");
 
-            $this->dispatch('delete-success-refresh', [
-                'deletedCount' => $deletedCount,
-                'message' => "Data berhasil dihapus sebanyak {$deletedCount} item."
-            ]);
+            $this->redirectRoute('pr.index', navigate: true);
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         } finally {
@@ -97,16 +93,17 @@ class Index extends Component
 
     private function resetSelections()
     {
-        $this->selectedRequests = [];
+        $this->selectedDataId = [];
         $this->selectAll = false;
     }
 
     public function confirmDelete()
     {
-        if ($this->isDeleting) return;
+        if ($this->isDeleting)
+            return;
 
         $this->dispatch('confirm-delete', [
-            'count' => count($this->selectedRequests)
+            'count' => count($this->selectedDataId)
         ]);
     }
 }
