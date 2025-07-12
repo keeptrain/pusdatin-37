@@ -28,7 +28,7 @@ class Index extends Component
 
     public function mount()
     {
-        $this->allowedStatuses = $this->getAllowedStatuses;
+        $this->allowedStatuses = $this->initiateStatusBasedRole;
     }
 
     #[Computed]
