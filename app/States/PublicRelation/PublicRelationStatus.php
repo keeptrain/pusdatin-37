@@ -36,7 +36,8 @@ abstract class PublicRelationStatus extends State
 
     public static function statusesBasedRole(User $user): array
     {
-        return match ($user->roles->pluck('id')->first()) {
+        $userRole = $user->currentUserRoleId();
+        return match ($userRole) {
             Division::HEAD_ID->value => ['Kurasi Promkes'],
             Division::PR_ID->value => ['Antrean Pusdatin', 'Proses Pusdatin', 'Selesai'],
             Division::PROMKES_ID->value => ['Usulan Masuk', 'Antrean Promkes', 'Kurasi Promkes'],

@@ -7,9 +7,8 @@
 
     <!-- Top Controls Section - Search Bar and Delete Button -->
     <div class="flex justify-between items-center mb-4">
-        <flux:button x-on:click="$dispatch('modal-show', { name: 'confirm-deletion' }); test()" icon="trash"
-            x-bind:disabled="selectedDataId.length === 0">Hapus data <span
-                x-text="selectedDataId.length"></span>
+        <flux:button x-on:click="$dispatch('modal-show', { name: 'confirm-deletion' }); sendSelectedId();" icon="trash"
+            x-bind:disabled="selectedId.length === 0">Hapus data <span x-text="`(${selectedId.length})`"></span>
         </flux:button>
 
         <!-- Right Side - Search Bar -->
@@ -25,9 +24,6 @@
             <thead class="bg-gray-50 uppercase text-sm">
                 <tr>
                     <th class="px-4 py-2 text-left border-b border-gray-200 w-12">
-                        {{-- <input type="checkbox" id="selectAllCheckbox" wire:model.live="selectAll"
-                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" @disabled($isDeleting)>
-                        --}}
                     </th>
                     <th class="px-4 py-2 text-left border-b border-gray-200">Tanggal Selesai</th>
                     <th class="px-4 py-2 text-left border-b border-gray-200">Tema</th>
@@ -35,6 +31,11 @@
                     <th wire:key="{{ rand() }}" class="px-4 py-2 text-left border-b border-gray-200 relative">
                         <div class="flex items-center justify-between">
                             <span>Status</span>
+                            <!-- Badge showing number of selected filters -->
+                            <span
+                                class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                <span x-text="selectedStatuses.length"></span>
+                            </span>
                             <button type="button" id="statusFilterToggle"
                                 class="ml-2 p-1 hover:bg-gray-200 rounded transition-colors">
                                 <flux:icon.adjustments-vertical class="size-5 text-gray-600 hover:text-gray-800" />
@@ -48,13 +49,10 @@
 
             <tbody>
                 @foreach($publicRelations as $item)
-                    <tr wire:key="{{ $item->id }}" x-on:click="Livewire.navigate('{{ route('pr.show', $item->id) }}')"
-                        class="border-b border-gray-200 transition-colors duration-200 hover:bg-gray-50"
-                        data-status="{{ $item->status->label() }}" data-id="{{$item->id}}">
+                    <tr wire:key="{{ $item->id }}" x-on:click="window.location.href = '{{ route('pr.show', $item->id) }}'"
+                        class="border-b border-gray-200 transition-colors duration-200 hover:bg-gray-50">
                         <td @click.stop class="px-4 py-3">
-                            <input type="checkbox" value="{{ $item->id }}" x-model="selectedDataId"
-                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 row-checkbox"
-                                onclick="event.stopPropagation()" @disabled($isDeleting)>
+                            <input type="checkbox" value="{{ $item->id }}" x-model="selectedId">
                         </td>
                         <td class="px-4 py-3">{{ $item->completed_date }}</td>
                         <td class="px-4 py-3">{{ $item->theme }}</td>
@@ -70,15 +68,20 @@
     </div>
 
     <!-- Confirmation Modal Component -->
-    <x-modal.delete-selected :selectedRequests="$selectedDataId" />
+    <x-modal.delete-selected />
 
-    @pushonce('styles')
+    @assets
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- DataTables v2.3.2 -->
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+    <!-- DataTables v2.3.2 CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css" />
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('css/public-relation-index.css') }}" />
-    @endpushonce
+    {{--
+    <link rel="stylesheet" href="{{ asset('css/public-relation-index.css') }}" /> --}}
+    @endassets
 
-    @pushonce('scripts')
-    <script src="{{ asset('js/test-pr-index.js') }}"></script>
-    @endpushonce
-    <script src="{{ asset('js/test-alpine.js') }}" defer></script>
+    @script
+    @include('livewire.requests.public-relation.blade-script.index-script')
+    @endscript
 </div>

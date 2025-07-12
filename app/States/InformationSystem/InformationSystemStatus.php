@@ -3,9 +3,11 @@
 namespace App\States\InformationSystem;
 
 use App\Enums\Division;
+use App\Models\User;
 use App\States\InformationSystem\Pending;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
+
 
 /**
  * @extends State<\App\Models\InformationSystemRequest>
@@ -48,15 +50,17 @@ abstract class InformationSystemStatus extends State
         return self::DIVISION_MAP[$division] ?? 'Unknown Division';
     }
 
-    public static function statusesBasedRole($user): array
+    public static function statusesBasedRole(User $user): array
     {
-        $siDataStatuses = ['disposition', 'replied', 'approved_kasatpel', 'rejected', 'approved_kapusdatin', 'process_request', 'completed'];
+        $userRole = $user->currentUserRoleId();
+        $headDataStatuses = ['Permohonan Masuk', 'Didisposisikan', 'Revisi Kapusdatin', 'Disetujui Kapusdatin'];
+        $siDataStatuses = ['Didisposisikan', 'Revisi Kasatpel', 'Disetujui Kasatpel', 'Proses', 'Ditolak Kasatpel', 'Proses'];
 
-        return match ($user) {
-            Division::HEAD_ID->value => ['pending', 'disposition', 'approved_kasatpel', 'rejected', 'approved_kapusdatin'],
+        return match ($userRole) {
+            Division::HEAD_ID->value => $headDataStatuses,
             Division::SI_ID->value => $siDataStatuses,
             Division::DATA_ID->value => $siDataStatuses,
-            default => [''],
+            default => [],
         };
     }
 }

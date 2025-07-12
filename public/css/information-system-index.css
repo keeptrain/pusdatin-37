@@ -3,9 +3,95 @@
     max-width: 10px;
 }
 
-#requestsTable th:nth-child(1) { width: 20%; }
-#requestsTable th:nth-child(2) { width: 100px; }
-#requestsTable th:nth-child(3) { width: 30%; }
+#statusFilterDropdown {
+    right: 0;
+    left: auto;
+    min-width: 250px;
+    max-width: 300px;
+}
+
+#statusFilterDropdown {
+    z-index: 1000;
+}
+
+.status-checkbox-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.status-checkbox-item:hover {
+    background-color: #f3f4f6;
+}
+
+.status-checkbox-item input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.status-checkbox-item label {
+    cursor: pointer;
+    flex: 1;
+    font-size: 14px;
+    color: #374151;
+}
+
+/* Selected count badge */
+.status-count-badge {
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+
+#statusFilterToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-active {
+    background-color: #dbeafe !important;
+    color: #3b82f6 !important;
+}
+
+.row-checkbox {
+    transform: scale(1.1);
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.status-header-content {
+    pointer-events: none;
+}
+
+.status-header-content button {
+    pointer-events: all;
+}
+
+.flash-message {
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 
 /* #requestsTable tbody tr:hover {
     background-color: #f9fafb !important;

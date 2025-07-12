@@ -3,25 +3,33 @@
 namespace App\Livewire\Requests\InformationSystem;
 
 use App\Models\InformationSystemRequest;
+use App\States\InformationSystem\InformationSystemStatus;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
+use Flux\Flux;
 
 class Index extends Component
 {
-    public $selectedDataId = [];
-    public $selectAll = false;
-    public $isDeleting = false;
+    public array $selectedSystemId = [];
+    public array $allowedStatuses = [];
+    public bool $selectAll = false;
+    public bool $isDeleting = false;
 
     public function render()
     {
         return view('livewire.requests.information-system.index', [
-            'requests' => $this->requests
+            'systemRequests' => $this->systemRequests
         ]);
     }
 
+    public function mount()
+    {
+        $this->allowedStatuses = $this->initiateStatusBasedRole;
+    }
+
     #[Computed]
-    public function requests()
+    public function systemRequests()
     {
         $roleId = auth()->user()->currentUserRoleId();
 
@@ -31,37 +39,18 @@ class Index extends Component
             ->get();
     }
 
-    public function show(int $requestId)
+    #[Computed]
+    protected function initiateStatusBasedRole()
     {
-        return $this->redirect(route('is.show', $requestId), navigate: true);
-    }
-
-    public function updatedSelectAll($value)
-    {
-        if ($value) {
-            // Gunakan computed property yang sudah ada
-            $this->selectedDataId = $this->requests->pluck('id')->toArray();
-        } else {
-            $this->selectedDataId = [];
-        }
-
-        // Hanya dispatch yang essential untuk sync checkbox
-        $this->dispatch('select-all-updated', [
-            'selectAll' => $value,
-            'selectedIds' => $this->selectedDataId
-        ]);
-    }
-
-    public function updatedSelectedDataId()
-    {
-        // Gunakan computed property
-        $this->selectAll = count($this->selectedDataId) === $this->requests->count();
+        return InformationSystemStatus::statusesBasedRole(auth()->user());
     }
 
     public function deleteSelected()
     {
         // Validation
-        if (empty($this->selectedDataId)) {
+        // $this->authorize('view si request', $this->systemRequests);
+
+        if (empty($this->selectedSystemId)) {
             session()->flash('error', 'Tidak ada data yang dipilih untuk dihapus.');
             return;
         }
@@ -74,16 +63,19 @@ class Index extends Component
         $this->isDeleting = true;
 
         try {
-            $deletedCount = count($this->selectedDataId);
-            $deletedIds = $this->selectedDataId;
+            $deletedCount = count($this->selectedSystemId);
+            $deletedIds = $this->selectedSystemId;
 
             DB::transaction(function () use ($deletedIds) {
                 InformationSystemRequest::whereIn('id', $deletedIds)->delete();
+                DB::afterCommit(function () {
+                    Flux::modal('confirm-deletion')->close();
+                });
             });
             $this->resetSelections();
             session()->flash('success', "Data berhasil dihapus sebanyak {$deletedCount} item.");
 
-            $this->redirectRoute('pr.index', navigate: true);
+            $this->redirectRoute('is.index', navigate: true);
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         } finally {
@@ -93,17 +85,7 @@ class Index extends Component
 
     private function resetSelections()
     {
-        $this->selectedDataId = [];
+        $this->selectedSystemId = [];
         $this->selectAll = false;
-    }
-
-    public function confirmDelete()
-    {
-        if ($this->isDeleting)
-            return;
-
-        $this->dispatch('confirm-delete', [
-            'count' => count($this->selectedDataId)
-        ]);
     }
 }

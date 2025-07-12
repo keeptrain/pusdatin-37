@@ -36,7 +36,7 @@ function initializeInformationSystemTable() {
             },
             {
                 targets: 2,
-                className: "judul",
+                width: "80%",
             },
             {
                 targets: 3, // Status column
@@ -141,9 +141,7 @@ function clearAllStatus() {
 
 // 3. Livewire events
 document.addEventListener("livewire:navigating", () => {
-    if ($.fn.dataTable.isDataTable("#requestsTable")) {
-        $('#requestsTable').DataTable().destroy(true);
-    }
+    $('#requestsTable').DataTable().destroy(true);
 });
 
 // 4. Manual initialization if jQuery is already loaded

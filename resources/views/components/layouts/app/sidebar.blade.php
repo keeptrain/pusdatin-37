@@ -3,12 +3,6 @@
 
 <head>
     @include('partials.head')
-    @once
-        <!-- DataTables v2.3.2 CSS -->
-        <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css" />
-        {{--
-        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.min.css" /> --}}
-    @endonce
     @stack('styles')
 </head>
 
@@ -219,13 +213,6 @@
 
     @fluxScripts
     @livewireScripts
-    @once
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
-        {{--
-        <script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script> --}}
-    @endonce
     @stack('scripts')
 </body>
 

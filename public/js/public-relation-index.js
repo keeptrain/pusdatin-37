@@ -1,521 +1,525 @@
-let dataTable;
-let selectedStatuses = [];
-let isDeleting = false;
-
-function initDataTable() {
-    // Check if dependencies are loaded
-    if (typeof $ === "undefined" || typeof DataTable === "undefined") {
-        setTimeout(initDataTable, 100);
-        return;
+/**
+ * DataTable Manager for Public Relation Requests
+ */
+if (typeof window.PRRequestsTableManager === 'undefined') {
+    window.PRRequestsTableManager = class PRRequestsTableManager {
+    constructor(options = {}) {
+        // Set default selectors first
+        this.tableSelector = options.tableSelector || '#prRequestsTable';
+        this.globalSearchSelector = options.globalSearchSelector || '#globalSearch';
+        this.statusFilterToggleSelector = options.statusFilterToggleSelector || '#statusFilterToggle';
+        this.statusFilterDropdownSelector = options.statusFilterDropdownSelector || '#statusFilterDropdown';
+        this.statusCheckboxContainerSelector = options.statusCheckboxContainerSelector || '#statusCheckboxContainer';
+        this.statusBadgeTextSelector = options.statusBadgeTextSelector || '#statusBadgeText';
+        
+        // Initialize other properties
+        this.dataTable = null;
+        this.eventHandlers = new Map();
+        this.config = this.getDefaultConfig();
+        this.defaultStatuses = this.getDefaultStatuses();
+        
+        // Log initialization
+        console.log('PRRequestsTableManager created with selector:', this.tableSelector);
+        
+        // Initialize
+        this.init();
     }
 
-    // Destroy existing table
-    if (DataTable.isDataTable("#prRequestsTable")) {
-        new DataTable("#prRequestsTable").destroy();
-    }
-
-    // Initialize DataTable v2 with custom layout
-    dataTable = new DataTable("#prRequestsTable", {
-        layout: {
-            topStart: null,
-            topEnd: null,
-            bottomStart: "info",
-            bottomEnd: "paging",
-        },
-        pageLength: 10,
-        responsive: true,
-        ordering: true,
-        searching: true,
-        language: {
-            sProcessing: "Sedang memproses...",
-            sLengthMenu: "Tampilkan _MENU_ data per halaman",
-            sZeroRecords: "Tidak ditemukan data yang sesuai",
-            sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            sInfoEmpty: "",
-            sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
-            sInfoPostFix: "",
-            sSearch: "Cari:",
-        },
-        columnDefs: [
-            {
-                targets: 0, // Checkbox column
-                orderable: false,
-                searchable: false,
-                className: "text-center",
+    /**
+     * Get default DataTable configuration
+     */
+    getDefaultConfig() {
+        return {
+            layout: {
+                topStart: null,
+                topEnd: null,
+                bottomStart: "info",
+                bottomEnd: "paging",
             },
-            {
-                targets: 4, // Status column
-                orderable: false,
+            responsive: true,
+            paging: true,
+            searching: true,
+            pageLength: 10,
+            destroy: true,
+            language: {
+                sProcessing: "Sedang memproses...",
+                sLengthMenu: "Tampilkan _MENU_ data per halaman",
+                sZeroRecords: "Tidak ditemukan data yang sesuai",
+                sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                sInfoEmpty: "",
+                sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
+                sInfoPostFix: "",
+                sSearch: "Cari:",
             },
-            {
-                targets: -1, // Last column
-                orderable: false,
-                searchable: false,
-            },
-        ],
-        drawCallback: function () {
-            $("#prRequestsTable tbody tr").addClass("hover:bg-gray-50");
-
-            // Re-bind checkbox events after table redraw
-            bindCheckboxEvents();
-
-            // Update custom info text
-            updateCustomInfo();
-
-            // Re-apply checkbox states after redraw
-            reapplyCheckboxStates();
-        },
-    });
-
-    // Global search functionality - IMPORTANT: Setup search AFTER table initialization
-    setupGlobalSearch();
-
-    // Initialize status filter in header
-    initHeaderStatusFilter();
-
-    // Initial checkbox binding
-    bindCheckboxEvents();
-
-    // Add custom entries control
-    addCustomEntriesControl();
-}
-
-function setupGlobalSearch() {
-    // Remove any existing event handlers first
-    $("#globalSearch").off("keyup");
-
-    // Setup new handler
-    $("#globalSearch").on("keyup", function () {
-        if (dataTable) {
-            dataTable.search(this.value).draw();
-        }
-    });
-}
-
-function addCustomEntriesControl() {
-    // Check if control already exists
-    if ($(".custom-entries-control").length > 0) {
-        return;
+            columnDefs: [
+                {
+                    targets: 0, // Checkbox column
+                    orderable: false,
+                    searchable: false,
+                },
+                {
+                    targets: 2, // Theme column
+                    width: "20%",
+                },
+                {
+                    targets: 4, // Status column
+                    orderable: false,
+                },
+            ],
+            initComplete: () => {
+                console.log('DataTable initialized successfully');
+            }
+        };
     }
 
-    // Add custom entries control before the table
-    const entriesControl = `
-        <div class="custom-entries-control">
-            <label for="customEntriesSelect">Show</label>
-            <select id="customEntriesSelect">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-            </select>
-            <label>entries per page</label>
-        </div>
-    `;
-
-    // Insert before the table
-    $("#prRequestsTable").before(entriesControl);
-
-    // Handle entries per page change
-    $("#customEntriesSelect").on("change", function () {
-        const length = parseInt($(this).val());
-        dataTable.page.len(length).draw();
-    });
-}
-
-function updateCustomInfo() {
-    // This function can be used to customize the info display if needed
-    // DataTables will handle the default info display
-}
-
-function reapplyCheckboxStates() {
-    // Reapply select all checkbox state
-    const selectAllChecked = $("#selectAllCheckbox").prop("checked");
-    if (selectAllChecked) {
-        $(".row-checkbox")
-            .prop("checked", true)
-            .prop("disabled", true)
-            .addClass("checkbox-disabled");
+    /**
+     * Get default status options
+     */
+    getDefaultStatuses() {
+        return [
+            { value: "Usulan Masuk", label: "Usulan Masuk" },
+            { value: "Antrean Promkes", label: "Antrean Promkes" },
+            { value: "Kurasi Promkes", label: "Kurasi Promkes" },
+            { value: "Antrean Pusdatin", label: "Antrean Pusdatin" },
+            { value: "Proses Pusdatin", label: "Proses Pusdatin" },
+            { value: "Selesai", label: "Selesai" },
+        ];
     }
-}
 
-function bindCheckboxEvents() {
-    // Remove existing handlers to prevent duplicates
-    $("#prRequestsTable tbody tr").off("click");
-    $("#selectAllCheckbox").off("change");
-    $(".row-checkbox").off("change");
-
-    // Row click handler
-    $("#prRequestsTable tbody tr").on("click", function (e) {
-        if (isDeleting) {
+    /**
+     * Initialize the DataTable and all related functionality
+     */
+    init() {
+        // Check if we're on the right page before initializing
+        if (!this.isOnCorrectPage()) {
+            console.log('Not on PR requests page, skipping DataTable initialization');
             return;
         }
-
-        const clickedColumnIndex = $(e.target).closest("td").index();
-        if (
-            clickedColumnIndex === 0 ||
-            clickedColumnIndex === 4 ||
-            clickedColumnIndex === 8
-        ) {
-            return;
-        }
-
-        const id = $(this).data("id");
-        if (id) {
-            window.location.href = "{{ url('public-relation') }}" + "/" + id;
-        }
-    });
-
-    // Select all checkbox handler
-    $("#selectAllCheckbox").on("change", function () {
-        const isChecked = $(this).prop("checked");
-
-        if (isChecked) {
-            // Check all checkboxes and disable them
-            $(".row-checkbox")
-                .prop("checked", true)
-                .prop("disabled", true)
-                .addClass("checkbox-disabled");
-        } else {
-            // Uncheck all checkboxes and enable them
-            $(".row-checkbox")
-                .prop("checked", false)
-                .prop("disabled", false)
-                .removeClass("checkbox-disabled");
-        }
-    });
-
-    // Individual checkbox handler
-    $(".row-checkbox").on("change", function () {
-        const totalCheckboxes = $(".row-checkbox").length;
-        const checkedCheckboxes = $(".row-checkbox:checked").length;
-
-        if (checkedCheckboxes === totalCheckboxes && totalCheckboxes > 0) {
-            $("#selectAllCheckbox").prop("checked", true);
-        } else {
-            $("#selectAllCheckbox").prop("checked", false);
-        }
-    });
-}
-
-function enableTableInteractions() {
-    $("#prRequestsTable").removeClass("table-disabled");
-
-    if (!$("#selectAllCheckbox").prop("checked")) {
-        $(".row-checkbox")
-            .prop("disabled", false)
-            .removeClass("checkbox-disabled");
-    }
-
-    $("#selectAllCheckbox").prop("disabled", false);
-    $("#globalSearch").prop("disabled", false);
-    $("#statusFilterToggle").prop("disabled", false);
-}
-
-function showFlashMessage(type, message) {
-    const flashContainer = $("#flash-messages");
-    const alertClass =
-        type === "success"
-            ? "bg-green-100 border-green-400 text-green-700"
-            : "bg-red-100 border-red-400 text-red-700";
-
-    const flashHtml = ` 
-        <div class="mb-4 p-4 ${alertClass} border rounded flash-message">
-            ${message}
-        </div>
-    `;
-
-    flashContainer.html(flashHtml);
-
-    // Auto hide after 5 seconds
-    setTimeout(() => {
-        flashContainer.find(".flash-message").fadeOut();
-    }, 5000);
-}
-
-// Function to remove rows from DataTable
-function removeRowsFromDataTable(deletedIds) {
-    deletedIds.forEach(function (id) {
-        // Find and remove row with the specific data-id
-        const row = dataTable.row($(`tr[data-id="${id}"]`));
-        if (row.length) {
-            row.remove();
-        }
-    });
-
-    // Redraw table
-    dataTable.draw();
-}
-
-// Listen for Livewire events
-document.addEventListener("livewire:init", () => {
-    // Handle confirm delete button click
-    Livewire.on("confirm-delete", (event) => {
-        const deleteButton = $('button[wire\\:click="confirmDelete"]');
-        const originalText = deleteButton.html();
-
-        // Disable button and show loading state
-        deleteButton
-            .prop("disabled", true)
-            .html(
-                '<span class="inline-flex items-center"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Loading...</span>'
-            );
-
-        // Re-enable button after modal shows (typically after a short delay)
+        
+        // Add a small delay to ensure DOM is ready
         setTimeout(() => {
-            deleteButton.prop("disabled", false).html(originalText);
-        }, 500);
-    });
+            this.waitForDependencies(() => {
+                this.initializeDataTable();
+                this.setupLivewireEventHandlers();
+            });
+        }, 50);
+    }
 
-    Livewire.on("data-deleted", (event) => {
-        const data = event[0];
-        const deletedIds = data.deletedIds;
-        const deletedCount = data.deletedCount;
+    /**
+     * Check if we're on the correct page that should have the table
+     */
+    isOnCorrectPage() {
+        const selector = this.tableSelector || '#prRequestsTable';
+        return $(selector).length > 0;
+    }
 
-        // Remove rows from DataTable
-        removeRowsFromDataTable(deletedIds);
-
-        // Show success message
-        showFlashMessage(
-            "success",
-            `Data berhasil dihapus sebanyak ${deletedCount} item.`
-        );
-
-        // Update button states and selections
-        updateButtonStates();
-    });
-
-    Livewire.on("select-all-updated", (event) => {
-        const data = event[0];
-        const selectAll = data.selectAll;
-        const selectedIds = data.selectedIds;
-
-        if (selectAll) {
-            // Check and disable all individual checkboxes when select all is checked
-            $(".row-checkbox")
-                .prop("checked", true)
-                .prop("disabled", true)
-                .addClass("checkbox-disabled");
-        } else {
-            // Uncheck and enable all individual checkboxes when select all is unchecked
-            $(".row-checkbox")
-                .prop("checked", false)
-                .prop("disabled", false)
-                .removeClass("checkbox-disabled");
+    /**
+     * Wait for jQuery and DataTable dependencies to be loaded
+     */
+    waitForDependencies(callback, attempts = 0) {
+        const maxAttempts = 50; // 5 seconds maximum wait
+        
+        if (typeof $ === 'undefined' || typeof $.fn.DataTable === 'undefined') {
+            if (attempts < maxAttempts) {
+                setTimeout(() => this.waitForDependencies(callback, attempts + 1), 100);
+            } else {
+                console.error('DataTable dependencies not loaded after maximum attempts');
+            }
+            return;
         }
-    });
+        
+        callback();
+    }
 
-    Livewire.on("delete-started", () => {
-        isDeleting = true;
-    });
+    /**
+     * Initialize DataTable with proper cleanup
+     */
+    initializeDataTable() {
+        // Ensure tableSelector is set
+        const selector = this.tableSelector || '#prRequestsTable';
+        
+        // Double-check if table element exists
+        if ($(selector).length === 0) {
+            console.log('Table element not found on current page, skipping initialization');
+            return false;
+        }
 
-    Livewire.on("delete-completed", () => {
-        isDeleting = false;
-        enableTableInteractions();
-    });
-});
-
-// Function to update button states after deletion
-function updateButtonStates() {
-    // Reset checkboxes and selections
-    $(".row-checkbox").prop("checked", false);
-    $("#selectAllCheckbox").prop("checked", false);
-
-    // Update button text to show 0 selected
-    $('button[wire\\:click="confirmDelete"] span').text("0");
-
-    // Disable delete button
-    $('button[wire\\:click="confirmDelete"]')
-        .prop("disabled", true)
-        .addClass("opacity-50 cursor-not-allowed");
-
-    // Enable all checkboxes again
-    $(".row-checkbox").prop("disabled", false).removeClass("checkbox-disabled");
-}
-
-const defaultStatusOptions = [
-    {
-        value: "Usulan Masuk",
-        label: "Usulan Masuk",
-    },
-    {
-        value: "Antrean Promkes",
-        label: "Antrean Promkes",
-    },
-    {
-        value: "Kurasi Promkes",
-        label: "Kurasi Promkes",
-    },
-    {
-        value: "Antrean Pusdatin",
-        label: "Antrean Pusdatin",
-    },
-    {
-        value: "Proses Pusdatin",
-        label: "Proses Pusdatin",
-    },
-    {
-        value: "Selesai",
-        label: "Selesai",
-    },
-];
-
-function initHeaderStatusFilter() {
-    // Populate checkbox options
-    const container = $("#statusCheckboxContainer");
-    container.empty();
-
-    defaultStatusOptions.forEach((opt, idx) => {
-        container.append(`
-            <div class="status-checkbox-item">
-                <input type="checkbox" id="status_${idx}" class="status-checkbox" value="${opt.value}">
-                <label for="status_${idx}">${opt.label}</label>
-            </div>
-        `);
-    });
-
-    // Add custom search function for status filtering
-    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-        // If no status filter selected, show all rows
-        if (selectedStatuses.length === 0) {
+        this.destroyExistingTable();
+        
+        try {
+            console.log('Initializing DataTable on element:', selector);
+            this.dataTable = $(selector).DataTable(this.config);
+            this.setupTableFeatures();
+            console.log('DataTable initialized successfully');
             return true;
+        } catch (error) {
+            console.error('Error initializing DataTable:', error);
+            return false;
         }
+    }
 
-        // Get the status from the row data (assuming status is in column index 4)
-        const row = settings.aoData[dataIndex].nTr;
-        const rowStatus = $(row).data("status");
-
-        // Return true if the row status matches any of the selected statuses
-        return selectedStatuses.includes(rowStatus);
-    });
-
-    // Toggle dropdown visibility when clicking the filter icon
-    $(document).on("click", "#statusFilterToggle", function (e) {
-        e.stopPropagation();
-        e.preventDefault();
-
-        const dropdown = $("#statusFilterDropdown");
-        const isVisible = !dropdown.hasClass("hidden");
-
-        // Close all other dropdowns first
-        $(".dropdown-menu").addClass("hidden");
-
-        if (isVisible) {
-            dropdown.addClass("hidden");
-        } else {
-            dropdown.removeClass("hidden");
-
-            // Position the dropdown correctly
-            positionDropdown();
+    /**
+     * Destroy existing DataTable instance if it exists
+     */
+    destroyExistingTable() {
+        const selector = this.tableSelector || '#prRequestsTable';
+        if ($.fn.dataTable.isDataTable(selector)) {
+            $(selector).DataTable().destroy(true);
+            console.log('Existing DataTable destroyed');
         }
-    });
+    }
 
-    // Close dropdown when clicking the close button
-    $(document).on("click", "#closeStatusFilter", function (e) {
-        e.stopPropagation();
-        $("#statusFilterDropdown").addClass("hidden");
-    });
+    /**
+     * Setup all table-related features
+     */
+    setupTableFeatures() {
+        this.setupGlobalSearch();
+        this.setupStatusFilter();
+    }
 
-    // Close dropdown when clicking outside
-    $(document).on("click", function (e) {
-        if (
-            !$(e.target).closest("#statusFilterToggle, #statusFilterDropdown")
-                .length
-        ) {
-            $("#statusFilterDropdown").addClass("hidden");
-        }
-    });
+    /**
+     * Setup global search functionality
+     */
+    setupGlobalSearch() {
+        const selector = this.globalSearchSelector || '#globalSearch';
+        this.removeEventHandler('globalSearch');
+        
+        const handler = (event) => {
+            if (this.dataTable) {
+                this.dataTable.search(event.target.value).draw();
+            }
+        };
 
-    // Prevent dropdown from closing when clicking inside it
-    $(document).on("click", "#statusFilterDropdown", function (e) {
-        e.stopPropagation();
-    });
-
-    // Handle checkbox changes
-    $(document).on("change", ".status-checkbox", function () {
-        updateSelectedStatuses();
-        applyStatusFilter();
-    });
-
-    // Select All functionality
-    $(document).on("click", "#selectAllStatus", function (e) {
-        e.preventDefault();
-        $(".status-checkbox").prop("checked", true);
-        updateSelectedStatuses();
-        applyStatusFilter();
-    });
-
-    // Clear All functionality
-    $(document).on("click", "#clearAllStatus", function (e) {
-        e.preventDefault();
-        $(".status-checkbox").prop("checked", false);
-        updateSelectedStatuses();
-        applyStatusFilter();
-    });
-}
-
-function positionDropdown() {
-    const toggle = $("#statusFilterToggle");
-    const dropdown = $("#statusFilterDropdown");
-
-    if (toggle.length && dropdown.length) {
-        const toggleOffset = toggle.offset();
-        const toggleHeight = toggle.outerHeight();
-        const toggleWidth = toggle.outerWidth();
-
-        // Position dropdown relative to the toggle button
-        dropdown.css({
-            position: "absolute",
-            top: "100%",
-            right: "0",
-            left: "auto",
+        $(selector).on('keyup.globalSearch', handler);
+        this.eventHandlers.set('globalSearch', {
+            element: selector,
+            event: 'keyup.globalSearch',
+            handler: handler
         });
     }
-}
 
-function updateSelectedStatuses() {
-    selectedStatuses = [];
-    $(".status-checkbox:checked").each(function () {
-        selectedStatuses.push($(this).val());
-    });
+    /**
+     * Setup status filter functionality
+     */
+    setupStatusFilter() {
+        this.setupStatusFilterActions();
+        this.populateStatusCheckboxes();
+        this.bindStatusFilterEvents();
+        this.bindStatusBasedRole();
+    }
 
-    updateFilterButtonVisual();
-}
+    /**
+     * Setup status filter dropdown actions
+     */
+    setupStatusFilterActions() {
+        const actions = [
+            {
+                selector: this.statusFilterToggleSelector || '#statusFilterToggle',
+                event: 'click',
+                handler: () => {
+                    $(this.statusFilterDropdownSelector || '#statusFilterDropdown').toggleClass('hidden');
+                }
+            },
+            {
+                selector: '#closeStatusFilter',
+                event: 'click',
+                handler: () => {
+                    $(this.statusFilterDropdownSelector || '#statusFilterDropdown').addClass('hidden');
+                }
+            },
+            {
+                selector: '#selectAllStatus',
+                event: 'click',
+                handler: () => {
+                    $(`${this.statusCheckboxContainerSelector || '#statusCheckboxContainer'} input[type='checkbox']`).prop('checked', true).trigger('change');
+                }
+            },
+            {
+                selector: '#clearAllStatus',
+                event: 'click',
+                handler: () => {
+                    $(`${this.statusCheckboxContainerSelector || '#statusCheckboxContainer'} input[type='checkbox']`).prop('checked', false).trigger('change');
+                }
+            }
+        ];
 
-function updateFilterButtonVisual() {
-    const filterButton = $("#statusFilterToggle");
-    const count = selectedStatuses.length;
+        actions.forEach(action => {
+            this.removeEventHandler(action.selector);
+            $(action.selector).on(action.event, action.handler);
+            this.eventHandlers.set(action.selector, action);
+        });
+    }
 
-    if (count > 0) {
-        filterButton.addClass("filter-active");
-        // Optionally add a badge or indicator
-        if (!filterButton.find(".filter-indicator").length) {
-            filterButton.append(
-                '<span class="filter-indicator absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">' +
-                    count +
-                    "</span>"
-            );
-        } else {
-            filterButton.find(".filter-indicator").text(count);
+    /**
+     * Populate status checkboxes
+     */
+    populateStatusCheckboxes() {
+        const container = $(this.statusCheckboxContainerSelector);
+        container.empty();
+
+        this.defaultStatuses.forEach((status, index) => {
+            const checkboxHtml = this.createStatusCheckboxHtml(status, index);
+            container.append(checkboxHtml);
+        });
+    }
+
+    /**
+     * Create HTML for status checkbox
+     */
+    createStatusCheckboxHtml(status, index) {
+        return `
+            <div class="status-checkbox-item">
+                <input type="checkbox" id="status_${index}" class="status-checkbox" value="${status.value}">
+                <label for="status_${index}">${status.label}</label>
+            </div>
+        `;
+    }
+
+    /**
+     * Bind status filter events
+     */
+    bindStatusFilterEvents() {
+        const handler = () => {
+            const selectedStatuses = this.getSelectedStatuses();
+            const searchPattern = selectedStatuses.join('|');
+            
+            if (this.dataTable) {
+                this.dataTable.column(4).search(searchPattern, true, false).draw();
+            }
+        };
+
+        this.removeEventHandler('statusFilter');
+        $(`${this.statusCheckboxContainerSelector} input[type='checkbox']`).on('change', handler);
+        this.eventHandlers.set('statusFilter', {
+            element: `${this.statusCheckboxContainerSelector} input[type='checkbox']`,
+            event: 'change',
+            handler: handler
+        });
+    }
+
+    /**
+     * Get selected status values
+     */
+    getSelectedStatuses() {
+        return $(`${this.statusCheckboxContainerSelector} input[type='checkbox']:checked`)
+            .map(function() { return $(this).val(); })
+            .get();
+    }
+
+    /**
+     * Bind status filter based on user role
+     */
+    bindStatusBasedRole() {
+        try {
+            const allowedStatuses = this.getAllowedStatusesFromLivewire();
+            
+            if (allowedStatuses && allowedStatuses.length > 0) {
+                this.setStatusCheckboxes(allowedStatuses);
+                this.updateStatusBadge(allowedStatuses.length);
+                
+                if (this.dataTable) {
+                    this.dataTable.draw();
+                }
+            }
+        } catch (error) {
+            console.warn('Could not get allowed statuses from Livewire:', error);
         }
-    } else {
-        filterButton.removeClass("filter-active");
-        filterButton.find(".filter-indicator").remove();
+    }
+
+    /**
+     * Get allowed statuses from Livewire component
+     */
+    getAllowedStatusesFromLivewire() {
+        if (typeof Livewire !== 'undefined' && Livewire.all) {
+            const components = Livewire.all();
+            if (components && components[1] && components[1].$wire) {
+                return components[1].$wire.get('allowedStatuses');
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Set status checkboxes based on allowed statuses
+     */
+    setStatusCheckboxes(allowedStatuses) {
+        // First uncheck all
+        $(`${this.statusCheckboxContainerSelector} input[type='checkbox']`).prop('checked', false);
+        
+        // Then check only allowed statuses
+        allowedStatuses.forEach(status => {
+            $(`${this.statusCheckboxContainerSelector} input[type='checkbox'][value='${status}']`)
+                .prop('checked', true)
+                .trigger('change');
+        });
+    }
+
+    /**
+     * Update status badge text
+     */
+    updateStatusBadge(count) {
+        $(this.statusBadgeTextSelector).text(count);
+    }
+
+    /**
+     * Setup Livewire event handlers
+     */
+    setupLivewireEventHandlers() {
+        document.addEventListener('livewire:navigating', () => {
+            this.cleanup();
+        });
+        
+        // Handle browser back/forward navigation
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                // Page was loaded from cache (back/forward navigation)
+                setTimeout(() => {
+                    this.handlePageRestore();
+                }, 100);
+            }
+        });
+        
+        // Handle Livewire navigation completed
+        document.addEventListener('livewire:navigated', () => {
+            setTimeout(() => {
+                this.reinitializeIfNeeded();
+            }, 100);
+        });
+    }
+
+    /**
+     * Handle page restore from cache (browser back/forward)
+     */
+    handlePageRestore() {
+        console.log('Page restored from cache, reinitializing DataTable');
+        
+        // Check if table element exists and DataTable is not initialized
+        if ($(this.tableSelector).length > 0 && !$.fn.dataTable.isDataTable(this.tableSelector)) {
+            this.initializeDataTable();
+        }
+    }
+
+    /**
+     * Reinitialize DataTable if needed
+     */
+    reinitializeIfNeeded() {
+        // Check if table element exists but DataTable is not initialized
+        if ($(this.tableSelector).length > 0 && !$.fn.dataTable.isDataTable(this.tableSelector)) {
+            console.log('Table element found but DataTable not initialized, reinitializing...');
+            this.initializeDataTable();
+        }
+    }
+
+    /**
+     * Remove specific event handler
+     */
+    removeEventHandler(key) {
+        if (this.eventHandlers.has(key)) {
+            const handler = this.eventHandlers.get(key);
+            $(handler.element).off(handler.event);
+            this.eventHandlers.delete(key);
+        }
+    }
+
+    /**
+     * Clean up all event handlers and DataTable instance
+     */
+    cleanup() {
+        // Remove all event handlers
+        this.eventHandlers.forEach((handler, key) => {
+            $(handler.element).off(handler.event);
+        });
+        this.eventHandlers.clear();
+
+        // Destroy DataTable
+        this.destroyExistingTable();
+        
+        console.log('PRRequestsTableManager cleaned up');
+    }
+
+    /**
+     * Refresh the DataTable
+     */
+    refresh() {
+        if (this.dataTable) {
+            this.dataTable.ajax.reload();
+        }
+    }
+
+    /**
+     * Get current DataTable instance
+     */
+    getDataTable() {
+        return this.dataTable;
     }
 }
+}
 
-function applyStatusFilter() {
-    // Simply redraw the table - the custom search function will handle the filtering
-    if (dataTable) {
-        dataTable.draw();
+// Check if we're on the correct page before initializing
+function shouldInitializeTable() {
+    // Check if table element exists
+    const tableExists = $('#prRequestsTable').length > 0;
+    
+    // Additional checks - you can add more specific page identifiers
+    const isCorrectPage = tableExists && (
+        // Check URL contains specific path
+        window.location.pathname.includes('/public-relation') ||
+        // Check for specific page elements
+        $('.pr-requests-page').length > 0 ||
+        // Check for specific body class
+        $('body').hasClass('pr-requests-page') ||
+        // Fallback - just check if table exists
+        tableExists
+    );
+    
+    return isCorrectPage;
+}
+
+// Simple initialization function
+function initializePrRequestsTable() {
+    // Only initialize if we should
+    if (!shouldInitializeTable()) {
+        console.log('Not on PR requests page, skipping table initialization');
+        return;
     }
+    
+    // Clean up existing instance if it exists
+    if (window.prTableManager) {
+        window.prTableManager.cleanup();
+        window.prTableManager = null;
+    }
+    
+    console.log('Initializing PR requests table...');
+    window.prTableManager = new window.PRRequestsTableManager();
 }
 
-// Initialize on various events
-document.addEventListener("DOMContentLoaded", initDataTable);
-document.addEventListener("livewire:navigated", initDataTable);
-document.addEventListener("livewire:load", initDataTable);
+// Primary initialization - when DOM is ready
+$(document).ready(function() {
+    if (typeof $ !== 'undefined') {
+        initializePrRequestsTable();
+    }
+});
 
-// jQuery ready fallback
-if (typeof $ !== "undefined") {
-    $(document).ready(initDataTable);
-}
+// Handle browser back/forward navigation
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // Page was loaded from cache
+        console.log('Page restored from cache');
+        setTimeout(function() {
+            if (shouldInitializeTable() && !window.prTableManager) {
+                console.log('Reinitializing after browser back navigation');
+                initializePrRequestsTable();
+            }
+        }, 100);
+    }
+});
+
+// Handle Livewire navigation
+document.addEventListener('livewire:navigated', function() {
+    setTimeout(function() {
+        if (shouldInitializeTable() && !window.prTableManager) {
+            console.log('Reinitializing after Livewire navigation');
+            initializePrRequestsTable();
+        }
+    }, 100);
+});

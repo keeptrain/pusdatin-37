@@ -2,28 +2,33 @@
 
 namespace App\Livewire\Requests\PublicRelation;
 
-use Carbon\Carbon;
 use Livewire\Attributes\Title;
 use App\Models\PublicRelationRequest;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use App\States\PublicRelation\PublicRelationStatus;
+use Flux\Flux;
 
 class Index extends Component
 {
-    public $selectedDataId = [];
-    public $selectAll = false;
-    public $isDeleting = false;
+    public array $selectedDataId = [];
+    public array $allowedStatuses = [];
+    public bool $selectAll = false;
+    public bool $isDeleting = false;
+
 
     #[Title('Permohonan Kehumasan')]
     public function render()
     {
-        // $this->dispatch('public-relations-data-ready');
         return view('livewire.requests.public-relation.index', [
             'publicRelations' => $this->publicRelations,
-            'allowedStatuses' => $this->allowedStatuses
         ]);
+    }
+
+    public function mount()
+    {
+        $this->allowedStatuses = $this->getAllowedStatuses;
     }
 
     #[Computed]
@@ -35,35 +40,15 @@ class Index extends Component
     }
 
     #[Computed]
-    public function allowedStatuses()
+    public function initiateStatusBasedRole()
     {
         return PublicRelationStatus::statusesBasedRole(auth()->user());
     }
 
-    public function updatedSelectAll($value)
-    {
-        if ($value) {
-            $this->selectedDataId = $this->publicRelations->pluck('id')->toArray();
-        } else {
-            $this->selectedDataId = [];
-        }
-
-        $this->dispatch('select-all-updated', [
-            'selectAll' => $value,
-            'selectedIds' => $this->selectedPrRequest
-        ]);
-    }
-
-    public function updatedSelectedPrRequest()
-    {
-        $this->selectAll = count($this->selectedPrRequest) === $this->publicRelations->count();
-    }
-
-
     public function deleteSelected()
     {
         // Validation for empty selected requests
-        if (empty($this->selectedPrRequests)) {
+        if (empty($this->selectedDataId)) {
             session()->flash('error', 'Tidak ada data yang dipilih untuk dihapus.');
             return;
         }
@@ -79,6 +64,9 @@ class Index extends Component
 
             DB::transaction(function () use ($deletedIds) {
                 PublicRelationRequest::whereIn('id', $deletedIds)->delete();
+                DB::afterCommit(function () {
+                    Flux::modal('confirm-deletion')->close();
+                });
             });
 
             // Reset state
@@ -97,23 +85,8 @@ class Index extends Component
         $this->selectAll = false;
     }
 
-    // Helper methods
-    private function stringMonthPublicationToNumber($searchQuery)
+    public function refresh()
     {
-        $monthValue = null;
-
-        foreach (range(1, 12) as $monthNumber) {
-            $monthName = Carbon::create(null, $monthNumber)->locale('id')->isoFormat('MMMM');
-            if (str_contains(strtolower($monthName), $searchQuery)) {
-                $monthValue = $monthNumber;
-                break;
-            }
-        }
-
-        if (is_numeric($searchQuery) && $searchQuery >= 1 && $searchQuery <= 12) {
-            $monthValue = (int) $searchQuery;
-        }
-
-        return $monthValue;
+        $this->redirectRoute('pr.index', navigate: true);
     }
 }
