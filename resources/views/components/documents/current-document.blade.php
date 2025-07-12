@@ -29,7 +29,7 @@
             <div x-show="selectedPart === '{{ $map['part_number'] }}'" class="w-full h-full">
                 @if ($map['file_path'])
                     <iframe
-                        src="{{ asset($map['file_path']) }}"
+                        src="{{ asset(Storage::url($map['file_path'])) }}"
                         class="w-full h-full"
                         frameborder="0"
                         loading="lazy"
