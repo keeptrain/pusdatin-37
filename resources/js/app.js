@@ -1,5 +1,3 @@
-import header from "./components/header.js";
-
 document.addEventListener('alpine:init', () => {
     Alpine.store('notifications', {
         hasUnread: false,
@@ -9,8 +7,4 @@ document.addEventListener('alpine:init', () => {
             });
         }
     });
-
-    if (document.querySelector('[x-data="header"]')) {
-        Alpine.data('header', header);
-    }
 });
