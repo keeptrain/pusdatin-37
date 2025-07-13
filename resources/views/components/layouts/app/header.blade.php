@@ -27,14 +27,19 @@
                 wire:navigate>
                 {{ __('Dashboard') }}
             </flux:navbar.item>
-            <div class="relative">
-                <flux:navbar.item @mouseenter="openDropdown = true" icon="folder-open" icon:trailing="chevron-down"
-                    :current="request()->routeIs('si-data.form') || request()->routeIs('pr.form')">
-                    {{ __('Ajukan Permohonan') }}
-                </flux:navbar.item>
-
-                <!-- Dropdown Menu -->
-                <x-menu.dropdown-menu-on-dashboard-user />
+            <div class="container mx-auto">
+                <ul>
+                    <li
+                        x-on:mouseenter="openDropdown = true; clearTimeout(timeOutDropdown)"
+                        x-on:mouseleave="closeDropdown()">
+                        <flux:navbar.item icon="folder-open" icon:trailing="chevron-down"
+                            :current="request()->routeIs('si-data.form') || request()->routeIs('pr.form')">
+                            {{ __('Ajukan Permohonan') }}
+                        </flux:navbar.item>
+                    
+                        <x-menu.dropdown-menu-on-dashboard-user />
+                    </li>
+                </ul>
             </div>
             <flux:navbar.item icon="book-open-text" :href="route('list.request')"
                 :current="request()->routeIs('list.request') || request()->routeIs('detail.request')" wire:navigate>
@@ -144,6 +149,7 @@
     <script>
         Alpine.data('header', () => ({
             openDropdown: false,
+            timeOutDropdown: null,
             openModal: false,
             hasReadSOP: false,
             sopConfirmed: false,
@@ -171,6 +177,12 @@
             closeModal() {
                 this.openModal = false;
                 this.sopConfirmed = false;
+            },
+
+            closeDropdown() {
+                this.timeOutDropdown = setTimeout(() => {
+                    this.openDropdown = false;
+                }, 200);
             },
         }));
     </script>
