@@ -1,8 +1,8 @@
 <div class="flex items-start gap-4">
-    <x-lucide-message-circle-more class="size-8 text-testing-100" />
+    <x-lucide-message-circle-more class="size-8 text-accent dark:text-white" />
     <div class="flex flex-col space-y-2">
-        <flux:heading size="xl" class="text-testing-100">Forum Diskusi</flux:heading>
-        <flux:subheading class="text-testing-100">Apakah kamu mempunyai kendala saat menggunakan layanan
+        <flux:heading size="xl" class="text-accent dark:text-white">Forum Diskusi</flux:heading>
+        <flux:subheading class="text-accent dark:text-white">Apakah kamu mempunyai kendala saat menggunakan layanan
             Pusdatin?</flux:subheading>
         <div>
             <!-- Button to toggle discussion form -->

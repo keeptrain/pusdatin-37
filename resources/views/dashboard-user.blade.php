@@ -62,7 +62,7 @@
         <flux:separator />
 
         {{-- Discussion List --}}
-        <div x-data="{ createDiscussion: false }" class="p-4 border rounded-lg mt-6">
+        <div x-data="{ createDiscussion: false }" class="p-4 border dark:border-zinc-700 rounded-lg mt-6">
             <x-user.dashboard.discussion-forum :requests="$requests" />
         </div>
     </div>

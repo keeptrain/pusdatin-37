@@ -41,45 +41,40 @@
 
     <!-- Konten Diskusi -->
     <main class="flex-grow overflow-y-auto px-4 py-6 space-y-6">
+        @php
+            $baseClasses = 'flex flex-col space-y-1 w-full rounded-lg  dark:border-zinc-700 ';
+        @endphp
         @forelse ($replies as $reply)
             @php
                 $isCurrentUser = $reply->user_id === auth()->id();
+                $userSpecificClasses = $isCurrentUser
+                    ? 'p-2 bg-zinc-50 border dark:bg-zinc-900'
+                    : '';
             @endphp
+
             <div wire:key="reply-{{ $reply->id }}" class="flex space-x-4 space-y-2">
                 <flux:avatar initials="{{ $reply->user->initials() }}" size="lg" />
 
-                @if (!$isCurrentUser)
-                    <div class="flex flex-col space-y-1 w-full">
-                        <div class="flex items-center justify-between">
-                            <flux:text class="font-semibold">{{ $reply->user->name }}</flux:text>
-                            {{-- <flux:text>Lampiran</flux:text> --}}
-                        </div>
+                <div @class([$baseClasses, $userSpecificClasses])>
+                    <div class="flex items-center justify-between">
+                        <flux:text class="font-semibold">{{ $reply->user->name }}</flux:text>
+                        @if($isCurrentUser)
+                            <button wire:click="deleteReply({{ $reply->id }})" class="text-red-500 hover:text-red-700">
+                                <flux:icon.trash class="size-5" />
+                            </button>
+                        @endif
+                    </div>
 
-                        <flux:text class="text-xs">menjawab {{ $reply->created_at->diffForHumans() }}</flux:text>
-                        <div>
-                            <flux:legend>{{ $reply->body }}</flux:legend>
-                        </div>
+                    <flux:text class="text-xs">menjawab {{ $reply->created_at->diffForHumans() }}</flux:text>
+
+                    <div>
+                        <flux:legend>{{ $reply->body }}</flux:legend>
+                    </div>
+
+                    <div class="flex items-center gap-2">
                         <x-discussions.attachments-list :attachments="$reply->attachments" />
                     </div>
-                @endif
-
-                @if ($isCurrentUser)
-                    <div class="flex flex-col space-y-1 bg-zinc-50 p-2 w-full border rounded-lg">
-                        <div class="flex justify-between">
-                            <flux:text class="font-semibold">{{ $reply->user->name }}</flux:text>
-                            <a wire:click="deleteReply({{ $reply->id }})">
-                                <flux:icon.trash class="size-5" />
-                            </a>
-                        </div>
-                        <flux:text class="text-xs">menjawab {{ $reply->created_at->diffForHumans() }}</flux:text>
-                        <div class="flex justify-between space-y-1">
-                            <flux:legend>{{ $reply->body }}</flux:legend>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <x-discussions.attachments-list :attachments="$reply->attachments" />
-                        </div>
-                    </div>
-                @endif
+                </div>
             </div>
         @empty
             <div class="flex flex-col items-center justify-center h-[calc(80vh-12rem)] space-y-4">

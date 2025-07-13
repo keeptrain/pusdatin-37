@@ -3,7 +3,7 @@
 ])
 <div 
     wire:key="discussion-{{ $discussion->id }}"
-    class="px-4 py-3 border rounded-lg space-y-3 hover:shadow-md transition-shadow"
+    class="px-4 py-3 border dark:bg-zinc-900 dark:border-zinc-700 rounded-lg space-y-3 hover:shadow-md transition-shadow"
 >
     <!-- Discussion Header -->
     <div class="flex items-start justify-between gap-2">
@@ -16,8 +16,8 @@
     </div>
 
     <!-- Discussion Content -->
-    <div class="text-gray-800">
-        {{ $discussion->body }}
+    <div>
+        <flux:text size="xl">{{ $discussion->body }}</flux:text>
     </div>
 
     <!-- Discussion Footer -->
