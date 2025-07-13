@@ -20,7 +20,7 @@ class ListRequest extends Component
 
     public int $page = 1;
     public int $perPage = 10;
-    public string $searchQuery = '';
+    public string $search = '';
 
     #[Computed]
     public function allRequests()
@@ -114,23 +114,6 @@ class ListRequest extends Component
         }
 
         return $status; // Fallback jika tidak ada tipe yang cocok
-    }
-
-    public function detailPage($id, $type)
-    {
-        // Mapping tipe ke route
-        $routeMapping = [
-            'Sistem Informasi & Data' => "permohonan/information-system/$id",
-            'Kehumasan' => "permohonan/public-relation/$id",
-        ];
-
-        // Validasi tipe
-        if (!array_key_exists($type, $routeMapping)) {
-            throw new \InvalidArgumentException("Invalid type: {$type}");
-        }
-
-        // Redirect ke route yang sesuai
-        return $this->redirect($routeMapping[$type], true);
     }
 
     // Reset pagination saat search berubah
