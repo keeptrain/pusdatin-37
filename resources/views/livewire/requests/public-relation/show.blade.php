@@ -9,14 +9,8 @@
             <flux:heading size="xl" class="p-4">Detail Permohonan Layanan</flux:heading>
 
             <x-layouts.requests.show overViewRoute='pr.show' activityRoute="pr.activity" :id="$publicRelationId">
-                <flux:callout icon="user" class="mr-3" variant="secondary">
-                    <flux:callout.heading>Penanggung jawab</flux:callout.heading>
-
-                    <flux:callout.text>
-                        {{ $publicRelation->user->name }} dari seksi {{ $publicRelation->user->section }} - No. Telp:
-                        {{ $publicRelation->user->contact }}
-                    </flux:callout.text>
-                </flux:callout>
+                <x-layouts.requests.info-responsible-person :requestable="$publicRelation" />
+               
                 <div class="mt-3 mr-3">
                     @foreach ($publicRelation->documentUploads as $documentUpload)
                         <div x-show="partTab === '{{ $documentUpload->part_number }}'" x-cloak>

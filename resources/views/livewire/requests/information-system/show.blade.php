@@ -6,23 +6,17 @@
 
     <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$systemRequestId">
         <div class="flex-1 p-4 md:p-3">
-            <flux:callout icon="user" class="mr-3" variant="secondary">
-                <flux:callout.heading>Penanggung jawab</flux:callout.heading>
+            <x-layouts.requests.info-responsible-person :requestable="$systemRequest" />
 
-                <flux:callout.text>
-                    {{ $systemRequest->user->name }} dari seksi {{ $systemRequest->user->section }} -
-                    No. Telp: {{ $systemRequest->user->contact }}
-                </flux:callout.text>
-            </flux:callout>
             <div class="mt-3 mr-3">
                 @foreach ($systemRequest->documentUploads as $fileData)
-                <div x-show="partTab === '{{ $fileData['part_number'] }}'" x-cloak>
-                    <iframe loading="lazy" src="{{ $this->getFileUrl($fileData) }}" width="100%" height="800"
-                        class="rounded-lg shadow border-none">
-                        This browser does not support PDFs. Please download the PDF to view it:
-                        <a href="{{ $this->getFileUrl($fileData) }}">Download PDF</a>
-                    </iframe>
-                </div>
+                    <div x-show="partTab === '{{ $fileData['part_number'] }}'" x-cloak>
+                        <iframe loading="lazy" src="{{ $this->getFileUrl($fileData) }}" width="100%" height="800"
+                            class="rounded-lg shadow border-none">
+                            This browser does not support PDFs. Please download the PDF to view it:
+                            <a href="{{ $this->getFileUrl($fileData) }}">Download PDF</a>
+                        </iframe>
+                    </div>
                 @endforeach
             </div>
 
