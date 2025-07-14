@@ -27,7 +27,7 @@ class Activity extends Component
     private function loadSystemRequest()
     {
         try {
-            $this->systemRequest = InformationSystemRequest::with('requestStatusTrack:statusable_id,statusable_type,action,notes,created_at')->findOrFail($this->systemRequestId);
+            $this->systemRequest = InformationSystemRequest::with('trackingHistorie:requestable_id,requestable_type,action,notes,created_at')->findOrFail($this->systemRequestId);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             abort(404, 'Activity Information System Request not found.');
         }
@@ -36,7 +36,7 @@ class Activity extends Component
     #[Computed]
     public function groupedActivities()
     {
-        return $this->systemRequest->getGroupedRequestStatusTracks();
+        return $this->systemRequest->getGroupedTrackingHistorie();
     }
 
     #[Computed]

@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use App\Models\PublicRelationRequest;
 use App\States\PublicRelation\Completed;
-use App\Models\RequestStatusTrack;
+use App\Models\TrackingHistorie;
 use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\Notification;
 use App\States\PublicRelation\PromkesComplete;
@@ -26,20 +26,20 @@ use App\States\InformationSystem\ApprovedKapusdatin;
 
 trait HasActivities
 {
-    public function requestStatusTrack()
+    public function trackingHistorie()
     {
-        return $this->morphMany(RequestStatusTrack::class, 'statusable')->latest('created_at');
+        return $this->morphMany(TrackingHistorie::class, 'requestable')->latest('created_at');
     }
 
-    public function getRawRequestStatusTracksRelation(): MorphMany
+    public function getRawTrackingHistorieRelation(): MorphMany
     {
-        return $this->requestStatusTrack();
+        return $this->trackingHistorie();
     }
 
-    public function getGroupedRequestStatusTracks(): Collection
+    public function getGroupedTrackingHistorie(): Collection
     {
         // Get relation request status track
-        $allTracks = $this->requestStatusTrack;
+        $allTracks = $this->trackingHistorie;
 
         return $allTracks
             ->sortByDesc('created_at')
@@ -55,7 +55,7 @@ trait HasActivities
             ? (int) $this->current_division
             : (int) $this->active_checking;
 
-        return $this->requestStatusTrack()->create([
+        return $this->trackingHistorie()->create([
             'action' => $this->status->trackingMessage($divisionParamForTrackingMessage),
             'notes' => $notes ?? null,
         ]);
@@ -63,7 +63,7 @@ trait HasActivities
 
     public function logStatusRevision(?string $notes, array $partName)
     {
-        return $this->requestStatusTrack()->create([
+        return $this->trackingHistorie()->create([
             'action' => auth()->user()->name . " telah melakukan revisi di bagian " . implode(' ,', $partName),
             'notes' => $notes ?? null,
         ]);
@@ -71,7 +71,7 @@ trait HasActivities
 
     public function logStatusReview(?string $action, ?string $notes)
     {
-        return $this->requestStatusTrack()->create([
+        return $this->trackingHistorie()->create([
             'action' => $action,
             'notes' => $notes
         ]);
@@ -79,7 +79,7 @@ trait HasActivities
 
     public function logStatusCustom(?string $action)
     {
-        return $this->requestStatusTrack()->create([
+        return $this->trackingHistorie()->create([
             'action' => $action,
         ]);
     }

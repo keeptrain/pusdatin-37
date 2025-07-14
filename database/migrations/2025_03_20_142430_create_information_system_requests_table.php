@@ -36,19 +36,6 @@ return new class extends Migration {
         });
 
         /**
-         * Create the request_status_tracks table
-         */
-        Schema::create('request_status_tracks', function (Blueprint $table) {
-            $table->id();
-            $table->morphs('statusable');
-            $table->string('action', 255);
-            $table->text('notes')->nullable();
-            $table->string('created_by', 100);
-            $table->timestamps();
-            $table->softDeletes();
-        });
-
-        /**
          * Create the system_request_messages table
          */
         Schema::create('request_messages', function (Blueprint $table) {
@@ -71,7 +58,6 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('information_system_requests');
-        Schema::dropIfExists('request_status_tracks');
         Schema::dropIfExists('request_messages');
     }
 };

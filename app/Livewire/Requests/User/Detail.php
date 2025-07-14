@@ -92,7 +92,7 @@ class Detail extends Component
     #[Computed]
     public function activities()
     {
-        return $this->content->getGroupedRequestStatusTracks();
+        return $this->content->getGroupedTrackingHistorie();
     }
 
     #[Computed]
@@ -170,7 +170,7 @@ class Detail extends Component
                         'document_upload_version_id' => $versioning->id
                     ]);
 
-                    $this->content->requestStatusTrack()->create([
+                    $this->content->trackingHistorie()->create([
                         'action' => 'Pemohon telah menambahkan dokumen pendukung',
                         'created_by' => auth()->user()->id
                     ]);

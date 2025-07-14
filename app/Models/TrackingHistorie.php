@@ -9,15 +9,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class RequestStatusTrack extends Model
+class TrackingHistorie extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'request_status_tracks';
+    protected $table = 'tracking_historie';
 
     protected $fillable = [
-        'statusable_id',
-        'statusable_type',
+        'requestable_id',
+        'requestable_type',
         'action',
         'notes',
     ];
@@ -40,7 +40,7 @@ class RequestStatusTrack extends Model
         return $this->belongsTo(PublicRelationRequest::class);
     }
 
-    public function statusable()
+    public function requestable()
     {
         return $this->morphTo();
     }

@@ -13,7 +13,7 @@ class TrackingStepped
 
     public static function SiDataRequest(InformationSystemRequest $systemRequest): array
     {
-        $statusTrack = $systemRequest->requestStatusTrack;
+        $statusTrack = $systemRequest->trackingHistorie;
         $statuses = self::mapStatuses($systemRequest, [
             \App\States\InformationSystem\Pending::class,
             \App\States\InformationSystem\Disposition::class,
@@ -47,7 +47,7 @@ class TrackingStepped
             \App\States\PublicRelation\PusdatinQueue::class,
             \App\States\PublicRelation\PusdatinProcess::class,
             \App\States\PublicRelation\Completed::class,
-        ], $prRequest->requestStatusTrack);
+        ], $prRequest->trackingHistorie);
     }
 
     public static function currentIndex(Model $model, array $statuses): int
