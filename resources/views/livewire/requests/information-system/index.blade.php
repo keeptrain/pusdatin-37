@@ -1,32 +1,24 @@
 <div x-data="requestsTable" class="lg:p-3">
     <flux:heading size="xl" level="1">{{ __('Daftar') }}</flux:heading>
-    <flux:heading size="lg" level="2" class="mb-6">{{ __('Permohonan Layanan Sistem Informasi & Data') }}
+    <flux:heading size="lg" level="2" class="mb-6">
+        {{ __('Permohonan Layanan Sistem Informasi & Data') }}
     </flux:heading>
+
     <x-flash-messages />
 
     <div class="flex justify-between items-center mb-4">
-        <flux:button x-on:click="$dispatch('modal-show', { name: 'confirm-deletion' }); sendSelectedId();" icon="trash"
-            x-bind:disabled="selectedId.length === 0">Hapus data <span x-text="`(${selectedId.length})`"></span>
-        </flux:button>
-
-        <div class="flex-shrink-0">
-            <div class="flex-1">
-                <input type="text" id="globalSearch" placeholder="Search..."
-                    class="px-3 py-2 border border-gray-300 rounded shadow-sm w-full max-w-md" />
-            </div>
-        </div>
+        <x-layouts.table.actions />
     </div>
 
     <!-- DataTables Table dengan wire:ignore -->
-    <div wire:ignore>
-        <table id="requestsTable" class="border border-zinc-200 stripe" style="width: 100%;">
+    <div wire:ignore wire:cloak>
+        <table id="requestsTable" class="border border-zinc-200 display" style="width: 100%;">
             <thead id="requestsTableHeader" class="bg-gray-50 text-sm uppercase">
                 <tr>
-                    <th class="table-header">
-                    </th>
+                    <th class="table-header"></th>
                     <th class="table-header">Penanggung Jawab</th>
-                    <th class="table-header">Judul</th>
-                    <th wire:key="{{ rand() }}" class="table-header relative">
+                    <th class="table-header judul">Judul</th>
+                    <th class="table-header relative">
                         <div class="flex items-center justify-between">
                             <span>Status</span>
                             <!-- Badge showing number of selected filters -->
@@ -48,7 +40,7 @@
             <tbody>
                 @foreach($systemRequests as $idx => $item)
                     <tr wire:key="{{ $item->id }}" x-on:click="window.location.href = '{{ route('is.show', $item->id) }}'"
-                        class="border-b">
+                        class="cursor-pointer">
                         <td @click.stop class="px-4 py-3">
                             <input type="checkbox" value="{{ $item->id }}" x-model="selectedId">
                         </td>
@@ -75,7 +67,8 @@
     <!-- DataTables v2.3.2 CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css" />
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('css/information-system-index.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/datatable/filter-status.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/datatable/information-system.css') }}" />
     @endassets
 
     <!-- Custom JS -->
