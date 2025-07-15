@@ -34,22 +34,6 @@ return new class extends Migration {
              */
             $table->foreign('user_id')->references('id')->on('users');
         });
-
-        /**
-         * Create the system_request_messages table
-         */
-        Schema::create('request_messages', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('request_id');
-            $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade');
-            $table->text('body');
-            $table->timestamp('read_at')->nullable();
-            $table->timestamps();
-
-            // Add Foreign Key to Information System Requests Table
-            $table->foreign('request_id')->references('id')->on('information_system_requests')->onDelete('cascade');
-        });
     }
 
     /**
@@ -58,6 +42,5 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('information_system_requests');
-        Schema::dropIfExists('request_messages');
     }
 };
