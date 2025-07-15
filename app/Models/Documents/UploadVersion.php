@@ -4,6 +4,7 @@ namespace App\Models\Documents;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class UploadVersion extends Model
 {
@@ -22,6 +23,11 @@ class UploadVersion extends Model
         return $this->hasOne(DocumentUpload::class, 'document_upload_version_id');
     }
 
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('l, d-m-Y H:i:s');
+    }
+
     public function getUrl()
     {
         $disk = Storage::disk('public');
@@ -29,7 +35,7 @@ class UploadVersion extends Model
 
         return $filePath;
     }
-    
+
     public function markAsResolved()
     {
         $this->update([

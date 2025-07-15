@@ -1,14 +1,12 @@
 @props([
     'id' => null,
-    'overViewRoute' => null,
-    'activityRoute' => null,
 ])
-<section x-data="tabsNavigation()" class="min-h-screen" x-init="init()">
-    <!-- Main Content -->
-    <div class="grid grid-rows-[auto_1fr] h-full">
-        <!-- Tabs -->
-        <nav class="border-b border-gray-200 dark:border-zinc-700 h-[55px] overflow-x-hidden">
-            <div class="flex space-x-4 md:space-x-8 px-2 md:px-2 w-max">
+
+<section x-data="tabsNavigation()" class="min-h-screen flex flex-col" x-init="init()">
+    <!-- Tabs Navigation - Fixed Height -->
+    <nav class="flex-shrink-0 border-b border-gray-200 dark:border-zinc-700 h-[55px]">
+        <div class="h-full overflow-x-auto overflow-y-hidden">
+            <div class="flex items-center space-x-4 md:space-x-8 px-2 md:px-2 h-full min-w-max">
                 <x-layouts.requests.tab tab="Overview" active-tab="activeTab" label="Overview" />
                 <x-layouts.requests.tab tab="Activity" active-tab="activeTab" label="Aktivitas" />
                 <template x-if="isInformationSystemRoute">
@@ -18,40 +16,44 @@
                     <x-layouts.requests.tab tab="Version" active-tab="activeTab" label="Versi" />
                 </template>
             </div>
-        </nav>
-
-        @if (isset($rightSidebar))
-        <!-- Mobile Details Toggle (visible on small screens) -->
-        <div class="lg:hidden border-b border-gray-200 p-4">
-            <button @click="mobileDetailsOpen = !mobileDetailsOpen"
-                class="flex items-center justify-between w-full text-left">
-                <span class="font-medium">Lihat Detail</span>
-                <flux:icon.chevron-up-down class="size-5" />
-            </button>
         </div>
-        @endif
+    </nav>
 
-        <!-- Content Area -->
-        <div class="flex flex-col lg:flex-row flex-1">
-            <!-- Left Content -->
-            <main class="flex-1 p-4 md:p-3">
-                {{ $slot }}
-            </main>
+    @if (isset($rightSidebar))
+    <!-- Mobile Details Toggle - Fixed Height -->
+    <div class="lg:hidden flex-shrink-0 border-b border-gray-200 dark:border-zinc-700 px-4 py-3">
+        <button @click="mobileDetailsOpen = !mobileDetailsOpen"
+            class="flex items-center justify-between w-full text-left">
+            <span class="font-medium">Lihat Detail</span>
+            <flux:icon.chevron-up-down class="size-5" />
+        </button>
+    </div>
+    @endif
 
-            <!-- Right Sidebar - Hidden on mobile unless toggled -->
-            @if (isset($rightSidebar))
-                <div class="lg:w-90 lg:border-l lg:border-gray-200 p-4 md:p-6 bg-white dark:bg-zinc-800 dark:border-zinc-700"
-                    :class="{ 'hidden lg:block': !mobileDetailsOpen }"
-                    x-show="mobileDetailsOpen || window.innerWidth >= 1024"
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 transform translate-y-2"
-                    x-transition:enter-end="opacity-100 transform translate-y-0">
-                    <div class="mb-32">
+    <!-- Content Area - Flexible Height -->
+    <div class="flex-1 flex flex-col lg:flex-row min-h-0">
+        <!-- Left Content -->
+        <main class="flex-1 p-4 md:p-3 min-h-0 overflow-y-auto">
+            {{ $slot }}
+        </main>
+
+        <!-- Right Sidebar -->
+        @if (isset($rightSidebar))
+            <aside class="lg:w-90 lg:border-l lg:border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 lg:flex-shrink-0"
+                x-show="mobileDetailsOpen || $store.breakpoints.lg"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 transform translate-y-2"
+                x-transition:enter-end="opacity-100 transform translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 transform translate-y-0"
+                x-transition:leave-end="opacity-0 transform translate-y-2">
+                <div class="p-4 md:p-6 h-full overflow-y-auto">
+                    <div class="pb-32">
                         {{ $rightSidebar }}
                     </div>
                 </div>
-            @endif
-        </div>
+            </aside>
+        @endif
     </div>
 </section>
 
@@ -66,6 +68,7 @@
             init() {
                 this.setActiveTabFromRoute();
                 this.setupResponsiveBehavior();
+                this.setupBreakpointStore();
             },
             
             setActiveTabFromRoute() {
@@ -78,21 +81,87 @@
             
             goTo(tab) {
                 const routes = {
-                    'Overview': '{{ route($overViewRoute, $id) }}',
-                    'Activity': '{{ route($activityRoute, $id) }}',
+                    'Overview': '{{ route('is.show', $id) }}',
+                    'Activity': '{{ route('is.activity', $id) }}',
                     'Meeting': '{{ route('is.meeting', $id) }}',
                     'Version': '{{ route('comparison.version', $id) }}'
                 };
-                window.location.href = routes[tab];
+                
+                if (routes[tab]) {
+                    window.location.href = routes[tab];
+                }
+            },
+            
+            setupBreakpointStore() {
+                // Create Alpine store for breakpoints to avoid repeated window.innerWidth checks
+                if (!Alpine.store('breakpoints')) {
+                    Alpine.store('breakpoints', {
+                        lg: window.innerWidth >= 1024,
+                        updateBreakpoints() {
+                            this.lg = window.innerWidth >= 1024;
+                        }
+                    });
+                }
             },
             
             setupResponsiveBehavior() {
-                window.addEventListener('resize', () => {
-                    if (window.innerWidth >= 1024) {
-                        this.mobileDetailsOpen = true;
-                    }
-                });
+                let resizeTimer;
+                
+                const handleResize = () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        Alpine.store('breakpoints').updateBreakpoints();
+                        
+                        // Auto-open sidebar on desktop
+                        if (window.innerWidth >= 1024) {
+                            this.mobileDetailsOpen = true;
+                        }
+                    }, 100); // Debounce resize events
+                };
+                
+                window.addEventListener('resize', handleResize, { passive: true });
+                
+                // Cleanup on component destroy
+                this.$cleanup = () => {
+                    window.removeEventListener('resize', handleResize);
+                    clearTimeout(resizeTimer);
+                };
             }
         };
     }
 </script>
+
+<style>
+    /* Optimize scrolling performance */
+    .overflow-y-auto {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 3px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(156, 163, 175, 0.7);
+    }
+    
+    /* Prevent layout shifts during transitions */
+    [x-transition] {
+        will-change: transform, opacity;
+    }
+    
+    /* Optimize paint containment */
+    nav, main, aside {
+        contain: layout style paint;
+    }
+</style>

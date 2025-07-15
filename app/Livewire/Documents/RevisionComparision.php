@@ -6,96 +6,71 @@ use Livewire\Component;
 use App\Models\InformationSystemRequest;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Computed;
-use Illuminate\Support\Facades\Storage;
 
 class RevisionComparision extends Component
 {
     #[Locked]
-    public int $siDataRequestId;
+    public int $systemRequestId;
 
-    private $siDataRequest;
-
-    public function mount(int $id)
-    {
-        $this->siDataRequestId = $id;
-        $this->siDataRequest = $this->informationSystemRequests();
-    }
+    private ?InformationSystemRequest $systemRequest = null;
 
     #[Title('Perbandingan Versi')]
     public function render()
     {
-        return view('livewire.documents.revision-comparision');
+        return view('livewire.documents.revision-comparision', [
+            'anyVersions' => $this->transformedVersions(),
+        ]);
     }
 
-    public function informationSystemRequests()
+    public function mount(int $id): void
+    {
+        $this->systemRequestId = $id;
+        $this->systemRequest = $this->loadInformationSystemRequests();
+    }
+
+    protected function loadInformationSystemRequests(): InformationSystemRequest
     {
         return InformationSystemRequest::with([
             'documentUploads.activeVersion:id,file_path',
             'documentUploads.versions'
-        ])->findOrFail($this->siDataRequestId);
+        ])->findOrFail($this->systemRequestId);
     }
 
-    #[Computed]
-    public function checkAvailableAnyVersions()
+    protected function getAllVersions()
     {
-        return $this->siDataRequest->hasNonZeroPartNumber();
+        return $this->systemRequest->documentUploads
+            ->flatMap(fn($doc) => $doc->versions->map(fn($v) => [$doc, $v]));
     }
 
-    #[Computed]
-    public function currentVersion()
+    public function transformedVersions()
     {
-        $currentVersionsData = collect();
+        $storageBaseUrl = asset('storage');
 
-        if ($this->siDataRequest->documentUploads->isNotEmpty()) {
-            foreach ($this->siDataRequest->documentUploads as $documentUpload) {
-                $currentVersionsData->push($documentUpload->formatForCurrentVersion());
-            }
-        }
+        return $this->getAllVersions()
+            ->filter(function ($pair) {
+                [$doc, $v] = $pair;
+                return !empty($v->file_path);
+            })
+            ->map(function ($pair) use ($storageBaseUrl) {
+                [$doc, $v] = $pair;
+                $isActive = $v->id === $doc->activeVersion?->id;
 
-        return $currentVersionsData->sortBy('part_number');
-    }
+                return [
+                    'version' => $v->version,
+                    'part_number' => $doc->part_number,
+                    'part_number_label' => $doc->part_number_label . ($isActive ? ' *' : ''),
+                    'file_path' => "{$storageBaseUrl}/{$v->file_path}",
+                    'revision_note' => $v->revision_note,
+                    'created_at' => $v->created_at,
+                ];
+            })
 
-    #[Computed]
-    public function anyVersions()
-    {
-        $groupedVersions = collect();
-
-        if ($this->siDataRequest->documentUploads->isNotEmpty()) {
-            foreach ($this->siDataRequest->documentUploads as $documentUpload) {
-                // Get active version ID
-                $activeVersionId = $documentUpload->activeVersion?->id;
-
-                $versions = $documentUpload->versions->reject(fn($version) => $version->id === $activeVersionId);
-
-                // Group data by version
-                foreach ($versions as $version) {
-                    if (!empty($version->file_path)) {
-                        $groupedVersions->push([
-                            'version' => $version->version ?? null,
-                            'part_number' => $documentUpload->part_number,
-                            'part_number_label' => $documentUpload->part_number_label,
-                            'file_path' => Storage::url($version->file_path),
-                            'revision_note' => $version->revision_note,
-                        ]);
-                    }
-                }
-            }
-        }
-
-        // Group by version
-        return $groupedVersions->sortBy('version')->groupBy('version')->map(function ($group) {
-            return [
-                'version' => $group->first()['version'],
-                'details' => $group->map(function ($item) {
-                    return [
-                        'part_number' => $item['part_number'],
-                        'part_number_label' => $item['part_number_label'],
-                        'file_path' => $item['file_path'],
-                        'revision_note' => $item['revision_note'],
-                    ];
-                })->values(),
-            ];
-        })->values();
+            ->sortBy('version')
+            ->groupBy('version')
+            ->map(fn($group, $version) => [
+                'version' => $version,
+                'details' => $group->values(),
+            ])
+            ->values();
     }
 }
