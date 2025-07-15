@@ -4,7 +4,7 @@
 
     <flux:heading size="lg" class="p-4">Detail Permohonan Layanan</flux:heading>
 
-    <x-layouts.requests.show overViewRoute="is.show" activityRoute="is.activity" :id="$systemRequestId">
+    <x-layouts.requests.show :id="$systemRequestId" overViewRoute="is.show" activityRoute="is.activity">
         <div class="flex-1 p-4 md:p-3">
             <x-layouts.requests.info-responsible-person :requestable="$systemRequest" />
 

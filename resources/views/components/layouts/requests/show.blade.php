@@ -1,5 +1,7 @@
 @props([
     'id' => null,
+    'overViewRoute' => null,
+    'activityRoute' => null,
 ])
 
 <section x-data="tabsNavigation()" class="min-h-screen flex flex-col" x-init="init()">
@@ -81,14 +83,14 @@
             
             goTo(tab) {
                 const routes = {
-                    'Overview': '{{ route('is.show', $id) }}',
-                    'Activity': '{{ route('is.activity', $id) }}',
+                    'Overview': '{{ route($overViewRoute, $id) }}',
+                    'Activity': '{{ route($activityRoute, $id) }}',
                     'Meeting': '{{ route('is.meeting', $id) }}',
                     'Version': '{{ route('comparison.version', $id) }}'
                 };
                 
                 if (routes[tab]) {
-                    window.location.href = routes[tab];
+                    Livewire.navigate(routes[tab]);
                 }
             },
             

@@ -4,7 +4,7 @@
     <flux:heading size="lg" class="p-4">Daftar Versi Dokumen</flux:heading>
 
     {{-- Comparison Container --}}
-    <x-layouts.requests.show :id="$systemRequestId">
+    <x-layouts.requests.show :id="$systemRequestId" overViewRoute="is.show" activityRoute="is.activity">
         <div class="items-center mb-4 p-1">
             <flux:heading size="lg">Silahkan Pilih Versi dan Dokumen</flux:heading>
             <flux:subheading>Jika disamping nama dokumen ada tanda (*) maka versi tersebut adalah versi aktif
