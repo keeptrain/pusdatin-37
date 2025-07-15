@@ -6,7 +6,7 @@
         <div class="flex items-center">
             <div class="w-2 h-2 rounded-full bg-zinc-400  mr-2"></div>
             <flux:text>
-                Permohonan Masuk:
+                Usulan Masuk:
                 <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['pending'] }}</span>
             </flux:text>
         </div>
@@ -37,14 +37,14 @@
         <div class="flex items-center">
             <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
             <flux:text>
-                Proses Pusdatin:
+                Proses:
                 <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['pusdatinProcess'] }}</span>
             </flux:text>
         </div>
         <div class="flex items-center">
             <div class="w-2 h-2 rounded-full bg-zinc-400 mr-2"></div>
             <flux:text>
-                Permohonan Selesai:
+                Selesai:
                 <span class="font-medium text-neutral-800 dark:text-white">{{ $statusCounts['completed'] }}</span>
             </flux:text>
         </div>

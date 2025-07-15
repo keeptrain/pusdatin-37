@@ -34,19 +34,19 @@
                 <h3 class="text-lg font-medium text-neutral-700 dark:text-neutral-200 mb-3">Kategori</h3>
                 <div class="flex-1 flex flex-col justify-center space-y-1">
                     <div class="flex items-center">
-                        <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                        <div class="w-2 h-2 rounded-full bg-blue-300 mr-2"></div>
                         <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Sistem Informasi</div>
                         <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['si'] }}%
                         </div>
                     </div>
                     <div class="flex items-center">
-                        <div class="w-2 h-2 rounded-full bg-teal-700 mr-2"></div>
+                        <div class="w-2 h-2 rounded-full bg-red-300 mr-2"></div>
                         <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Data</div>
                         <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['data'] }}%
                         </div>
                     </div>
                     <div class="flex items-center">
-                        <div class="w-2 h-2 rounded-full bg-orange-700 mr-2"></div>
+                        <div class="w-2 h-2 rounded-full bg-orange-300 mr-2"></div>
                         <div class="flex-1 text-sm text-neutral-600 dark:text-neutral-300">Kehumasan</div>
                         <div class="font-medium text-neutral-800 dark:text-white">{{ $categoryPercentages['pr'] }}%
                         </div>
@@ -76,39 +76,38 @@
             </div>
             @endhasanyrole
 
+            @unlessrole('administrator')
             <x-dashboard.small-chart icon="star" title="" :data="$avarageRating" label="Rata-rata penilaian layanan"
                 :widthPercentage="$widthPercentage" />
-
-            {{-- <div
-                class="relative overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-5 flex flex-col">
-                <flux:heading size="lg">Penilaian Layanan</flux:heading>
-                <flux:avatar icon="star" size="xl" color="auto" />
-                <x-rating-emoticon />
-
-            </div> --}}
+            @endunlessrole
         </div>
         @unlessrole('administrator')
-            <div class="grid auto-rows-min gap-4 md:grid-cols-2 border rounded-2xl pl-2">
-                <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
-            </div>
+        <div class="grid auto-rows-min gap-4 md:grid-cols-2 border rounded-2xl pl-2">
+            <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
+        </div>
         @endunlessrole
-        <!-- bar chart area -->
-        @push('scripts')
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        @endpush
-        @hasanyrole('head_verifier')
-        <x-chart.head-verif :monthlyLetterData="$monthlyLetterData" />
-        @endhasanyrole
-        @hasanyrole('si_verifier')
-        <x-chart.si-verif :monthlySiData="$monthlySiData" />
-        @endhasanyrole
-        @hasanyrole('data_verifier')
-        <x-chart.data-verif :monthlyDataDiv="$monthlyDataDiv" />
-        @endhasanyrole
-        @hasanyrole('pr_verifier|promkes_verifier')
-        <x-chart.pr-verif :monthlyLetterData="$monthlyLetterData" />
-        @endhasanyrole
 
-        <!-- bar chart area -->
+        <!-- Chart area -->
+        @pushOnce('scripts')
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        @endPushOnce
+        <div class="rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 max-h-85" x-cloak>
+            <flux:heading size="lg" class="flex items-center gap-2 text-accent">
+                <x-lucide-line-chart class="w-6 h-6" />
+                Statistik Permohonan Layanan
+            </flux:heading>
+            @hasanyrole('head_verifier')
+            <x-chart.head-verif :monthlyLetterData="$monthlyLetterData" />
+            @endhasanyrole
+            @hasanyrole('si_verifier')
+            <x-chart.si-verif :monthlySiData="$monthlySiData" />
+            @endhasanyrole
+            @hasanyrole('data_verifier')
+            <x-chart.data-verif :monthlyDataDiv="$monthlyDataDiv" />
+            @endhasanyrole
+            @hasanyrole('pr_verifier|promkes_verifier')
+            <x-chart.pr-verif :monthlyLetterData="$monthlyLetterData" />
+            @endhasanyrole
+        </div>
     </div>
 </x-layouts.app>
