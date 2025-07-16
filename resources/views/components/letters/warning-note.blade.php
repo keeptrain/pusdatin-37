@@ -1,4 +1,4 @@
-<div x-data="{ open: false }" class="border-l-2 border-amber-500 bg-amber-50">
+<div x-data="{ open: true }" class="border-l-2 border-amber-500 bg-amber-50">
     <div class="p-2 bg-amber-100 flex justify-between items-center" x-on:click="open = !open">
         <div class="flex items-center">
             <flux:icon.exclamation-circle class="text-amber-600 dark:text-amber-300"/>
