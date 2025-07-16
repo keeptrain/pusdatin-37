@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <div class="space-y-4 w-300 h-225">
+    <div class="space-y-4 min-w-max h-225">
         <template x-if="selectedPart && revisionNote">
             <flux:callout variant="warning" icon="exclamation-circle" heading="Catatan sebelumnya: ">
                 <flux:callout.text x-text="revisionNote"></flux:callout.text>
