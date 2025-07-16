@@ -10,33 +10,12 @@
     </p>
 </div>
 
-{{-- <div class="mb-6">
-    <h4 class="text-gray-500 mb-1">Penanggung Jawab</h4>
-    <p class="text-gray-800">
-        {{ $systemRequest->user->name }}
-    </p>
-</div> --}}
-
 <div class="mb-6">
     <h4 class="text-gray-500 mb-1">Nomor Surat</h4>
     <p class="text-gray-800">
         {{ $systemRequest->reference_number }}
     </p>
 </div>
-
-{{-- <div class="mb-6">
-    <h4 class="text-gray-500 mb-1">Kontak</h4>
-    <p class="text-gray-800">
-        {{ $systemRequest->user->contact }}
-    </p>
-</div>
-
-<div class="mb-6">
-    <h4 class="text-gray-500 mb-1">Seksi</h4>
-    <p class="text-gray-800">
-        {{ $systemRequest->user->section }}
-    </p>
-</div> --}}
 
 <div class="mb-6">
     <h4 class="text-gray-500 mb-1">Tanggal dibuat</h4>
@@ -51,7 +30,9 @@
 <div class="mb-6">
     @if ($timeline)
         <h4 class="text-gray-500 mb-1">Timeline pengerjaan</h4>
-        <p class="text-gray-800">{{ $timeline }}</p>
+        <div class="break-words w-60">
+            <p class="text-gray-800">{{ $timeline }}</p>
+        </div>
     @endif
 </div>
 
