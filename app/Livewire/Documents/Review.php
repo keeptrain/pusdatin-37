@@ -79,21 +79,26 @@ class Review extends Component
                 $this->changesChoiceNo($documentUploadsIds);
             }
 
+            $verifikatorReviewed = $systemRequest->active_checking === 2;
+            $text = $verifikatorReviewed ? 'Kapusdatin' : 'Ketua Satuan Pelaksana';
+
             if (!empty($this->note)) {
-                $systemRequest->logStatusReview("Kepala Satuan Pelaksana telah melakukan review dan memberikan", $this->note);
+                $systemRequest->logStatusReview("{$text} telah melakukan review dan memberikan", $this->note);
             } else {
-                $systemRequest->logStatusCustom("Kepala Satuan Pelaksana telah melakukan review");
+                $systemRequest->logStatusReview("{$text} telah melakukan review");
             }
 
             $systemRequest->updatedForCompletedReview();
 
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => 'Berhasil melakukan review'
-            ]);
-
-            $this->redirectRoute('is.show', ['id' => $this->systemRequestId]);
+            DB::afterCommit(function () use ($systemRequest) {
+                session()->flash('status', [
+                    'variant' => 'success',
+                    'message' => 'Berhasil melakukan review'
+                ]);
+            });
         });
+
+        $this->redirectRoute('is.show', ['id' => $this->systemRequestId]);
     }
 
     private function changesChoiceYes(InformationSystemRequest $systemRequest, $documentUploadIds)

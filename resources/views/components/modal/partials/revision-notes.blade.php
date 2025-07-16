@@ -1,24 +1,26 @@
-<template x-if="revisionPart.includes('1')">
-    <flux:textarea wire:model.defer="revisionNotes.1" cols="66" rows="2"
-        placeholder="Catatan untuk dokumen identifikasi aplikasi " resize="vertical" />
-</template>
+@foreach([1, 2, 3, 4, 5] as $part)
+    <template x-if="revisionPart.includes('{{ $part }}')">
+        <div class="mb-4">
+            @php
+                $placeholders = [
+                    1 => "Catatan untuk dokumen identifikasi aplikasi",
+                    2 => "Catatan untuk SOP aplikasi",
+                    3 => "Catatan untuk pakta integritas implementasi",
+                    4 => "Catatan untuk form RFC pusdatinkes",
+                    5 => "Catatan untuk surat perjanjian kerahasiaan"
+                ];
+            @endphp
 
-<template x-if="revisionPart.includes('2')">
-    <flux:textarea wire:model.defer="revisionNotes.2" cols="66" rows="2"
-        placeholder="Catatan untuk SOP aplikasi" resize="vertical" />
-</template>
+            <flux:textarea wire:model.defer="form.revisionNotes.{{ $part }}" cols="6" rows="2"
+                placeholder="{{ $placeholders[$part] }}" resize="vertical" />
 
-<template x-if="revisionPart.includes('3')">
-    <flux:textarea wire:model.defer="revisionNotes.3" cols="66" rows="2"
-        placeholder="Catatan untuk pakta integritas implementasi" resize="vertical" />
-</template>
-
-<template x-if="revisionPart.includes('4')">
-    <flux:textarea wire:model.defer="revisionNotes.4" cols="66" rows="2"
-        placeholder="Catatan untuk form RFC pusdatinkes" resize="vertical" />
-</template>
-
-<template x-if="revisionPart.includes('5')">
-    <flux:textarea wire:model.defer="revisionNotes.5" cols="66" rows="2"
-        placeholder="Catatan untuk surat perjanjian kerahasiaan" resize="vertical" />
-</template>
+            @error("form.revisionNotes.{$part}")
+                <div x-show="revisionPart.includes('{{ $part }}')" class="mt-1">
+                    <flux:text variant="strong" color="red">
+                        {{ $message }}
+                    </flux:text>
+                </div>
+            @enderror
+        </div>
+    </template>
+@endforeach

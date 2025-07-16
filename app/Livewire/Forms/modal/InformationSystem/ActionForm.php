@@ -27,6 +27,8 @@ class ActionForm extends Form
 
     public bool $hasPartNumber5 = false;
 
+    private const REPLY_STATUSES = ['replied', 'replied_kapusdatin'];
+
     public function getSelectedDivisionId()
     {
         return Division::getIdFromString($this->selectedDivision);
@@ -74,97 +76,83 @@ class ActionForm extends Form
         });
     }
 
-    public function verification(int $systemRequestId)
+    protected function isReplying(): bool
+    {
+        return in_array($this->status, self::REPLY_STATUSES, true);
+    }
+
+    public function verification(int $systemRequestId): void
     {
         $rules = [
             'status' => 'required|string|in:approved_kasatpel,replied,approved_kapusdatin,replied_kapusdatin',
             'revisionParts' => 'required_if:status,replied,replied_kapusdatin',
         ];
 
-        $statusToTransition = $this->status;
-
-        if (in_array($statusToTransition, ['replied', 'replied_kapusdatin']) && !empty($this->revisionParts)) {
+        if ($this->isReplying() && !empty($this->revisionParts)) {
             $rules['revisionParts'] = 'array|min:1';
+            $rules['revisionNotes'] = 'required|array';
+
             foreach ($this->revisionParts as $part) {
                 $rules["revisionNotes.{$part}"] = 'required|string|max:255';
             }
         }
 
-        $messages = [
+        $message = [
             'status.required' => 'Status selanjutnya tidak boleh kosong',
             'status.in' => 'Status selanjutnya tidak valid',
             'revisionParts.required_if' => 'Butuh bagian yang harus di revisi',
             'revisionParts.min' => 'Bagian yang harus di revisi minimal 1',
+            'revisionNotes.required' => 'Catatan revisi wajib diisi',
+            'revisionNotes.array' => 'Format catatan revisi tidak valid',
             'revisionNotes.*.required' => 'Catatan revisi wajib diisi untuk bagian yang dipilih',
             'revisionNotes.*.max' => 'Catatan revisi maksimal 255 karakter',
         ];
 
-        $this->validate($rules, $messages);
+        $this->validate($rules, $message);
 
-        DB::transaction(function () use ($systemRequestId, $statusToTransition) {
+        DB::transaction(function () use ($systemRequestId) {
             $systemRequest = InformationSystemRequest::with('documentUploads')->findOrFail($systemRequestId);
 
-            if (in_array($statusToTransition, ['replied', 'replied_kapusdatin'])) {
-                if (empty($this->revisionParts)) {
-                    throw new \Exception('Part of revision is required, cannot be empty');
-                }
-                $this->checkRevisionInputForRepliedStatus($systemRequest);
+            if ($this->isReplying()) {
+                $this->processRevisions($systemRequest);
             }
 
-            $systemRequest->transitionStatusFromDisposition($this->status);
-
-            $systemRequest->refresh();
-
-            $systemRequest->logStatus($this->notes);
-
-            DB::afterCommit(function () use ($systemRequest, $statusToTransition) {
-                $data = [];
-
-                if (in_array($statusToTransition, ['replied', 'replied_kapusdatin'])) {
-                    $data = [
-                        'title' => $systemRequest->title,
-                        'revision_notes' => $this->formatRevisionNotes($systemRequest),
-                        'url' => route('is.edit', $systemRequest->id),
-                    ];
-                    Cache::rememberForever("revision-mail-{$systemRequest->id}", fn() => $data);
-                }
-
-                $systemRequest->sendProcessServiceRequestNotification($data);
-
-                session()->flash('status', [
-                    'variant' => 'success',
-                    'message' => $systemRequest->status->toastMessage(),
-                ]);
-            });
+            $this->updateSystemRequestStatus($systemRequest);
+            $this->handleAfterCommitVerification($systemRequest);
         });
     }
 
-    public function checkRevisionInputForRepliedStatus(InformationSystemRequest $systemRequest): array
+    protected function processRevisions(InformationSystemRequest $systemRequest): array
     {
+        if (empty($this->revisionParts)) {
+            throw new \InvalidArgumentException('Part of revision is required, cannot be empty');
+        }
+
+        return $this->createRevisions($systemRequest);
+    }
+
+    protected function createRevisions(InformationSystemRequest $systemRequest): array
+    {
+        if (!$this->isReplying()) {
+            return [];
+        }
+
+        $documentUploadsByPartNumber = $systemRequest->documentUploads->keyBy('part_number');
         $revisionNotes = [];
 
-        if (in_array($this->status, ['replied', 'replied_kapusdatin'])) {
-            $documentUploadsByPartNumber = $systemRequest->documentUploads->keyBy('part_number');
+        foreach (array_filter($this->revisionParts ?? []) as $partNumber) {
+            $revisionNote = trim($this->revisionNotes[$partNumber] ?? '');
 
-            foreach ($this->revisionParts ?? [] as $partNumber) {
-                $revisionNote = trim($this->revisionNotes[$partNumber] ?? '');
-
-                // Skip if revision note is empty or doesn't exist
-                if (empty($revisionNote)) {
-                    continue;
-                }
-
-                $documentUpload = $documentUploadsByPartNumber->get($partNumber);
-
-                if ($documentUpload) {
-                    $documentUpload->createRevision($revisionNote);
-                    $revisionNotes[] = [
-                        'part_number' => $partNumber,
-                        'label' => InformationSystemRequestPart::tryFrom($partNumber)->label(),
-                        'note' => $revisionNote
-                    ];
-                }
+            if (empty($revisionNote) || !($documentUpload = $documentUploadsByPartNumber->get($partNumber))) {
+                continue;
             }
+
+            $documentUpload->createRevision($revisionNote);
+            $revisionNotes[] = [
+                'part_number' => $partNumber,
+                'label' => InformationSystemRequestPart::tryFrom($partNumber)->label(),
+                'note' => $revisionNote
+            ];
         }
 
         return $revisionNotes;
@@ -172,20 +160,71 @@ class ActionForm extends Form
 
     public function formatRevisionNotes(InformationSystemRequest $systemRequest): array
     {
-        $revisions = $this->checkRevisionInputForRepliedStatus($systemRequest);
+        $revisions = [];
 
-        // Sort by part number
-        usort($revisions, function ($a, $b) {
-            return $a['part_number'] <=> $b['part_number'];
-        });
+        if ($this->isReplying() && !empty($this->revisionParts)) {
+            $documentUploadsByPartNumber = $systemRequest->documentUploads->keyBy('part_number');
 
-        // Convert to the final format with labels as keys and notes as values
-        $formatted = [];
-        foreach ($revisions as $revision) {
-            $formatted[$revision['label']] = $revision['note'];
+            foreach (array_filter($this->revisionParts ?? []) as $partNumber) {
+                $revisionNote = trim($this->revisionNotes[$partNumber] ?? '');
+
+                if (empty($revisionNote) || !$documentUploadsByPartNumber->has($partNumber)) {
+                    continue;
+                }
+
+                $revisions[] = [
+                    'part_number' => $partNumber,
+                    'label' => InformationSystemRequestPart::tryFrom($partNumber)->label(),
+                    'note' => $revisionNote
+                ];
+            }
         }
 
-        return $formatted;
+        // Sort by part number and convert to label => note format
+        return collect($revisions)
+            ->sortBy('part_number')
+            ->pluck('note', 'label')
+            ->all();
+    }
+
+    protected function updateSystemRequestStatus(InformationSystemRequest $systemRequest): void
+    {
+        $systemRequest->transitionStatusFromDisposition($this->status);
+        $systemRequest->refresh();
+        $systemRequest->logStatus($this->notes);
+    }
+
+    protected function handleAfterCommitVerification(InformationSystemRequest $systemRequest): void
+    {
+        DB::afterCommit(function () use ($systemRequest) {
+            $data = $this->prepareNotificationData($systemRequest);
+            $systemRequest->sendProcessServiceRequestNotification($data);
+
+            session()->flash('status', [
+                'variant' => 'success',
+                'message' => $systemRequest->status->toastMessage(),
+            ]);
+        });
+    }
+
+    protected function prepareNotificationData(InformationSystemRequest $systemRequest): array
+    {
+        if (!$this->isReplying()) {
+            return [];
+        }
+
+        $data = [
+            'title' => $systemRequest->title,
+            'revision_notes' => $this->formatRevisionNotes($systemRequest),
+            'url' => route('is.edit', $systemRequest->id),
+        ];
+
+        Cache::rememberForever(
+            "revision-mail-{$systemRequest->id}",
+            fn() => $data
+        );
+
+        return $data;
     }
 
     public function process(int $systemRequestId)
