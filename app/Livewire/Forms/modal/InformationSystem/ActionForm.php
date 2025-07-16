@@ -40,10 +40,17 @@ class ActionForm extends Form
             'selectedDivision' => 'required',
         ];
 
-        $this->validate($rules);
+        $messages = [
+            'status.required' => 'Status selanjutnya tidak boleh kosong',
+            'status.in' => 'Status selanjutnya tidak valid',
+            'notes.required' => 'Catatan tidak boleh kosong',
+            'selectedDivision.required' => 'Divisi tujuan tidak boleh kosong',
+        ];
+
+        $this->validate($rules, $messages);
 
         DB::transaction(function () use ($systemRequestId) {
-            $systemRequest = $this->systemRequest->findOrFail($systemRequestId);
+            $systemRequest = InformationSystemRequest::findOrFail($systemRequestId);
 
             // Transisi status
             $systemRequest->transitionStatusFromPending(
@@ -113,10 +120,10 @@ class ActionForm extends Form
             DB::afterCommit(function () use ($systemRequest, $statusToTransition) {
                 $data = [];
 
-                if (in_array($statusToTransition, ['replied', 'replied_kapusdatin']) && !empty($this->revisionParts)) {
+                if (in_array($statusToTransition, ['replied', 'replied_kapusdatin'])) {
                     $data = [
                         'title' => $systemRequest->title,
-                        'revision_notes' => $this->formatRevisionNotes(),
+                        'revision_notes' => $this->formatRevisionNotes($systemRequest),
                         'url' => route('is.edit', $systemRequest->id),
                     ];
                     Cache::rememberForever("revision-mail-{$systemRequest->id}", fn() => $data);
@@ -132,34 +139,50 @@ class ActionForm extends Form
         });
     }
 
-    public function checkRevisionInputForRepliedStatus(InformationSystemRequest $systemRequest)
+    public function checkRevisionInputForRepliedStatus(InformationSystemRequest $systemRequest): array
     {
-        if (in_array($this->status, ['replied', 'replied_kapusdatin']) && !empty($this->revisionParts)) {
+        $revisionNotes = [];
+
+        if (in_array($this->status, ['replied', 'replied_kapusdatin'])) {
             $documentUploadsByPartNumber = $systemRequest->documentUploads->keyBy('part_number');
 
-            foreach ($this->revisionParts as $partNumber) {
-                if (isset($this->revisionNotes[$partNumber])) {
-                    $revisionNote = $this->revisionNotes[$partNumber];
+            foreach ($this->revisionParts ?? [] as $partNumber) {
+                $revisionNote = trim($this->revisionNotes[$partNumber] ?? '');
 
-                    $documentUpload = $documentUploadsByPartNumber->get($partNumber);
+                // Skip if revision note is empty or doesn't exist
+                if (empty($revisionNote)) {
+                    continue;
+                }
 
-                    if ($documentUpload) {
-                        $documentUpload->createRevision($revisionNote);
-                    }
+                $documentUpload = $documentUploadsByPartNumber->get($partNumber);
+
+                if ($documentUpload) {
+                    $documentUpload->createRevision($revisionNote);
+                    $revisionNotes[] = [
+                        'part_number' => $partNumber,
+                        'label' => InformationSystemRequestPart::tryFrom($partNumber)->label(),
+                        'note' => $revisionNote
+                    ];
                 }
             }
         }
+
+        return $revisionNotes;
     }
 
-    public function formatRevisionNotes()
+    public function formatRevisionNotes(InformationSystemRequest $systemRequest): array
     {
-        $revisionNotes = $this->revisionNotes;
+        $revisions = $this->checkRevisionInputForRepliedStatus($systemRequest);
+
+        // Sort by part number
+        usort($revisions, function ($a, $b) {
+            return $a['part_number'] <=> $b['part_number'];
+        });
+
+        // Convert to the final format with labels as keys and notes as values
         $formatted = [];
-
-        foreach ($revisionNotes as $key => $value) {
-            $label = InformationSystemRequestPart::tryFrom($key)->label();
-
-            $formatted[$label] = $value;
+        foreach ($revisions as $revision) {
+            $formatted[$revision['label']] = $revision['note'];
         }
 
         return $formatted;
