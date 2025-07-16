@@ -18,22 +18,22 @@ class ManageTemplate extends Component
     use WithFileUploads;
 
     #[Locked]
-    public $selectedTemplateId = null;
+    public int $selectedTemplateId;
 
     public $templates;
 
-    public $name = '';
+    public string $name = '';
 
-    public $isActive;
+    public bool $isActive;
 
-    public $partNumber = '';
+    public int $partNumber;
 
     public $file;
 
-    public $updateName = '';
+    public string $updateName = '';
     public bool $updateIsActive;
     public $updateFile;
-    private $updatePartNumber;
+    public int $updatePartNumber;
 
     public function mount()
     {
@@ -90,12 +90,12 @@ class ManageTemplate extends Component
         $this->validate([
             'updateName' => 'required',
             'updateIsActive' => 'required|boolean',
-            'updateFile' => 'nullable|file',
+            'updateFile' => 'nullable|file|mimes:doc,docx',
         ]);
 
         if (!$this->updateIsActive) {
             $activeTemplates = Template::where('part_number', $this->updatePartNumber)
-                ->where('id', '!=', $this->updatePartNumber) // Jangan termasuk diri sendiri
+                ->where('id', '!=', $this->selectedTemplateId) // Jangan termasuk diri sendiri
                 ->where('is_active', true)
                 ->exists();
 
@@ -138,9 +138,9 @@ class ManageTemplate extends Component
                 'variant' => 'success',
                 'message' => 'Berhasil melakukan update!',
             ]);
-
-            return $this->redirect("/system/templates", navigate: true);
         });
+
+        $this->redirectRoute('manage.templates', navigate: true);
     }
 
     public function delete($id)
