@@ -1,13 +1,13 @@
 <flux:modal x-data="{
         status: '',
     }" name="disposition-modal" focusable class="md:w-120" size="lg">
-    <form wire:submit="saveDisposition" class="space-y-6">
+    <form wire:submit="actionDisposition" class="space-y-6">
         <flux:heading size="lg">
             {{ __('Disposisi permohonan layanan') }}
         </flux:heading>
 
         <!-- Radio Group -->
-        <flux:radio.group wire:model="status" name="status" label="Status" badge="Required">
+        <flux:radio.group wire:model="form.status" name="status" label="Status" badge="Required">
             <flux:radio value="disposition" name="status" label="Disposisi" x-on:click="status = 'approved'" />
             <flux:radio value="rejected" name="status" label="Ditolak" x-on:click="status = 'rejected'" />
             {{--
@@ -15,13 +15,15 @@
         </flux:radio.group>
 
         <template x-if="status === 'approved'">
-            <flux:textarea wire:model="notes" cols="66" rows="3" placeholder="Catatan disposisi ke kasatpel "
-                resize="vertical" />
-            @error('notes')
-                <flux:text variant="strong" class="text-red-500 flex items-center">
-                    <flux:icon.exclamation-circle />{{ $message }}
-                </flux:text>
-            @enderror
+            <div>
+                <flux:textarea wire:model="form.notes" cols="66" rows="3" placeholder="Catatan disposisi ke kasatpel "
+                    resize="vertical" />
+                @error('form.notes')
+                    <flux:text variant="strong" color="red">
+                        {{ $message }}
+                    </flux:text>
+                @enderror
+            </div>
         </template>
 
         <template x-if="status === 'approved'">
@@ -30,16 +32,16 @@
 
                 <flux:description>Pilih divisi selanjutnya yang akan memproses</flux:description>
 
-                <flux:radio.group wire:model="selectedDivision" name="selectedDivision" invalid>
+                <flux:radio.group wire:model="form.selectedDivision" name="selectedDivision" invalid>
                     <div class="flex gap-4 *:gap-x-2">
                         <flux:radio value="si" label="Sistem Informasi" />
                         <flux:radio value="data" label="Data" />
                     </div>
                 </flux:radio.group>
 
-                @error('selectedDivision')
-                    <flux:text variant="strong" class="text-red-500 flex items-center">
-                        <flux:icon.exclamation-circle />{{ $message }}
+                @error('form.selectedDivision')
+                    <flux:text variant="strong" color="red">
+                        {{ $message }}
                     </flux:text>
                 @enderror
             </flux:fieldset>
@@ -52,8 +54,8 @@
 
         <!-- Template untuk Rejected -->
         <template x-if="status === 'rejected'">
-            <flux:textarea wire:model="notesHistorie" cols="66" rows="2" placeholder="Catatan penolakan (opsional) "
-                resize="vertical" />
+            <flux:textarea wire:model="form.notesHistorie" cols="66" rows="2"
+                placeholder="Catatan penolakan (opsional) " resize="vertical" />
         </template>
 
         <!-- Template untuk Test Failed -->

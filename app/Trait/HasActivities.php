@@ -136,7 +136,7 @@ trait HasActivities
         $currentStatusClass = $this->status::class;
 
         $callback = match ($currentStatusClass) {
-            Replied::class => function () use ($data) {
+            Replied::class, RepliedKapusdatin::class => function () use ($data) {
                     $this->revisionContext($data);
                 },
             ApprovedKasatpel::class => function (): void {

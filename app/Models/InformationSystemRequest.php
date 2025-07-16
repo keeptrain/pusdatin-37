@@ -213,7 +213,7 @@ class InformationSystemRequest extends Model
             'rejected' => $this->update([
                 'active_revision' => false,
                 'need_review' => false,
-            ])
+            ]),
         };
     }
 
@@ -236,7 +236,9 @@ class InformationSystemRequest extends Model
 
     public function updatedForCompletedReview()
     {
-        $this->status->transitionTo(Disposition::class);
+        $currentChecking = $this->active_checking === Division::HEAD_ID->value;
+        $this->status->transitionTo($currentChecking ? ApprovedKasatpel::class : Disposition::class);
+
         $this->update([
             'active_revision' => false,
             'need_review' => false

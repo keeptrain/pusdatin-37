@@ -25,7 +25,7 @@
         {{ __('Review') }}
     </flux:button>
 @elsecan('viewVerificationStep2', $systemRequest)
-    <flux:modal.trigger name="approved-modal">
+    <flux:modal.trigger name="verification-modal">
         <flux:button variant="primary" icon="check-badge" class="w-full">
             Verifikasi</flux:button>
     </flux:modal.trigger>
