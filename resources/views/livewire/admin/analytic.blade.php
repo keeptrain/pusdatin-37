@@ -1,4 +1,4 @@
-<div>
+<div class="lg:p-3">
     <!-- Full page overlay loading -->
     {{-- <div wire:loading.delay wire:target="exportAsPdf, exportAsExcel">
         <div class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5);">
