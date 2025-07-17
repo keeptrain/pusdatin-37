@@ -1,7 +1,31 @@
 <x-layouts.app :title="__('Dashboard')">
     <x-user.dashboard.warning-modal-sop />
     <!-- Welcome Section -->
-    <div x-data="dashboardUser" x-init="updateTime();" class="max-w-7xl mx-auto px-2 mb-8">
+    <div x-data="{
+        greeting: '',
+        currentDate: '',
+        isNight: false,
+        updateTime() {
+            const now = new Date();
+            this.currentDate = now.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+            });
+            const hour = now.getHours();
+            if (hour >= 5 && hour < 12) {
+                this.greeting = 'Selamat pagi';
+                this.isNight = false; // Set to false during the day
+            } else if (hour >= 12 && hour < 18)
+                this.greeting = 'Selamat siang';
+            else {
+                this.greeting = 'Selamat malam';
+                this.isNight = true;  // Set to true during the night
+            }
+        }
+    }" x-init="
+        updateTime(); // Initialize the time and greeting
+    " class="max-w-7xl mx-auto px-2" class="mb-8">
         <div class="bg-gradient-to-l from-zinc-600 to-blue-900 rounded-xl p-6 text-white shadow-sm">
             <div class="flex items-center justify-between">
                 <div class="space-y-1">
@@ -42,31 +66,4 @@
             <x-user.dashboard.discussion-forum :requests="$requests" />
         </div>
     </div>
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('dashboardUser', () => ({
-                greeting: '',
-                currentDate: '',
-                isNight: false,
-                updateTime() {
-                    const now = new Date();
-                    this.currentDate = now.toLocaleDateString('id-ID', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long'
-                    });
-                    const hour = now.getHours();
-                    if (hour >= 5 && hour < 12) {
-                        this.greeting = 'Selamat pagi';
-                        this.isNight = false; // Set to false during the day
-                    } else if (hour >= 12 && hour < 18)
-                        this.greeting = 'Selamat siang';
-                    else {
-                        this.greeting = 'Selamat malam';
-                        this.isNight = true;  // Set to true during the night
-                    }
-                }
-            }));
-        });
-    </script>
 </x-layouts.app>
