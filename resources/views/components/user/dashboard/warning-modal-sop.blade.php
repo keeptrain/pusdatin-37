@@ -61,7 +61,7 @@
             {{-- Checkbox confirmation --}}
             <div class="text-left">
                 <label class="flex items-start space-x-3">
-                    <flux:checkbox x-model="sopConfirmed"></flux:checkbox>
+                    <flux:checkbox x-model="sopConfirmed" checked></flux:checkbox>
                     <span class="text-sm text-gray-700">
                         Saya sudah membaca dan memahami SOP Permohonan Sistem Informasi & Data
                     </span>

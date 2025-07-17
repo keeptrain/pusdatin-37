@@ -186,8 +186,6 @@
             },
         }));
     </script>
-
-    <x-user.dashboard.warning-modal-sop />
     
 </body>
 
