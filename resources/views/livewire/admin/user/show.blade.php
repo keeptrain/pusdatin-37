@@ -6,16 +6,30 @@
     <div class="max-w-screen-xl mb-6 ml-4">
         <div class="p-6 border border-gray-200 rounded-lg overflow-hidden space-y-4">
             <!-- Header: Request ID & Status -->
-            <div class="flex flex-col md:flex-row md:items-center space-x-4">
-                <flux:avatar size="xl" :initials="$user->initials()" />
+            <div class="flex justify-between">
+                <div class="flex flex-col md:flex-row md:items-center gap-4 ">
+                    <flux:avatar size="xl" :initials="$user->initials()" />
 
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{{ $user->name }}</h3>
-                    <p class="text-gray-500 text-sm mb-1">{{ $user->email }}</p>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ $user->name }}</h3>
+                        <p class="text-gray-500 text-sm mb-1">{{ $user->email }}</p>
+                    </div>
                 </div>
+                <flux:dropdown align="start" class="ml-auto">
+                    <flux:button variant="primary" icon:trailing="ellipsis-vertical">Aksi</flux:button>
 
-                <flux:button icon="pencil" variant="primary"
-                    x-on:click="$dispatch('modal-show', { name: 'update-user' }) " class="ml-auto">Edit</flux:button>
+                    <flux:menu>
+                        <flux:menu.item icon="pencil" x-on:click="$dispatch('modal-show', { name: 'update-user' }) ">
+                            Edit
+                        </flux:menu.item>
+
+                        <flux:menu.separator />
+
+                        <flux:menu.item x-on:click="$dispatch('modal-show', { name: 'delete-user' }) " variant="danger"
+                            icon="trash" :disabled="auth()->user()->id === $user->id">Delete
+                        </flux:menu.item>
+                    </flux:menu>
+                </flux:dropdown>
             </div>
 
             <div class="flex items-center space-x-2">
@@ -75,27 +89,30 @@
         @endif
     </div>
 
-    <flux:modal name="update-user" class="w-120 space-y-4">
-        <flux:legend>Perbarui Data User</flux:legend>
-        <form wire:submit="update">
-            <div class="flex flex-col space-y-2">
-                <flux:input wire:model="name" label="Nama" placeholder="Nama" required />
-                <flux:input wire:model="email" label="Email" placeholder="Email" required />
-                <flux:select wire:model="section" label="Seksi" placeholder="Seksi" required>
-                    @foreach ($this->getSections as $key => $section)
-                        <option value="{{ $key }}">{{ $section }}</option>
-                    @endforeach
-                </flux:select>
+    <div class="max-w-screen-xl mb-6 ml-4 grid grid-cols-2 gap-4">
+        <x-dashboard.small-chart icon="book-open" label="Total Permohonan" data="20" />
+        <x-dashboard.small-chart icon="chat-bubble-left" label="Total Diskusi" data="10" />
+    </div>
 
-                <flux:input wire:model="contact" label="No. Telp" placeholder="No. Telp" required />
-                <flux:select wire:model="role" label="Role" placeholder="Role" required>
-                    @foreach ($this->getRolesNames as $roles)
-                        <option value="{{ $roles }}">{{ $roles }}</option>
-                    @endforeach
-                </flux:select>
-                {{--
-                <flux:input wire:model="password" label="Password" placeholder="Password" required /> --}}
+    <flux:modal name="update-user" class="w-120 lg:max-w-lg">
+        <form wire:submit="update" class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('Perbarui Data User') }}</flux:heading>
             </div>
+            <flux:input wire:model="name" label="Nama" placeholder="Nama" required />
+            <flux:input wire:model="email" label="Email" placeholder="Email" required />
+            <flux:select wire:model="section" label="Seksi" placeholder="Seksi" required>
+                @foreach ($this->getSections as $key => $section)
+                    <option value="{{ $key }}">{{ $section }}</option>
+                @endforeach
+            </flux:select>
+
+            <flux:input wire:model="contact" label="No. Telp" placeholder="No. Telp" required />
+            <flux:select wire:model="role" label="Role" placeholder="Role" required>
+                @foreach ($this->getRolesNames as $roles)
+                    <option value="{{ $roles }}">{{ $roles }}</option>
+                @endforeach
+            </flux:select>
 
             <div class="flex justify-end mt-4">
                 <flux:modal.close>
@@ -106,5 +123,31 @@
         </form>
         {{-- <livewire:admin.user.update-user /> --}}
     </flux:modal>
+
+    <flux:modal name="delete-user" :show="$errors->isNotEmpty()" focusable class="max-w-lg">
+        <form wire:submit="deleteUser" class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('Apakah Anda yakin ingin menghapus akun ini?') }}</flux:heading>
+
+                <flux:subheading>
+                    {{ __('Setelah akun dihapus, semua data akan dihapus secara permanen. Silahkan masukkan password Anda untuk memastikan Anda ingin menghapus akun ini.') }}
+                </flux:subheading>
+            </div>
+
+            <flux:input wire:model="password" :label="__('Password')" type="password" x-ref="passwordInput"
+                x-on:input="$refs.submitBtn.disabled = $event.target.value === ''" />
+
+            <div class="flex justify-end space-x-2">
+                <flux:modal.close>
+                    <flux:button variant="subtle">{{ __('Cancel') }}</flux:button>
+                </flux:modal.close>
+
+                <flux:button variant="danger" type="submit" x-ref="submitBtn" disabled>
+                    {{ __('Delete account') }}
+                </flux:button>
+            </div>
+        </form>
+    </flux:modal>
+
 
 </div>

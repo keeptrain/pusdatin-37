@@ -13,21 +13,22 @@ use Illuminate\Validation\Rule;
 
 class Show extends Component
 {
-
     #[Locked]
-    public $userId;
+    public int $userId;
 
-    public $user;
+    public User $user;
 
-    public $name;
+    public string $name;
 
-    public $email;
+    public string $email;
 
-    public $section;
+    public string $section;
 
-    public $contact;
+    public string $contact;
 
-    public $role;
+    public string $role;
+
+    public string $password = '';
 
     #[Title('Detail User')]
     public function render()
@@ -87,6 +88,17 @@ class Show extends Component
         });
 
         $this->redirectRoute('user.show', $this->userId);
+    }
+
+    public function deleteUser()
+    {
+        $this->validate([
+            'password' => ['required', 'string', 'current_password'],
+        ]);
+
+        $this->user->delete();
+
+        $this->redirectRoute('manage.users', navigate: true);
     }
 
     #[Computed]
