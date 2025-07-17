@@ -7,7 +7,7 @@
     <li class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-90">
         <!-- Item 1: Sistem Informasi & Data -->
         @if (Route::currentRouteName() != 'si-data.form')
-            <a @click.prevent="handleSIDataRequest()"
+            <a x-on:click="handleSIDataRequest()"
                 class="flex items-start px-2 py-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-150">
                 <div class="flex-shrink-0 mt-1">
                     <div class="w-10 h-10 bg-blue-200 dark:bg-blue-900 rounded-lg flex items-center justify-center">
@@ -27,7 +27,7 @@
 
         <!-- Item 2: Kehumasan -->
         @if (Route::currentRouteName() != 'pr.form')
-            <a @click.prevent="handlePRRequest()"
+            <a x-on:click="handlePRRequest()"
                 class="flex items-start px-2 py-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-150">
                 <div class="flex-shrink-0 mt-1">
                     <div class="w-10 h-10 bg-purple-200 dark:bg-purple-900 rounded-lg flex items-center justify-center">
