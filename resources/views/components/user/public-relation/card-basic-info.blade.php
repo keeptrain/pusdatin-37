@@ -5,7 +5,7 @@
             <div>
                 <h3 class="text-lg font-semibold text-gray-900">Tema: {{ $prRequest->theme }}
                     <h3>
-                        <p class="text-gray-500 text-sm mb-1">Tanggal diajukan: {{ $prRequest->created_at }}</p>
+                        <p class="text-gray-500 text-sm mb-1">Tanggal diajukan: {{ $prRequest->createdAtWithTime() }}</p>
             </div>
             <div class="mt-4 md:mt-0">
                 <flux:notification.status-badge :status="$prRequest->status" />

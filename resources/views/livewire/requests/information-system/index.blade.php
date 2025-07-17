@@ -55,7 +55,7 @@
                             <flux:notification.status-badge :status="$item->status" />
                         </td>
                         <td class="px-4 py-3">{{ $item->kasatpelName($item->current_division) }}</td>
-                        <td class="px-4 py-3">{{ $item->createdAtDMY() }}</td>
+                        <td class="px-4 py-3">{{ $item->createdAtWithTime() }}</td>
                     </tr>
                 @endforeach
             </tbody>

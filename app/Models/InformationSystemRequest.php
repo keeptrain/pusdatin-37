@@ -35,7 +35,9 @@ class InformationSystemRequest extends Model
         'status' => InformationSystemStatus::class,
         'meetings' => 'json',
         'notes' => 'json',
-        'rating' => 'json'
+        'rating' => 'json',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public $fillable = [
@@ -93,25 +95,9 @@ class InformationSystemRequest extends Model
         return array_map(fn($status) => static::resolveStatusClassFromString($status), $statuses);
     }
 
-    /**
-     * Get the created_at attribute in readable format.
-     *
-     * @param  string  $value
-     * @return string
-     */
-    public function getCreatedAtAttribute($value)
-    {
-        return Carbon::parse($value)->diffForHumans();
-    }
-
-    public function createdAtDMY()
-    {
-        return Carbon::parse($this->created_at)->format('d F Y');
-    }
-
     public function createdAtWithTime()
     {
-        return Carbon::parse($this->created_at)->format('d F Y, H:i');
+        return $this->created_at->format('d F Y, H:i');
     }
 
     public function kasatpelName($value)
