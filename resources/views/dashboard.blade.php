@@ -91,6 +91,7 @@
         @pushOnce('scripts')
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         @endPushOnce
+        @unlessrole('administrator')
         <div class="rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 max-h-85" x-cloak>
             <flux:heading size="lg" class="flex items-center gap-2 text-accent">
                 <x-lucide-line-chart class="w-6 h-6" />
@@ -109,5 +110,6 @@
             <x-chart.pr-verif :monthlyLetterData="$monthlyLetterData" />
             @endhasanyrole
         </div>
+        @endunlessrole
     </div>
 </x-layouts.app>

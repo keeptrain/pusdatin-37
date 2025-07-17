@@ -16,22 +16,57 @@ class ManageUsers extends Component
 
     public User $user;
 
-    public $perPage = 10; // Default per page
+    public int $perPage = 10; // Default per page
 
-    public $selectedUsers = [];
+    public string $search = '';
+
+    public string $sortBy = 'latest_activity';
+
+    public array $selectedUsers = [];
+
+    public string $password = '';
 
     #[Title('Daftar User')]
     public function render()
     {
+        $users = $this->loadUsers();
+        $users = $this->filterUsers($users);
         return view('livewire.admin.manage-users', [
-            'users' => $this->loadUsers(),
+            'users' => $users->paginate($this->perPage),
         ]);
     }
 
     public function loadUsers()
     {
-        return User::with('roles')
-            ->paginate($this->perPage);
+        $query = User::with('roles');
+
+        if ($this->sortBy === 'latest_activity') {
+            $query->latest('updated_at');
+        } else {
+            $query->latest('created_at');
+        }
+        return $query;
+    }
+
+    public function sortBy($field)
+    {
+        $this->sortBy = $field;
+        $this->resetPage();
+    }
+
+    public function filterUsers($users)
+    {
+        if (empty($this->search)) {
+            return $users;
+        }
+
+        $searchTerm = '%' . $this->search . '%';
+
+        return $users->where(function ($query) use ($searchTerm) {
+            $query->where('name', 'like', $searchTerm)
+                ->orWhere('email', 'like', $searchTerm)
+                ->orWhere('section', 'like', $searchTerm);
+        });
     }
 
     public function show(int $id)
@@ -57,7 +92,7 @@ class ManageUsers extends Component
 
         User::whereIn('id', $this->selectedUsers)->delete();
 
-        $this->selectedUsers = [];
+        $this->reset();
 
         return redirect()->route('manage.users');
     }
