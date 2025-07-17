@@ -33,7 +33,7 @@
         </div>
 
         <div class="flex items-center space-x-2">
-            <flux:input wire:model.live.debounce.250ms="search" icon="magnifying-glass" placeholder="Cari user..."
+            <flux:input wire:model.live.debounce.500ms="search" icon="magnifying-glass" placeholder="Cari user..."
                 :loading="false" />
             <flux:modal.trigger name="create-user" wire:click="createPage">
                 <flux:button variant="primary" icon:variant="mini" icon="plus">User</flux:button>
