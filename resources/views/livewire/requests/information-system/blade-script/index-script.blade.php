@@ -78,7 +78,7 @@
                 language: {
                     sProcessing: "Sedang memproses...",
                     sLengthMenu: "Tampilkan _MENU_ data per halaman",
-                    sZeroRecords: "Tidak ditemukan data yang sesuai",
+                    sZeroRecords: this.getNoRecordsTemplate(),
                     sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                     sInfoEmpty: "Tidak ada data tersedia",
                     sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
@@ -126,6 +126,17 @@
             searchInput.on("keyup.globalSearch", function () {
                 debouncedSearch(this.value);
             });
+        },
+
+        getNoRecordsTemplate(message = "Tidak ada data yang sesuai dengan pencarian Anda") {
+            return `
+            <div class="text-center py-4">
+                <div class="mb-2">
+                    <x-lucide-search-x class="w-12 h-12 text-gray-600 mx-auto" />
+                </div>
+                <p class="text-sm text-gray-600">${message}</p>
+            </div>
+            `;
         },
 
         setupStatusFilter(dataTable) {

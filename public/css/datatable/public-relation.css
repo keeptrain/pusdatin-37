@@ -1,0 +1,64 @@
+/* Custom Checkbox Styling */
+.custom-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin: 0 auto;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.custom-checkbox label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    background-color: #fff;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover state */
+.custom-checkbox:hover label {
+    border-color: #93c5fd;
+}
+
+/* Checked state */
+.custom-checkbox input[type="checkbox"]:checked+label {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+/* Checkmark */
+.custom-checkbox label:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Show checkmark when checked */
+.custom-checkbox input[type="checkbox"]:checked+label:after {
+    display: block;
+}
+
+/* Focus state */
+.custom-checkbox input[type="checkbox"]:focus+label {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+    outline: none;
+}
