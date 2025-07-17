@@ -2,9 +2,13 @@
 
 namespace App\Livewire\Forms\admin;
 
+use App\Mail\AccountCreatedMail;
 use Livewire\Form;
 use App\Models\User;
 use Illuminate\Validation\Rule;
+use Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class UserForm extends Form
 {
@@ -20,7 +24,7 @@ class UserForm extends Form
 
     public $contact = '';
 
-    public $password = '';
+    // public $password = '';
 
     public $role = 'user';
 
@@ -39,9 +43,9 @@ class UserForm extends Form
             ],
             'section' => ['required', 'string', 'max:100'],
             'contact' => ['required', 'string', 'max:16'],
-            'password' => $this->id
-                ? ['nullable']
-                : ['required', 'string', 'min:8', 'max:46'],
+            // 'password' => $this->id
+            //     ? ['nullable']
+            //     : ['required', 'string', 'min:8', 'max:46'],
             'role' => [
                 'required',
                 'string',
@@ -72,11 +76,30 @@ class UserForm extends Form
         $this->validate();
 
         try {
-            $this->user = User::create(
-                $this->all()
-            );
+            DB::transaction(function () {
+                $password = Str::random(10);
 
-            $this->user->assignRole($this->role);
+                $user = User::create(
+                    [
+                        'name' => $this->name,
+                        'email' => $this->email,
+                        'password' => bcrypt($password),
+                        'section' => $this->section,
+                        'contact' => $this->contact,
+                    ]
+                );
+
+                $user->assignRole($this->role);
+
+                DB::afterCommit(function () use ($user, $password) {
+                    $data = [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'password' => $password,
+                    ];
+                    Mail::to($user->email)->send(new AccountCreatedMail($data));
+                });
+            });
         } catch (\Exception $e) {
             throw $e;
         }

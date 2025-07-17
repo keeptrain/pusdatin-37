@@ -15,7 +15,7 @@
     </div>
 
     <!-- Body -->
-    <div style="padding: 20px; max-width: 600px; margin: 0 auto;">
+    <div style="padding: 10px; max-width: 600px; margin: 0 auto;">
         {{ $slot }}
     </div>
 
