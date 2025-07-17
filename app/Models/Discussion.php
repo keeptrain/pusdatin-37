@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\Enums\Division;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\Permission\Models\Role;
 
 class Discussion extends Model
 {
@@ -97,6 +98,48 @@ class Discussion extends Model
                     );
             }
         ]);
+    }
+
+    public function scopeForUserRole(Builder $query, int $roleId)
+    {
+        $query->where(function ($q) use ($roleId) {
+            // User can always see their own discussions
+            $q->where('user_id', auth()->user()->id)
+                ->orWhereRoleDiscussion($roleId);
+        });
+    }
+
+    public function scopeForInformationSystemDivision(Builder $query, $roleId)
+    {
+        $query->where(function ($q) use ($roleId) {
+            $q->whereHasMorph(
+                'discussable',
+                [InformationSystemRequest::class],
+                fn($sub) => $sub->where('current_division', $roleId)
+            )->orWhereRoleDiscussion($roleId);
+        });
+    }
+
+    public function scopeForPublicRelationDivision(Builder $query, $roleId)
+    {
+        $query->where(function ($q) use ($roleId) {
+            $q->whereHasMorph('discussable', [PublicRelationRequest::class])
+                ->orWhereRoleDiscussion($roleId);
+        });
+    }
+
+    public function scopeOrWhereRoleDiscussion(Builder $query, $roleId)
+    {
+        $query->orWhere(function ($q) use ($roleId) {
+            $q->where('discussable_type', Role::class)
+                ->where(function ($subQ) use ($roleId) {
+                    $subQ->where('discussable_id', $roleId)
+                        // Add PROMKES role if the current role is PROMKES
+                        ->when($roleId === Division::PROMKES_ID->value, function ($q) {
+                            $q->orWhere('discussable_id', Division::PR_ID->value);
+                        });
+                });
+        });
     }
 
     public function scopeWithAttachmentCounts(Builder $query)

@@ -6,8 +6,8 @@
             Pusdatin?</flux:subheading>
         <div>
             <!-- Button to toggle discussion form -->
-            <flux:button @click="createDiscussion = !createDiscussion" x-show="!createDiscussion" size="sm"
-                icon:trailing="chevron-down" x-transition:enter="transition ease-out duration-300"
+            <flux:button x-on:click="showForm = !showForm" x-show="!showForm" size="sm" icon:trailing="chevron-down"
+                x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 transform scale-95"
                 x-transition:enter-end="opacity-100 transform scale-100"
                 x-transition:leave="transition ease-in duration-200"

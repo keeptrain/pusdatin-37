@@ -13,6 +13,7 @@ use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use Livewire\WithPagination;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
+use Spatie\Permission\Models\Role;
 
 class Index extends Component
 {
@@ -23,10 +24,11 @@ class Index extends Component
     public DiscussionForm $form;
     public Collection $requests;
 
+    public bool $hasActiveFilters = false;
     public string $search = '';
     public string $sort = 'Update terbaru';
     public string $status = 'open';
-    public string $discussableType = '';
+    public string $discussableType = 'all';
     public array $imagesUpload = [];
 
     public function mount(int $perPage = 5)
@@ -34,7 +36,7 @@ class Index extends Component
         $this->perPage = $perPage;
     }
 
-    #[Title("Forum Diskusi")]
+    #[Title('Forum Diskusi')]
     public function render()
     {
         $query = $this->loadDiscussions();
@@ -43,9 +45,21 @@ class Index extends Component
             $query->whereHasMorph('discussable', [InformationSystemRequest::class, PublicRelationRequest::class]);
         });
 
+        $query->when($this->discussableType === 'no', function ($query) {
+            $query->whereHasMorph('discussable', [Role::class]);
+        });
+
+        // Check if any filters are active
+        $this->setActiveFiltersFlag();
+
+        // Get discussions with pagination
         $discussions = $query->paginate($this->perPage);
 
-        return view('livewire.discussions.index', compact('discussions'));
+        return view('livewire.discussions.index', [
+            'discussions' => $discussions,
+            'totalDiscussions' => $discussions->total(),
+            'hasActiveFilters' => $this->hasActiveFilters
+        ]);
     }
 
     public function updatedImagesUpload($value)
@@ -59,6 +73,8 @@ class Index extends Component
     {
         try {
             $this->form->store();
+
+            $this->dispatch('discussion-created');
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -78,53 +94,31 @@ class Index extends Component
         return $query;
     }
 
-    protected function applyDiscussionFilters(Builder $query)
+    protected function applyDiscussionFilters(Builder $query): void
     {
         $currentRole = auth()->user()->currentUserRoleId();
 
-        $headDivision = Division::HEAD_ID->value;
-        $siDivision = Division::SI_ID->value;
-        $dataDivision = Division::DATA_ID->value;
-        $prDivision = Division::PR_ID->value;
-
-        // Head Division can see all discussions
-        if ($currentRole == $headDivision) {
-            return; // No filters applied for head division
+        if ($currentRole === Division::HEAD_ID->value) {
+            return;
         }
 
-        if ($currentRole == $siDivision || $currentRole == $dataDivision) {
-            $query->where(function ($q) use ($currentRole) {
-                $q->whereHasMorph('discussable', [InformationSystemRequest::class], function ($subQuery) use ($currentRole) {
-                    $subQuery->where('current_division', $currentRole);
-                });
+        $roleMapping = [
+            Division::SI_ID->value => 'forInformationSystemDivision',
+            Division::DATA_ID->value => 'forInformationSystemDivision',
+            Division::PR_ID->value => 'forPublicRelationDivision',
+            Division::PROMKES_ID->value => 'forPublicRelationDivision',
+        ];
 
-                // Add Role-based discussions in the same query context
-                $q->orWhere(function ($roleQuery) use ($currentRole) {
-                    $roleQuery->where('discussable_type', \Spatie\Permission\Models\Role::class)
-                        ->where('discussable_id', $currentRole);
-                });
-            });
-        } elseif ($currentRole == $prDivision) {
-            $query->where(function ($q) use ($currentRole) {
-                $q->whereHasMorph('discussable', [PublicRelationRequest::class]);
+        $scope = $roleMapping[$currentRole] ?? 'forUserRole';
+        $query->$scope($currentRole);
+    }
 
-                // Add Role-based discussions in the same query context
-                $q->orWhere(function ($roleQuery) use ($currentRole) {
-                    $roleQuery->where('discussable_type', \Spatie\Permission\Models\Role::class)
-                        ->where('discussable_id', $currentRole);
-                });
-            });
-        } else {
-            $query->where(function ($q) use ($currentRole) {
-                $q->where('user_id', auth()->user()->id);
-
-                // Add Role-based discussions in the same query context
-                $q->orWhere(function ($roleQuery) use ($currentRole) {
-                    $roleQuery->where('discussable_type', \Spatie\Permission\Models\Role::class)
-                        ->where('discussable_id', $currentRole);
-                });
-            });
-        }
+    protected function setActiveFiltersFlag(): void
+    {
+        $this->hasActiveFilters = !empty($this->search) ||
+            $this->discussableType !== 'all' ||
+            $this->status !== 'open' ||
+            $this->sort !== 'Update terbaru';
     }
 
     public function sortToggle()
@@ -136,6 +130,12 @@ class Index extends Component
     {
         $this->dispatch('modal-close', name: 'filter-discussion-modal');
         $this->resetPage();
+    }
+
+    public function resetFilters()
+    {
+        $this->reset('search', 'discussableType', 'status');
+        $this->sort = 'Update terbaru';
     }
 
     public function removeTemporaryImage($index)

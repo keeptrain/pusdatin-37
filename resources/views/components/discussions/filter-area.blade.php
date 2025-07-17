@@ -1,6 +1,6 @@
 <div class="flex justify-between space-x-2">
-    <flux:input wire:model.blur="search" size="sm" icon="magnifying-glass"
-        placeholder="Cari diskusi..." loading="false" />
+    <flux:input wire:model.live.debounce.500ms="search" size="sm" icon="magnifying-glass" placeholder="Cari diskusi..."
+        :loading="false" />
 
     <flux:button wire:click="sortToggle" size="sm" icon="arrows-up-down">{{ $sort }}</flux:button>
 
@@ -13,6 +13,7 @@
         <flux:legend>Filter Diskusi</flux:legend>
 
         <flux:select wire:model="discussableType" label="Kategori diskusi" placeholder="Pilih kategori">
+            <option value="all">Semua</option>
             <option value="yes">Terkait permohonan</option>
             <option value="no">Tidak terkait</option>
         </flux:select>
