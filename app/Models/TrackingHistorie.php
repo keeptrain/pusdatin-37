@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\InformationSystemRequest;
-use App\Models\PublicRelationRequest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,18 +24,10 @@ class TrackingHistorie extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            $model->created_by = auth()->user()->name;
+            if (auth()->check()) {
+                $model->created_by = auth()->user()->name;
+            }
         });
-    }
-
-    public function informationSystem()
-    {
-        return $this->belongsTo(InformationSystemRequest::class);
-    }
-
-    public function publicRelation()
-    {
-        return $this->belongsTo(PublicRelationRequest::class);
     }
 
     public function requestable()

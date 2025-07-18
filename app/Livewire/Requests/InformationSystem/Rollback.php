@@ -2,86 +2,160 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
+use App\Enums\Division;
+use App\States\InformationSystem\Pending;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Models\InformationSystemRequest;
 use Illuminate\Support\Facades\DB;
-use App\Models\RequestStatusTrack;
 use Livewire\Attributes\Locked;
+use Livewire\WithPagination;
 
 class Rollback extends Component
 {
+    use WithPagination;
+
     #[Locked]
-    public $systemRequestId;
-
-    public $changeStatus = '';
-
-    public array $filter = [
-        'sortBy' => 'latest',
-        'deletedRecords' => 'withoutDeleted',
-    ];
-
+    public int $systemRequestId;
     public array $trackId = [];
+    protected ?InformationSystemRequest $systemRequest = null;
+
+    public int $perPage = 5;
+
+    public string $changeStatus = '';
+    public ?string $currentDivision = null;
+    public string $deletedRecords = 'all';
+
+    #[Title('Rollback')]
+    public function render()
+    {
+        if (!$this->systemRequest) {
+            $this->systemRequest = $this->getSystemRequest();
+        }
+        return view('livewire.requests.information-system.rollback', [
+            'trackingHistorie' => $this->getTrackingHistorie(),
+            'systemRequest' => $this->systemRequest // Pass systemRequest to view if needed
+        ]);
+    }
 
     public function mount(int $id)
     {
         $this->systemRequestId = $id;
+        $this->systemRequest = $this->getSystemRequest();
+        $this->currentDivision = $this->systemRequest->current_division
+            ? Division::tryFrom($this->systemRequest->current_division)?->getShortLabelFromId($this->systemRequest->current_division)
+            : null;
+    }
+
+    protected function getSystemRequest(): InformationSystemRequest
+    {
+        return InformationSystemRequest::findOrFail($this->systemRequestId);
+    }
+
+    protected function getTrackingHistorie()
+    {
+        if (!$this->systemRequest) {
+            $this->systemRequest = $this->getSystemRequest();
+        }
+
+        return $this->systemRequest->trackingHistorie()
+            // ->sortBy($this->filter['sortBy'])
+            ->withDeletedRecords($this->deletedRecords)
+            ->paginate($this->perPage);
     }
 
     #[Computed]
-    public function systemRequest(): InformationSystemRequest
+    public function status()
     {
-        return InformationSystemRequest::with([
-            'requestStatusTrack' => fn($query) =>
-            $query->filterByUser(auth()->user()->name)
-                ->sortBy($this->filter['sortBy'])
-                ->withDeletedRecords($this->filter['deletedRecords'])
-        ])->findOrFail($this->systemRequestId);
+        return $this->systemRequest->status;
     }
 
-    public function updatedFilter()
+    #[Computed]
+    public function currentDivisions()
     {
-        $this->trackId = [];
+        return $this->systemRequest->kasatpelName($this->systemRequest->current_division);
     }
 
-    public function save()
+    public function save(): void
     {
         DB::transaction(function () {
-            $systemRequest = $this->systemRequest;
+            $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
+            $hasStatusChange = !empty($this->changeStatus);
+            $isNotPending = !$systemRequest->status instanceof Pending;
+            $hasTrackChanges = !empty($this->trackId);
 
-            $systemRequest->transitionStatusOnly($this->changeStatus);
-            $systemRequest->update(['active_revision' => false]);
-
-            $systemRequest->mapping->each(function ($mapping) {
-                if ($mapping->letterable) {
-                    $mapping->letterable->update([
-                        'needs_revision' => false,
-                    ]);
-                }
-            });
-
-            $validIds = $systemRequest->requestStatusTrack
-                ->pluck('id')
-                ->intersect($this->trackId);
-
-            if ($validIds->isNotEmpty()) {
-                $tracks = RequestStatusTrack::withTrashed()->whereIn('id', $validIds)->get();
-
-                foreach ($tracks as $track) {
-                    $track->trashed() ? $track->restore() : $track->delete();
-                }
+            // Early return if no changes
+            if (!$hasStatusChange && !$hasTrackChanges && !$this->shouldUpdateDivision($systemRequest)) {
+                return;
             }
 
-            return redirect()->to("/information-system/{$this->systemRequestId}")
-                ->with('status', [
-                    'variant' => 'success',
-                    'message' => 'Successfully rollback action!'
-                ]);
+            // Handle status change
+            if ($hasStatusChange && $isNotPending) {
+                $this->processStatusChange($systemRequest);
+            }
+
+            // Handle division update if not pending
+            if ($isNotPending && $this->shouldUpdateDivision($systemRequest)) {
+                $this->updateDivision($systemRequest);
+            }
+
+            // Handle tracking history changes
+            if ($hasTrackChanges) {
+                $this->processTrackingHistory($systemRequest);
+            }
         });
+
+        $this->redirectRoute('is.show', $this->systemRequestId);
     }
 
-    public function delete()
+    protected function shouldUpdateDivision($systemRequest): bool
     {
-        DB::transaction(function () {});
+        if (empty($this->currentDivision)) {
+            return false;
+        }
+
+        $newDivisionId = Division::getIdFromString($this->currentDivision);
+        return $newDivisionId !== $systemRequest->current_division;
+    }
+
+    protected function processStatusChange($systemRequest): void
+    {
+        $systemRequest->checkRevisionForRollback();
+        $systemRequest->transitionStatusOnlyFromString($this->changeStatus);
+        $systemRequest->refresh();
+        $systemRequest->updateForRollback();
+        $systemRequest->logStatusCustom("Telah terjadi rollback ke status: {$systemRequest->status->label()}");
+    }
+
+    protected function updateDivision($systemRequest): void
+    {
+        $newDivisionId = Division::getIdFromString($this->currentDivision);
+        $systemRequest->update(['current_division' => $newDivisionId]);
+
+        $message = "Permohonan layanan di pindahkan ke Kepala Satuan Pelaksana " .
+            $systemRequest->kasatpelName($newDivisionId);
+        $systemRequest->logStatusCustom($message);
+
+        $oldMessage = $systemRequest->status->trackingMessage($systemRequest->current_division);
+        $newMessage = $systemRequest->status->trackingMessage($newDivisionId);
+
+        $systemRequest->trackingHistorie()
+            ->where('action', $oldMessage)
+            ->update(['action' => $newMessage]);
+    }
+
+    protected function processTrackingHistory($systemRequest): void
+    {
+        $trackingHistories = $systemRequest->trackingHistorie()
+            ->withTrashed()
+            ->whereIn('id', $this->trackId)
+            ->get();
+
+        $trackingHistories->each(function ($tracking) {
+            $tracking->trashed() ? $tracking->restore() : $tracking->delete();
+        });
+
+        $this->trackId = [];
     }
 }

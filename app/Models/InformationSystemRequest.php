@@ -86,7 +86,8 @@ class InformationSystemRequest extends Model
             'approved_kapusdatin' => ApprovedKapusdatin::class,
             'process_request' => Process::class,
             'completed' => Completed::class,
-            'rejected' => Rejected::class
+            'rejected' => Rejected::class,
+            default => null
         };
     }
 
@@ -110,12 +111,6 @@ class InformationSystemRequest extends Model
         return Division::tryFrom($this->current_division)?->label() ?? 'Perlu disposisi';
     }
 
-    /**
-     * Get the updated_at attribute in readable format.
-     *
-     * @param  string  $value
-     * @return string
-     */
     public function getUpdatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d F Y, H:i');
@@ -148,7 +143,7 @@ class InformationSystemRequest extends Model
     {
         $newStatus = self::resolveStatusClassFromString($newStatus);
 
-        $this->status->transitionTo($newStatus);
+        $this->status->transitionTo($newStatus ?? $this->status);
     }
 
     public function transitionStatusFromPending($newStatus, $division, $notes)
@@ -212,6 +207,11 @@ class InformationSystemRequest extends Model
         ]);
     }
 
+    public function transitionStatusOnlyFromString(string $newStatus)
+    {
+        $this->transitionStatusFromString($newStatus);
+    }
+
     public function updatedForNeedReview()
     {
         $this->update([
@@ -229,6 +229,47 @@ class InformationSystemRequest extends Model
             'active_revision' => false,
             'need_review' => false
         ]);
+    }
+
+    public function updateForRollback()
+    {
+        $statusClass = get_class($this->status);
+        $activeCheckingCondition = match ($statusClass) {
+            Pending::class, ApprovedKasatpel::class => Division::HEAD_ID->value,
+            default => $this->current_division,
+        };
+
+        $currentDivisionCondition = match ($statusClass) {
+            Pending::class => null,
+            default => $this->current_division,
+        };
+
+        $this->update([
+            'active_checking' => $activeCheckingCondition,
+            'current_division' => $currentDivisionCondition,
+            'active_revision' => false,
+            'need_review' => false,
+        ]);
+    }
+
+    public function checkRevisionForRollback()
+    {
+        if ($this->status instanceof Replied || $this->status instanceof RepliedKapusdatin) {
+            $this->documentUploads()
+                ->where('need_revision', true)
+                ->with([
+                    'versions' => function ($query) {
+                        $query->where('is_resolved', false)
+                            ->whereNull('file_path');
+                    }
+                ])
+                ->lockForUpdate()
+                ->get()
+                ->each(function ($document) {
+                    $document->versions->each->delete();
+                    $document->update(['need_revision' => false]);
+                });
+        }
     }
 
     public function scopeFilterByStatus(Builder $query, ?string $filterStatus): Builder

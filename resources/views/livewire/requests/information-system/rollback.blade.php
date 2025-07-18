@@ -1,117 +1,137 @@
-<div x-data="{ status: '' }">
-    <flux:button :href="route('is.show', [$systemRequestId])" icon="arrow-long-left" variant="subtle">Batal
-    </flux:button>
+<div x-data="{ status: '' }" class="lg:p-2">
+    <div class="flex justify-between">
+        <flux:button :href="route('is.show', [$systemRequestId])" icon="arrow-long-left" variant="subtle">
+            Batal
+        </flux:button>
+    </div>
 
-    <form wire:submit="save">
-        <div class="p-4 space-y-6">
+    <form x-data="rollbackTable" class="p-4">
+        <div class="space-y-4">
             <flux:heading size="lg">Rollback</flux:heading>
-
-            <div class="space-y-2">
-                <div class="flex">
-                    <flux:text>Ubah status</flux:text>
-                </div>
-
-                <div class="flex">
-                    <flux:notification.status-badge :status="$this->systemRequest->status" />
+            <div class="space-y-6">
+                <div class="flex items-center">
+                    <div class="flex flex-row gap-4">
+                        <flux:text>Ubah status dari: </flux:text>
+                        <flux:notification.status-badge :status="$this->status" />
+                    </div>
                     <flux:icon.arrow-long-right class="size-6 pt-1 ml-6 mr-6" />
                     <div>
-                        <flux:select wire:model="changeStatus" size="sm" placeholder="Ke status..." x-model="status">
+                        <flux:select wire:model.live="changeStatus" size="sm" placeholder="Ke status..."
+                            x-model="status">
                             <flux:select.option value="pending">Permohonan Masuk</flux:select.option>
                             <flux:select.option value="disposition">Disposisi</flux:select.option>
-                            <flux:select.option value="process">Proses</flux:select.option>
-                            <flux:select.option value="replied">Balasan Kasatpel</flux:select.option>
                             <flux:select.option value="approved_kasatpel">Disetujui Kasatpel</flux:select.option>
-                            <flux:select.option value="replied_kapusdatin">Balasan Kapusdatin</flux:select.option>
                             <flux:select.option value="approved_kapusdatin">Disetujui Kapusdatin</flux:select.option>
+                            <flux:select.option value="process">Proses</flux:select.option>
                             <flux:select.option value="rejected">Ditolak</flux:select.option>
                         </flux:select>
                     </div>
                 </div>
+                <div>
+                    <flux:radio.group x-model="currentDivision" name="status" label="Pindahkan kasatpel"
+                        :disabled="empty($currentDivision)">
+                        <flux:radio value="si" label="Sistem Informasi" />
+                        <flux:radio value="data" label="Pengelolaan Data" />
+                    </flux:radio.group>
+                </div>
             </div>
+            <x-letters.information-rollback />
         </div>
 
-        <div class="grid grid-cols-2 gap-4 rounded-lg p-4">
-            <div class="border rounded-lg">
-                <div class="bg-zinc-50 p-4">
-                    <flux:text x-text="`Apa yang terjadi ketika mengubah status ke ${status}`" />
-
-                </div>
-                <div class="p-4">
-                    <x-letters.information-rollback />
+        <div class="mt-12 space-y-4">
+            <div class="flex justify-between">
+                <div>
+                    <flux:heading size="lg">Atau jika anda ingin menghapus pesan tracking</flux:heading>
+                    <flux:text>* jika sebelumnya sudah terhapus, lalu mencentang checkbox maka pesan akan kembali
+                        tampil.</flux:text>
                 </div>
 
+                <flux:button x-on:click="$dispatch('modal-show', {name: 'rollback-track'});" size="sm" icon="eye">
+                    Filter
+                </flux:button>
             </div>
-
-            {{-- <div class="border rounded-lg">
-                <div class="flex flex-1 items-center justify-between p-2 bg-zinc-50">
-                    <flux:text>Menghapus pesan tracking permohonan layanan </flux:text>
-                    <flux:dropdown>
-                        <flux:button variant="ghost">Filters
-                            <flux:icon.funnel class="size-4.5" />
-                        </flux:button>
-
-                        <flux:menu>
-                            <flux:menu.submenu heading="Sort by">
-                                <flux:menu.radio.group wire:model.live="filter.sortBy">
-                                    <flux:menu.radio value="latest">Latest</flux:menu.radio>
-                                    <flux:menu.radio value="oldest">Oldest</flux:menu.radio>
-                                </flux:menu.radio.group>
-                            </flux:menu.submenu>
-
-                            <flux:menu.submenu heading="Delete records">
-                                <flux:menu.radio.group wire:model.live="filter.deletedRecords">
-                                    <flux:menu.radio value="withoutDeleted">Without deleted records
-                                    </flux:menu.radio>
-                                    <flux:menu.radio value="withDeleted">With deleted records</flux:menu.radio>
-                                    <flux:menu.radio value="onlyDeleted">Only deleted records</flux:menu.radio>
-                                </flux:menu.radio.group>
-                            </flux:menu.submenu>
-                        </flux:menu>
-                    </flux:dropdown>
-                </div>
-
-                <flux:checkbox.group wire:model.live="trackId" class="h-60 p-3 overflow-y-auto">
-                    @foreach ($this->systemRequest->requestStatusTrack as $track)
-                    <div class="mb-4">
-                        <flux:checkbox wire:key="{{ $track->id }}" value="{{ $track->id }}"
-                            label="{{ $track->created_at->format('d F y, H:i') }}" description="{{ $track->action }}" />
-                    </div>
+            <flux:table.base :perPage="$perPage" :paginate="$trackingHistorie">
+                <x-slot name="header">
+                    <flux:table.column>
+                    </flux:table.column>
+                    <flux:table.column>Pesan</flux:table.column>
+                    <flux:table.column class="w-60">Tanggal</flux:table.column>
+                </x-slot>
+                <x-slot name="body">
+                    @foreach ($trackingHistorie as $historie)
+                        <tr wire:key="{{ $historie->id }}" class="hover:bg-zinc-100 dark:hover:bg-zinc-700">
+                            <flux:table.row class="py-3">
+                                <flux:checkbox x-model="trackId" value="{{ $historie->id }}" />
+                            </flux:table.row>
+                            <flux:table.row>{{ $historie->action }} </flux:table.row>
+                            <flux:table.row>{{ $historie->created_at }}</flux:table.row>
+                        </tr>
                     @endforeach
-                </flux:checkbox.group>
-            </div> --}}
+                </x-slot>
+            </flux:table.base>
         </div>
 
         <div class="flex justify-end">
-            <flux:modal.trigger name="rollback-track">
-                <flux:button type="button" variant="primary">Rollback</flux:button>
-            </flux:modal.trigger>
+            <flux:button x-on:click="save()" variant="primary" icon="backward">
+                Rollback
+            </flux:button>
         </div>
 
         <flux:modal name="rollback-track" class="min-w-[22rem]">
             <div class="space-y-6">
                 <div>
-                    <flux:heading size="lg">Rollback?</flux:heading>
-
-                    <flux:text class="space-y-3">
-                        <p>You're about to rollback this status track.</p>
-                        <li>This action will remove the track status for users</li>
-                        <li>If a previously existing track is selected, it will disappear</li>
-                        <li>Likewise, if there is none, it will return.</li>
-                    </flux:text>
-
+                    <flux:heading size="lg">Filter tabel riwayat tracking</flux:heading>
                 </div>
 
-                <div class="flex gap-2">
-                    <flux:spacer />
+                <flux:radio.group x-model="selectedDeleteRecords" label="Tampilkan pesan yang dihapus">
+                    <flux:radio label="Tidak termasuk yang dihapus" value="all" />
+                    <flux:radio label="Termasuk yang dihapus" value="withDeleted" />
+                    <flux:radio label="Hanya yang dihapus" value="onlyDeleted" />
+                </flux:radio.group>
 
-                    <flux:modal.close>
-                        <flux:button variant="ghost">Cancel</flux:button>
-                    </flux:modal.close>
+                {{-- <flux:checkbox.group label="Pesan dibuat pada bagian">
+                    <flux:checkbox label="Kapusdatin" value="oldest" />
+                    <flux:checkbox label="Kasatpel" value="oldest" />
+                    <flux:checkbox label="Pemohon" value="latest" />
+                </flux:checkbox.group> --}}
 
-                    <flux:button type="submit" variant="primary">Confirm</flux:button>
+                <div class="flex justify-end">
+                    {{-- <flux:modal.close>
+                        <flux:button variant="subtle">Reset</flux:button>
+                    </flux:modal.close> --}}
+
+                    <flux:button x-on:click="setFilter()" type="button" variant="primary">Terapkan</flux:button>
                 </div>
             </div>
         </flux:modal>
-</div>
-</form>
+    </form>
+
+    @script
+    <script>
+        Alpine.data('rollbackTable', () => ({
+            trackId: [],
+            currentDivision: '',
+            selectedDeleteRecords: '',
+
+            init() {
+                this.$nextTick(() => {
+                    this.currentDivision = $wire.currentDivision;
+                    this.selectedDeleteRecords = $wire.deletedRecords;
+                });
+            },
+
+            setFilter() {
+                $wire.set('deletedRecords', this.selectedDeleteRecords).then(() => {
+                    this.$dispatch('modal-close', { name: 'rollback-track' });
+                });
+            },
+
+            save() {
+                $wire.set('trackId', this.trackId);
+                // $wire.set('currentDivision', this.currentDivision);
+                $wire.save();
+            }
+        }));
+    </script>
+    @endscript
 </div>
