@@ -63,7 +63,7 @@
                             <flux:table.row class="py-3">
                                 <flux:checkbox x-model="trackId" value="{{ $historie->id }}" />
                             </flux:table.row>
-                            <flux:table.row>{{ $historie->action }} </flux:table.row>
+                            <flux:table.row>{{ $historie->message }} </flux:table.row>
                             <flux:table.row>{{ $historie->created_at }}</flux:table.row>
                         </tr>
                     @endforeach

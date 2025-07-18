@@ -1,5 +1,5 @@
 @foreach ($activity as $date => $hours)
-    <!-- Activity letter -->
+    <!-- Activity history -->
     <div class="border border-gray-200 rounded-lg mt-4">
         <div class="p-4 flex items-center">
             <flux:icon.calendar />
@@ -7,16 +7,16 @@
             </flux:heading>
         </div>
 
-        @foreach ($hours as $hour => $actions)
+        @foreach ($hours as $hour => $trackingHistorie)
             <div class="border-t border-gray-200">
                 <div class="flex flex-col md:flex-row md:justify-between md:items-center p-4">
                     <div class="mb-3 md:mb-0">
-                        @foreach ($actions as $action)
+                        @foreach ($trackingHistorie as $historie)
                             <flux:subheading class="max-w-[800px] overflow-wrap-break">
-                                {{ $action->action }}
+                                {{ $historie->message }}
                             </flux:subheading>
-                            @if (!empty($action->notes))
-                                Catatan: {{ $action->notes }}
+                            @if (!empty($historie->notes))
+                                Catatan: {{ $historie->notes }}
                             @endif
                         @endforeach
                     </div>

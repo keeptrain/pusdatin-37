@@ -69,17 +69,17 @@ class Show extends Component
         // Load tracking historie if not loaded
         if ($this->tracks === null) {
             $this->tracks = $this->systemRequest->trackingHistorie()
-                ->select('requestable_id', 'action', 'created_at')
+                ->select('requestable_id', 'message', 'created_at')
                 ->orderBy('created_at', 'desc')
                 ->limit(2)
                 ->get();
         }
 
         // Find first track of process status
-        $firstTrack = $this->tracks->first(fn($item): bool => Str::contains($item->action, 'Permohonan layanan sedang diproses oleh'));
+        $firstTrack = $this->tracks->first(fn($item): bool => Str::contains($item->message, 'Permohonan layanan sedang diproses oleh'));
 
         // Find last track of completed status
-        $lastTrack = $this->tracks->first(fn($item): bool => Str::contains($item->action, 'Permohonan layanan telah selesai di kerjakan oleh divisi'));
+        $lastTrack = $this->tracks->first(fn($item): bool => Str::contains($item->message, 'Permohonan layanan telah selesai di kerjakan oleh divisi'));
 
         if ($firstTrack) {
             $startDate = Carbon::parse($firstTrack->created_at);

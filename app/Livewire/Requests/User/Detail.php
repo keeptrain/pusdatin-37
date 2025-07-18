@@ -171,7 +171,7 @@ class Detail extends Component
                     ]);
 
                     $this->content->trackingHistorie()->create([
-                        'action' => 'Pemohon telah menambahkan dokumen pendukung',
+                        'message' => 'Pemohon telah menambahkan dokumen pendukung',
                         'created_by' => auth()->user()->id
                     ]);
                 }

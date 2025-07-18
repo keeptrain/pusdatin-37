@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('tracking_historie', function (Blueprint $table) {
             $table->id();
             $table->morphs('requestable');
-            $table->string('action', 255);
+            $table->string('message', 255);
             $table->text('notes')->nullable();
             $table->string('created_by', 100);
             $table->timestamps();

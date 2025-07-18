@@ -141,8 +141,8 @@ class Rollback extends Component
         $newMessage = $systemRequest->status->trackingMessage($newDivisionId);
 
         $systemRequest->trackingHistorie()
-            ->where('action', $oldMessage)
-            ->update(['action' => $newMessage]);
+            ->where('message', $oldMessage)
+            ->update(['message' => $newMessage]);
     }
 
     protected function processTrackingHistory($systemRequest): void

@@ -16,7 +16,7 @@ class TrackingHistorie extends Model
     protected $fillable = [
         'requestable_id',
         'requestable_type',
-        'action',
+        'message',
         'notes',
     ];
 
