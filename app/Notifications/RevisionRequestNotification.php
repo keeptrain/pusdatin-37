@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use App\Mail\Requests\InformationSystem\RevisionMail;
-use App\States\InformationSystem\Replied;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -37,7 +36,7 @@ class RevisionRequestNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable)
     {
-        if (!$this->informationSystemRequest->status instanceof Replied) {
+        if (empty($this->data)) {
             return;
         }
 
