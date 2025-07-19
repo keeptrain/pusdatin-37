@@ -12,7 +12,7 @@ enum Division: int
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::HEAD_ID => 'Kapusdatin',
             self::SI_ID => 'Sistem Informasi',
             self::DATA_ID => 'Pengelolaan Data',
@@ -24,7 +24,7 @@ enum Division: int
 
     public static function getIdFromString(string $key): ?int
     {
-        return match(strtolower($key)) {
+        return match (strtolower($key)) {
             'head' => self::HEAD_ID->value,
             'si' => self::SI_ID->value,
             'data' => self::DATA_ID->value,
@@ -34,4 +34,15 @@ enum Division: int
         };
     }
 
+    public function getShortLabelFromId(?int $id): string
+    {
+        return match ($id) {
+            self::HEAD_ID->value => 'kapusdatin',
+            self::SI_ID->value => 'si',
+            self::DATA_ID->value => 'data',
+            self::PR_ID->value => 'pr',
+            self::PROMKES_ID->value => 'promkes',
+            default => 'Perlu disposisi'
+        };
+    }
 }

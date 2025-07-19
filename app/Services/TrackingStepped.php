@@ -74,7 +74,7 @@ class TrackingStepped
                 $state = self::getStateInstance($stateClass, $model);
                 $trackMessage = $state->trackingMessage($division);
 
-                $trackEntry = $statusTrack->firstWhere('action', $trackMessage);
+                $trackEntry = $statusTrack->firstWhere('message', $trackMessage);
 
                 return [
                     'label' => $state->label(),
@@ -91,7 +91,7 @@ class TrackingStepped
         $statuses = array_slice($statuses, 0, 2);
         $rejectedState = self::getStateInstance(\App\States\InformationSystem\Rejected::class, $systemRequest);
         $rejectedTrack = $statusTrack->firstWhere(
-            'action',
+            'message',
             $rejectedState->trackingMessage(Division::HEAD_ID->value)
         );
 
@@ -109,7 +109,7 @@ class TrackingStepped
         if (in_array($systemRequest->active_checking, [Division::SI_ID->value, Division::DATA_ID->value], true)) {
             $repliedState = self::getStateInstance(\App\States\InformationSystem\Replied::class, $systemRequest);
             $repliedTrack = $statusTrack->firstWhere(
-                'action',
+                'message',
                 $repliedState->trackingMessage($systemRequest->current_division)
             );
 
@@ -130,7 +130,7 @@ class TrackingStepped
         if ($systemRequest->active_checking === Division::HEAD_ID->value) {
             $repliedKapusdatinState = self::getStateInstance(\App\States\InformationSystem\RepliedKapusdatin::class, $systemRequest);
             $repliedKapusdatinTrack = $statusTrack->firstWhere(
-                'action',
+                'message',
                 $repliedKapusdatinState->trackingMessage($systemRequest->current_division)
             );
 

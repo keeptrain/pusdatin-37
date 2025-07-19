@@ -20,15 +20,12 @@ class Edit extends Component
 
     #[Locked]
     public int $systemRequestId;
-
     public $systemRequest;
 
-    public $title;
-    public $reference_number;
-
-    public $revisedFiles = [];
-
-    public $notes = '';
+    public string $title;
+    public string $reference_number;
+    public array $revisedFiles = [];
+    public string $notes = '';
 
     public function rules()
     {
@@ -76,53 +73,72 @@ class Edit extends Component
         $this->validate();
 
         DB::transaction(function () {
+            // Get available information system request instance
             $systemRequest = $this->systemRequest;
 
+            // Initialize empty arrays
+            // Array of part numbers that need revision
             $revisedParts = [];
+
+            // Array of paths to update in revisions
             $pathsToUpdateInRevisions = [];
+
+            // Array of document upload IDs to mark not needing revision
             $documentUploadIdsToMarkNotNeedingRevision = [];
 
+            // Looping through revised files for each part number
             foreach ($this->revisedFiles as $partNumber => $file) {
+                // Get the document upload and check if part number need revision
                 $documentUpload = $systemRequest->documentUploads->first(function ($doc) use ($partNumber) {
                     return $doc->part_number == $partNumber && $doc->need_revision;
                 });
 
+                // If document upload not found, continue to next iteration
                 if (!$documentUpload) {
                     continue;
                 }
 
+                // Store the revision file to public disk
                 $path = $file->store('documents', 'public');
 
                 $documentUpload->load('versions');
 
+                // Get the latest revision that not resolved and not have file path
                 $revision = $documentUpload->versions
                     ->where('is_resolved', false)
                     ->whereNull('file_path')
                     ->sortByDesc('id')
                     ->first();
 
+                // If revision not found, continue to next iteration
                 if (!$revision) {
                     continue;
                 }
 
-                // Kumpulkan untuk update
+                // Add to paths to update
                 $pathsToUpdateInRevisions[$revision->id] = $path;
+
+                // Add to document upload IDs to mark not needing revision
                 $documentUploadIdsToMarkNotNeedingRevision[] = $documentUpload->id;
 
+                // Add to revised parts
                 $revisedParts[] = $documentUpload->part_number_label;
             }
 
+            // Update document upload need revision status
             if (!empty($documentUploadIdsToMarkNotNeedingRevision)) {
                 DocumentUpload::whereIn('id', array_unique($documentUploadIdsToMarkNotNeedingRevision))
                     ->update(['need_revision' => false]);
             }
 
+            // Update revision file path
             if (!empty($pathsToUpdateInRevisions)) {
                 foreach ($pathsToUpdateInRevisions as $revisionId => $filePath) {
                     UploadVersion::where('id', $revisionId)->update(['file_path' => $filePath]);
                 }
             }
 
+            // Update request status to need review
             $systemRequest->updatedForNeedReview();
 
             $systemRequest->refresh();
@@ -133,12 +149,12 @@ class Edit extends Component
                 $systemRequest->sendProcessServiceRequestNotification();
 
                 Cache::forget("revision-mail-{$this->systemRequestId}");
-            });
 
-            session()->flash('status', [
-                'variant' => 'success',
-                'message' => $systemRequest->status->toastMessage(),
-            ]);
+                session()->flash('status', [
+                    'variant' => 'success',
+                    'message' => $systemRequest->status->toastMessage(),
+                ]);
+            });
         });
 
         $this->redirectRoute('detail.request', ['type' => 'information-system', $this->systemRequestId]);

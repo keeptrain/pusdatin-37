@@ -28,7 +28,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Tanggal diajukan</p>
-                    <p class="mt-1 text-gray-900">{{ $systemRequest->createdAtDMY() }}</p>
+                    <p class="mt-1 text-gray-900">{{ $systemRequest->createdAtWithTime() }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Kontak</p>

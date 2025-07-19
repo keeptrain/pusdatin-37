@@ -56,7 +56,7 @@ trait HasActivities
             : (int) $this->active_checking;
 
         return $this->trackingHistorie()->create([
-            'action' => $this->status->trackingMessage($divisionParamForTrackingMessage),
+            'message' => $this->status->trackingMessage($divisionParamForTrackingMessage),
             'notes' => $notes ?? null,
         ]);
     }
@@ -64,23 +64,23 @@ trait HasActivities
     public function logStatusRevision(?string $notes, array $partName)
     {
         return $this->trackingHistorie()->create([
-            'action' => auth()->user()->name . " telah melakukan revisi di bagian " . implode(' ,', $partName),
+            'message' => auth()->user()->name . " telah melakukan revisi di bagian " . implode(' ,', $partName),
             'notes' => $notes ?? null,
         ]);
     }
 
-    public function logStatusReview(?string $action, ?string $notes)
+    public function logStatusReview(?string $message, ?string $notes)
     {
         return $this->trackingHistorie()->create([
-            'action' => $action,
+            'message' => $message,
             'notes' => $notes
         ]);
     }
 
-    public function logStatusCustom(?string $action)
+    public function logStatusCustom(?string $message)
     {
         return $this->trackingHistorie()->create([
-            'action' => $action,
+            'message' => $message,
         ]);
     }
 

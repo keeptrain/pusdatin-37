@@ -43,7 +43,11 @@
                     <tr wire:key="{{ $item->id }}" x-on:click="window.location.href = '{{ route('pr.show', $item->id) }}'"
                         class="cursor-pointer">
                         <td @click.stop class="px-4 py-3">
-                            <input type="checkbox" value="{{ $item->id }}" x-model="selectedId">
+                            <div class="custom-checkbox">
+                                <input type="checkbox" value="{{ $item->id }}" x-model="selectedId"
+                                    id="checkbox-{{ $item->id }}">
+                                <label for="checkbox-{{ $item->id }}"></label>
+                            </div>
                         </td>
                         <td class="px-4 py-3">{{ $item->completed_date }}</td>
                         <td class="px-4 py-3">{{ $item->theme }}</td>

@@ -35,18 +35,21 @@ class Show extends Component
     public function mount(int $id)
     {
         $this->systemRequestId = $id;
-        $this->systemRequest = InformationSystemRequest::with(['documentUploads.activeVersion:id,file_path', 'user:id,name,contact,section'])->findOrFail($this->systemRequestId);
-    }
-
-    public function getFileUrl($fileData): string
-    {
-        return asset(Storage::url($fileData->activeVersion->file_path));
+        $this->systemRequest = InformationSystemRequest::with([
+            'documentUploads.activeVersion:id,file_path',
+            'user:id,name,contact,section'
+        ])->findOrFail($this->systemRequestId);
     }
 
     #[Title('Detail Permohonan')]
     public function render()
     {
         return view('livewire.requests.information-system.show');
+    }
+
+    public function getFileUrl($fileData): string
+    {
+        return asset(Storage::url($fileData->activeVersion->file_path));
     }
 
     #[Computed]
@@ -63,18 +66,20 @@ class Show extends Component
             return null;
         }
 
-        // Load requestStatusTrack if not loaded
+        // Load tracking historie if not loaded
         if ($this->tracks === null) {
-            $this->tracks = $this->systemRequest->requestStatusTrack()
-                ->select('statusable_id', 'action', 'created_at')
+            $this->tracks = $this->systemRequest->trackingHistorie()
+                ->select('requestable_id', 'message', 'created_at')
                 ->orderBy('created_at', 'desc')
                 ->limit(2)
                 ->get();
         }
 
-        // Find first and last track
-        $firstTrack = $this->tracks->first(fn($item): bool => Str::contains($item->action, 'Permohonan layanan sedang diproses oleh'));
-        $lastTrack = $this->tracks->first(fn($item): bool => Str::contains($item->action, 'Permohonan layanan telah selesai di kerjakan oleh divisi'));
+        // Find first track of process status
+        $firstTrack = $this->tracks->first(fn($item): bool => Str::contains($item->message, 'Permohonan layanan sedang diproses oleh'));
+
+        // Find last track of completed status
+        $lastTrack = $this->tracks->first(fn($item): bool => Str::contains($item->message, 'Permohonan layanan telah selesai di kerjakan oleh divisi'));
 
         if ($firstTrack) {
             $startDate = Carbon::parse($firstTrack->created_at);
@@ -126,6 +131,7 @@ class Show extends Component
 
     public function sendMail()
     {
+        // Prepare data for email
         $data = [
             'title' => $this->systemRequest->title,
             'created_at' => $this->systemRequest->createdAtDMY(),
@@ -134,6 +140,7 @@ class Show extends Component
 
         $email = $this->systemRequest->user->email;
 
+        // Send email based on selected email type
         foreach ($this->emailChecked as $emailType) {
             switch ($emailType) {
                 case 'need-nda':

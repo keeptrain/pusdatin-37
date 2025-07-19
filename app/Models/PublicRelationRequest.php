@@ -30,7 +30,9 @@ class PublicRelationRequest extends Model
         'status' => PublicRelationStatus::class,
         'target' => 'array',
         'links' => 'array',
-        'rating' => 'json'
+        'rating' => 'json',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -94,11 +96,6 @@ class PublicRelationRequest extends Model
         return Carbon::parse($value)->format('d F Y');
     }
 
-    public function getCreatedAtAttribute($value)
-    {
-        return Carbon::parse($value)->format('d F Y, H:i');
-    }
-
     public function publicationPlan()
     {
         return Carbon::parse($this->spesific_date)->format('F');
@@ -132,6 +129,11 @@ class PublicRelationRequest extends Model
 
         // Convert month number to full month name in Indonesian
         return $formatter->format(mktime(0, 0, 0, $value, 1)) ?? 'Bulan Tidak Diketahui';
+    }
+
+    public function createdAtWithTime()
+    {
+        return $this->created_at->format('d F Y, H:i');
     }
 
     public function createdAtDMY()
