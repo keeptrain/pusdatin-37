@@ -90,8 +90,8 @@
     </div>
 
     <div class="max-w-screen-xl mb-6 ml-4 grid grid-cols-2 gap-4">
-        <x-dashboard.small-chart icon="book-open" label="Total Permohonan" data="20" />
-        <x-dashboard.small-chart icon="chat-bubble-left" label="Total Diskusi" data="10" />
+        <x-dashboard.small-chart icon="book-open" label="Total Permohonan" :data="$this->requestCount()"  />
+        <x-dashboard.small-chart icon="chat-bubble-left" label="Total Diskusi" :data="$this->discussionCount()"  />
     </div>
 
     <flux:modal name="update-user" class="w-120 lg:max-w-lg">

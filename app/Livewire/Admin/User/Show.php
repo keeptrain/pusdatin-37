@@ -66,6 +66,23 @@ class Show extends Component
         ];
     }
 
+    #[Computed]
+    public function requestCount()
+    {
+        $user = $this->user;
+
+        $informationSystemCount = $user->informationSystemRequests()->count();
+        $publicRelationCount = $user->publicRelationRequests()->count();
+
+        return $informationSystemCount + $publicRelationCount;
+    }
+
+    #[Computed]
+    public function discussionCount()
+    {
+        return $this->user->discussions()->count();
+    }
+
     public function update()
     {
         $this->validate([
