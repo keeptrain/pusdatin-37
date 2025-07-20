@@ -18,7 +18,6 @@ class ListRequest extends Component
 {
     use WithPagination;
 
-    public int $page = 1;
     public int $perPage = 10;
     public string $search = '';
 
@@ -34,7 +33,7 @@ class ListRequest extends Component
     }
 
     /**
-     * Menggabungkan query dari Letter dan PublicRelationRequest.
+     * Combine query from InformationSystemRequest and PublicRelationRequest.
      */
     protected function getCombinedQuery()
     {
@@ -51,16 +50,31 @@ class ListRequest extends Component
     /**
      * Build base query.
      */
-    protected function buildBaseQuery($modelClass, $type, $informationField, $isNullRevision = false)
+    protected function buildBaseQuery($modelClass, string $type, string $informationField, bool $isNullRevision = false)
     {
-        return $modelClass::select(
+        $query = $modelClass::select(
             'id',
             DB::raw("'$type' as type"),
             "$informationField as information",
             'status',
             'created_at',
             $isNullRevision ? DB::raw('null as active_revision') : 'active_revision'
-        )->where('user_id', auth()->id())->whereNull('deleted_at')->getQuery();
+        )
+            ->where('user_id', auth()->id())
+            ->whereNull('deleted_at');
+
+        // Search condition if search term exists
+        if (!empty($this->search)) {
+            $searchTerm = strtolower($this->search);
+            $query->where(function ($q) use ($informationField, $searchTerm, $type) {
+                $q->where(DB::raw("LOWER($informationField)"), 'like', "%$searchTerm%")
+                    // ->orWhere(DB::raw("LOWER(status)"), 'like', "%$searchTerm%")
+                    ->orWhere(DB::raw("LOWER(DATE_FORMAT(created_at, '%d %M %Y, %H:%i'))"), 'like', "%$searchTerm%")
+                    ->orWhere(DB::raw("LOWER('$type')"), 'like', "%$searchTerm%");
+            });
+        }
+
+        return $query->getQuery();
     }
 
     /**
@@ -68,18 +82,18 @@ class ListRequest extends Component
      */
     protected function paginateAndTransform($combinedQuery)
     {
-        // SQL dan binding dari query gabungan
+        // Get SQL and bindings from combined query
         $sql = $combinedQuery->toSql();
 
-        // Query untuk paginasi
+        // Build main query for pagination
         $mainQuery = DB::table(DB::raw("($sql) as combined_table"))
             ->mergeBindings($combinedQuery)
             ->orderBy('created_at', 'desc');
 
-        // Paginasi menggunakan metode Livewire
+        // Paginate using Livewire
         $paginator = $mainQuery->paginate($this->perPage);
 
-        // Transformasi setiap item dalam koleksi
+        // Transform collection
         $transformedCollection = $paginator->getCollection()->map(function ($item) {
             return (object) [
                 'id' => $item->id,
@@ -91,12 +105,15 @@ class ListRequest extends Component
             ];
         });
 
-        // Set koleksi yang sudah ditransformasi
+        // Set transformed collection
         $paginator->setCollection($transformedCollection);
 
         return $paginator;
     }
 
+    /**
+     * Get status label.
+     */
     protected function getStatusLabel(string $type, string $status)
     {
         try {
@@ -113,12 +130,6 @@ class ListRequest extends Component
             report($e); // Log error
         }
 
-        return $status; // Fallback jika tidak ada tipe yang cocok
-    }
-
-    // Reset pagination saat search berubah
-    public function updatingSearchQuery()
-    {
-        $this->resetPage();
+        return $status; // Fallback if no type matches
     }
 }

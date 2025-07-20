@@ -3,8 +3,8 @@
         <flux:heading size="lg">Daftar Permohonan</flux:heading>
         <div class="flex items-center justify-between">
             <flux:subheading>Seluruh permohonan layanan yang diajukan terdata disini.</flux:subheading>
-            <flux:input icon="magnifying-glass" placeholder="Cari permohonan..." wire:model.blur="search"
-                class="!w-1/4" />
+            <flux:input wire:model.live.debounce.500ms="search" icon="magnifying-glass" placeholder="Cari permohonan..."
+                class="!w-1/4" clearable />
         </div>
     </div>
 
@@ -24,7 +24,8 @@
                 $typeMapping = ['Sistem Informasi & Data' => 'information-system', 'Kehumasan' => 'public-relation'];
             @endphp
             @foreach ($this->allRequests as $item)
-                <tr x-on:click="Livewire.navigate('{{ route('detail.request', ['type' => $typeMapping[$item->type], 'id' => $item->id]) }}')"
+                <tr wire:key="{{ $item->id }}"
+                    x-on:click="Livewire.navigate('{{ route('detail.request', ['type' => $typeMapping[$item->type], 'id' => $item->id]) }}')"
                     class="hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer">
                     <td class="py-3 dark:bg-zinc-900">&nbsp;</td>
                     <flux:table.row>{{ $item->created_at }} </flux:table.row>
