@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->string('created_by', 100);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['requestable_id', 'requestable_type'], 'requestable_index');
         });
     }
 

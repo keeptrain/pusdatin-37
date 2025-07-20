@@ -20,6 +20,8 @@ return new class extends Migration {
             $table->dateTime('closed_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['discussable_id', 'discussable_type'], 'discussable_index');
         });
 
         Schema::create('discussion_attachments', function (Blueprint $table) {
