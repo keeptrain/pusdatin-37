@@ -104,7 +104,7 @@
                     {{-- <td>{{ $item->user->section ?? '—' }}</td> --}}
                     {{-- <td>{{ $item->user->email ?? '—' }}</td> --}}
                     <td>{{ $item->user->contact ?? '—' }}</td>
-                    <td>{{ $item->request->createdAtDMY() ?? '—' }}</td>
+                    <td>{{ $item->request->createdAtWithTime() ?? '—' }}</td>
                     <td>{{ $item->request->title ?? '—' }}</td>
                     <td>{{ $item->request->reference_number ?? '—' }}</td>
                     <td>{{ optional($item->request->status)->label() ?? '—' }}</td>

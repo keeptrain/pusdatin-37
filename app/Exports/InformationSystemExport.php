@@ -84,7 +84,7 @@ class InformationSystemExport implements FromCollection, WithHeadings, ShouldAut
             $item->user->section ?? '—',
             $item->user->email ?? '—',
             $item->user->contact ?? '—',
-            $item->request->createdAtDMY(),
+            $item->request->createdAtWithTime(),
             $item->request->title,
             $item->request->reference_number,
             $item->request->status->label(),
