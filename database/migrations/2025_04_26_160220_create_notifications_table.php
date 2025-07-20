@@ -18,6 +18,9 @@ return new class extends Migration {
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
+            /**
+             * Add Index for notifiable_id and notifiable_type
+             */
             $table->index(['notifiable_id', 'notifiable_type'], 'notifiable_index');
         });
     }

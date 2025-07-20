@@ -33,6 +33,18 @@ return new class extends Migration {
              * Add Foreign Key to Users Table
              */
             $table->foreign('user_id')->references('id')->on('users');
+
+            /**
+             * Add Index for id and user_id
+             */
+            $table->index(['id', 'user_id'], 'id_user_id_index');
+
+            /**
+             * Add Index for id and status
+             */
+            $table->index(['id', 'status'], 'id_status_index');
+
+
         });
     }
 
