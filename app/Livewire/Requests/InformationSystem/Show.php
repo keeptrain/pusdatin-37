@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
+use App\Enums\InformationSystemRequestPart;
 use Carbon\Carbon;
 use App\States\InformationSystem\Process;
 use App\States\InformationSystem\Completed;
@@ -127,6 +128,19 @@ class Show extends Component
         });
 
         $systemRequest->load('documentUploads.activeVersion');
+    }
+
+    #[Computed]
+    public function checkNeedSendingEmail(): bool
+    {
+        return $this->systemRequest->active_revision || $this->checkNeedNdaDocument;
+    }
+
+    #[Computed]
+    public function checkNeedNdaDocument(): bool
+    {
+        $partNumberNDA = InformationSystemRequestPart::NON_DISCLOSURE_AGREEMENT->value;
+        return $this->systemRequest->documentUploads->where('part_number', $partNumberNDA)->isEmpty();
     }
 
     public function sendMail()

@@ -30,14 +30,14 @@
                         :systemRequest="$systemRequest" />
                 </div>
 
-                <x-menu.dropdown-menu-on-show :systemRequestId="$systemRequestId" />
+                <x-menu.dropdown-menu-on-show :systemRequestId="$systemRequestId" :checkNeedSendingEmail="$this->checkNeedSendingEmail" />
             </x-slot>
 
             <livewire:requests.information-system.confirm-modal :systemRequestId="$systemRequestId"
                 :allowedParts="$this->allowedParts" />
         </div>
 
-        <x-modal.information-system.email-to-user :systemRequest="$systemRequest" />
+        <x-modal.information-system.email-to-user :systemRequest="$systemRequest" :checkNeedNdaDocument="$this->checkNeedNdaDocument" />
 
     </x-layouts.requests.show>
 </div>
