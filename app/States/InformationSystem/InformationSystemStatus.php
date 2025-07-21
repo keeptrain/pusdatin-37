@@ -15,7 +15,7 @@ use Spatie\ModelStates\StateConfig;
 abstract class InformationSystemStatus extends State
 {
     const DIVISION_MAP = [
-        2 => 'Kepala Pusat Dinas Kesehatan',
+        2 => 'Kepala Pusat Data dan Teknologi Dinas Kesehatan',
         3 => 'Sistem Informasi',
         4 => 'Pengelolaan Data',
         5 => 'Hubungan Masyarakat',
@@ -53,8 +53,8 @@ abstract class InformationSystemStatus extends State
     public static function statusesBasedRole(User $user): array
     {
         $userRole = $user->currentUserRoleId();
-        $headDataStatuses = ['Permohonan Masuk', 'Didisposisikan', 'Revisi Kapusdatin', 'Disetujui Kapusdatin'];
-        $siDataStatuses = ['Didisposisikan', 'Revisi Kasatpel', 'Disetujui Kasatpel', 'Proses', 'Ditolak Kasatpel', 'Proses'];
+        $headDataStatuses = ['Permohonan Masuk', 'Didisposisikan', 'Disetujui Kasatpel', 'Revisi Kapusdatin', 'Disetujui Kapusdatin'];
+        $siDataStatuses = ['Didisposisikan', 'Revisi Kasatpel', 'Disetujui Kasatpel', 'Disetujui Kapusdatin', 'Proses'];
 
         return match ($userRole) {
             Division::HEAD_ID->value => $headDataStatuses,
