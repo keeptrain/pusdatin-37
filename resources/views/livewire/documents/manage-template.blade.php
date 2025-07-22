@@ -1,4 +1,4 @@
-<div class="lg:p-3">
+<div>
     <!-- Header Section -->
     <div class="flex justify-between items-center mb-6">
         <div>

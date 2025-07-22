@@ -1,4 +1,4 @@
-<div class="lg:p-3">
+<div>
     <flux:heading size="xl" level="1">{{ __('Rating') }}</flux:heading>
     <flux:heading size="lg" level="2" class="mb-6">{{ __('Daftar rating yang diberikan oleh pemohon') }}</flux:heading>
 
