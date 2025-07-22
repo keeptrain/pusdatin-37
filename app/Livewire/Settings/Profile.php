@@ -33,7 +33,7 @@ class Profile extends Component
     {
         $user = Auth::user();
 
-        $validated = $this->validate([
+        $validated = $this->validate(rules: [
             'name' => ['required', 'string', 'max:255'],
 
             'email' => [
@@ -45,7 +45,14 @@ class Profile extends Component
                 Rule::unique(User::class)->ignore($user->id),
             ],
 
-            'contact' => ['required', 'string', 'max:14'],
+            'contact' => ['required', 'string', 'max:15'],
+        ], messages: [
+            'name.required' => 'Nama harus diisi.',
+            'email.required' => 'Email harus diisi.',
+            'email.email' => 'Email harus valid.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'contact.required' => 'Nomor kontak harus diisi.',
+            'contact.max' => 'Nomor kontak maksimal 15.',
         ]);
 
         $user->fill($validated);

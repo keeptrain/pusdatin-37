@@ -22,9 +22,14 @@ class Password extends Component
     public function updatePassword(): void
     {
         try {
-            $validated = $this->validate([
+            $validated = $this->validate(rules: [
                 'current_password' => ['required', 'string', 'current_password'],
                 'password' => ['required', 'string', PasswordRule::defaults(), 'confirmed'],
+            ], messages: [
+                'current_password.required' => 'Password saat ini harus diisi.',
+                'current_password.current_password' => 'Password saat ini tidak valid.',
+                'password.required' => 'Password baru harus diisi.',
+                'password.confirmed' => 'Password baru tidak cocok.',
             ]);
         } catch (ValidationException $e) {
             $this->reset('current_password', 'password', 'password_confirmation');
