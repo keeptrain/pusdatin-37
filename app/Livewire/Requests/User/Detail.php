@@ -16,7 +16,6 @@ use Livewire\Attributes\Title;
 use Illuminate\Validation\Rule;
 use App\Enums\PublicRelationRequestPart;
 
-#[Title('Detail Permohonan')]
 class Detail extends Component
 {
     use WithFileUploads;
@@ -24,7 +23,7 @@ class Detail extends Component
     #[Locked]
     public int $id;
 
-    public $type;
+    public string $type;
 
     public $additionalFile;
 
@@ -37,7 +36,7 @@ class Detail extends Component
 
     public $meetings;
 
-    public function mount($type, int $id)
+    public function mount(string $type, int $id)
     {
         $this->id = $id;
         $this->type = $type;
@@ -45,6 +44,12 @@ class Detail extends Component
         if (method_exists($this->content, 'meetings')) {
             $this->meetings = $this->content?->meetings()->get() ?? null;
         }
+    }
+
+    #[Title('Detail Permohonan')]
+    public function render()
+    {
+        return view('livewire.requests.user.detail');
     }
 
     protected function loadContent()
