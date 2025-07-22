@@ -31,39 +31,51 @@ class ActionForm extends Form
 
     public function getSelectedDivisionId()
     {
-        return Division::getIdFromString($this->selectedDivision);
+        return $this->selectedDivision ? Division::getIdFromString($this->selectedDivision) : null;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
     }
 
     public function disposition(int $systemRequestId)
     {
         $rules = [
             'status' => 'required|in:disposition,rejected',
-            'notes' => 'required',
-            'selectedDivision' => 'required',
         ];
 
         $messages = [
             'status.required' => 'Status selanjutnya tidak boleh kosong',
             'status.in' => 'Status selanjutnya tidak valid',
-            'notes.required' => 'Catatan tidak boleh kosong',
-            'selectedDivision.required' => 'Divisi tujuan tidak boleh kosong',
         ];
+
+        if (!$this->isRejected()) {
+            $rules['notes'] = 'required|string|max:100';
+            $messages['notes.required'] = 'Catatan tidak boleh kosong';
+            $rules['selectedDivision'] = 'required';
+            $messages['selectedDivision.required'] = 'Divisi tujuan tidak boleh kosong';
+        } else {
+            $rules['notes'] = 'nullable|string|max:100';
+        }
 
         $this->validate($rules, $messages);
 
         DB::transaction(function () use ($systemRequestId) {
             $systemRequest = InformationSystemRequest::findOrFail($systemRequestId);
 
-            // Transisi status
+            $selectedDivisionId = $this->getSelectedDivisionId();
+            $headVerifierNotes = $this->status === 'disposition' ? $this->notes : null;
+
             $systemRequest->transitionStatusFromPending(
                 $this->status,
-                $this->getSelectedDivisionId(),
-                $this->notes
+                $selectedDivisionId,
+                $headVerifierNotes
             );
 
             $systemRequest->refresh();
 
-            $systemRequest->logStatus(null);
+            $systemRequest->logStatus($this->notes);
 
             DB::afterCommit(function () use ($systemRequest) {
                 $systemRequest->sendDispositionServiceRequestNotification();

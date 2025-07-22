@@ -47,15 +47,10 @@
             </flux:fieldset>
         </template>
 
-        <!-- Template untuk Replied -->
-        <template x-if="status === 'replied'">
-            <flux:badge>Badge untuk Replied</flux:badge>
-        </template>
-
         <!-- Template untuk Rejected -->
         <template x-if="status === 'rejected'">
-            <flux:textarea wire:model="form.notesHistorie" cols="66" rows="2"
-                placeholder="Catatan penolakan (opsional) " resize="vertical" />
+            <flux:textarea wire:model="form.notes" cols="66" rows="2" placeholder="Catatan penolakan (opsional)"
+                resize="vertical" />
         </template>
 
         <!-- Template untuk Test Failed -->

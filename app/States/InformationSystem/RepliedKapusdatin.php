@@ -23,11 +23,7 @@ class RepliedKapusdatin extends InformationSystemStatus
     {
         $resolveDivision = $this->getDivisionName($division);
 
-        if ($resolveDivision === 'Kepala Pusat Dinas Kesehatan') {
-            return "Permohonan layanan mendapatkan balasan dari {$resolveDivision}, harap di periksa.";
-        }
-        
-        return "Permohonan layanan mendapatkan balasan dari Kepala Satuan Pelaksana {$resolveDivision} , harap di periksa.";
+        return "Permohonan layanan ini memerlukan revisi yang di kirimkan dari {$resolveDivision} , harap di periksa.";
     }
 
     public function userNotificationMessage(array $context): string
