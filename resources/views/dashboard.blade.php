@@ -1,11 +1,11 @@
 <x-layouts.app :title="__('Dashboard')">
     <div x-data="{ greeting: '' }" x-init="const hour = new Date().getHours();
             if (hour >= 5 && hour < 12) {
-                greeting = 'Good morning';
+                greeting = 'Selamat pagi';
             } else if (hour >= 12 && hour < 18) {
-                greeting = 'Good afternoon';
+                greeting = 'Selamat siang';
             } else {
-                greeting = 'Good evening';
+                greeting = 'Selamat malam';
             }" class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
         <div>
             <flux:heading size="xl" level="1" class="text-color-testing-100">
