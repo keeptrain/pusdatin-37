@@ -5,6 +5,7 @@ namespace App\Livewire\Forms\modal\InformationSystem;
 use App\Enums\InformationSystemRequestPart;
 use App\States\InformationSystem\Completed;
 use App\States\InformationSystem\Process;
+use App\States\InformationSystem\Rejected;
 use Livewire\Form;
 use Illuminate\Support\Facades\DB;
 use App\Models\InformationSystemRequest;
@@ -75,7 +76,13 @@ class ActionForm extends Form
 
             $systemRequest->refresh();
 
-            $systemRequest->logStatus($this->notes);
+            $rejectedNotes = $this->notes;
+
+            if (!$systemRequest->status instanceof Rejected) {
+                $rejectedNotes = null;
+            }
+
+            $systemRequest->logStatus($rejectedNotes);
 
             DB::afterCommit(function () use ($systemRequest) {
                 $systemRequest->sendDispositionServiceRequestNotification();
@@ -269,7 +276,7 @@ class ActionForm extends Form
 
         if (!$hasPartNumber5) {
             // Add error hasPartNumber5 to error
-            $this->addError('hasPartNumber5', InformationSystemRequestPart::NON_DISCLOSURE_AGREEMENT->label() . ' sudah diunggah oleh pemohon');
+            $this->addError('hasPartNumber5', InformationSystemRequestPart::NON_DISCLOSURE_AGREEMENT->label() . ' belum diunggah oleh pemohon');
 
             // Return false if hasPartNumber5 is not found
             return false;

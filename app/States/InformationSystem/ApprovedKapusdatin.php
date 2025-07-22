@@ -23,7 +23,8 @@ class ApprovedKapusdatin extends InformationSystemStatus
 
     public function trackingMessage($division): string
     {
-        return 'Permohonan layanan anda telah disetujui oleh Kepala Pusat Data dan Teknologi Dinas Kesehatan' ;
+        return 'Permohonan layanan anda telah disetujui oleh Kepala Pusat Data dan Teknologi Dinas Kesehatan, 
+        selanjutnya menunggu permohonan di proses oleh Kepala Satuan Pelaksana';
     }
 
     public function userNotificationMessage(array $context): string
@@ -45,7 +46,7 @@ class ApprovedKapusdatin extends InformationSystemStatus
     {
         return '100%';
     }
-    
+
     public function percentageBar(): string
     {
         return 'w-[100%]';
