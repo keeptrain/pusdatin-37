@@ -1,4 +1,4 @@
-<div x-data="requestsTable" class="lg:p-3">
+<div x-data="requestsTable">
     <flux:heading size="xl" level="1">{{ __('Daftar') }}</flux:heading>
     <flux:heading size="lg" level="2" class="mb-6">
         {{ __('Permohonan Layanan Sistem Informasi & Data') }}
@@ -33,7 +33,9 @@
                         </div>
                         <x-layouts.table.filter-status />
                     </th>
+                    @hasrole('head_verifier')
                     <th class="table-header">Kasatpel</th>
+                    @endhasrole
                     <th class="table-header">Diajukan</th>
                 </tr>
             </thead>
@@ -54,7 +56,9 @@
                         <td class="px-4 py-3">
                             <flux:notification.status-badge :status="$item->status" />
                         </td>
+                        @hasrole('head_verifier')
                         <td class="px-4 py-3">{{ $item->kasatpelName($item->current_division) }}</td>
+                        @endhasrole
                         <td class="px-4 py-3">{{ $item->createdAtWithTime() }}</td>
                     </tr>
                 @endforeach
