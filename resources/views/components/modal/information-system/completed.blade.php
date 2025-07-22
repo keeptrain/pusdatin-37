@@ -3,7 +3,7 @@
         <flux:heading size="lg" x-text="mode === 'process' ? 'Proses permohonan' : 'Selesaikan permohonan'">
         </flux:heading>
         <flux:subheading
-            x-text="mode === 'process' ? 'Permohonan ini siap untuk di proses' : 'Apakah Anda yakin ingin menyelesaikan permohonan ini?'">
+            x-text="mode === 'process' ? 'Apakah permohonan ini ingin di proses?' : 'Apakah Anda yakin ingin menyelesaikan permohonan ini?'">
         </flux:subheading>
         @error('form.hasPartNumber5')
             <flux:error :message="$message" />
@@ -13,15 +13,15 @@
     <div class="flex justify-end space-x-2 mt-6">
         <!-- Tombol Batal -->
         <flux:modal.close>
-            <flux:button variant="subtle" @click="mode = null">{{ __('Batal') }}</flux:button>
+            <flux:button variant="subtle" x-on:click="mode = null">{{ __('Cancel') }}</flux:button>
         </flux:modal.close>
 
         <!-- Tombol Proses/Selesaikan -->
         <template x-if="mode === 'process'">
-            <flux:button wire:click="processPusdatin" variant="primary">{{ __('Proses') }}</flux:button>
+            <flux:button wire:click="processPusdatin" variant="primary">{{ __('Ya, Proses') }}</flux:button>
         </template>
         <template x-if="mode === 'completed'">
-            <flux:button wire:click="completed" variant="primary">{{ __('Selesaikan') }}</flux:button>
+            <flux:button wire:click="completed" variant="primary">{{ __('Ya, Selesaikan') }}</flux:button>
         </template>
     </div>
 </flux:modal>
