@@ -1,6 +1,6 @@
 <div class="flex justify-between space-x-2">
     <flux:input wire:model.live.debounce.500ms="search" icon="magnifying-glass" placeholder="Cari diskusi..."
-        :loading="false" class="flex-1" />
+        :loading="false" class="flex-1" clearable />
 
     <div class="flex items-center space-x-2">
         <!-- Sort Button -->

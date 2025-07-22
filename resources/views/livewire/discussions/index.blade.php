@@ -11,7 +11,7 @@
     <x-user.dashboard.discussion-form :requests="$requests" :form="$form" :perPage="3" />
     @endrole
 
-    <div class="space-y-4 mt-6">
+    <div x-show="!window.location.pathname.includes('dashboard') || !showForm" class="space-y-4 mt-6">
         <x-discussions.filter-area :sort="$sort" />
 
         @if($discussions->isEmpty())
