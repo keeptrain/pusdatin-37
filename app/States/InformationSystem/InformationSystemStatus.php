@@ -8,17 +8,15 @@ use App\States\InformationSystem\Pending;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 
-
 /**
  * @extends State<\App\Models\InformationSystemRequest>
  */
 abstract class InformationSystemStatus extends State
 {
-    const DIVISION_MAP = [
-        2 => 'Kepala Pusat Data dan Teknologi Dinas Kesehatan',
-        3 => 'Sistem Informasi',
-        4 => 'Pengelolaan Data',
-        5 => 'Hubungan Masyarakat',
+    private const DIVISION_MAP = [
+        Division::HEAD_ID->value => 'Kepala Pusat Data dan Teknologi Dinas Kesehatan',
+        Division::SI_ID->value => 'Sistem Informasi',
+        Division::DATA_ID->value => 'Pengelolaan Data',
     ];
 
     public static function config(): StateConfig
