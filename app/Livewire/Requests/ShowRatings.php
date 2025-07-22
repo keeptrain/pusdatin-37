@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Requests;
 
+use App\Enums\Division;
+use DB;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use App\Models\InformationSystemRequest;
@@ -10,7 +12,6 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReplyAssessmentMail;
 
-#[Title('Penilaian Layanan')]
 class ShowRatings extends Component
 {
     use WithPagination;
@@ -25,6 +26,7 @@ class ShowRatings extends Component
         // $this->contents = $this->loadContent();
     }
 
+    #[Title('Penilaian Layanan')]
     public function render()
     {
         $contents = $this->loadContent()->simplePaginate(10);
@@ -45,8 +47,8 @@ class ShowRatings extends Component
         $roleId = auth()->user()->currentUserRoleId();
 
         return match ($roleId) {
-            3, 4 => $this->systemRequests($roleId),
-            5 => $this->prRequests(),
+            Division::SI_ID->value, Division::DATA_ID->value => $this->systemRequests($roleId),
+            Division::PR_ID->value => $this->prRequests(),
             default => abort(404, 'Invalid content type.')
         };
     }
@@ -77,48 +79,69 @@ class ShowRatings extends Component
     {
         $contents = $this->loadContent()->get();
         $successCount = 0;
-        $failCount = 0;
         $alreadyRepliedCount = 0;
-        $invalidCount = 0;
-        $totalProcessed = 0;
+        $emailsToSend = [];
+        $itemsToUpdate = [];
 
+        // First, collect all items that need processing
         foreach ($contents as $item) {
-            $totalProcessed++;
-
-            // Skip if rating not valid
             if (empty($item->rating)) {
-                $invalidCount++;
                 continue;
             }
 
-            // Skip if already replied
             if (!empty($item->rating['replied_at'])) {
                 $alreadyRepliedCount++;
                 continue;
             }
 
-            try {
-                Mail::to($item->user->email)->send(new ReplyAssessmentMail($item->rating['rating']));
+            $emailsToSend[] = [
+                'email' => $item->user->email,
+                'rating' => $item->rating['rating']
+            ];
 
-                $rating = $item->rating;
-                $rating['replied_at'] = now()->toDateTimeString();
-                $item->rating = $rating;
-                $item->save();
-
-                $successCount++;
-            } catch (\Exception $e) {
-                \Log::error("Failed to send email to {$item->user->email}: " . $e->getMessage());
-                $failCount++;
-            }
+            $itemsToUpdate[] = $item;
         }
 
-        $message = $this->prepareStatusMessage(
-            totalItems: count($contents),
-            successCount: $successCount,
-            failCount: $failCount,
-            alreadyRepliedCount: $alreadyRepliedCount,
-            invalidCount: $invalidCount
-        );
+        // Process all updates in a single transaction
+        try {
+            DB::beginTransaction();
+
+            $successCount = 0;
+            $now = now()->toDateTimeString();
+
+            foreach ($itemsToUpdate as $index => $item) {
+                // Send email
+                try {
+                    Mail::to($emailsToSend[$index]['email'])
+                        ->send(new ReplyAssessmentMail($emailsToSend[$index]['rating']));
+
+                    // Update item
+                    $rating = $item->rating;
+                    $rating['replied_at'] = $now;
+                    $item->rating = $rating;
+                    $item->save();
+
+                    $successCount++;
+                } catch (\Exception $e) {
+                    \Log::error("Failed to process email for user {$emailsToSend[$index]['email']}: " . $e->getMessage());
+                    // Continue with next item even if one fails
+                    continue;
+                }
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Transaction failed: " . $e->getMessage());
+            session()->flash('status', [
+                'variant' => 'error',
+                'message' => "Terjadi kesalahan saat memproses email.",
+            ]);
+            return;
+        }
+
+        $totalToSend = $successCount + $alreadyRepliedCount;
+        $message = $this->prepareStatusMessage($totalToSend, $successCount, $alreadyRepliedCount);
 
         session()->flash('status', [
             'variant' => $successCount > 0 ? 'success' : 'info',
@@ -128,34 +151,20 @@ class ShowRatings extends Component
         $this->redirectRoute('show.ratings', navigate: true);
     }
 
-    protected function prepareStatusMessage(
-        int $totalItems,
-        int $successCount,
-        int $failCount,
-        int $alreadyRepliedCount,
-        int $invalidCount
-    ): string {
-        // Special case 1: All items were already replied
-        if ($alreadyRepliedCount === $totalItems) {
-            return "Semua balasan email telah dikirim sebelumnya.";
+    protected function prepareStatusMessage(int $totalToSend, int $successCount, int $alreadyRepliedCount): string
+    {
+        if ($alreadyRepliedCount > 0 && $successCount === 0) {
+            return "Semua email ($alreadyRepliedCount) sudah pernah dikirim.";
         }
 
-        // Special case 2: No valid items to process
-        if ($invalidCount === $totalItems) {
-            return "Tidak ada rating valid yang perlu dibalas.";
+        if ($successCount > 0) {
+            $message = "Berhasil mengirim $successCount email.";
+            if ($alreadyRepliedCount > 0) {
+                $message .= " ($alreadyRepliedCount email sudah pernah dikirim sebelumnya)";
+            }
+            return $message;
         }
 
-        // Normal cases
-        $messages = [];
-        if ($successCount > 0)
-            $messages[] = "Berhasil mengirim {$successCount} email.";
-        if ($failCount > 0)
-            $messages[] = "Gagal mengirim {$failCount} email.";
-        if ($alreadyRepliedCount > 0)
-            $messages[] = "{$alreadyRepliedCount} sudah pernah dikirim.";
-        if ($invalidCount > 0)
-            $messages[] = "{$invalidCount} data tidak valid.";
-
-        return implode(' ', $messages);
+        return "Tidak ada email yang perlu dikirim.";
     }
 }
