@@ -230,4 +230,9 @@ class PublicRelationRequest extends Model
             return "Media $mediaLabel: $mediaHyperLink";
         })->implode($separator);
     }
+
+    public function getNearestMeetingFromCollection($meetings)
+    {
+        return $meetings->sortBy('start_at')->first();
+    }
 }

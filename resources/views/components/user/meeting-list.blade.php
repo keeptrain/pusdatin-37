@@ -52,8 +52,8 @@
                             <flux:subheading size="lg" class="text-black text-sm">
                                 @if ($meeting['place']['type'] === 'link')
                                     <flux:link x-data="{
-                                                                        link: '{{ $meeting['place']['value'] ?? '' }}',
-                                                                        isTruncated: false }"
+                                        link: '{{ $meeting['place']['value'] ?? '' }}',
+                                        isTruncated: false }"
                                         x-init="isTruncated = typeof link === 'string' && link.length > 50;"
                                         :href="$meeting['place']['value'] ?? '#'">
                                         <span x-text="isTruncated ? link.substring(0, 50) + '...' : link"></span>
@@ -78,7 +78,7 @@
                             @php
                                 $url = !auth()->user()->hasRole('user') ? route('is.show', ['id' => $meeting['request_id']]) : route('detail.request', ['type' => 'information-system', 'id' => $meeting['request_id']]);
                             @endphp
-                            <flux:button icon="chevron-right" variant="subtle" wire:navigate href="{{ $url }}"></flux:button>
+                            <flux:button :href="$url" icon="chevron-right" variant="subtle" wire:navigate></flux:button>
                         </div>
                     </div>
                 </div>

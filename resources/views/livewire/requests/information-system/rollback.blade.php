@@ -1,32 +1,32 @@
-<div x-data="{ status: '' }" class="lg:p-2">
-    <div class="flex justify-between">
-        <flux:button :href="route('is.show', [$systemRequestId])" icon="arrow-long-left" variant="subtle">
-            Batal
-        </flux:button>
-    </div>
+<div x-data="{ status: '' }">
+    <flux:button :href="route('is.show', [$systemRequestId])" icon="arrow-long-left" variant="subtle">
+        Batal
+    </flux:button>
 
     <form x-data="rollbackTable" class="p-4">
         <div class="space-y-4">
             <flux:heading size="lg">Rollback</flux:heading>
             <div class="space-y-6">
-                <div class="flex items-center">
-                    <div class="flex flex-row gap-4">
-                        <flux:text>Ubah status dari: </flux:text>
-                        <flux:notification.status-badge :status="$this->status" />
+                @if (!$systemRequest->status instanceof Pending)
+                    <div class="flex items-center">
+                        <div class="flex flex-row gap-4">
+                            <flux:text>Ubah status dari: </flux:text>
+                            <flux:notification.status-badge :status="$this->status" />
+                        </div>
+                        <flux:icon.arrow-long-right class="size-6 pt-1 ml-6 mr-6" />
+                        <div>
+                            <flux:select wire:model.live="changeStatus" size="sm" placeholder="Ke status..."
+                                x-model="status">
+                                <flux:select.option value="pending">Permohonan Masuk</flux:select.option>
+                                <flux:select.option value="disposition">Disposisi</flux:select.option>
+                                <flux:select.option value="approved_kasatpel">Disetujui Kasatpel</flux:select.option>
+                                <flux:select.option value="approved_kapusdatin">Disetujui Kapusdatin</flux:select.option>
+                                <flux:select.option value="process">Proses</flux:select.option>
+                                <flux:select.option value="rejected">Ditolak</flux:select.option>
+                            </flux:select>
+                        </div>
                     </div>
-                    <flux:icon.arrow-long-right class="size-6 pt-1 ml-6 mr-6" />
-                    <div>
-                        <flux:select wire:model.live="changeStatus" size="sm" placeholder="Ke status..."
-                            x-model="status">
-                            <flux:select.option value="pending">Permohonan Masuk</flux:select.option>
-                            <flux:select.option value="disposition">Disposisi</flux:select.option>
-                            <flux:select.option value="approved_kasatpel">Disetujui Kasatpel</flux:select.option>
-                            <flux:select.option value="approved_kapusdatin">Disetujui Kapusdatin</flux:select.option>
-                            <flux:select.option value="process">Proses</flux:select.option>
-                            <flux:select.option value="rejected">Ditolak</flux:select.option>
-                        </flux:select>
-                    </div>
-                </div>
+                @endif
                 <div>
                     <flux:radio.group x-model="currentDivision" name="status" label="Pindahkan kasatpel"
                         :disabled="empty($currentDivision)">
@@ -128,7 +128,7 @@
 
             save() {
                 $wire.set('trackId', this.trackId);
-                // $wire.set('currentDivision', this.currentDivision);
+                $wire.set('currentDivision', this.currentDivision);
                 $wire.save();
             }
         }));

@@ -146,18 +146,19 @@ class InformationSystemRequest extends Model
         $this->status->transitionTo($newStatus ?? $this->status);
     }
 
-    public function transitionStatusFromPending($newStatus, $division, $notes)
+    public function transitionStatusFromPending(string $newStatus, ?int $division, ?string $headVerifierNotes)
     {
         $this->transitionStatusFromString($newStatus);
 
+        // Notes from head verifier (kapusdatin)
         $newNotes = [
-            $notes
+            $headVerifierNotes ?? '-'
         ];
 
         if ($division) {
             $this->update([
-                'active_checking' => $division,
-                'current_division' => $division,
+                'active_checking' => $division ?? Division::HEAD_ID->value,
+                'current_division' => $division ?? null,
                 'notes' => $newNotes
             ]);
         }
@@ -356,6 +357,6 @@ class InformationSystemRequest extends Model
 
     public function getNearestMeetingFromCollection(Collection $meetings)
     {
-        return $meetings->filter(fn($meeting) => $meeting->start_at <= Carbon::now())->sortBy('start_at')->first();
+        return $meetings->sortBy('start_at')->first();
     }
 }

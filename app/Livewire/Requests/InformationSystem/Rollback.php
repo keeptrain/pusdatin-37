@@ -82,21 +82,30 @@ class Rollback extends Component
         DB::transaction(function () {
             $systemRequest = InformationSystemRequest::findOrFail($this->systemRequestId);
             $hasStatusChange = !empty($this->changeStatus);
+            $hasDivisionChange = !empty($this->currentDivision) && $this->shouldUpdateDivision($systemRequest);
+            $isChangingToPending = $hasStatusChange && $this->changeStatus === Pending::class;
             $isNotPending = !$systemRequest->status instanceof Pending;
             $hasTrackChanges = !empty($this->trackId);
+            // dd(!$this->shouldUpdateDivision($systemRequest));
 
             // Early return if no changes
-            if (!$hasStatusChange && !$hasTrackChanges && !$this->shouldUpdateDivision($systemRequest)) {
+            if (!$hasStatusChange && !$hasTrackChanges && !$hasDivisionChange) {
                 return;
             }
 
             // Handle status change
-            if ($hasStatusChange && $isNotPending) {
+            if ($hasStatusChange) {
                 $this->processStatusChange($systemRequest);
+
+                // If changing to Pending, skip division update
+                if ($isChangingToPending) {
+                    $this->redirectRoute('is.show', $this->systemRequestId);
+                    return;
+                }
             }
 
             // Handle division update if not pending
-            if ($isNotPending && $this->shouldUpdateDivision($systemRequest)) {
+            if ($isNotPending && $hasDivisionChange) {
                 $this->updateDivision($systemRequest);
             }
 
@@ -111,19 +120,19 @@ class Rollback extends Component
 
     protected function shouldUpdateDivision($systemRequest): bool
     {
-        if (empty($this->currentDivision)) {
-            return false;
-        }
-
         $newDivisionId = Division::getIdFromString($this->currentDivision);
         return $newDivisionId !== $systemRequest->current_division;
     }
 
     protected function processStatusChange($systemRequest): void
     {
+        // Check for revision before changing status 
         $systemRequest->checkRevisionForRollback();
+
+        // Transition status
         $systemRequest->transitionStatusOnlyFromString($this->changeStatus);
         $systemRequest->refresh();
+
         $systemRequest->updateForRollback();
         $systemRequest->logStatusCustom("Telah terjadi rollback ke status: {$systemRequest->status->label()}");
     }
@@ -137,11 +146,10 @@ class Rollback extends Component
             $systemRequest->kasatpelName($newDivisionId);
         $systemRequest->logStatusCustom($message);
 
-        $oldMessage = $systemRequest->status->trackingMessage($systemRequest->current_division);
         $newMessage = $systemRequest->status->trackingMessage($newDivisionId);
 
         $systemRequest->trackingHistorie()
-            ->where('message', $oldMessage)
+            ->where('message', $newMessage)
             ->update(['message' => $newMessage]);
     }
 
