@@ -1,4 +1,4 @@
-<section>
+<div>
     <flux:button :href="route('list.request')" icon="arrow-long-left" variant="subtle">Kembali</flux:button>
     <div class="bg-white border-b border-gray-200 px-4 py-3 mb-3">
         <div class="bg-white border-b border-gray-200 px-4 py-3 mb-3">
@@ -55,4 +55,5 @@
             <x-user.public-relation.card-progress-info :status="$content->status" :currentIndex="$this->currentIndex"
                 :statuses="$this->statuses" :activity="$this->activities" :isRejected="false" />
         @endif
-</section>
+    </div>
+</div>

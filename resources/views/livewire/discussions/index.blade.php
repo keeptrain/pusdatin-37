@@ -1,4 +1,4 @@
-<div class="lg:p-3">
+<div>
     @unlessrole('user')
     <div class="flex items-center space-x-2">
         <flux:heading size="xl" class="">Forum Diskusi</flux:heading>

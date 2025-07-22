@@ -1,11 +1,18 @@
 <div class="flex justify-between space-x-2">
-    <flux:input wire:model.live.debounce.500ms="search" size="sm" icon="magnifying-glass" placeholder="Cari diskusi..."
-        :loading="false" />
+    <flux:input wire:model.live.debounce.500ms="search" icon="magnifying-glass" placeholder="Cari diskusi..."
+        :loading="false" class="flex-1" />
 
-    <flux:button wire:click="sortToggle" size="sm" icon="arrows-up-down">{{ $sort }}</flux:button>
+    <div class="flex items-center space-x-2">
+        <!-- Sort Button -->
+        <flux:button wire:click="sortToggle" icon="arrows-up-down">
+            <span class="hidden sm:block">{{ $sort }}</span>
+        </flux:button>
 
-    <flux:button @click="$dispatch('modal-show', { name: 'filter-discussion-modal' });" size="sm" icon="eye">
-        Filter</flux:button>
+        <!-- Filter Button -->
+        <flux:button @click="$dispatch('modal-show', { name: 'filter-discussion-modal' });" icon="eye">
+            <span class="hidden sm:block">Filter</span>
+        </flux:button>
+    </div>
 </div>
 
 <flux:modal name="filter-discussion-modal" class="w-full max-w-md">
