@@ -10,6 +10,5 @@
             </flux:modal.trigger>
         @endif
         <flux:menu.item :href="route('is.rollback', [$systemRequestId])" icon="backward">Rollback</flux:menu.item>
-        {{-- <flux:menu.item icon="trash" variant="danger">Delete</flux:menu.item> --}}
     </flux:menu>
 </flux:dropdown>
