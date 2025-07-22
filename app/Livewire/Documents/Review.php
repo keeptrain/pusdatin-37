@@ -22,11 +22,11 @@ class Review extends Component
 
     public $latestRevisions;
 
-    public $changesChoice = '';
+    public string $changesChoice = '';
 
     public array $partAccepted = [];
 
-    public $note = '';
+    public string $note = '';
 
     public function rules()
     {
@@ -85,7 +85,7 @@ class Review extends Component
             if (!empty($this->note)) {
                 $systemRequest->logStatusReview("{$text} telah melakukan review dan memberikan", $this->note);
             } else {
-                $systemRequest->logStatusReview("{$text} telah melakukan review");
+                $systemRequest->logStatusReview("{$text} telah melakukan review", null);
             }
 
             $systemRequest->updatedForCompletedReview();
