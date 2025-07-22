@@ -16,15 +16,15 @@ use App\Services\MeetingServices;
 class Meeting extends Component
 {
     #[Locked]
-    public $systemRequestId;
-    public $selectedOption = '';
-    public $topic = '';
-    public $place = [];
-    public $date = '';
-    public $startAt = '';
-    public $endAt = '';
-    public $recipients = [];
-    public $result = [];
+    public int $systemRequestId;
+    public string $selectedOption = '';
+    public string $topic = '';
+    public array $place = [];
+    public string $date = '';
+    public string $startAt = '';
+    public string $endAt = '';
+    public array $recipients = ['kasatpel'];
+    public array $result = [];
 
     public $meetings;
 
@@ -38,6 +38,7 @@ class Meeting extends Component
     {
         // Reset nilai place
         $this->place = [];
+        $this->resetErrorBag('place.*');
 
         if ($value === 'in-person') {
             $this->place['type'] = 'location';
@@ -70,7 +71,28 @@ class Meeting extends Component
             'date' => 'required|date',
             'startAt' => 'required|date_format:H:i',
             'endAt' => 'required|date_format:H:i|after:startAt',
-            'recipients' => 'required|array|in:kapusdatin,kasatpel,user',
+            'recipients' => 'required|array|min:2|in:kapusdatin,kasatpel,user',
+        ];
+
+        $messages = [
+            'topic.required' => 'Topic rapat wajib diisi',
+            'place.required' => 'Tempat rapat wajib diisi',
+            'place.type.required' => 'Jenis tempat rapat wajib diisi',
+            'place.type.in' => 'Jenis tempat rapat tidak valid',
+            'place.value.required' => 'Tempat rapat wajib diisi',
+            'place.value.max' => 'Tempat rapat maksimal 255 karakter',
+            'place.password.max' => 'Password maksimal 255 karakter',
+            'date.required' => 'Tanggal rapat wajib diisi',
+            'date.date' => 'Tanggal rapat tidak valid',
+            'startAt.required' => 'Waktu mulai rapat wajib diisi',
+            'startAt.date_format' => 'Waktu mulai rapat tidak valid',
+            'endAt.required' => 'Waktu selesai rapat wajib diisi',
+            'endAt.date_format' => 'Waktu selesai rapat tidak valid',
+            'endAt.after' => 'Waktu selesai rapat harus setelah waktu mulai',
+            'recipients.required' => 'Penerima undangan rapat wajib diisi',
+            'recipients.array' => 'Penerima undangan rapat harus array',
+            'recipients.min' => 'Penerima undangan rapat minimal 2 pihak',
+            'recipients.in' => 'Penerima undangan rapat tidak valid',
         ];
 
         // Add validation based on location or link selection using dynamic array
@@ -79,9 +101,11 @@ class Meeting extends Component
         } elseif ($this->place['type'] === 'link') {
             $rules['place.value'] = 'required|url|max:255';
             $rules['place.password'] = 'nullable|string|max:255';
+            $messages['place.value.required'] = 'Link rapat wajib diisi';
+            $messages['place.value.url'] = 'Link rapat tidak valid';
         }
 
-        $this->validate($rules);
+        $this->validate($rules, $messages);
 
         DB::transaction(function () use ($meetingServices) {
             // Get information system request
@@ -113,7 +137,7 @@ class Meeting extends Component
             'message' => 'Meeting berhasil dibuat',
         ]);
 
-        // $this->redirectRoute('is.meeting', ['id' => $this->systemRequestId]);
+        $this->redirectRoute('is.meeting', ['id' => $this->systemRequestId]);
     }
 
     #[Computed]

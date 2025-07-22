@@ -23,7 +23,7 @@
         </form>
         @endunlessrole
 
-        <div class="space-y-4">
+        <div class="space-y-4 mt-4">
             @forelse ($this->getMeetings as $meeting)
                 <x-menu.information-system.meeting-adapter wire:key="{{ $meeting['id'] }}"
                     :systemRequestId="$systemRequestId" :meeting="$meeting" />
