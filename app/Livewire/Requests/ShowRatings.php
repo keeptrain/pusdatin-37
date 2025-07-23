@@ -35,13 +35,6 @@ class ShowRatings extends Component
         return view('livewire.requests.show-ratings', compact('ratingCount', 'contents'));
     }
 
-    protected function ratingCount($loadContent)
-    {
-        return collect($loadContent->items())->filter(function ($item) {
-            return !empty(data_get($item->rating, 'rating'));
-        })->count();
-    }
-
     protected function loadContent()
     {
         $roleId = auth()->user()->currentUserRoleId();
@@ -51,6 +44,13 @@ class ShowRatings extends Component
             Division::PR_ID->value => $this->prRequests(),
             default => abort(404, 'Invalid content type.')
         };
+    }
+
+    protected function ratingCount($loadContent)
+    {
+        return collect($loadContent->items())->filter(function ($item) {
+            return !empty(data_get($item->rating, 'rating'));
+        })->count();
     }
 
     public function systemRequests(int $division)
@@ -77,7 +77,9 @@ class ShowRatings extends Component
 
     public function replyToAllGivesRating()
     {
+        // Get all contents that have rating based on division
         $contents = $this->loadContent()->get();
+
         $successCount = 0;
         $alreadyRepliedCount = 0;
         $emailsToSend = [];
@@ -95,6 +97,7 @@ class ShowRatings extends Component
             }
 
             $emailsToSend[] = [
+                'name' => $item->user->name,
                 'email' => $item->user->email,
                 'rating' => $item->rating['rating']
             ];
@@ -110,10 +113,13 @@ class ShowRatings extends Component
             $now = now()->toDateTimeString();
 
             foreach ($itemsToUpdate as $index => $item) {
-                // Send email
                 try {
+                    // Send email
                     Mail::to($emailsToSend[$index]['email'])
-                        ->send(new ReplyAssessmentMail($emailsToSend[$index]['rating']));
+                        ->send(new ReplyAssessmentMail(
+                            $emailsToSend[$index]['name'],
+                            $emailsToSend[$index]['rating']
+                        ));
 
                     // Update item
                     $rating = $item->rating;

@@ -1,7 +1,7 @@
 <x-mail.partials.base-pusdatin-layout :message="$message">
     <p style="font-size: 14px; color: #333;">
         Kepada Yth.<br>
-        <strong>Bapak/Ibu Pemohon</strong><br>
+        <strong>{{ $name }}</strong><br>
     </p>
 
     <p style="font-size: 14px; color: #333; margin-top: 20px;">
