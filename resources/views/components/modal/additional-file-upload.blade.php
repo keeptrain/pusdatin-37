@@ -20,9 +20,7 @@
                 </div>
             </template>
             @error('additionalFile')
-                <flux:text variant="strong" class="text-red-500 flex items-center mt-2 mr-2">
-                    <flux:icon.exclamation-circle />{{ $message }}
-                </flux:text>
+               <flux:error :message="$message" />
             @enderror
         </section>
         <div class="flex justify-end space-x-2">
