@@ -233,6 +233,11 @@ class Detail extends Component
             ]);
         });
 
+        session()->flash('status', [
+            'variant' => 'success',
+            'message' => 'Berhasil memberikan rating.',
+        ]);
+
         $this->redirectRoute('detail.request', ['type' => $this->type, 'id' => $this->id]);
     }
 }
