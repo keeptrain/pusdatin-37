@@ -11,10 +11,8 @@
     <p style="font-size: 14px; color: #333;">
         Permohonan layanan yang anda ajukan dengan judul <span style="font-weight: bold;">{{ $data['title'] }}</span>,
         jenis layanan <span style="font-weight: bold;">Sistem
-            Informasi & Data</span>, dan tanggal pengajuan <span
-            style="font-weight: bold;">{{ $data['created_at'] }}</span>. Agar dapat di proses lebih lanjut,
-        kami
-        membutuhkan dokumen Surat Perjanjian Kerahasiaan (NDA).
+            Informasi & Data</span>, dan tanggal pengajuan <span style="font-weight: bold;">{{ $data['created_at'] }}
+        </span>. Agar dapat di selesaikan, kami membutuhkan dokumen Surat Perjanjian Kerahasiaan (NDA).
     </p>
 
     <p style="font-size: 14px; color: #333;">
