@@ -51,24 +51,18 @@ class Notifications extends Component
         return $this->prepareNotifications($notifications);
     }
 
-    private function tabBaseRoles()
+    private function tabBaseRoles(): array
     {
-        $user = auth()->user()->roles->pluck('name');
-        $userTabs = [];
+        $userRoles = auth()->user()->roles->pluck('name');
 
-        if ($user->contains('head_verifier')) {
-            $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
-        } else if ($user->contains('si_verifier|data_verifier')) {
-            $userTabs = ['all', 'disposisi', 'revisi', 'disetujui'];
-        } else if ($user->contains('pr_verifier')) {
-            $userTabs = ['all', 'disposisi'];
-        } else if ($user->contains('promkes_verifier')) {
-            $userTabs = ['all'];
-        } else {
-            $userTabs = ['all', 'revisi', 'disetujui'];
-        }
-
-        return $userTabs;
+        return match (true) {
+            $userRoles->contains('head_verifier') ||
+            $userRoles->contains('si_verifier') ||
+            $userRoles->contains('data_verifier') => ['all', 'disposisi', 'revisi', 'disetujui'],
+            $userRoles->contains('pr_verifier') => ['all', 'disposisi'],
+            $userRoles->contains('promkes_verifier') => ['all'],
+            default => ['all', 'revisi', 'disetujui']
+        };
     }
 
     private function prepareNotifications($notifications)

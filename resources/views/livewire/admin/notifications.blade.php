@@ -3,6 +3,9 @@
     <div class="flex justify-between items-center">
         <div>
             <h1 class="text-xl font-semibold text-gray-800">Notifikasi</h1>
+            <flux:text x-on:click="$wire.markAllAsRead()" size="sm" class="flex items-center text-gray-600 hover:text-blue-400 hover:underline cursor-pointer">
+                Tandai semua sebagai telah dibaca
+            </flux:text>
         </div>
         <div class="flex space-x-2">
             <flux:modal.close>
