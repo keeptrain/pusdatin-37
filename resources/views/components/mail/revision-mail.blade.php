@@ -5,7 +5,7 @@
     <div style="max-width: 600px; margin: 0 auto;">
         <p style="font-size: 14px; color: #333;">
             Kepada Yth.<br>
-            <strong>Bapak/Ibu Pemohon</strong><br>
+            <strong>{{ $data['name'] }}</strong><br>
         </p>
 
         <p style="font-size: 14px; color: #333; margin-top: 20px;">
@@ -13,7 +13,7 @@
         </p>
 
         <p style="font-size: 14px; color: #333;">
-            Setelah kami melakukan verifikasi terhadap dokumen permohonan yang telah Bapak/Ibu ajukan, kami menemukan
+            Setelah kami melakukan verifikasi terhadap dokumen permohonan yang telah diajukan, kami menemukan
             beberapa hal yang perlu diperbaiki agar permohonan dapat diproses lebih lanjut. Adapun hal-hal yang perlu
             diperbaiki adalah sebagai berikut:
         </p>
@@ -37,8 +37,8 @@
         </ul>
 
         <p style="font-size: 14px; color: #333;">
-            Untuk itu, kami memohon kesediaan Bapak/Ibu untuk segera melakukan perbaikan dokumen sesuai dengan catatan
-            yang telah kami sampaikan. Silahkan klik tombol di bawah ini untuk:
+            Untuk itu, kami memohon kesediaannya untuk segera melakukan perbaikan dokumen sesuai
+            dengan catatan yang telah kami sampaikan. Silahkan klik tombol di bawah ini untuk:
         </p>
         <a href="{{ $data['url'] }}"
             style="display: inline-block; padding: 5px 10px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 5px;">Perbaikan

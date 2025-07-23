@@ -16,7 +16,7 @@ class ReplyAssessmentMail extends Mailable implements ShouldQueue
     /**
      * Create a new message instance.
      */
-    public function __construct(public $rating)
+    public function __construct(public $name, public $rating)
     {
         //
     }
@@ -45,6 +45,7 @@ class ReplyAssessmentMail extends Mailable implements ShouldQueue
         return new Content(
             view: 'components.mail.reply-assessment-mail',
             with: [
+                'name' => $this->name,
                 'rating' => $this->rating,
             ]
         );

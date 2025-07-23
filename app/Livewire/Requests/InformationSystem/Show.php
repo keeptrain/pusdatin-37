@@ -147,6 +147,7 @@ class Show extends Component
     {
         // Prepare data for email
         $data = [
+            'name' => $this->systemRequest->user->name,
             'title' => $this->systemRequest->title,
             'created_at' => $this->systemRequest->createdAtWithTime(),
             'url' => route('detail.request', ['type' => 'information-system', 'id' => $this->systemRequestId]),

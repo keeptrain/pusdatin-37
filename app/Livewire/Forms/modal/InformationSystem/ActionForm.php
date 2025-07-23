@@ -233,6 +233,7 @@ class ActionForm extends Form
         }
 
         $data = [
+            'name' => $systemRequest->user->name,
             'title' => $systemRequest->title,
             'revision_notes' => $this->formatRevisionNotes($systemRequest),
             'url' => route('is.edit', $systemRequest->id),
