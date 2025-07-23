@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Documents;
 
+use App\Enums\Division;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
@@ -71,6 +72,7 @@ class Review extends Component
         DB::transaction(function () {
             $systemRequest = $this->informationSystemRequest;
 
+            // Get document uploads ids
             $documentUploadsIds = $systemRequest->documentUploads()->pluck('id');
 
             if ($this->changesChoice === 'yes') {
@@ -79,7 +81,8 @@ class Review extends Component
                 $this->changesChoiceNo($documentUploadsIds);
             }
 
-            $verifikatorReviewed = $systemRequest->active_checking === 2;
+            // Head verifier reviewed condition
+            $verifikatorReviewed = $systemRequest->active_checking === Division::HEAD_ID->value;
             $text = $verifikatorReviewed ? 'Kapusdatin' : 'Ketua Satuan Pelaksana';
 
             if (!empty($this->note)) {
@@ -117,6 +120,10 @@ class Review extends Component
                 ->first();
 
             if ($latestUnapprovedRevision) {
+                $documentUpload->activeVersion->update([
+                    'revision_note' => $latestUnapprovedRevision->revision_note,
+                ]);
+
                 $documentUpload->update([
                     'document_upload_version_id' => $latestUnapprovedRevision->id,
                     'need_revision' => false,
@@ -124,6 +131,7 @@ class Review extends Component
 
                 UploadVersion::where('id', $latestUnapprovedRevision->id)
                     ->update([
+                        'revision_note' => null,
                         'is_resolved' => true,
                     ]);
             }
