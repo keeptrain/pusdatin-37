@@ -6,6 +6,8 @@ use App\States\InformationSystem\InformationSystemStatus;
 
 class Completed extends InformationSystemStatus
 {
+    public static $name = 'completed';
+
     public function label(): string
     {
         return 'Permohonan Selesai';

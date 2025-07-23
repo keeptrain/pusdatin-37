@@ -6,6 +6,8 @@ use App\States\InformationSystem\InformationSystemStatus;
 
 class Replied extends InformationSystemStatus
 {
+    public static $name = 'replied';
+    
     public function label(): string
     {
         return 'Revisi Kasatpel';

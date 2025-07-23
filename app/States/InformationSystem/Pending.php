@@ -6,6 +6,8 @@ use App\States\InformationSystem\InformationSystemStatus;
 
 class Pending extends InformationSystemStatus
 {
+    public static $name = 'pending';
+
     public function label(): string
     {
         return 'Permohonan Masuk';

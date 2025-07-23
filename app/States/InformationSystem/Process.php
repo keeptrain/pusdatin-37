@@ -6,6 +6,8 @@ use App\States\InformationSystem\InformationSystemStatus;
 
 class Process extends InformationSystemStatus
 {
+    public static $name = 'process';
+    
     public function label(): string
     {
         return 'Proses Permohonan';

@@ -4,6 +4,8 @@ namespace App\States\InformationSystem;
 
 class RepliedKapusdatin extends InformationSystemStatus
 {
+    public static $name = 'replied_kapusdatin';
+    
     public function label(): string
     {
         return 'Revisi Kapusdatin';

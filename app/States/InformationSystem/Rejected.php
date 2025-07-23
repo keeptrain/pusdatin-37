@@ -6,6 +6,8 @@ use App\States\InformationSystem\InformationSystemStatus;
 
 class Rejected extends InformationSystemStatus
 {
+    public static $name = 'rejected';
+    
     public function label(): string
     {
         return 'Ditolak';

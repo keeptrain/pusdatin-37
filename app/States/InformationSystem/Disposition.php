@@ -6,6 +6,8 @@ use App\States\InformationSystem\InformationSystemStatus;
 
 class Disposition extends InformationSystemStatus
 {
+    public static $name = 'disposition';
+    
     public function label(): string
     {
         return 'Didisposisikan';

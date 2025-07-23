@@ -6,6 +6,8 @@ use App\States\InformationSystem\InformationSystemStatus;
 
 class ApprovedKasatpel extends InformationSystemStatus
 {
+    public static $name = 'approved_kasatpel';
+    
     public function label(): string
     {
         return 'Disetujui Kasatpel';

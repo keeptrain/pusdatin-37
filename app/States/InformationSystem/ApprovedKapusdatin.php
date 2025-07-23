@@ -6,6 +6,8 @@ use App\States\InformationSystem\InformationSystemStatus;
 
 class ApprovedKapusdatin extends InformationSystemStatus
 {
+    public static $name = 'approved_kapusdatin';
+    
     public function label(): string
     {
         return 'Disetujui Kapusdatin';
