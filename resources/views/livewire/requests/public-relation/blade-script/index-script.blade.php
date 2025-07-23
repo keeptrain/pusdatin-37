@@ -73,13 +73,14 @@
                 destroy: true,
                 deferRender: true, // Render rows only when needed
                 language: {
-                    sProcessing: "Sedang memproses...",
-                    sLengthMenu: "Tampilkan _MENU_ data per halaman",
-                    sZeroRecords: this.getNoRecordsTemplate(),
-                    sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    sInfoEmpty: "",
-                    sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
-                    sInfoPostFix: "",
+                    emptyTable: "Tidak ada data yang tersedia",
+                    processing: "Sedang memproses...",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    zeroRecords: this.getNoRecordsTemplate(),
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "",
+                    infoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
+                    infoPostFix: "",
                 },
                 columnDefs: [
                     {
