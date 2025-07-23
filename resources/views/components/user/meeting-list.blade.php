@@ -36,7 +36,7 @@
         @if($dateGroup['has_meetings'])
             @foreach($dateGroup['meetings'] as $meeting)
                 <div wire:key="meeting-{{ $meeting['id'] }}" class="flex">
-                    <div class="hidden lg:block lg:w-[50px]"></div> <!-- Offset untuk border start & end -->
+                    <div class="hidden lg:block lg:w-[75px]"></div> <!-- Offset untuk border start & end -->
                     <div class="border rounded-lg p-3 bg-zinc-50 flex items-center w-full">
                         <!-- Icon -->
                         @if (($meeting['place']['type']) === 'link')

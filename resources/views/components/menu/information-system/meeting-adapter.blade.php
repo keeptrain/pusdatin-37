@@ -75,8 +75,8 @@
                 <div class="flex items-start space-x-2">
                     <flux:icon.clipboard class="size-5 text-gray-400" />
                     <flux:heading size="lg" class="text-gray-500">Topik: </flux:heading>
-                    <flux:subheading size="lg" class="text-gray-800">{{ $meeting['topic'] }}</flux:subheading>
                 </div>
+                <flux:subheading size="lg" class="text-gray-800 mb-2">{{ $meeting['topic'] }}</flux:subheading>
                 @if ($meeting['pastEndDate'] && $meeting['result'] === null)
                     <div class="flex items-center space-x-2">
                         <flux:icon.chat-bubble-left-right class="size-5 text-gray-400" />

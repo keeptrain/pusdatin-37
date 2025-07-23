@@ -136,7 +136,7 @@
                 </flux:navlist.item>
 
             </flux:navlist.group>
-        </flux:navlist>x
+        </flux:navlist>
 
         <flux:spacer />
 
