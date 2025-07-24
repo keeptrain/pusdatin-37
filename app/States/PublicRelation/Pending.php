@@ -6,6 +6,8 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class Pending extends PublicRelationStatus
 {
+    public static $name = 'pending';
+    
     public function label(): String
     {
         return "Usulan Masuk";

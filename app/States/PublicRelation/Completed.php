@@ -6,6 +6,8 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class Completed extends PublicRelationStatus
 {
+    public static $name = 'completed';
+    
     public function label(): string
     {
         return "Permohonan Selesai";

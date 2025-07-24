@@ -6,6 +6,8 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class PromkesComplete extends PublicRelationStatus
 {
+    public static $name = 'promkes_complete';
+    
     public function label(): String
     {
         return "Kurasi Promkes";

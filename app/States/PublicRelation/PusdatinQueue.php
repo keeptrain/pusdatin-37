@@ -6,8 +6,9 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class PusdatinQueue extends PublicRelationStatus
 {
+    public static $name = 'pusdatin_queue';
 
-    public function label(): String
+    public function label(): string
     {
         return "Antrean Pusdatin";
     }
@@ -42,7 +43,7 @@ class PusdatinQueue extends PublicRelationStatus
         return 'Berhasil mengantrekan permohonan layanan';
     }
 
-    public function trackingMessage(): String
+    public function trackingMessage(): string
     {
         return "Permohonan layanan sedang dalam antrean di Pusat Data Teknologi dan Dinas Kesehatan";
     }

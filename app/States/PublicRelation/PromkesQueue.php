@@ -6,6 +6,7 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class PromkesQueue extends PublicRelationStatus
 {
+    public static $name = 'promkes_queue';
 
     public function label(): String
     {

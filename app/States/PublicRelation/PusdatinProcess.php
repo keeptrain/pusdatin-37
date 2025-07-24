@@ -6,7 +6,8 @@ use App\States\PublicRelation\PublicRelationStatus;
 
 class PusdatinProcess extends PublicRelationStatus
 {
-
+    public static $name = 'pusdatin_process';
+    
     public function label(): String
     {
         return "Proses Pusdatin";
