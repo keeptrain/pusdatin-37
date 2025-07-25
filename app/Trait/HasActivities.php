@@ -110,7 +110,7 @@ trait HasActivities
         $siRequest = $this;
         $newStatus = $siRequest->status;
 
-        if ($newStatus == Disposition::class) {
+        if ($newStatus instanceof Disposition) {
             $finalRecipients = User::role($siRequest->current_division)->get();
 
             // Send notification to division
@@ -119,7 +119,7 @@ trait HasActivities
                     $user->notify(new SiServiceRequestNotification($siRequest));
                 });
             }
-        } elseif ($newStatus == Rejected::class) {
+        } elseif ($newStatus instanceof Rejected) {
             $finalRecipient = User::findOrFail($siRequest->user_id);
 
             // Send notification to requestor
