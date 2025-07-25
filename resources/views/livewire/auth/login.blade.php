@@ -4,7 +4,7 @@
 
         <!-- Kolom Gambar Kiri -->
         <div class="hidden md:block md:w-1/2 bg-green-100 dark:bg-green-900">
-            <img src="{{ asset('images/dinkes.jpg') }}" alt="Logo Dinas Kesehatan"
+            <img src="{{ asset('images/dinkes.jpg') }}" alt="Dinas Kesehatan"
                 class="h-full w-full object-cover object-center brightness-75" />
         </div>
 
@@ -17,7 +17,7 @@
                 class="absolute -top-10 -left-10 w-32 h-16 bg-gradient-to-br from-green-300 to-green-500 rounded-full opacity-20 blur-3xl z-0">
             </div>
 
-            <div class="relative z-10 flex flex-col gap-5">
+            <div class="relative flex flex-col gap-5">
                 <a class="flex flex-col items-center gap-2 font-medium">
                     <span class="flex h-10 w-10 items-center justify-center rounded-full">
                         <x-lucide-log-in class="w-8 h-8" />
@@ -30,26 +30,19 @@
                 <x-auth-session-status class="text-center text-sm text-green-600 dark:text-green-400"
                     :status="session('status')" />
 
-                <!-- Form -->
-                {{-- <form @submit.prevent="doCaptcha" x-data="{
+                {{-- <form wire:submit="$dispatchTo('auth.login', 'executeCaptchaValidation')" x-data="{
                     siteKey: @js(config('services.recaptcha.site_key')),
                     init() {
                         if (!window.recaptcha) {
                             const script = document.createElement('script');
                             script.src = 'https://www.google.com/recaptcha/api.js?render=' + this.siteKey;
-                            script.async;
-                            script.defer;
+                            script.async = true;
+                            script.defer = true;
                             document.body.append(script);
                         }
-                    },
-                    doCaptcha() {
-                        grecaptcha.ready(() => {
-                            grecaptcha.execute(this.siteKey, { action: 'login' }).then(token => {
-                                Livewire.dispatch('formSubmitted', { token: token });
-                            });
-                        });
-                    },
-                }" class="flex flex-col gap-6"> --}}
+                    }
+                }" 
+                class="flex flex-col gap-6"> --}}
                 <form wire:submit="login" class="flex flex-col gap-6">
                     <flux:input wire:model="email" :label="__('Email address')" type="email" required autofocus
                         autocomplete="email" placeholder="email@example.com" />
@@ -67,10 +60,7 @@
                     </div>
 
                     @error('recaptcha')
-                        <span class="text-sm text-red-600 flex items-center gap-1">
-                            <flux:icon.exclamation-triangle variant="solid" class="size-5" />
-                            {{ $message }}
-                        </span>
+                        <flux:error :message="$message" />
                     @enderror
 
                     <!-- Remember Me -->
@@ -86,3 +76,18 @@
         </div>
     </div>
 </div>
+{{-- @script
+<script>
+    $wire.on('executeCaptchaValidation', () => {
+        grecaptcha.ready(() => {
+            grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {
+                action: 'login'
+            }).then((token) => {
+                $wire.dispatch('captchaResponse', { token: token });
+            }).catch(error => {
+                console.error('reCAPTCHA Error:', error);
+            });
+        });
+    });
+</script>
+@endscript --}}

@@ -26,20 +26,15 @@ class Login extends Component
     public bool $remember = false;
 
     // #[Validate(['required', new Recaptcha('login')])]
-    // public $recaptcha;
-
-    // #[On('formSubmitted')]
-    // public function recaptchaPassed($token)
-    // {
-    //     $this->recaptcha = $token;
-    //     $this->login();
-    // }
+    // public ?string $recaptcha = null;
 
     /**
      * Handle an incoming authentication request.
      */
+    // #[On('captchaResponse')]
     public function login(): void
     {
+        // $this->recaptcha = $token;
         $this->validate();
 
         $this->ensureIsNotRateLimited();
