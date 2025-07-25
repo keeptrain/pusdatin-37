@@ -120,6 +120,7 @@ class Review extends Component
                 ->first();
 
             if ($latestUnapprovedRevision) {
+                $documentUpload->load('activeVersion');
                 $documentUpload->activeVersion->update([
                     'revision_note' => $latestUnapprovedRevision->revision_note,
                 ]);
