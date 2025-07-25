@@ -268,11 +268,12 @@ class ActionsModal extends Component
         }
 
         return [
+            'name' => $prRequest->user->name,
             'theme' => $prRequest->theme,
             'target' => implode(',', $targets),
             'completed_date' => $prRequest->completed_date,
             'media' => $formatted,
-            'rating_link' => route('detail.request', ['type' => 'public_relation', 'id' => $prRequest->id]),
+            'rating_link' => route('detail.request', ['type' => 'public-relation', 'id' => $prRequest->id]),
         ];
     }
 }

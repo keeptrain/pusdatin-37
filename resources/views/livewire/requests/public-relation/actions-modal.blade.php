@@ -1,10 +1,10 @@
 <flux:modal name="action-on-show-modal" focusable class="md:w-120" size="lg">
     <section>
         <flux:heading size="lg"
-            x-text="mode === 'process_pusdatin' ? 'Permohonan ini siap untuk di proses' : (mode === 'curation' ? 'Kurasi materi' : (mode === 'completed' ? 'Selesaikan permohonan' : 'Antrikan permohonan'))">
+            x-text="mode === 'process_pusdatin' ? 'Proses permohonan' : (mode === 'curation' ? 'Kurasi materi' : (mode === 'completed' ? 'Selesaikan permohonan' : 'Antrikan permohonan'))">
         </flux:heading>
         <flux:subheading
-            x-text="mode === 'queue_promkes' ? 'Permohonan ini akan di antrikan' : (mode === 'queue_pusdatin' ? 'Permohonan ini akan di antrikan di Pusdatin' : (mode === 'completed' ? 'Masukkan link sesuai dengan jenis media yang di ajukan' : (mode === 'curation' ? '' : 'Permohonan ini siap untuk di proses')))">
+            x-text="mode === 'queue_promkes' ? 'Permohonan ini akan di antrikan' : (mode === 'queue_pusdatin' ? 'Permohonan ini akan di antrikan di Pusdatin' : (mode === 'completed' ? 'Masukkan link sesuai dengan jenis media yang di ajukan' : (mode === 'curation' ? '' : 'Apakah permohonan ini siap untuk di proses?')))">
         </flux:subheading>
     </section>
 
@@ -31,7 +31,7 @@
             </template>
 
             <template x-if="mode === 'process_pusdatin'">
-                <flux:button wire:click="processPusdatin" variant="primary">{{ __('Ya Antrikan') }}</flux:button>
+                <flux:button wire:click="processPusdatin" variant="primary">{{ __('Ya Proses') }}</flux:button>
             </template>
         </div>
     </template>
