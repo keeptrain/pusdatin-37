@@ -41,28 +41,27 @@ class Login extends Component
 
         $this->ensureIsNotRateLimited();
 
-        // Check if user exists first
+        // Single query to get user with email
         $user = User::where('email', $this->email)->first();
 
-        // If user exists but password is wrong
-        if ($user && !Hash::check($this->password, $user->password)) {
+        // If user doesn't exist or password is wrong
+        if (!$user || !Hash::check($this->password, $user->password)) {
             RateLimiter::hit($this->throttleKey());
 
-            throw ValidationException::withMessages([
-                'password' => __('auth.password'),
-            ]);
+            throw ValidationException::withMessages(
+                $user
+                ? ['password' => __('auth.password')]
+                : ['email' => __('auth.failed')]
+            );
         }
 
-        // If user doesn't exist or credentials are invalid
-        if (!Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
-            RateLimiter::hit($this->throttleKey());
+        // Log in the user
+        Auth::login($user, $this->remember);
 
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
-        }
-
+        // Clear rate limiter
         RateLimiter::clear($this->throttleKey());
+
+        // Regenerate session
         Session::regenerate();
 
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
