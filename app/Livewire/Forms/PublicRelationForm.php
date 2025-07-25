@@ -99,7 +99,12 @@ class PublicRelationForm extends Component
         $prId = null;
 
         DB::transaction(function () use ($fileUploadServices, &$prId) {
-            $validFiles = array_filter($this->uploadFile);
+            // Always include uploadFile.0 (nota dinas) and filter other media types
+            $validFiles = collect($this->uploadFile)
+                ->filter(function ($file, $partNumber) {
+                    return $partNumber == 0 || in_array($partNumber, $this->mediaType);
+                })
+                ->toArray();
 
             $prData = $this->createPublicRelationRequest();
             $prData->logStatus(null);
@@ -135,16 +140,6 @@ class PublicRelationForm extends Component
         ]);
     }
 
-    public function updatedMediaType($value)
-    {
-        $allMediaTypes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-        foreach ($allMediaTypes as $type) {
-            if (!in_array($type, $this->mediaType)) {
-                $this->removeUploadedFile($type);
-            }
-        }
-    }
-
     private function removeUploadedFile($type)
     {
         if (isset($this->uploadFile[$type])) {
@@ -156,14 +151,19 @@ class PublicRelationForm extends Component
     {
         $documentVersionId = collect();
 
-        foreach ($uploads as $upload) {
+        foreach ($uploads as $partNumber => $file) {
+            // Always allow part_number 0 (nota dinas) or if it's in selected media types
+            if ($partNumber != 0 && !in_array($partNumber, $this->mediaType)) {
+                continue;
+            }
+
             $documentUpload = $prRequest->documentUploads()->create([
-                'part_number' => $upload['part_number']
+                'part_number' => $partNumber
             ]);
 
             $version = $documentUpload->versions()->create([
                 'document_upload_id' => $documentUpload->id,
-                'file_path' => $upload['file_path'],
+                'file_path' => $file['file_path'],
                 'is_resolved' => true,
             ]);
 
