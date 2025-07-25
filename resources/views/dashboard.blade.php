@@ -81,7 +81,7 @@
                 :widthPercentage="$widthPercentage" />
             @endunlessrole
         </div>
-        @unlessrole('administrator')
+        @unlessrole('administrator|promkes_verifier|pr_verifier')
         <div class="grid auto-rows-min gap-4 border rounded-2xl pl-2">
             <x-user.meeting-list :meetingList="$meetingList" :todayMeetingCount="$todayMeetingCount" />
         </div>

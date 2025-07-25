@@ -184,17 +184,17 @@ class AdminDashboardService
     private function getSiDataStatusCounts($currentDivision = null)
     {
         $statusStates = [
-            'pending' => 'App\States\InformationSystem\Pending',
-            'disposition' => 'App\States\InformationSystem\Disposition',
-            'replied' => 'App\States\InformationSystem\Replied',
-            'approvedKasatpel' => 'App\States\InformationSystem\ApprovedKasatpel',
-            'repliedKapusdatin' => 'App\States\InformationSystem\RepliedKapusdatin',
-            'approvedKapusdatin' => 'App\States\InformationSystem\ApprovedKapusdatin',
-            'process' => 'App\States\InformationSystem\Process',
+            'pending',
+            'disposition',
+            'replied',
+            'approved_kasatpel',
+            'replied_kapusdatin',
+            'approved_kapusdatin',
+            'process',
         ];
 
         $query = InformationSystemRequest::select('status', DB::raw('COUNT(*) as total'))
-            ->whereIn('status', array_values($statusStates))
+            ->whereIn('status', $statusStates)
             ->groupBy('status');
 
         if ($currentDivision !== null) {
@@ -204,46 +204,46 @@ class AdminDashboardService
         $statusCounts = $query->pluck('total', 'status');
 
         return [
-            'pending' => $statusCounts[$statusStates['pending']] ?? 0,
-            'disposition' => $statusCounts[$statusStates['disposition']] ?? 0,
-            'replied' => $statusCounts[$statusStates['replied']] ?? 0,
-            'approvedKasatpel' => $statusCounts[$statusStates['approvedKasatpel']] ?? 0,
-            'repliedKapusdatin' => $statusCounts[$statusStates['repliedKapusdatin']] ?? 0,
-            'process' => $statusCounts[$statusStates['process']] ?? 0,
-            'completed' => $statusCounts[$statusStates['approvedKapusdatin']] ?? 0,
+            'pending' => $statusCounts['pending'] ?? 0,
+            'disposition' => $statusCounts['disposition'] ?? 0,
+            'replied' => $statusCounts['replied'] ?? 0,
+            'approvedKasatpel' => $statusCounts['approved_kasatpel'] ?? 0,
+            'repliedKapusdatin' => $statusCounts['replied_kapusdatin'] ?? 0,
+            'process' => $statusCounts['process'] ?? 0,
+            'completed' => $statusCounts['approved_kapusdatin'] ?? 0,
         ];
     }
 
     private function getPrStatusCounts(?string $user = null)
     {
         $statusStates = [
-            'pending' => 'App\States\PublicRelation\Pending',
-            'promkesQueue' => 'App\States\PublicRelation\PromkesQueue',
-            'promkesCompleted' => 'App\States\PublicRelation\PromkesComplete',
-            'pusdatinQueue' => 'App\States\PublicRelation\PusdatinQueue',
-            'pusdatinProcess' => 'App\States\PublicRelation\PusdatinProcess',
-            'completed' => 'App\States\PublicRelation\Completed',
+            'pending',
+            'promkes_queue',
+            'promkes_complete',
+            'pusdatin_queue',
+            'pusdatin_process',
+            'completed',
         ];
 
         $query = PublicRelationRequest::select('status', DB::raw('COUNT(*) as total'))
-            ->whereIn('status', array_values($statusStates))
+            ->whereIn('status', $statusStates)
             ->groupBy('status');
 
         $statusCounts = $query->pluck('total', 'status');
 
         if ($user == 'pr') {
             return [
-                'pending' => $statusCounts[$statusStates['pending']] ?? 0,
-                'promkesQueue' => $statusCounts[$statusStates['promkesQueue']] ?? 0,
-                'promkesCompleted' => $statusCounts[$statusStates['promkesCompleted']] ?? 0,
-                'pusdatinQueue' => $statusCounts[$statusStates['pusdatinQueue']] ?? 0,
-                'pusdatinProcess' => $statusCounts[$statusStates['pusdatinProcess']] ?? 0,
-                'completed' => $statusCounts[$statusStates['completed']] ?? 0,
+                'pending' => $statusCounts['pending'] ?? 0,
+                'promkesQueue' => $statusCounts['promkes_queue'] ?? 0,
+                'promkesCompleted' => $statusCounts['promkes_complete'] ?? 0,
+                'pusdatinQueue' => $statusCounts['pusdatin_queue'] ?? 0,
+                'pusdatinProcess' => $statusCounts['pusdatin_process'] ?? 0,
+                'completed' => $statusCounts['completed'] ?? 0,
             ];
         } else {
             return [
-                'promkesCompleted' => $statusCounts[$statusStates['promkesCompleted']] ?? 0,
-                'completed' => $statusCounts[$statusStates['completed']] ?? 0,
+                'promkesCompleted' => $statusCounts['promkes_complete'] ?? 0,
+                'completed' => $statusCounts['completed'] ?? 0,
             ];
         }
     }
@@ -347,9 +347,9 @@ class AdminDashboardService
 
         return [
             'months' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            'informationSystem' => $informationSystemCounts, // Data untuk current_division 3
-            'data' => $dataCounts,                          // Data untuk current_division 4
-            'publicRelation' => $publicRelationCounts      // Data untuk PublicRelationRequest
+            'informationSystem' => $informationSystemCounts, // Data untuk kasatpel si
+            'data' => $dataCounts,                          // Data untuk kasatpel data
+            'publicRelation' => $publicRelationCounts      // Data untuk kasatpel kehumasan
         ];
     }
 
