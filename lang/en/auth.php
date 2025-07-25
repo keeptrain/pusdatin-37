@@ -13,8 +13,8 @@ return [
     |
     */
 
-    'failed' => 'Kredensial tidak ditemukan.',
-    'password' => 'Password yang Anda masukkan salah.',
+    'failed' => 'Kredensial tidak valid.',
+    'password' => 'Password yang anda masukkan salah.',
     'throttle' => 'Terlalu banyak upaya login. Silakan coba lagi dalam :seconds detik.',
 
 ];

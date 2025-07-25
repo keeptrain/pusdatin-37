@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Auth;
 
+use App\Models\User;
 use App\Rules\Recaptcha;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -39,6 +41,19 @@ class Login extends Component
 
         $this->ensureIsNotRateLimited();
 
+        // Check if user exists first
+        $user = User::where('email', $this->email)->first();
+
+        // If user exists but password is wrong
+        if ($user && !Hash::check($this->password, $user->password)) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'password' => __('auth.password'),
+            ]);
+        }
+
+        // If user doesn't exist or credentials are invalid
         if (!Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
