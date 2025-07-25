@@ -16,12 +16,9 @@ class SiDataRequestForm extends Component
 {
     use WithFileUploads;
 
-    public $title = '';
-
-    public $reference_number = '';
-
-    public $files = [];
-
+    public string $title = '';
+    public string $reference_number = '';
+    public array $files = [];
     public bool $fileReady = false;
 
     public function rules()
@@ -78,6 +75,8 @@ class SiDataRequestForm extends Component
 
             $systemRequestId = $systemRequest->id;
         });
+
+        $this->reset();
 
         $this->redirectRoute('detail.request', ['type' => 'information-system', 'id' => $systemRequestId], true);
     }
