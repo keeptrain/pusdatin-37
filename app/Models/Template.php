@@ -31,7 +31,7 @@ class Template extends Model
             3 => 'Pemanfaatan Aplikasi',
             4 => 'RFC',
             5 => 'NDA',
-            6 => 'Universal',
+            6 => 'Materi Edukasi',
         };
     }
 
@@ -54,10 +54,17 @@ class Template extends Model
 
     public function scopeFilterByRole($query, $user)
     {
+        // If user is administrator, don't apply any part number filter
+        if ($user->hasRole('administrator')) {
+            return $query;
+        }
+
+        // For PR verifiers, only show part number 6
         if ($user->roles()->where('name', 'pr_verifier')->exists()) {
             return $query->where('part_number', 6);
         }
 
+        // For all other roles, show part numbers 1-5
         return $query->whereIn('part_number', [1, 2, 3, 4, 5]);
     }
 

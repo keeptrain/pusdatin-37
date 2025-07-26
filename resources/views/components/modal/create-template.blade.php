@@ -13,6 +13,9 @@
             <flux:select.option value="3">Pemanfaatan Aplikasi</flux:select.option>
             <flux:select.option value="4">RFC</flux:select.option>
             <flux:select.option value="5">NDA</flux:select.option>
+            @hasrole('administrator')
+            <flux:select.option value="6">Materi Edukasi</flux:select.option>
+            @endrole
         </flux:select>
         @endunlessrole
 

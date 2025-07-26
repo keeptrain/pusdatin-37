@@ -8,7 +8,7 @@
         </div>
         <flux:modal.trigger>
             <flux:button variant="primary" x-on:click="$dispatch('modal-show', { name: 'create-template' });"
-                class="px-3 py-2 ">Template baru</flux:button>
+                icon="plus" class="px-3 py-2 ">Template</flux:button>
         </flux:modal.trigger>
     </div>
 
