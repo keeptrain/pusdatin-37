@@ -180,7 +180,7 @@ class ActionsModal extends Component
         $dynamicRules = [];
 
         foreach ($this->getAllowedDocument() as $documentUpload) {
-            $dynamicRules["mediaLinks.{$documentUpload->part_number}"] = ['required', 'url'];
+            $dynamicRules["mediaLinks.{$documentUpload->part_number}"] = ['required'];
         }
 
         $this->validate(
