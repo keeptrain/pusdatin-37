@@ -1,7 +1,7 @@
 <div x-data="requestsTable">
     <flux:heading size="xl" level="1">{{ __('Daftar') }}</flux:heading>
     <flux:heading size="lg" level="2" class="mb-6">
-        {{ __('Permohonan Layanan Sistem Informasi & Data') }}
+        {{{ $heading }}}
     </flux:heading>
 
     <x-flash-messages />

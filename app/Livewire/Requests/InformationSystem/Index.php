@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Requests\InformationSystem;
 
+use App\Enums\Division;
 use App\Models\InformationSystemRequest;
 use App\States\InformationSystem\InformationSystemStatus;
 use Livewire\Component;
@@ -11,6 +12,7 @@ use Flux\Flux;
 
 class Index extends Component
 {
+    public string $heading = '';
     public array $selectedSystemId = [];
     public array $allowedStatuses = [];
     public bool $selectAll = false;
@@ -26,6 +28,12 @@ class Index extends Component
     public function mount()
     {
         $this->allowedStatuses = $this->initiateStatusBasedRole;
+        $this->heading = match (auth()->user()->currentUserRoleId()) {
+            Division::HEAD_ID->value => __('Permohonan Layanan SI & Data'),
+            Division::DATA_ID->value => __('Permohonan Layanan Data'),
+            Division::SI_ID->value => __('Permohonan Layanan Sistem Informasi'),
+            default => __('Permohonan Layanan'),
+        };
     }
 
     #[Computed]
