@@ -8,8 +8,6 @@ use Illuminate\Bus\Queueable;
 use App\Models\PublicRelationRequest;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\States\PublicRelation\PromkesComplete;
-use App\States\PublicRelation\PusdatinProcess;
 use Illuminate\Support\Facades\Log;
 use App\Mail\Requests\PublicRelation\CompletedMail;
 
@@ -31,15 +29,14 @@ class PublicRelationRequestNotification extends Notification implements ShouldQu
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        // Only include 'mail' channel if status is Completed
+        return $this->publicRelationRequest->status instanceof Completed
+            ? ['database', 'mail']
+            : ['database'];
     }
 
     public function toMail(object $notifiable)
     {
-        if (!$this->publicRelationRequest->status instanceof Completed) {
-            return;
-        }
-
         try {
             return new CompletedMail($this->data)->to($notifiable->email);
         } catch (\Exception $e) {
