@@ -5,6 +5,7 @@ namespace App\Services\Dashboard;
 use App\Models\InformationSystemRequest;
 use App\Models\PublicRelationRequest;
 use App\Services\MeetingServices;
+use DB;
 
 class UserDashboardService
 {
@@ -29,36 +30,24 @@ class UserDashboardService
 
     public function getListRequests()
     {
-        // Get data from InformationSystemRequest
-        $systemRequests = InformationSystemRequest::select('id', 'title as label', 'created_at')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'type' => 'Sistem Informasi dan Data',
-                    'label' => $item->label,
-                    'created_at' => $item->created_at,
-                ];
-            });
-
-        // Get data from PublicRelationRequest
-        $prRequests = PublicRelationRequest::select('id', 'theme as label', 'created_at')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'type' => 'Kehumasan',
-                    'label' => $item->label,
-                    'created_at' => $item->created_at,
-                ];
-            });
-
-        // Combine the collections
-        $combinedRequests = $systemRequests->concat($prRequests);
-
-        // Sort by created_at (optional)
-        $combinedRequests = $combinedRequests->sortByDesc('created_at')->values();
-
-        return $combinedRequests;
+        return InformationSystemRequest::select(
+            'id',
+            'title as label',
+            DB::raw("'Sistem Informasi dan Data' as type"),
+            'created_at'
+        )
+            ->where('user_id', auth()->id())
+            ->union(
+                PublicRelationRequest::select(
+                    'id',
+                    'theme as label',
+                    DB::raw("'Kehumasan' as type"),
+                    'created_at'
+                )
+                    ->where('user_id', auth()->id())
+                    ->getQuery()
+            )
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }
