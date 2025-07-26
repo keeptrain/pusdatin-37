@@ -19,11 +19,8 @@ class ShowRatings extends Component
     public string $sortDirection = 'asc';
     public string $sortField = 'rating';
 
-    // private $contents;
-
     public function mount()
     {
-        // $this->contents = $this->loadContent();
     }
 
     #[Title('Penilaian Layanan')]
@@ -40,6 +37,7 @@ class ShowRatings extends Component
         $roleId = auth()->user()->currentUserRoleId();
 
         return match ($roleId) {
+            Division::HEAD_ID->value => $this->allRatings(),
             Division::SI_ID->value, Division::DATA_ID->value => $this->systemRequests($roleId),
             Division::PR_ID->value => $this->prRequests(),
             default => abort(404, 'Invalid content type.')
@@ -51,6 +49,42 @@ class ShowRatings extends Component
         return collect($loadContent->items())->filter(function ($item) {
             return !empty(data_get($item->rating, 'rating'));
         })->count();
+    }
+
+    public function allRatings()
+    {
+        // Base query for information system requests
+        $informationSystem = InformationSystemRequest::query()
+            ->selectRaw("
+            id,
+            user_id,
+            current_division,
+            title,
+            rating,
+            updated_at,
+            'system' as type
+        ")
+            ->whereNotNull('rating')
+            ->with('user:id,name,email');
+
+        // Base query for public relation requests
+        $publicRelation = PublicRelationRequest::query()
+            ->selectRaw("
+            id,
+            user_id,
+            " . Division::PR_ID->value . " as current_division,
+            theme as title,
+            rating,
+            updated_at,
+            'pr' as type
+        ")
+            ->whereNotNull('rating')
+            ->with('user:id,name,email');
+
+        // Union the queries
+        return $informationSystem->unionAll($publicRelation)
+            ->orderByRaw("(rating->>'$.rating') " . ($this->sortDirection === 'asc' ? 'ASC' : 'DESC'))
+            ->orderBy('updated_at', 'desc');
     }
 
     public function systemRequests(int $division)

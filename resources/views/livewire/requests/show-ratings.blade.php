@@ -9,7 +9,9 @@
                 <div class="flex">
                     <flux:text class="w-full">Total Rating: {{ $ratingCount}}</flux:text>
                 </div>
+                @unlessrole('head_verifier')
                 <flux:button wire:click="replyToAllGivesRating" size="sm" icon="inbox-stack">Balas Semua</flux:button>
+                @endunlessrole
             </div>
 
             <div>
@@ -36,7 +38,7 @@
                 <div class="divide-y border-l border-r border-b">
                     @foreach ($contents as $item)
                         @if (isset($item->rating))
-                            <div class="p-4 hover:bg-gray-50 transition-colors">
+                            <div wire:key="{{ $item->id }}" class="p-4 hover:bg-gray-50 transition-colors">
                                 <div class="grid md:grid-cols-14 gap-4">
                                     {{-- Pemohon & Permohonan --}}
                                     <div class="md:col-span-5 flex items-start gap-3">
@@ -48,10 +50,15 @@
 
                                             </flux:heading>
                                             <flux:text class="text-gray-600 text-sm md:flex items-center gap-1">
-                                                @if ($item->title) Judul: @else Tema: @endif
-                                                <span class=" text-gray-900 md:truncate max-w-[300px]"
+                                                @if(isset($item->type))
+                                                    {{ $item->type === 'system' ? 'Judul:' : 'Tema:' }}
+                                                @else
+                                                    {{ $item->title ? 'Judul:' : 'Tema:' }}
+                                                @endif
+                                                <span class="text-gray-900 md:truncate max-w-[300px]"
                                                     title="{{ $item->theme ?? $item->title }}">
                                                     {{ $item->theme ?? $item->title }}
+                                                </span>
                                             </flux:text>
                                         </div>
                                     </div>
@@ -75,7 +82,7 @@
                                     {{-- Aksi --}}
                                     <div class="md:col-span-1 flex items-center">
                                         <flux:button
-                                            href="{{ ($item->current_division == 3 || $item->current_division == 5) ? route('is.show', [$item->id]) : route('pr.show', [$item->id]) }}"
+                                            href="{{ $item->current_division == 5 ? route('pr.show', [$item->id]) : (in_array($item->current_division, [3, 4]) ? route('is.show', [$item->id]) : route('pr.show', [$item->id])) }}"
                                             icon="arrow-top-right-on-square" variant="ghost" inset wire:navigate>
                                         </flux:button>
                                     </div>
