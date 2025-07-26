@@ -19,33 +19,35 @@ class PermissionRoleSeeder extends Seeder
         // Create permissions
         $permissions = [];
 
-        $headPermissions = [
-            'can disposition',
-            'verification request si-data step2',
-            'review request si-data step2',
-            'queue pr pusdatin',
-            'disposition pr pusdatin',
+        $generalPermissions = [
+            'view notifications',
+            'view discussions',
+            'view ratings',
+            'view analytics',
         ];
 
-        $siPermissions = [
+        $administratorPermissions = [
+            'create user',
+            'update user',
+            'delete user',
+            'view users',
+        ];
+
+        $informationSystemPermissions = [
             'view si request',
             'can process si',
             'verification request si step1',
             'review revision si',
         ];
 
-        $dataPermissions = [
+        $dataSystemPermissions = [
             'view data request',
             'can process data',
             'verification request data step1',
             'review revision data',
         ];
 
-        $siDataPermisions = [
-            'completed request'
-        ];
-
-        $prPermisions = [
+        $publicRelationPermissions = [
             'view pr request',
             'process pr pusdatin',
             'completing pr request',
@@ -56,6 +58,18 @@ class PermissionRoleSeeder extends Seeder
             'curation',
         ];
 
+        $headPermissions = [
+            'can disposition',
+            'verification request si-data step2',
+            'review request si-data step2',
+            'disposition pr pusdatin',
+            'queue pr pusdatin',
+        ];
+
+        $siDataPermisions = [
+            'completed request'
+        ];
+
         $userPermissions = [
             'create request',
             'view requests',
@@ -63,11 +77,13 @@ class PermissionRoleSeeder extends Seeder
         ];
 
         $permissions = array_unique([
+            ...$generalPermissions,
+            ...$administratorPermissions,
             ...$headPermissions,
-            ...$siPermissions,
-            ...$dataPermissions,
+            ...$informationSystemPermissions,
+            ...$dataSystemPermissions,
             ...$siDataPermisions,
-            ...$prPermisions,
+            ...$publicRelationPermissions,
             ...$promkesPermissions,
             ...$userPermissions,
         ]);
@@ -99,22 +115,23 @@ class PermissionRoleSeeder extends Seeder
 
         // Assign permissions to roles
         $role = \Spatie\Permission\Models\Role::findByName('administrator');
-        $role->givePermissionTo($permissions);
+        $role->givePermissionTo($administratorPermissions);
 
         $role = \Spatie\Permission\Models\Role::findByName('head_verifier');
-        $role->givePermissionTo($headPermissions, 'view pr request', 'view si request', 'view data request');
+        $viewPermissions = ['view pr request', 'view si request', 'view data request'];
+        $role->givePermissionTo([$generalPermissions, $headPermissions, $viewPermissions]);
 
         $role = \Spatie\Permission\Models\Role::findByName('si_verifier');
-        $role->givePermissionTo([$siPermissions, $siDataPermisions]);
+        $role->givePermissionTo([$generalPermissions, $informationSystemPermissions, $siDataPermisions]);
 
         $role = \Spatie\Permission\Models\Role::findByName('data_verifier');
-        $role->givePermissionTo([$dataPermissions, $siDataPermisions]);
+        $role->givePermissionTo([$generalPermissions, $dataSystemPermissions, $siDataPermisions]);
 
         $role = \Spatie\Permission\Models\Role::findByName('pr_verifier');
-        $role->givePermissionTo([$prPermisions]);
+        $role->givePermissionTo([$generalPermissions, $publicRelationPermissions]);
 
         $role = \Spatie\Permission\Models\Role::findByName('promkes_verifier');
-        $role->givePermissionTo($promkesPermissions, 'view pr request',);
+        $role->givePermissionTo([$promkesPermissions, 'view pr request'], 'view discussions', 'view notifications');
 
         $role = \Spatie\Permission\Models\Role::findByName('user');
         $role->givePermissionTo($userPermissions);

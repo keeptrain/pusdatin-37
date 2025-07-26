@@ -22,12 +22,12 @@
             <x-app-logo />
         </a>
 
-        @unlessrole('administrator')
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Main')" class="grid">
                 <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
 
+                @haspermission('view notifications')
                 <flux:navlist variant="outline">
                     <flux:modal.trigger name="notifications-admin">
                         <flux:navlist.item icon="bell">
@@ -39,6 +39,7 @@
                         </flux:navlist.item>
                     </flux:modal.trigger>
                 </flux:navlist>
+                @endhaspermission
 
                 <flux:modal name="notifications-admin" variant="flyout" position="right" :closable="false"
                     class="md:w-96">
@@ -48,72 +49,67 @@
             </flux:navlist.group>
         </flux:navlist>
 
+        @unlessrole('administrator')
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Manajemen')" class="grid">
-                @hasanyrole('head_verifier')
-                <flux:navlist.item :href="route('is.index')" icon="folder-open"
-                    :current="request()->routeIs('is.index')" wire:navigate>Layanan SI & Data</flux:navlist.item>
-                @endrole
-                @hasanyrole('si_verifier')
-                <flux:navlist.item :href="route('is.index')" icon="folder-open"
-                    :current="request()->routeIs('is.index')" wire:navigate>Layanan SI</flux:navlist.item>
-                @endrole
-                @hasanyrole('data_verifier')
-                <flux:navlist.item :href="route('is.index')" icon="folder-open"
-                    :current="request()->routeIs('is.index')" wire:navigate>Layanan Data</flux:navlist.item>
-                @endrole
-                @hasanyrole('head_verifier|pr_verifier|promkes_verifier')
+                @php
+                    $hasSiPermission = auth()->user()->hasPermissionTo('view si request');
+                    $hasDataPermission = auth()->user()->hasPermissionTo('view data request');
+                @endphp
+
+                @if($hasSiPermission || $hasDataPermission)
+                    <flux:navlist.item :href="route('is.index')" icon="folder-open"
+                        :current="request()->routeIs('is.index')" wire:navigate>
+                        @if($hasSiPermission && $hasDataPermission)
+                            Layanan SI & Data
+                        @elseif($hasSiPermission)
+                            Layanan SI
+                        @elseif($hasDataPermission)
+                            Layanan Data
+                        @endif
+                    </flux:navlist.item>
+                @endif
+
+                @haspermission('view pr request')
                 <flux:navlist.item :href="route('pr.index')" icon="folder-open"
                     :current="request()->routeIs('pr.index')" wire:navigate>Layanan Kehumasan</flux:navlist.item>
-                @endrole
+                @endhaspermission
+                @haspermission('view discussions')
                 <flux:navlist.item :href="route('discussions')" icon="chat-bubble-left-right"
                     :current="request()->routeIs('discussions')" wire:navigate>Forum Diskusi</flux:navlist.item>
-                @unlessrole('head_verifier|promkes_verifier')
+                @endhaspermission
+                @haspermission('view ratings')
                 <flux:navlist.item :href="route('show.ratings')" icon="star"
                     :current="request()->routeIs('show.ratings')" wire:navigate>Penilaian Layanan</flux:navlist.item>
-                @endunlessrole
+                @endhaspermission
             </flux:navlist.group>
         </flux:navlist>
         @endunlessrole
 
-        @unlessrole('administrator|promkes_verifier')
+        @unlessrole('promkes_verifier')
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Sistem')" class="grid">
-                @hasanyrole('si_verifier|data_verifier|pr_verifier|head_verifier')
+                @haspermission('view analytics')
                 <flux:navlist.item :href="route('analytic.index')" icon="chart-pie" wire:navigate>
                     Analitik
                 </flux:navlist.item>
-                @endhasanyrole
+                @endhaspermission
 
-                @hasanyrole('si_verifier|data_verifier|pr_verifier')
+                @unlessrole('head_verifier')
                 <flux:navlist.item :href="route('manage.templates')" icon="document-text" wire:navigate>
                     Templates
                 </flux:navlist.item>
-                @endhasanyrole
-            </flux:navlist.group>
-        </flux:navlist>
-        @endunlessrole
+                @endunlessrole
 
-        @hasrole('administrator')
-        <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Main')" class="grid">
-                <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                    wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-            </flux:navlist.group>
-            <flux:navlist.group :heading="__('Systems')" class="grid">
+                @haspermission('view users')
                 <flux:navlist.item :href="route('manage.users')" icon="users"
                     :current="request()->routeIs('manage.users')" wire:navigate>
                     Users
                 </flux:navlist.item>
-                {{-- <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
-                    Permissions
-                </flux:navlist.item>
-                <flux:navlist.item :href="route('manage.users')" icon="building-office" wire:navigate>
-                    Seksi
-                </flux:navlist.item> --}}
+                @endhaspermission
             </flux:navlist.group>
         </flux:navlist>
-        @endhasrole
+        @endunlessrole
 
         <flux:spacer />
 
