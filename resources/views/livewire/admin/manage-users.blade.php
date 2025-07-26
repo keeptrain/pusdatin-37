@@ -1,7 +1,10 @@
-<div class="lg:p-3">
-    <flux:heading size="xl" level="1" class="mb-6">{{ __('Manage Users') }}</flux:heading>
+<div>
+    <flux:heading size="xl">{{ __(key: 'Manajemen Users') }}</flux:heading>
+    <flux:subheading>
+        {{ __('Daftar user yang terdaftar di sistem.') }}
+    </flux:subheading>
 
-    <div class="flex justify-between mb-4 h-10">
+    <div class="flex justify-between mt-6 mb-4 h-10">
         <div class="flex items-center">
             @if (count($selectedUsers) > 0)
                 <flux:dropdown class="mr-2">
@@ -20,8 +23,9 @@
                 </flux:dropdown>
             @endif
             <flux:dropdown>
-                <flux:button icon:trailing="chevron-down">Sort
-                    by</flux:button>
+                <flux:button icon:trailing="chevron-down">
+                    Sort by
+                </flux:button>
 
                 <flux:menu>
                     <flux:menu.radio.group wire:model.live.debounce.500ms="sortBy">
@@ -35,8 +39,8 @@
         <div class="flex items-center space-x-2">
             <flux:input wire:model.live.debounce.500ms="search" icon="magnifying-glass" placeholder="Cari user..."
                 :loading="false" />
-            <flux:modal.trigger name="create-user" wire:click="createPage">
-                <flux:button variant="primary" icon:variant="mini" icon="plus">User</flux:button>
+            <flux:modal.trigger name="create-user">
+                <flux:button variant="primary" icon="plus">User</flux:button>
             </flux:modal.trigger>
         </div>
     </div>
@@ -54,7 +58,7 @@
 
         <x-slot name="body">
             @foreach ($users as $user)
-                <tr wire:key="{{ $user->id }}" @click="$wire.show({{ $user->id }})"
+                <tr wire:key="{{ $user->id }}" x-on:click="Livewire.navigate('{{ route('user.show', $user->id) }}')"
                     class="hover:bg-zinc-100 cursor-pointer">
                     <flux:table.row>
                         <div @click.stop class="py-3">
@@ -81,11 +85,12 @@
                 <flux:heading size="lg">{{ __('Apakah Anda yakin ingin menghapus akun ini?') }}</flux:heading>
 
                 <flux:subheading>
-                    {{ __('Setelah akun dihapus, semua data akan dihapus secara permanen. Silahkan masukkan password Anda untuk memastikan Anda ingin menghapus akun ini.') }}
+                    {{ __('Setelah akun dihapus, semua data akan dihapus secara permanen. 
+                    Silahkan masukkan password Anda untuk memastikan Anda ingin menghapus akun yang di pilih.') }}
                 </flux:subheading>
             </div>
 
-            <flux:input wire:model="password" :label="__('Password')" type="password" x-ref="passwordInput"
+            <flux:input wire:model="form.password" :label="__('Password')" type="password" x-ref="passwordInput"
                 x-on:input="$refs.submitBtn.disabled = $event.target.value === ''" />
 
             <div class="flex justify-end space-x-2">
@@ -99,6 +104,4 @@
             </div>
         </form>
     </flux:modal>
-
-    {{-- <livewire:admin.update-user /> --}}
 </div>

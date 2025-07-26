@@ -24,8 +24,6 @@ class ManageUsers extends Component
 
     public array $selectedUsers = [];
 
-    public string $password = '';
-
     #[Title('Daftar User')]
     public function render()
     {
@@ -38,7 +36,9 @@ class ManageUsers extends Component
 
     public function loadUsers()
     {
-        $query = User::with('roles');
+        $query = User::with('roles')->whereDoesntHave('roles', function ($query) {
+            $query->where('name', 'administrator');
+        });
 
         if ($this->sortBy === 'latest_activity') {
             $query->latest('updated_at');
@@ -60,7 +60,9 @@ class ManageUsers extends Component
             return $users;
         }
 
-        $searchTerm = '%' . $this->search . '%';
+        $searchValue = strtolower($this->search);
+
+        $searchTerm = '%' . $searchValue . '%';
 
         return $users->where(function ($query) use ($searchTerm) {
             $query->where('name', 'like', $searchTerm)
@@ -69,31 +71,25 @@ class ManageUsers extends Component
         });
     }
 
-    public function show(int $id)
-    {
-        $this->redirectRoute('user.show', ['id' => $id]);
-    }
+    // public function createUser()
+    // {
+    //     $this->authorize('create user');
 
-    public function createPage()
-    {
-        $this->dispatch('create-user');
-    }
+    //     $this->form->store();
 
-    public function updatePage($id)
-    {
-        $this->dispatch('update-user', $id);
-    }
+    //     $this->reset('form');
+
+    //     return redirect()->route('manage.users');
+    // }
 
     public function deleteUsers()
     {
-        $this->validate([
-            'password' => ['required', 'string', 'current_password'],
-        ]);
+        $this->authorize('delete user');
 
-        User::whereIn('id', $this->selectedUsers)->delete();
+        $this->form->delete($this->selectedUsers);
 
-        $this->reset();
+        $this->reset('selectedUsers');
 
-        return redirect()->route('manage.users');
+        return $this->redirectRoute('manage.users', navigate: true);
     }
 }

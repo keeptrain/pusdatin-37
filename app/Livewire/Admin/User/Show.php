@@ -28,8 +28,6 @@ class Show extends Component
 
     public string $role;
 
-    public string $password = '';
-
     #[Title('Detail User')]
     public function render()
     {
@@ -85,15 +83,22 @@ class Show extends Component
 
     public function update()
     {
+        $this->authorize('update user');
+
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $this->userId,
             'section' => ['required', Rule::in(array_keys($this->user->sections))],
             'contact' => 'required|string|max:255',
-            'role' => 'required|string|exists:roles,name',
+            'role' => [
+                'required',
+                'string',
+                'exists:roles,name',
+            ],
         ]);
 
         DB::transaction(function () {
+            // Update user details
             $this->user->update([
                 'name' => $this->name,
                 'email' => $this->email,
@@ -109,6 +114,8 @@ class Show extends Component
 
     public function deleteUser()
     {
+        $this->authorize('delete user');
+
         $this->validate([
             'password' => ['required', 'string', 'current_password'],
         ]);
@@ -118,26 +125,6 @@ class Show extends Component
         $this->redirectRoute('manage.users', navigate: true);
     }
 
-    #[Computed]
-    public function getRolesNames()
-    {
-        // $roles = Role::pluck('id', 'id')->toArray();
-        // $readableNames = [];
-
-        // foreach ($roles as $roleId) {
-        //     $division = Division::tryFrom($roleId);
-
-        //     if ($division) {
-        //         $readableNames[$roleId] = $division->label();
-        //     } else {
-        //         $readableNames[$roleId] = 'User';
-        //     }
-        // }
-
-        // return $readableNames;
-
-        return Role::pluck('name', 'id')->toArray();
-    }
 
     #[Computed]
     public function getSections()

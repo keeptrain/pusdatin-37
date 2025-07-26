@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Division;
 use Carbon\Carbon;
 use App\Models\Discussion;
 use Illuminate\Support\Str;
@@ -62,30 +63,45 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Get the user's information system requests.
+     */
     public function informationSystemRequests()
     {
         return $this->hasMany(InformationSystemRequest::class);
     }
 
+    /**
+     * Get the user's public relation requests.
+     */
     public function publicRelationRequests()
     {
         return $this->hasMany(PublicRelationRequest::class);
     }
 
     /**
-     * Get the user's initials
+     * Get the user's discussions.
+     */
+    public function discussions()
+    {
+        return $this->hasMany(Discussion::class);
+    }
+
+    /**
+     * Get the user's initials (maximum 2 characters)
      */
     public function initials(): string
     {
         return Str::of($this->name)
             ->explode(' ')
+            ->filter()
+            ->take(2)
             ->map(fn(string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
     }
 
     /**
      * Get the current user from the session.
-     *
      */
     public static function currentUser()
     {
@@ -94,13 +110,15 @@ class User extends Authenticatable
 
     /**
      * Get the current user role id from the session.
-     *
      */
     public static function currentUserRoleId()
     {
         return auth()->user()->roles->pluck('id')->first();
     }
 
+    /**
+     * Get the sections.
+     */
     public static function getSections()
     {
         return [
@@ -113,6 +131,9 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Set the user's section.
+     */
     public function setSectionAttribute(string $value)
     {
         if (!array_key_exists($value, $this->sections)) {
@@ -121,23 +142,35 @@ class User extends Authenticatable
         $this->attributes['section'] = $value;
     }
 
+    /**
+     * Get the user's section label.
+     */
     public function getSectionLabelAttribute()
     {
         return $this->sections[$this->section] ?? 'Unknown section';
     }
 
+    /**
+     * Get the user's created at attribute.
+     */
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d M Y, H:i:s');
     }
 
+    /**
+     * Get the user's updated at attribute.
+     */
     public function getUpdatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d M Y, H:i:s');
     }
 
-    public function discussions()
+    /**
+     * Get the user's role label.
+     */
+    public function getRoleLabelAttribute()
     {
-        return $this->hasMany(Discussion::class);
+        return Division::tryFrom($this->roles->first()->id)->getRoleLabelFromId();
     }
 }

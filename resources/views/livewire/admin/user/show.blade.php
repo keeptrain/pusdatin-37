@@ -1,9 +1,11 @@
 <div>
-    <flux:button :href="route('manage.users')" icon="arrow-long-left" variant="subtle">Kembali ke Tabel</flux:button>
+    <flux:button :href="route('manage.users')" size="sm" icon="arrow-long-left" variant="subtle" wire:navigate>
+        Kembali
+    </flux:button>
 
-    <flux:heading size="xl" level="1" class="p-4">{{ __('Detail User') }}</flux:heading>
+    <flux:heading size="xl" level="1" class="p-3">{{ __('Detail User') }}</flux:heading>
 
-    <div class="max-w-screen-xl mb-6 ml-4">
+    <div class="max-w-screen-xl mb-6 ml-3">
         <div class="p-6 border border-gray-200 rounded-lg overflow-hidden space-y-4">
             <!-- Header: Request ID & Status -->
             <div class="flex justify-between">
@@ -16,7 +18,7 @@
                     </div>
                 </div>
                 <flux:dropdown align="start" class="ml-auto">
-                    <flux:button variant="primary" icon:trailing="ellipsis-vertical">Aksi</flux:button>
+                    <flux:button di variant="primary" icon:trailing="ellipsis-vertical">Aksi</flux:button>
 
                     <flux:menu>
                         <flux:menu.item icon="pencil" x-on:click="$dispatch('modal-show', { name: 'update-user' }) ">
@@ -44,7 +46,7 @@
 
             <div class="flex items-center space-x-2">
                 <flux:text>Role: </flux:text>
-                <flux:legend>{{ $user->roles->first()->name }}</flux:legend>
+                <flux:legend>{{ $user->role_label }}</flux:legend>
             </div>
 
             <div class="flex items-center space-x-2">
@@ -57,41 +59,11 @@
                 <flux:legend>{{ $user->updated_at }}</flux:legend>
             </div>
         </div>
-
-        @if ($user->roles->first()->name === 'user')
-            {{-- <div class="p-6 border border-gray-200 rounded-lg overflow-hidden space-y-4">
-                <flux:subheading size="lg" level="2">{{ __('Daftar Permohonan') }}</flux:subheading>
-                @if ($this->requestsOfUser['informationSystemRequests']->isNotEmpty())
-                <flux:legend>Sistem Informasi & Data</flux:legend>
-                <ul class="space-y-2">
-                    @foreach ($this->requestsOfUser['informationSystemRequests'] as $request)
-                    <li class="p-4 border rounded-md shadow-sm bg-white">
-                        <div class="font-medium text-gray-800">Title: {{ $request['title'] }}</div>
-                        <div class="text-sm text-gray-400">Dibuat pada: </div>
-                    </li>
-                    @endforeach
-                </ul>
-                @endif
-
-                @if ($this->requestsOfUser['publicRelationRequests']->isNotEmpty())
-                <flux:legend>Kehumasan</flux:legend>
-                <ul class="space-y-2">
-                    @foreach ($this->requestsOfUser['publicRelationRequests'] as $request)
-                    <li class="p-4 border rounded-md shadow-sm bg-white">
-                        <div class="font-medium text-gray-800">Tema: {{ $request['theme'] }}</div>
-                        <div></div>
-
-                    </li>
-                    @endforeach
-                </ul>
-                @endif
-            </div> --}}
-        @endif
     </div>
 
-    <div class="max-w-screen-xl mb-6 ml-4 grid grid-cols-2 gap-4">
-        <x-dashboard.small-chart icon="book-open" label="Total Permohonan" :data="$this->requestCount()"  />
-        <x-dashboard.small-chart icon="chat-bubble-left" label="Total Diskusi" :data="$this->discussionCount()"  />
+    <div class="max-w-screen-xl mb-6 ml-3 grid grid-cols-2 gap-4">
+        <x-dashboard.small-chart icon="book-open" label="Total Permohonan" :data="$this->requestCount()" />
+        <x-dashboard.small-chart icon="chat-bubble-left" label="Total Diskusi" :data="$this->discussionCount()" />
     </div>
 
     <flux:modal name="update-user" class="w-120 lg:max-w-lg">
@@ -108,11 +80,15 @@
             </flux:select>
 
             <flux:input wire:model="contact" label="No. Telp" placeholder="No. Telp" required />
-            <flux:select wire:model="role" label="Role" placeholder="Role" required>
-                @foreach ($this->getRolesNames as $roles)
-                    <option value="{{ $roles }}">{{ $roles }}</option>
-                @endforeach
-            </flux:select>
+            <flux:radio.group wire:model="role" label="Role" :disabled="auth()->user()->id === $user->id">
+                <div class="grid grid-cols-2 gap-2">
+                    <flux:radio label="SI Verifikator" value="si_verifier" />
+                    <flux:radio label="Data Verifikator" value="data_verifier" />
+                    <flux:radio label="Humas Verifikator" value="pr_verifier" />
+                    <flux:radio label="Promkes Verifikator" value="promkes_verifier" />
+                    <flux:radio label="User" value="user" />
+                </div>
+            </flux:radio.group>
 
             <div class="flex justify-end mt-4">
                 <flux:modal.close>

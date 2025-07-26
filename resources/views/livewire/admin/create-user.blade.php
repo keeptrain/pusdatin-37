@@ -8,16 +8,14 @@
             </flux:subheading>
         </div>
 
-        <flux:input wire:model="form.name" :label="__('Name')" type="name" required/>
-        <flux:input wire:model="form.email" :label="__('Email')" type="email" required/>
+        <flux:input wire:model="form.name" :label="__('Name')" type="name" required />
+        <flux:input wire:model="form.email" :label="__('Email')" type="email" required />
         <flux:select wire:model="form.section" label="Seksi" placeholder="Pilih seksi" required>
             @foreach ($this->getSections as $key => $section)
                 <option value="{{ $key }}">{{ $section }}</option>
             @endforeach
         </flux:select>
-        <flux:input wire:model="form.contact" :label="__('Contact')" type="number" required/>
-
-        {{-- <flux:input wire:model="form.password" :label="__('Password')" type="password" clearable /> --}}
+        <flux:input wire:model="form.contact" :label="__('Contact')" mask="999999999999999" required />
 
         <flux:radio.group wire:model="form.role" label="Role">
             {{--
@@ -30,7 +28,7 @@
 
         <div class="flex justify-end space-x-2">
             <flux:modal.close>
-                <flux:button variant="filled">{{ __('Cancel') }}</flux:button>
+                <flux:button variant="subtle">{{ __('Cancel') }}</flux:button>
             </flux:modal.close>
 
             <flux:button variant="primary" type="submit">{{ __('Create') }}</flux:button>

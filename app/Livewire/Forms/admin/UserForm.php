@@ -14,19 +14,19 @@ class UserForm extends Form
 {
     public ?User $user;
 
-    public $id = null;
+    public ?int $id = null;
 
-    public $name = '';
+    public string $name = '';
 
-    public $email = '';
+    public string $email = '';
 
-    public $section = '';
+    public string $section = '';
 
-    public $contact = '';
+    public string $contact = '';
 
-    // public $password = '';
+    public string $role = 'user';
 
-    public $role = 'user';
+    public string $password = '';
 
     public function rules()
     {
@@ -107,20 +107,18 @@ class UserForm extends Form
         $this->reset();
     }
 
-    public function update()
+    public function delete(array $selectedUsers)
     {
-        $this->validate();
+        $this->validate([
+            'password' => ['required', 'string', 'current_password'],
+        ]);
 
-        $this->user = User::findOrFail($this->id);
+        DB::transaction(function () use ($selectedUsers) {
+            User::whereIn('id', $selectedUsers)->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'administrator');
+            })->delete();
+        });
 
-        $this->user->update(
-            $this->only(['name', 'email', 'role'])
-        );
-
-        $this->user->syncRoles($this->role);
-
-        return redirect()->route('manage.users');
-
+        $this->reset();
     }
-
 }
