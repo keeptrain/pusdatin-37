@@ -3,9 +3,8 @@
         <!-- Header: Request ID & Status -->
         <div class="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-                <h3 class="text-lg font-semibold text-gray-900">Tema: {{ $prRequest->theme }}
-                    <h3>
-                        <p class="text-gray-500 text-sm mb-1">Tanggal diajukan: {{ $prRequest->createdAtWithTime() }}</p>
+                <h3 class="text-lg font-semibold text-gray-900">Tema: {{ $prRequest->theme }}</h3>
+                <p class="text-gray-500 text-sm mb-1">Tanggal diajukan: {{ $prRequest->createdAtWithTime() }}</p>
             </div>
             <div class="mt-4 md:mt-0">
                 <flux:notification.status-badge :status="$prRequest->status" />
@@ -35,13 +34,13 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1">Materi yang di upload</p>
                     @foreach ($this->uploadedFile as $file)
-                                    <div class="flex flex-row gap-2">
-                                        <x-lucide-circle-check-big class="w-4 text-green-500" />
-                                        <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
-                                            class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
-                        ?? $file['part_number'] }}
-                                        </a>
-                                    </div>
+                        <div class="flex flex-row gap-2">
+                            <x-lucide-circle-check-big class="w-4 text-green-500" />
+                            <a href="#" wire:click.prevent="downloadFile('{{ $file['part_number'] }}')"
+                                class="hover:text-zinc-700 hover:underline cursor-pointer">{{ $file['part_number_label']
+                                ?? $file['part_number'] }}
+                            </a>
+                        </div>
                     @endforeach
                 </div>
                 <div>
@@ -51,9 +50,10 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase">Link Produksi</p>
                     @forelse ($this->linkProductions as $value)
-                        <li>
+                        <li class="flex items-start text-gray-900">
+                            <span class="mr-2">•</span>
                             <a href="{{ $value['url'] }}"
-                                class="font-normal text-blue-800 hover:underline">{{ $value['label']}}</a>
+                                class="font-normal text-blue-700 hover:text-blue-800 hover:underline">{{ $value['label']}}</a>
                         </li>
                     @empty
                         <span>-</span>
