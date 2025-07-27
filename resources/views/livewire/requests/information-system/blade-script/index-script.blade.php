@@ -76,6 +76,7 @@
                 destroy: true,
                 deferRender: true, // Render rows only when needed
                 language: {
+                    sEmptyTable: "Tidak ada data yang tersedia.",
                     sProcessing: "Sedang memproses...",
                     sLengthMenu: "Tampilkan _MENU_ data per halaman",
                     sZeroRecords: this.getNoRecordsTemplate(),
